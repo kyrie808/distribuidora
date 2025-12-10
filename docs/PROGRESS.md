@@ -104,14 +104,26 @@
 
 ---
 
-## Milestone 5: Alertas de Recompra 🚧
+## Milestone 5: Alertas de Recompra ✅
 
-**Status:** Pendente
+**Data:** 10/Dezembro/2024  
+**Status:** Concluído
 
-### Próximos:
-- [ ] Página de Recompra
-- [ ] Cálculo de dias desde última compra
-- [ ] Integração com WhatsApp
+### Entregas:
+- ✅ Hook `useConfiguracoes` (lê config do Supabase)
+- ✅ Hook `useRecompra` (calcula dias desde última compra)
+- ✅ Classificação por ciclo (B2C: 15d, B2B: 7d)
+- ✅ Status: 🔴 Atrasado, 🟡 Próximo, 🟢 Em dia
+- ✅ Lista ordenada por urgência
+- ✅ Filtros clicáveis por status
+- ✅ Botão WhatsApp com template de mensagem
+- ✅ Substituição de variáveis {{nome}}, {{dias}}
+- ✅ Botão "Marcar como Contatado"
+
+### Arquivos criados:
+- `src/hooks/useConfiguracoes.ts`
+- `src/hooks/useRecompra.ts`
+- `src/pages/Recompra.tsx` (atualizado)
 
 ---
 

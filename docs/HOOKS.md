@@ -144,6 +144,74 @@ const {
 
 ---
 
+## useConfiguracoes
+
+**Arquivo:** `src/hooks/useConfiguracoes.ts`  
+**Responsabilidade:** Leitura de configurações do sistema
+
+### Funções exportadas:
+
+#### `useConfiguracoes()`
+Busca configurações da tabela `configuracoes`.
+
+```tsx
+const { 
+  config: {
+    cicloRecompra: { b2c: 15, b2b: 7 },
+    recompensaIndicacao,
+    mensagemRecompra,
+    taxaEntregaPadrao
+  },
+  loading,          
+  error,            
+  refetch,          
+  updateConfig,     // (chave, valor) => Promise<boolean>
+} = useConfiguracoes()
+```
+
+---
+
+## useRecompra
+
+**Arquivo:** `src/hooks/useRecompra.ts`  
+**Responsabilidade:** Cálculo de alertas de recompra
+
+### Funções exportadas:
+
+#### `useRecompra()`
+Calcula dias desde última compra e classifica por urgência.
+
+```tsx
+const { 
+  contatos,           // ContatoRecompra[]
+  loading,          
+  error,            
+  atrasados,         // contagem de atrasados
+  proximos,          // contagem de próximos
+  emDia,             // contagem em dia
+  refetch,          
+  marcarComoContatado, // (id) => Promise<boolean>
+} = useRecompra()
+```
+
+### Tipo `ContatoRecompra`:
+```tsx
+{
+  contato: Contato,
+  diasSemCompra: number,
+  ciclo: number,
+  status: 'atrasado' | 'proximo' | 'ok',
+  ultimaCompra: Date | null,
+}
+```
+
+### Lógica de classificação:
+- **Atrasado**: `diasSemCompra > ciclo`
+- **Próximo**: `diasSemCompra >= ciclo - threshold` (3d B2C, 2d B2B)
+- **OK**: dentro do ciclo
+
+---
+
 ## Padrões de Hooks
 
 ### Retorno padrão:
