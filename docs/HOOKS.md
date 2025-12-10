@@ -108,6 +108,42 @@ const {
 
 ---
 
+## useIndicacoes
+
+**Arquivo:** `src/hooks/useIndicacoes.ts`  
+**Responsabilidade:** Cálculo de indicações derivado de contatos
+
+### Funções exportadas:
+
+#### `useIndicacoes()`
+Calcula dados de indicações a partir de `contatos.indicado_por_id`.
+
+```tsx
+const { 
+  indicadores,       // IndicadorComIndicados[]
+  loading,          
+  error,            
+  totalIndicacoes,   // número total de indicações
+  totalConversoes,   // indicações que viraram clientes
+  taxaConversao,     // percentual de conversão
+  refetch,          
+  getIndicadorById,  // (id) => IndicadorComIndicados | undefined
+} = useIndicacoes()
+```
+
+### Tipo `IndicadorComIndicados`:
+```tsx
+{
+  indicador: Contato,           // Quem indicou
+  indicados: Indicado[],        // Lista de indicados
+  totalIndicacoes: number,
+  indicacoesConvertidas: number, // status === 'cliente'
+  recompensaAcumulada: number,   // R$5 por conversão
+}
+```
+
+---
+
 ## Padrões de Hooks
 
 ### Retorno padrão:

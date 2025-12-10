@@ -1,4 +1,6 @@
 export { useContatos, useContato } from './useContatos'
 export { useProdutos } from './useProdutos'
 export { useVendas, useVenda } from './useVendas'
+export { useIndicacoes } from './useIndicacoes'
 export type { VendaComItens } from './useVendas'
+export type { IndicadorComIndicados, Indicado } from './useIndicacoes'

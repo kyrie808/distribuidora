@@ -84,14 +84,23 @@
 
 ---
 
-## Milestone 4: Sistema de Indicações 🚧
+## Milestone 4: Sistema de Indicações ✅
 
-**Status:** Pendente
+**Data:** 10/Dezembro/2024  
+**Status:** Concluído
 
-### Próximos:
-- [ ] Página de Indicações
-- [ ] Visualização de rede
-- [ ] Contagem de indicações por contato
+### Entregas:
+- ✅ Hook `useIndicacoes` (dados derivados de contatos)
+- ✅ Cálculo de conversões (status = cliente)
+- ✅ Cálculo de recompensa (R$5 por conversão)
+- ✅ Ranking ordenado por conversões
+- ✅ Métricas (total, convertidas, taxa)
+- ✅ Modal de detalhe do indicador
+- ✅ Botão WhatsApp com mensagem de recompensa
+
+### Arquivos criados:
+- `src/hooks/useIndicacoes.ts`
+- `src/pages/Indicacoes.tsx` (atualizado)
 
 ---
 
