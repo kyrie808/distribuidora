@@ -1,5 +1,6 @@
 export { Dashboard } from './Dashboard'
 export { Contatos } from './Contatos'
+export { ContatoDetalhe } from './ContatoDetalhe'
 export { NovaVenda } from './NovaVenda'
 export { Indicacoes } from './Indicacoes'
 export { Recompra } from './Recompra'
