@@ -131,5 +131,23 @@
 
 - [ ] Configurar ESLint + Prettier
 - [ ] Configurar PWA (manifest.json, service worker)
-- [ ] Dashboard com métricas reais
+- [ ] Página de Configurações
 - [ ] Testes automatizados
+
+---
+
+## Milestone 6: Dashboard ✅
+
+**Data:** 10/Dezembro/2024  
+**Status:** Concluído
+
+### Entregas:
+- ✅ 4 cards de métricas (Faturamento, Vendas, Ticket médio, Clientes ativos)
+- ✅ Seção "Alertas de Recompra" com top 5 atrasados
+- ✅ Seção "Top Indicadores" com top 3
+- ✅ Seção "Últimas Vendas" com 5 recentes
+- ✅ Botão Pull to Refresh
+- ✅ Navegação para páginas detalhadas
+
+### Arquivos modificados:
+- `src/pages/Dashboard.tsx` (reescrito)

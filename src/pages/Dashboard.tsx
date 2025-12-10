@@ -1,92 +1,283 @@
+import { useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
-    TrendingUp,
-    Users,
     DollarSign,
     ShoppingCart,
-    ArrowUpRight,
-    ArrowDownRight,
+    Users,
+    TrendingUp,
+    AlertCircle,
+    Trophy,
+    ChevronRight,
+    RefreshCcw,
+    Bell,
+    Share2,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, CardHeader } from '../components/ui/Card'
+import { Card, Badge, LoadingScreen } from '../components/ui'
+import { useVendas } from '../hooks/useVendas'
+import { useContatos } from '../hooks/useContatos'
+import { useRecompra } from '../hooks/useRecompra'
+import { useIndicacoes } from '../hooks/useIndicacoes'
+import { formatCurrency, formatRelativeDate } from '../utils/formatters'
+import { VENDA_STATUS_LABELS } from '../constants'
 
 export function Dashboard() {
+    const navigate = useNavigate()
+    const [isRefreshing, setIsRefreshing] = useState(false)
+
+    // Fetch data
+    const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({})
+    const { contatos, loading: loadingContatos, refetch: refetchContatos } = useContatos({})
+    const { contatos: recompraContatos, atrasados, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
+    const { indicadores, loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
+
+    const loading = loadingVendas || loadingContatos || loadingRecompra || loadingIndicacoes
+
+    // Pull to refresh
+    const handleRefresh = useCallback(async () => {
+        setIsRefreshing(true)
+        await Promise.all([
+            refetchVendas(),
+            refetchContatos(),
+            refetchRecompra(),
+            refetchIndicacoes(),
+        ])
+        setIsRefreshing(false)
+    }, [refetchVendas, refetchContatos, refetchRecompra, refetchIndicacoes])
+
+    // Derived metrics
+    const clientesAtivos = contatos.filter((c) => c.status === 'cliente').length
+    const ultimasVendas = vendas.slice(0, 5)
+    const topIndicadores = indicadores.slice(0, 3)
+    const alertasUrgentes = recompraContatos.filter((c) => c.status === 'atrasado').slice(0, 5)
+
+    // Variation (placeholder - would need previous month data)
+    const variacao = metrics.vendasMes > 0 ? '+12%' : '0%'
+
     return (
         <>
-            <Header title="MassasCRM" />
+            <Header
+                title="Dashboard"
+                rightAction={
+                    <button
+                        onClick={handleRefresh}
+                        disabled={isRefreshing}
+                        className={`p-2 rounded-lg hover:bg-white/10 transition-colors ${isRefreshing ? 'animate-spin' : ''
+                            }`}
+                    >
+                        <RefreshCcw className="h-5 w-5" />
+                    </button>
+                }
+            />
             <PageContainer>
-                {/* Métricas rápidas */}
-                <div className="grid grid-cols-2 gap-3 mb-6">
-                    <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                        <div className="flex items-center justify-between mb-2">
-                            <DollarSign className="h-5 w-5 opacity-80" />
-                            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                                <ArrowUpRight className="h-3 w-3" />
-                                12%
-                            </span>
+                {loading && !isRefreshing && <LoadingScreen message="Carregando dashboard..." />}
+
+                {!loading && (
+                    <div className="space-y-6">
+                        {/* Metric Cards */}
+                        <div className="grid grid-cols-2 gap-3">
+                            {/* Faturamento do Mês */}
+                            <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
+                                <div className="flex items-center justify-between mb-2">
+                                    <DollarSign className="h-5 w-5 opacity-80" />
+                                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                                        {variacao}
+                                    </span>
+                                </div>
+                                <p className="text-2xl font-bold">{formatCurrency(metrics.faturamentoMes)}</p>
+                                <p className="text-sm opacity-80">Faturamento do mês</p>
+                            </Card>
+
+                            {/* Vendas do Mês */}
+                            <Card className="bg-gradient-to-br from-accent-500 to-accent-600 text-white">
+                                <div className="flex items-center justify-between mb-2">
+                                    <ShoppingCart className="h-5 w-5 opacity-80" />
+                                </div>
+                                <p className="text-2xl font-bold">{metrics.vendasMes}</p>
+                                <p className="text-sm opacity-80">Vendas do mês</p>
+                            </Card>
+
+                            {/* Ticket Médio */}
+                            <Card>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="h-5 w-5 text-success-500" />
+                                </div>
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {formatCurrency(metrics.ticketMedio)}
+                                </p>
+                                <p className="text-sm text-gray-500">Ticket médio</p>
+                            </Card>
+
+                            {/* Clientes Ativos */}
+                            <Card>
+                                <div className="flex items-center gap-2 mb-2">
+                                    <Users className="h-5 w-5 text-primary-500" />
+                                </div>
+                                <p className="text-2xl font-bold text-gray-900">{clientesAtivos}</p>
+                                <p className="text-sm text-gray-500">Clientes ativos</p>
+                            </Card>
                         </div>
-                        <p className="text-2xl font-bold">R$ 0,00</p>
-                        <p className="text-sm opacity-80">Faturamento do mês</p>
-                    </Card>
 
-                    <Card className="bg-gradient-to-br from-accent-500 to-accent-600 text-white">
-                        <div className="flex items-center justify-between mb-2">
-                            <ShoppingCart className="h-5 w-5 opacity-80" />
-                            <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">0</span>
-                        </div>
-                        <p className="text-2xl font-bold">0</p>
-                        <p className="text-sm opacity-80">Vendas do mês</p>
-                    </Card>
+                        {/* Alertas de Recompra */}
+                        <section>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <Bell className="h-5 w-5 text-danger-500" />
+                                    Alertas de Recompra
+                                    {atrasados > 0 && (
+                                        <Badge variant="danger">{atrasados}</Badge>
+                                    )}
+                                </h2>
+                                <button
+                                    onClick={() => navigate('/recompra')}
+                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
+                                >
+                                    Ver todos <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
 
-                    <Card>
-                        <div className="flex items-center justify-between mb-2">
-                            <TrendingUp className="h-5 w-5 text-success-500" />
-                        </div>
-                        <p className="text-xl font-bold text-gray-900">R$ 0,00</p>
-                        <p className="text-sm text-gray-500">Ticket médio</p>
-                    </Card>
+                            {alertasUrgentes.length === 0 ? (
+                                <Card className="text-center py-8 text-gray-500">
+                                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p>Nenhum cliente atrasado</p>
+                                </Card>
+                            ) : (
+                                <div className="space-y-2">
+                                    {alertasUrgentes.map((item) => (
+                                        <Card
+                                            key={item.contato.id}
+                                            hover
+                                            onClick={() => navigate(`/contatos/${item.contato.id}`)}
+                                            className="cursor-pointer"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 bg-danger-100 rounded-full flex items-center justify-center">
+                                                        <AlertCircle className="h-4 w-4 text-danger-500" />
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{item.contato.nome}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {item.diasSemCompra} dias sem comprar
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <ChevronRight className="h-5 w-5 text-gray-400" />
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
 
-                    <Card>
-                        <div className="flex items-center justify-between mb-2">
-                            <Users className="h-5 w-5 text-primary-500" />
-                        </div>
-                        <p className="text-xl font-bold text-gray-900">0</p>
-                        <p className="text-sm text-gray-500">Clientes ativos</p>
-                    </Card>
-                </div>
+                        {/* Top Indicadores */}
+                        <section>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <Trophy className="h-5 w-5 text-accent-500" />
+                                    Top Indicadores
+                                </h2>
+                                <button
+                                    onClick={() => navigate('/indicacoes')}
+                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
+                                >
+                                    Ver todos <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
 
-                {/* Alertas de Recompra */}
-                <Card className="mb-4">
-                    <CardHeader
-                        title="🔔 Alertas de Recompra"
-                        subtitle="Clientes para recontatar"
-                    />
-                    <p className="text-sm text-gray-500 text-center py-4">
-                        Nenhum alerta de recompra no momento
-                    </p>
-                </Card>
+                            {topIndicadores.length === 0 ? (
+                                <Card className="text-center py-8 text-gray-500">
+                                    <Share2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p>Sem indicações ainda</p>
+                                </Card>
+                            ) : (
+                                <div className="space-y-2">
+                                    {topIndicadores.map((item, index) => (
+                                        <Card
+                                            key={item.indicador.id}
+                                            hover
+                                            onClick={() => navigate(`/contatos/${item.indicador.id}`)}
+                                            className="cursor-pointer"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center gap-3">
+                                                    <div
+                                                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0
+                                                                ? 'bg-yellow-100 text-yellow-700'
+                                                                : index === 1
+                                                                    ? 'bg-gray-200 text-gray-700'
+                                                                    : 'bg-orange-100 text-orange-700'
+                                                            }`}
+                                                    >
+                                                        {index + 1}º
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-gray-900">{item.indicador.nome}</p>
+                                                        <p className="text-xs text-gray-500">
+                                                            {item.indicacoesConvertidas} clientes convertidos
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Badge variant="success">
+                                                    {formatCurrency(item.recompensaAcumulada)}
+                                                </Badge>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
 
-                {/* Top Indicadores */}
-                <Card className="mb-4">
-                    <CardHeader
-                        title="🏆 Top Indicadores"
-                        subtitle="Quem mais trouxe clientes"
-                    />
-                    <p className="text-sm text-gray-500 text-center py-4">
-                        Nenhuma indicação registrada
-                    </p>
-                </Card>
+                        {/* Últimas Vendas */}
+                        <section>
+                            <div className="flex items-center justify-between mb-3">
+                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                                    <ShoppingCart className="h-5 w-5 text-primary-500" />
+                                    Últimas Vendas
+                                </h2>
+                                <button
+                                    onClick={() => navigate('/vendas')}
+                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
+                                >
+                                    Ver todas <ChevronRight className="h-4 w-4" />
+                                </button>
+                            </div>
 
-                {/* Últimas Vendas */}
-                <Card>
-                    <CardHeader
-                        title="🛒 Últimas Vendas"
-                        subtitle="Vendas recentes"
-                    />
-                    <p className="text-sm text-gray-500 text-center py-4">
-                        Nenhuma venda registrada
-                    </p>
-                </Card>
+                            {ultimasVendas.length === 0 ? (
+                                <Card className="text-center py-8 text-gray-500">
+                                    <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p>Nenhuma venda registrada</p>
+                                </Card>
+                            ) : (
+                                <div className="space-y-2">
+                                    {ultimasVendas.map((venda) => (
+                                        <Card
+                                            key={venda.id}
+                                            hover
+                                            onClick={() => navigate(`/vendas/${venda.id}`)}
+                                            className="cursor-pointer"
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <p className="font-medium text-gray-900">
+                                                        {venda.contato?.nome || 'Cliente'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {formatRelativeDate(venda.criado_em)} • {VENDA_STATUS_LABELS[venda.status]}
+                                                    </p>
+                                                </div>
+                                                <p className="font-bold text-primary-600">
+                                                    {formatCurrency(Number(venda.total))}
+                                                </p>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            )}
+                        </section>
+                    </div>
+                )}
             </PageContainer>
         </>
     )
