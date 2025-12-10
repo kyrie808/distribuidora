@@ -27,7 +27,7 @@ export function useProdutos(): UseProdutosReturn {
                 .order('nome')
 
             if (queryError) throw queryError
-            setProdutos(data ?? [])
+            setProdutos((data as Produto[]) ?? [])
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar produtos')
         } finally {

@@ -1,4 +1,4 @@
-# Arquitetura do MassasCRM
+# Arquitetura do Gilmar Distribuidor Massas
 
 ## Stack
 

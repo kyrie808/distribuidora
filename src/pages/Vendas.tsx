@@ -4,16 +4,12 @@ import {
     ShoppingCart,
     Filter,
     Calendar,
-    Clock,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
-import { useVendas, type VendaComItens } from '../hooks/useVendas'
-import { formatCurrency, formatDate, formatRelativeDate, formatPhone } from '../utils/formatters'
+import { useVendas } from '../hooks/useVendas'
+import { formatCurrency, formatDate, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 
 type StatusFilter = 'todos' | 'pendente' | 'entregue' | 'cancelada'
@@ -45,17 +41,6 @@ export function Vendas() {
     const clearFilters = () => {
         setStatusFilter('todos')
         setPeriodoFilter('todos')
-    }
-
-    const getStatusIcon = (status: string) => {
-        switch (status) {
-            case 'entregue':
-                return <CheckCircle className="h-4 w-4 text-success-500" />
-            case 'cancelada':
-                return <XCircle className="h-4 w-4 text-danger-500" />
-            default:
-                return <AlertCircle className="h-4 w-4 text-warning-500" />
-        }
     }
 
     const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'warning' => {

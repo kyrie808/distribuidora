@@ -1,36 +1,42 @@
-<<<<<<< HEAD
-# distribuidora
+# Gilmar Distribuidor Massas
 
-Projeto completo da Distribuidora – Milestone 0 concluída com sucesso!
+Sistema de Gestão Comercial para distribuidora de massas artesanais.
 
-## React + TypeScript + Vite
+## Stack
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+- **Frontend:** React 18 + TypeScript + Vite
+- **Estilização:** Tailwind CSS
+- **Backend:** Supabase (PostgreSQL + Realtime)
+- **State:** Zustand + React Query patterns
 
-Currently, two official plugins are available:
+## Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- ✅ Gestão de Contatos (leads, clientes, B2B/B2C)
+- ✅ Registro de Vendas (fluxo rápido mobile)
+- ✅ Sistema de Indicações (ranking + recompensas)
+- ✅ Alertas de Recompra (ciclos configuráveis)
+- ✅ Dashboard com métricas
+- ✅ Configurações editáveis
+- ✅ Integração WhatsApp
 
-## Expanding the ESLint configuration
+## Desenvolvimento
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+```bash
+# Instalar dependências
+npm install
 
-```js
-// eslint.config.js
-import tseslint from 'typescript-eslint';
+# Rodar em desenvolvimento
+npm run dev
 
-export default tseslint.config(
-  { ignores: ['dist'] },
-  {
-    extends: [tseslint.configs.recommendedTypeChecked],
-    files: ['**/*.{ts,tsx}'],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  }
-);
->>>>>>> cda52befc0f23c1e105acfe97f9623c4776b6aa8
+# Build para produção
+npm run build
+```
+
+## Configuração
+
+Crie um arquivo `.env` com as credenciais do Supabase:
+
+```env
+VITE_SUPABASE_URL=sua_url
+VITE_SUPABASE_ANON_KEY=sua_chave
+```

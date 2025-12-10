@@ -187,9 +187,11 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
 
             if (vendaError) throw vendaError
 
+            const typedVenda = newVenda as Venda
+
             // Insert items
             const itensInsert: ItemVendaInsert[] = data.itens.map((item) => ({
-                venda_id: newVenda.id,
+                venda_id: typedVenda.id,
                 produto_id: item.produto_id,
                 quantidade: item.quantidade,
                 preco_unitario: item.preco_unitario,
@@ -211,7 +213,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 })
                 .eq('id', data.contato_id)
 
-            return newVenda
+            return typedVenda
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao criar venda')
             return null
@@ -267,11 +269,12 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
 
             if (error) throw error
 
+            const vendaData = data as unknown as VendaComItens
             return {
-                ...data,
-                contato: Array.isArray(data.contato) ? data.contato[0] : data.contato,
-                itens: data.itens ?? [],
-            } as VendaComItens
+                ...vendaData,
+                contato: Array.isArray(vendaData.contato) ? vendaData.contato[0] : vendaData.contato,
+                itens: vendaData.itens ?? [],
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao buscar venda')
             return null
@@ -320,11 +323,12 @@ export function useVenda(id: string | undefined) {
 
                 if (queryError) throw queryError
 
+                const vendaData = data as unknown as VendaComItens
                 setVenda({
-                    ...data,
-                    contato: Array.isArray(data.contato) ? data.contato[0] : data.contato,
-                    itens: data.itens ?? [],
-                } as VendaComItens)
+                    ...vendaData,
+                    contato: Array.isArray(vendaData.contato) ? vendaData.contato[0] : vendaData.contato,
+                    itens: vendaData.itens ?? [],
+                })
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Erro ao carregar venda')
             } finally {

@@ -54,7 +54,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
             const { data, error: queryError } = await query
 
             if (queryError) throw queryError
-            setContatos(data || [])
+            setContatos((data as Contato[]) || [])
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar contatos')
         } finally {
@@ -110,7 +110,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
                 .single()
 
             if (error) throw error
-            return newContato
+            return newContato as Contato
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao criar contato')
             return null
@@ -131,7 +131,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
                 .single()
 
             if (error) throw error
-            return updatedContato
+            return updatedContato as Contato
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao atualizar contato')
             return null
@@ -161,7 +161,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
                 .single()
 
             if (error) throw error
-            return data
+            return data as Contato
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao buscar contato')
             return null
@@ -180,7 +180,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
                 .limit(10)
 
             if (error) throw error
-            return data || []
+            return (data as Contato[]) || []
         } catch (err) {
             return []
         }
@@ -225,17 +225,18 @@ export function useContato(id: string | undefined) {
                     .single()
 
                 if (queryError) throw queryError
-                setContato(data)
+                const contatoData = data as Contato
+                setContato(contatoData)
 
                 // Fetch indicador if exists
-                if (data?.indicado_por_id) {
+                if (contatoData?.indicado_por_id) {
                     const { data: indicadorData } = await supabase
                         .from('contatos')
                         .select('*')
-                        .eq('id', data.indicado_por_id)
+                        .eq('id', contatoData.indicado_por_id)
                         .single()
 
-                    setIndicador(indicadorData)
+                    setIndicador(indicadorData as Contato | null)
                 }
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'Erro ao carregar contato')

@@ -8,7 +8,8 @@ import {
   Vendas,
   VendaDetalhe,
   Indicacoes,
-  Recompra
+  Recompra,
+  Configuracoes
 } from './pages'
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           <Route path="/vendas/:id" element={<VendaDetalhe />} />
           <Route path="/indicacoes" element={<Indicacoes />} />
           <Route path="/recompra" element={<Recompra />} />
+          <Route path="/configuracoes" element={<Configuracoes />} />
         </Route>
       </Routes>
     </BrowserRouter>

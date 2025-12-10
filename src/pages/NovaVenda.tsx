@@ -1,16 +1,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { useForm, Controller } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
 import {
-    ArrowLeft,
     Search,
     Plus,
     Minus,
     ShoppingCart,
-    Check,
     User,
-    X,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -19,7 +14,7 @@ import { useContatos } from '../hooks/useContatos'
 import { useProdutos } from '../hooks/useProdutos'
 import { useVendas } from '../hooks/useVendas'
 import { useToast } from '../components/ui/Toast'
-import { vendaSchema, type VendaFormData, type ItemVendaFormData } from '../schemas/venda'
+import { type VendaFormData, type ItemVendaFormData } from '../schemas/venda'
 import { formatCurrency, formatPhone } from '../utils/formatters'
 import { FORMA_PAGAMENTO_LABELS } from '../constants'
 import type { Contato, Produto } from '../types/database'
@@ -172,11 +167,6 @@ export function NovaVenda() {
                 })
                 .filter(Boolean) as CartItem[]
         )
-    }
-
-    // Remove from cart
-    const handleRemoveFromCart = (produtoId: string) => {
-        setCart((prev) => prev.filter((item) => item.produto_id !== produtoId))
     }
 
     // Submit sale

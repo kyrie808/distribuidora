@@ -10,7 +10,6 @@ import {
     X,
     Trash2,
     MessageCircle,
-    Phone,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'

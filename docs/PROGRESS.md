@@ -1,4 +1,4 @@
-# Progresso do Projeto
+# Progresso do Projeto - Gilmar Distribuidor Massas
 
 ## Milestone 0: Setup ✅
 
@@ -151,3 +151,23 @@
 
 ### Arquivos modificados:
 - `src/pages/Dashboard.tsx` (reescrito)
+
+---
+
+## Milestone 7: Configurações ✅
+
+**Data:** 10/Dezembro/2024  
+**Status:** Concluído
+
+### Entregas:
+- ✅ Página de Configurações completa
+- ✅ Edição de ciclos de recompra (B2C/B2B)
+- ✅ Edição de valor de recompensa por indicação
+- ✅ Edição de template de mensagem WhatsApp
+- ✅ Variáveis {{nome}} e {{dias}}
+- ✅ Botões Salvar/Descartar com detecção de mudanças
+- ✅ Toast de feedback
+
+### Arquivos criados:
+- `src/pages/Configuracoes.tsx`
+

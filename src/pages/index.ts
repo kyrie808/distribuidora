@@ -6,3 +6,5 @@ export { Vendas } from './Vendas'
 export { VendaDetalhe } from './VendaDetalhe'
 export { Indicacoes } from './Indicacoes'
 export { Recompra } from './Recompra'
+export { Configuracoes } from './Configuracoes'
+

@@ -31,7 +31,7 @@ interface UseConfiguracoesReturn {
     loading: boolean
     error: string | null
     refetch: () => Promise<void>
-    updateConfig: (chave: string, valor: unknown) => Promise<boolean>
+    updateConfig: (chave: string, valor: Record<string, unknown>) => Promise<boolean>
 }
 
 export function useConfiguracoes(): UseConfiguracoesReturn {
@@ -56,16 +56,16 @@ export function useConfiguracoes(): UseConfiguracoesReturn {
             data?.forEach((item) => {
                 switch (item.chave) {
                     case 'ciclo_recompra':
-                        configObj.cicloRecompra = item.valor as CicloRecompra
+                        configObj.cicloRecompra = item.valor as unknown as CicloRecompra
                         break
                     case 'recompensa_indicacao':
-                        configObj.recompensaIndicacao = item.valor as RecompensaIndicacao
+                        configObj.recompensaIndicacao = item.valor as unknown as RecompensaIndicacao
                         break
                     case 'mensagem_recompra':
-                        configObj.mensagemRecompra = (item.valor as { texto: string }).texto || DEFAULT_CONFIG.mensagemRecompra
+                        configObj.mensagemRecompra = (item.valor as unknown as { texto: string }).texto || DEFAULT_CONFIG.mensagemRecompra
                         break
                     case 'taxa_entrega_padrao':
-                        configObj.taxaEntregaPadrao = (item.valor as { valor: number }).valor || 0
+                        configObj.taxaEntregaPadrao = (item.valor as unknown as { valor: number }).valor || 0
                         break
                 }
             })
@@ -82,11 +82,11 @@ export function useConfiguracoes(): UseConfiguracoesReturn {
         fetchConfiguracoes()
     }, [fetchConfiguracoes])
 
-    const updateConfig = async (chave: string, valor: unknown): Promise<boolean> => {
+    const updateConfig = async (chave: string, valor: Record<string, unknown>): Promise<boolean> => {
         try {
             const { error } = await supabase
                 .from('configuracoes')
-                .update({ valor })
+                .update({ valor: valor as unknown as Record<string, never> })
                 .eq('chave', chave)
 
             if (error) throw error
