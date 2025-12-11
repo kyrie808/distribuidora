@@ -76,67 +76,126 @@ export function Dashboard() {
 
                 {!loading && (
                     <div className="space-y-6">
-                        {/* Metric Cards */}
-                        <div className="grid grid-cols-2 gap-3">
-                            {/* Faturamento do Mês */}
-                            <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                                <div className="flex items-center justify-between mb-2">
-                                    <DollarSign className="h-5 w-5 opacity-80" />
-                                    <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                                        {variacao}
-                                    </span>
-                                </div>
-                                <p className="text-2xl font-bold">{formatCurrency(metrics.faturamentoMes)}</p>
-                                <p className="text-sm opacity-80">Faturamento do mês</p>
-                            </Card>
-
-                            {/* Vendas do Mês */}
-                            <Card className="bg-gradient-to-br from-accent-500 to-accent-600 text-white">
-                                <div className="flex items-center justify-between mb-2">
-                                    <ShoppingCart className="h-5 w-5 opacity-80" />
-                                </div>
-                                <p className="text-2xl font-bold">{metrics.vendasMes}</p>
-                                <p className="text-sm opacity-80">Vendas do mês</p>
-                            </Card>
-
-                            {/* Produtos Vendidos */}
-                            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-                                <div className="flex items-center justify-between mb-2">
-                                    <Package className="h-5 w-5 opacity-80" />
-                                </div>
-                                <p className="text-2xl font-bold">{metrics.produtosVendidos?.total || 0} itens</p>
-                                <div className="mt-2 pt-2 border-t border-white/20 text-xs opacity-90 space-y-0.5 font-medium">
-                                    <div className="flex justify-between">
-                                        <span>1kg:</span>
-                                        <span>{metrics.produtosVendidos?.pote1kg || 0} potes</span>
+                        {/* 💰 FINANCEIRO */}
+                        <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                <DollarSign className="h-4 w-4" /> Financeiro
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Faturamento do Mês */}
+                                <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <DollarSign className="h-5 w-5 opacity-80" />
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
+                                            {variacao}
+                                        </span>
                                     </div>
-                                    <div className="flex justify-between">
-                                        <span>4kg:</span>
-                                        <span>{metrics.produtosVendidos?.pote4kg || 0} potes</span>
+                                    <p className="text-2xl font-bold">{formatCurrency(metrics.faturamentoMes)}</p>
+                                    <p className="text-sm opacity-80">Faturamento do mês</p>
+                                </Card>
+
+                                {/* Ticket Médio */}
+                                <Card>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <TrendingUp className="h-5 w-5 text-success-500" />
                                     </div>
-                                </div>
-                            </Card>
+                                    <p className="text-2xl font-bold text-gray-900">
+                                        {formatCurrency(metrics.ticketMedio)}
+                                    </p>
+                                    <p className="text-sm text-gray-500">Ticket médio</p>
+                                </Card>
 
-                            {/* Ticket Médio */}
-                            <Card>
-                                <div className="flex items-center gap-2 mb-2">
-                                    <TrendingUp className="h-5 w-5 text-success-500" />
-                                </div>
-                                <p className="text-2xl font-bold text-gray-900">
-                                    {formatCurrency(metrics.ticketMedio)}
-                                </p>
-                                <p className="text-sm text-gray-500">Ticket médio</p>
-                            </Card>
+                                {/* Recebido */}
+                                <Card className="bg-gradient-to-br from-success-500 to-success-600 text-white">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <DollarSign className="h-5 w-5 opacity-80" />
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">💰</span>
+                                    </div>
+                                    <p className="text-2xl font-bold">{formatCurrency(metrics.recebido)}</p>
+                                    <p className="text-sm opacity-80">Recebido</p>
+                                </Card>
 
-                            {/* Clientes Ativos */}
-                            <Card>
-                                <div className="flex items-center gap-2 mb-2">
-                                    <Users className="h-5 w-5 text-primary-500" />
-                                </div>
-                                <p className="text-2xl font-bold text-gray-900">{clientesAtivos}</p>
-                                <p className="text-sm text-gray-500">Clientes ativos</p>
-                            </Card>
-                        </div>
+                                {/* A Receber */}
+                                <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <DollarSign className="h-5 w-5 opacity-80" />
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">⏳</span>
+                                    </div>
+                                    <p className="text-2xl font-bold">{formatCurrency(metrics.aReceber)}</p>
+                                    <p className="text-sm opacity-80">A Receber</p>
+                                </Card>
+                            </div>
+                        </section>
+
+                        {/* 📦 VENDAS E ENTREGAS */}
+                        <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                <ShoppingCart className="h-4 w-4" /> Vendas & Entregas
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Vendas do Mês */}
+                                <Card className="bg-gradient-to-br from-accent-500 to-accent-600 text-white">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <ShoppingCart className="h-5 w-5 opacity-80" />
+                                    </div>
+                                    <p className="text-2xl font-bold">{metrics.vendasMes}</p>
+                                    <p className="text-sm opacity-80">Vendas do mês</p>
+                                </Card>
+
+                                {/* Produtos Vendidos */}
+                                <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <Package className="h-5 w-5 opacity-80" />
+                                    </div>
+                                    <p className="text-2xl font-bold">{metrics.produtosVendidos?.total || 0} itens</p>
+                                    <div className="mt-2 pt-2 border-t border-white/20 text-xs opacity-90 space-y-0.5 font-medium">
+                                        <div className="flex justify-between">
+                                            <span>1kg:</span>
+                                            <span>{metrics.produtosVendidos?.pote1kg || 0} potes</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>4kg:</span>
+                                            <span>{metrics.produtosVendidos?.pote4kg || 0} potes</span>
+                                        </div>
+                                    </div>
+                                </Card>
+
+                                {/* Entregas Pendentes */}
+                                <Card className="border-l-4 border-l-warning-500">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Package className="h-5 w-5 text-warning-500" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-gray-900">{metrics.entregasPendentes}</p>
+                                    <p className="text-sm text-gray-500">Entregas Pendentes</p>
+                                </Card>
+
+                                {/* Entregas Realizadas */}
+                                <Card className="border-l-4 border-l-success-500">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Package className="h-5 w-5 text-success-500" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-gray-900">{metrics.entregasRealizadas}</p>
+                                    <p className="text-sm text-gray-500">Entregas Realizadas</p>
+                                </Card>
+                            </div>
+                        </section>
+
+                        {/* 👥 CLIENTES */}
+                        <section className="mb-6">
+                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                <Users className="h-4 w-4" /> Clientes
+                            </h2>
+                            <div className="grid grid-cols-2 gap-3">
+                                {/* Clientes Ativos */}
+                                <Card>
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Users className="h-5 w-5 text-primary-500" />
+                                    </div>
+                                    <p className="text-2xl font-bold text-gray-900">{clientesAtivos}</p>
+                                    <p className="text-sm text-gray-500">Clientes ativos</p>
+                                </Card>
+                            </div>
+                        </section>
 
                         {/* Alertas de Recompra */}
                         <section>
@@ -278,12 +337,25 @@ export function Dashboard() {
                                             className="cursor-pointer"
                                         >
                                             <div className="flex items-center justify-between">
-                                                <div>
-                                                    <p className="font-medium text-gray-900">
-                                                        {venda.contato?.nome || 'Cliente'}
-                                                    </p>
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <p className="font-medium text-gray-900 truncate">
+                                                            {venda.contato?.nome || 'Cliente'}
+                                                        </p>
+                                                        <Badge
+                                                            variant={venda.status === 'entregue' ? 'success' : venda.status === 'cancelada' ? 'danger' : 'warning'}
+                                                            className="text-xs"
+                                                        >
+                                                            {VENDA_STATUS_LABELS[venda.status]}
+                                                        </Badge>
+                                                        {venda.pago ? (
+                                                            <Badge variant="success" className="text-xs">💰</Badge>
+                                                        ) : (
+                                                            <Badge variant="gray" className="text-xs">⏳</Badge>
+                                                        )}
+                                                    </div>
                                                     <p className="text-xs text-gray-500">
-                                                        {formatRelativeDate(venda.criado_em)} • {VENDA_STATUS_LABELS[venda.status]}
+                                                        {formatRelativeDate(venda.criado_em)}
                                                         {venda.contato?.origem === 'indicacao' && (
                                                             <span className="ml-1 text-accent-600">
                                                                 • 📣 {getNomeIndicador(venda.contato?.indicado_por_id ?? null)
@@ -293,7 +365,7 @@ export function Dashboard() {
                                                         )}
                                                     </p>
                                                 </div>
-                                                <p className="font-bold text-primary-600">
+                                                <p className="font-bold text-primary-600 flex-shrink-0">
                                                     {formatCurrency(Number(venda.total))}
                                                 </p>
                                             </div>

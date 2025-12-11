@@ -102,7 +102,25 @@
 - Queries simples são mais estáveis e debugáveis
 - Performance não impactada para volume atual
 
-**Trade-off:** Badge "Indicado por" não exibe nome do indicador diretamente (requer query adicional se implementado)
+**Trade-off:** Resolvido — implementamos lookup síncrono `getNomeIndicador()` que busca o nome do indicador da lista de contatos em memória.
+
+---
+
+## 009 - Campo `pago` Boolean para Status de Pagamento
+
+**Data:** Dezembro/2024  
+**Contexto:** Usuários marcavam vendas como pagas/entregues por engano e não conseguiam desfazer  
+**Decisão:** Adicionar campo `pago: boolean` à tabela `vendas` e criar toggles na UI  
+**Motivo:**
+- Solução mais simples (boolean) vs. enum de status de pagamento
+- Permite correção rápida de erros humanos
+- Separação clara entre status de entrega e status de pagamento
+- Campo `atualizado_em` já rastreia alterações
+
+**Implementação:**
+- Migração: `ALTER TABLE vendas ADD COLUMN pago boolean DEFAULT false`
+- Hook: `updateVendaPago(id, pago)`
+- UI: Toggle em VendaDetalhe, badges em Vendas e Dashboard
 
 ---
 

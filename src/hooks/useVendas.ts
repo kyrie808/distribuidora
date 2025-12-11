@@ -34,6 +34,12 @@ interface VendasMetrics {
         pote1kg: number
         pote4kg: number
     }
+    // Pagamento
+    recebido: number
+    aReceber: number
+    // Entregas
+    entregasPendentes: number
+    entregasRealizadas: number
 }
 
 interface UseVendasOptions {
@@ -185,6 +191,18 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             return acc
         }, { total: 0, pote1kg: 0, pote4kg: 0 })
 
+        // Payment metrics
+        const recebido = vendasNaoCanceladas
+            .filter(v => v.pago === true)
+            .reduce((acc, v) => acc + Number(v.total), 0)
+        const aReceber = vendasNaoCanceladas
+            .filter(v => v.pago !== true)
+            .reduce((acc, v) => acc + Number(v.total), 0)
+
+        // Delivery metrics
+        const entregasPendentes = vendas.filter(v => v.status === 'pendente').length
+        const entregasRealizadas = vendas.filter(v => v.status === 'entregue').length
+
         return {
             faturamentoTotal,
             faturamentoMes,
@@ -192,6 +210,10 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             vendasMes: vendasMesNaoCanceladas.length,
             ticketMedio: vendasNaoCanceladas.length > 0 ? faturamentoTotal / vendasNaoCanceladas.length : 0,
             produtosVendidos,
+            recebido,
+            aReceber,
+            entregasPendentes,
+            entregasRealizadas,
         }
     })()
 

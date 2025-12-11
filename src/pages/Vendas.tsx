@@ -182,6 +182,11 @@ export function Vendas() {
                                             <Badge variant={getStatusBadgeVariant(venda.status)}>
                                                 {VENDA_STATUS_LABELS[venda.status]}
                                             </Badge>
+                                            {venda.pago ? (
+                                                <Badge variant="success">💰 Pago</Badge>
+                                            ) : (
+                                                <Badge variant="gray">⏳ Não pago</Badge>
+                                            )}
                                         </div>
 
                                         <div className="flex items-center gap-4 text-sm text-gray-500">

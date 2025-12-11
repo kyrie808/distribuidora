@@ -4,8 +4,15 @@
 
 **Arquivo:** `src/pages/Dashboard.tsx`  
 **Função:** Overview com métricas e alertas  
-**Hooks:** - (placeholder, usará useVendas, useContatos)  
-**Componentes:** Header, PageContainer, Card
+**Hooks:** `useVendas`, `useContatos`  
+**Componentes:** Header, PageContainer, Card, Badge
+
+**Seções:**
+- **💰 Financeiro**: Faturamento mês, Ticket médio, Recebido, A Receber
+- **📦 Vendas & Entregas**: Vendas mês, Produtos vendidos, Entregas pendentes/realizadas
+- **👥 Clientes**: Clientes ativos
+- **🔔 Alertas de Recompra**: Lista de clientes
+- **🛒 Últimas Vendas**: 5 vendas mais recentes com status
 
 ---
 
@@ -69,7 +76,7 @@
 **Features:**
 - Métricas (faturamento, vendas do mês)
 - Filtros por status e período
-- Cards com resumo da venda
+- Cards com resumo da venda + badges (entrega, pagamento, indicação)
 
 ---
 
@@ -81,11 +88,13 @@
 **Componentes:** Header, PageContainer, Card, Badge, Button, Modal
 
 **Features:**
-- Status da venda
+- Status da venda + badge de pagamento
 - Dados do cliente
 - Lista de itens
-- Ação: Marcar Entregue
-- Ação: Cancelar
+- Toggle: Marcar Entregue ↔ Voltar para Pendente
+- Toggle: Marcar Pago ↔ Desmarcar Pago
+- Botão: Restaurar venda cancelada
+- Ação: Cancelar (botão vermelho)
 - Botão WhatsApp
 
 ---

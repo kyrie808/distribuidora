@@ -189,13 +189,23 @@
 - ✅ Toggle de status de entrega (pendente ↔ entregue) em VendaDetalhe
 - ✅ Toggle de pagamento (pago ↔ não pago) em VendaDetalhe
 - ✅ Campo `pago` adicionado à tabela `vendas`
+- ✅ Botão "Restaurar Venda" para descancelar vendas canceladas
+- ✅ Botão de cancelar vermelho (`variant="danger"`) para hierarquia visual
+- ✅ Badges de status (entrega + pagamento) nos cards de Vendas.tsx
+- ✅ Badges de status (entrega + pagamento) na seção "Últimas Vendas" do Dashboard
+- ✅ KPIs de pagamento: "Recebido" e "A Receber" no Dashboard
+- ✅ KPIs de entrega: "Entregas Pendentes" e "Entregas Realizadas" no Dashboard
+- ✅ Reorganização do Dashboard em seções: Financeiro, Vendas & Entregas, Clientes
 
 ### Arquivos criados/modificados:
 - `src/components/contatos/ClienteNome.tsx` (novo)
-- `src/hooks/useVendas.ts` (métricas de produtos)
-- `src/hooks/useContatos.ts` (simplificação de queries)
+- `src/hooks/useVendas.ts` (métricas de produtos, updateVendaPago)
+- `src/hooks/useContatos.ts` (getNomeIndicador, simplificação de queries)
 - `src/hooks/useIndicacoes.ts` (simplificação de queries)
-- `src/pages/Dashboard.tsx` (novo KPI card)
+- `src/pages/Dashboard.tsx` (novo KPI card, badges de status/pagamento)
+- `src/pages/Vendas.tsx` (badges de status/pagamento)
+- `src/pages/VendaDetalhe.tsx` (toggles de entrega/pagamento, restaurar)
+- `src/types/database.ts` (campo pago)
 - `vercel.json` (novo)
 - `vite.config.ts` (base path)
 

@@ -84,7 +84,11 @@ const {
     totalVendas,
     vendasMes,
     ticketMedio,
-    produtosVendidos: { total, pote1kg, pote4kg }  // NOVO
+    produtosVendidos: { total, pote1kg, pote4kg },
+    recebido,         // soma vendas pagas
+    aReceber,         // soma vendas não pagas
+    entregasPendentes,
+    entregasRealizadas
   },
   refetch,          
   createVenda,      // (data) => Promise<Venda | null>
