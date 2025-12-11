@@ -15,7 +15,7 @@ import {
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button, Card, Badge, LoadingScreen, Modal, ModalActions } from '../components/ui'
-import { ContatoFormModal } from '../components/contatos'
+import { ContatoFormModal, ClienteNome } from '../components/contatos'
 import { useContato, useContatos } from '../hooks/useContatos'
 import { useToast } from '../components/ui/Toast'
 import {
@@ -52,7 +52,7 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                             {formatDate(venda.data)}
                         </div>
                         <div className="text-xs text-gray-500 mt-1">
-                            {venda.itens.length} {venda.itens.length === 1 ? 'item' : 'itens'}
+                            {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} {venda.itens.reduce((acc, item) => acc + item.quantidade, 0) === 1 ? 'item' : 'itens'}
                         </div>
                     </div>
                     <div className="text-right">
@@ -156,7 +156,10 @@ export function ContatoDetalhe() {
                         {/* Info */}
                         <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
-                                <h2 className="text-xl font-bold text-gray-900">{contato.nome}</h2>
+                                <ClienteNome
+                                    contato={{ ...contato, indicador }}
+                                    className="text-xl"
+                                />
                             </div>
                             <div className="flex items-center gap-2 mb-2">
                                 <Badge variant={statusColor}>

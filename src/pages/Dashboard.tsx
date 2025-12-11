@@ -11,6 +11,7 @@ import {
     RefreshCcw,
     Bell,
     Share2,
+    Package,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -96,6 +97,24 @@ export function Dashboard() {
                                 </div>
                                 <p className="text-2xl font-bold">{metrics.vendasMes}</p>
                                 <p className="text-sm opacity-80">Vendas do mês</p>
+                            </Card>
+
+                            {/* Produtos Vendidos */}
+                            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
+                                <div className="flex items-center justify-between mb-2">
+                                    <Package className="h-5 w-5 opacity-80" />
+                                </div>
+                                <p className="text-2xl font-bold">{metrics.produtosVendidos?.total || 0} itens</p>
+                                <div className="mt-2 pt-2 border-t border-white/20 text-xs opacity-90 space-y-0.5 font-medium">
+                                    <div className="flex justify-between">
+                                        <span>1kg:</span>
+                                        <span>{metrics.produtosVendidos?.pote1kg || 0} potes</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>4kg:</span>
+                                        <span>{metrics.produtosVendidos?.pote4kg || 0} potes</span>
+                                    </div>
+                                </div>
                             </Card>
 
                             {/* Ticket Médio */}
@@ -204,10 +223,10 @@ export function Dashboard() {
                                                 <div className="flex items-center gap-3">
                                                     <div
                                                         className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0
-                                                                ? 'bg-yellow-100 text-yellow-700'
-                                                                : index === 1
-                                                                    ? 'bg-gray-200 text-gray-700'
-                                                                    : 'bg-orange-100 text-orange-700'
+                                                            ? 'bg-yellow-100 text-yellow-700'
+                                                            : index === 1
+                                                                ? 'bg-gray-200 text-gray-700'
+                                                                : 'bg-orange-100 text-orange-700'
                                                             }`}
                                                     >
                                                         {index + 1}º

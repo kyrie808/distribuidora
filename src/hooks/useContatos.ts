@@ -34,7 +34,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         try {
             let query = supabase
                 .from('contatos')
-                .select('*')
+                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
                 .order('criado_em', { ascending: false })
 
             // Apply filters
@@ -54,7 +54,9 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
             const { data, error: queryError } = await query
 
             if (queryError) throw queryError
-            setContatos((data as Contato[]) || [])
+
+            // Transform to ensure proper typing if needed, mostly Supabase handles alias
+            setContatos((data as unknown as Contato[]) || [])
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao carregar contatos')
         } finally {

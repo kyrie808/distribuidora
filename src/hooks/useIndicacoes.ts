@@ -43,19 +43,27 @@ export function useIndicacoes(): UseIndicacoesReturn {
             // Fetch all contacts that have indicated someone
             const { data: contatos, error: contatosError } = await supabase
                 .from('contatos')
-                .select('*')
+                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
                 .not('indicado_por_id', 'is', null)
 
             if (contatosError) throw contatosError
-            const indicados = (contatos ?? []) as Contato[]
+
+            // Normalize indicator data
+            const indicados = ((contatos as any[]) ?? []).map(c => ({
+                ...c,
+                indicador: Array.isArray(c.indicador) ? c.indicador[0] : c.indicador
+            })) as Contato[]
 
             // Fetch all contacts that are indicadores (have indicated at least one person)
             const { data: todosContatos, error: todosError } = await supabase
                 .from('contatos')
-                .select('*')
+                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
 
             if (todosError) throw todosError
-            const allContatos = (todosContatos ?? []) as Contato[]
+            const allContatos = ((todosContatos as any[]) ?? []).map(c => ({
+                ...c,
+                indicador: Array.isArray(c.indicador) ? c.indicador[0] : c.indicador
+            })) as Contato[]
 
             // Fetch sales count per contact
             const { data: vendasCount, error: vendasError } = await supabase

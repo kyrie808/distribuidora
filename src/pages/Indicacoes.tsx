@@ -13,6 +13,7 @@ import {
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen, Modal, ModalActions, Button } from '../components/ui'
+import { ClienteNome } from '../components/contatos'
 import { useIndicacoes, type IndicadorComIndicados } from '../hooks/useIndicacoes'
 import { formatCurrency, formatPhone, getWhatsAppLink } from '../utils/formatters'
 import { CONTATO_STATUS_LABELS } from '../constants'
@@ -119,9 +120,10 @@ export function Indicacoes() {
 
                                     {/* Info */}
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-medium text-gray-900 truncate">
-                                            {item.indicador.nome}
-                                        </h4>
+                                        <ClienteNome
+                                            contato={item.indicador}
+                                            className="font-medium text-gray-900 truncate"
+                                        />
                                         <p className="text-sm text-gray-500">
                                             {item.totalIndicacoes} indicações • {item.indicacoesConvertidas} clientes
                                         </p>
@@ -160,9 +162,10 @@ export function Indicacoes() {
                                         <User className="h-6 w-6 text-primary-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-semibold text-gray-900">
-                                            {selectedIndicador.indicador.nome}
-                                        </h3>
+                                        <ClienteNome
+                                            contato={selectedIndicador.indicador}
+                                            className="font-semibold text-gray-900 text-lg"
+                                        />
                                         <p className="text-sm text-gray-600">
                                             {formatPhone(selectedIndicador.indicador.telefone)}
                                         </p>
@@ -209,7 +212,10 @@ export function Indicacoes() {
                                             className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                                         >
                                             <div>
-                                                <p className="font-medium text-gray-900">{indicado.nome}</p>
+                                                <ClienteNome
+                                                    contato={indicado as any}
+                                                    className="font-medium text-gray-900"
+                                                />
                                                 <p className="text-sm text-gray-500">
                                                     {indicado.totalCompras} compra(s)
                                                 </p>

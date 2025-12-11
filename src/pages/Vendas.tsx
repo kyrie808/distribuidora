@@ -8,6 +8,7 @@ import {
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
+import { ClienteNome } from '../components/contatos'
 import { useVendas } from '../hooks/useVendas'
 import { formatCurrency, formatDate, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
@@ -169,9 +170,13 @@ export function Vendas() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <h3 className="font-semibold text-gray-900 truncate">
-                                                {venda.contato?.nome || 'Cliente desconhecido'}
-                                            </h3>
+                                            <div className="font-semibold text-gray-900 truncate">
+                                                {venda.contato ? (
+                                                    <ClienteNome contato={venda.contato} />
+                                                ) : (
+                                                    'Cliente desconhecido'
+                                                )}
+                                            </div>
                                             <Badge variant={getStatusBadgeVariant(venda.status)}>
                                                 {VENDA_STATUS_LABELS[venda.status]}
                                             </Badge>
@@ -186,7 +191,7 @@ export function Vendas() {
                                         </div>
 
                                         <p className="text-xs text-gray-400 mt-1">
-                                            {venda.itens.length} item(s)
+                                            {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} item(s)
                                         </p>
                                     </div>
 

@@ -5,11 +5,21 @@ import type { VendaFiltros, VendaFormData } from '../schemas/venda'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 
 export interface VendaComItens extends Venda {
-    itens: ItemVenda[]
+    itens: (ItemVenda & {
+        produto?: {
+            codigo: string
+        }
+    })[]
     contato?: {
         id: string
         nome: string
         telefone: string
+        origem: string
+        indicado_por_id?: string | null
+        indicador?: {
+            id: string
+            nome: string
+        } | null
     }
 }
 
@@ -19,6 +29,11 @@ interface VendasMetrics {
     totalVendas: number
     vendasMes: number
     ticketMedio: number
+    produtosVendidos: {
+        total: number
+        pote1kg: number
+        pote4kg: number
+    }
 }
 
 interface UseVendasOptions {
@@ -69,8 +84,9 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 .from('vendas')
                 .select(`
           *,
-          contato:contatos(id, nome, telefone),
-          itens:itens_venda(*)
+          *,
+          contato:contatos(id, nome, telefone, origem, indicado_por_id, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)),
+          itens:itens_venda(*, produto:produtos(codigo))
         `)
                 .order('data', { ascending: false })
 
@@ -156,12 +172,26 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) => acc + Number(v.total), 0)
         const faturamentoMes = vendasMesNaoCanceladas.reduce((acc, v) => acc + Number(v.total), 0)
 
+        // Product metrics
+        const produtosVendidos = vendasMesNaoCanceladas.reduce((acc, v) => {
+            v.itens.forEach(item => {
+                acc.total += item.quantidade
+                if (item.produto?.codigo === 'pao_queijo_1kg') {
+                    acc.pote1kg += item.quantidade
+                } else if (item.produto?.codigo === 'pao_queijo_4kg') {
+                    acc.pote4kg += item.quantidade
+                }
+            })
+            return acc
+        }, { total: 0, pote1kg: 0, pote4kg: 0 })
+
         return {
             faturamentoTotal,
             faturamentoMes,
             totalVendas: vendasNaoCanceladas.length,
             vendasMes: vendasMesNaoCanceladas.length,
             ticketMedio: vendasNaoCanceladas.length > 0 ? faturamentoTotal / vendasNaoCanceladas.length : 0,
+            produtosVendidos,
         }
     })()
 

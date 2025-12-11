@@ -58,6 +58,7 @@ import { Header, PageContainer } from '@/components/layout'
 | Componente | Props | Uso |
 |------------|-------|-----|
 | `ContatoCard` | `contato`, `onClick` | Card na lista de contatos |
+| `ClienteNome` | `contato`, `className` | Badge reutilizável para exibir nome + indicador |
 | `ContatoFormModal` | `isOpen`, `onClose`, `contato`, `onSuccess` | Modal de criação/edição |
 
 ### Exemplo de uso:

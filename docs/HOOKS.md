@@ -8,7 +8,7 @@
 ### Funções exportadas:
 
 #### `useContatos(options?)`
-Lista todos os contatos com filtros opcionais.
+Lista todos os contatos com filtros opcionais e inclui indicador.
 
 ```tsx
 const { 
@@ -70,7 +70,7 @@ const {
 ### Funções exportadas:
 
 #### `useVendas(options?)`
-Lista vendas com filtros e calcula métricas.
+Lista vendas com filtros, calcula métricas e inclui dados profundos de contato/indicador.
 
 ```tsx
 const { 
@@ -116,7 +116,7 @@ const {
 ### Funções exportadas:
 
 #### `useIndicacoes()`
-Calcula dados de indicações a partir de `contatos.indicado_por_id`.
+Calcula dados de indicações a partir de `contatos.indicado_por_id`. Normaliza dados relacionais.
 
 ```tsx
 const { 

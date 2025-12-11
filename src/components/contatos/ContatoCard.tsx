@@ -1,4 +1,17 @@
 import { Phone, MapPin, User, Building2 } from 'lucide-react'
+import { ClienteNome } from './ClienteNome' // Added import
+
+// ...
+
+<div className="flex items-center gap-2 mb-1">
+    <ClienteNome
+        contato={contato as any}
+        className="truncate flex-1 min-w-0"
+    />
+    <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
+        {CONTATO_STATUS_LABELS[contato.status]}
+    </Badge>
+</div>
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
