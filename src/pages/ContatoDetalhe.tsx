@@ -31,6 +31,43 @@ import {
     CONTATO_ORIGEM_LABELS,
     SUBTIPOS_B2B_LABELS,
 } from '../constants'
+import { useVendas } from '../hooks/useVendas'
+import { formatCurrency } from '../utils/formatters'
+
+function VendasHistorico({ contatoId }: { contatoId: string }) {
+    const { vendas, loading, error } = useVendas({
+        filtros: { contatoId, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' }
+    })
+
+    if (loading) return <div className="text-center py-4 text-gray-500">Carregando histórico...</div>
+    if (error) return <div className="text-center py-4 text-danger-500">Erro ao carregar histórico</div>
+    if (vendas.length === 0) return <div className="text-center py-4 text-gray-500">Nenhuma compra registrada</div>
+
+    return (
+        <div className="space-y-3">
+            {vendas.map((venda) => (
+                <div key={venda.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                    <div>
+                        <div className="text-sm font-medium text-gray-900">
+                            {formatDate(venda.data)}
+                        </div>
+                        <div className="text-xs text-gray-500 mt-1">
+                            {venda.itens.length} {venda.itens.length === 1 ? 'item' : 'itens'}
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <div className="text-sm font-bold text-gray-900">
+                            {formatCurrency(venda.total)}
+                        </div>
+                        <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
+                            {venda.status}
+                        </Badge>
+                    </div>
+                </div>
+            ))}
+        </div>
+    )
+}
 
 export function ContatoDetalhe() {
     const { id } = useParams<{ id: string }>()
@@ -234,12 +271,10 @@ export function ContatoDetalhe() {
                     )}
                 </div>
 
-                {/* Histórico de Compras (placeholder) */}
+                {/* Histórico de Compras */}
                 <Card className="mb-4">
-                    <h3 className="font-medium text-gray-900 mb-2">Histórico de Compras</h3>
-                    <p className="text-sm text-gray-500 text-center py-4">
-                        Nenhuma compra registrada
-                    </p>
+                    <h3 className="font-medium text-gray-900 mb-4">Histórico de Compras</h3>
+                    <VendasHistorico contatoId={contato.id} />
                 </Card>
 
                 {/* Delete Button */}

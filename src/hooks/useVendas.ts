@@ -89,6 +89,9 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                         .lte('data', dateRange.end.toISOString().split('T')[0])
                 }
             }
+            if (filtros?.contatoId) {
+                query = query.eq('contato_id', filtros.contatoId)
+            }
 
             const { data, error: queryError } = await query
 
