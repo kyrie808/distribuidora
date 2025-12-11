@@ -3,15 +3,7 @@ import { ClienteNome } from './ClienteNome' // Added import
 
 // ...
 
-<div className="flex items-center gap-2 mb-1">
-    <ClienteNome
-        contato={contato as any}
-        className="truncate flex-1 min-w-0"
-    />
-    <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
-        {CONTATO_STATUS_LABELS[contato.status]}
-    </Badge>
-</div>
+
 import { useNavigate } from 'react-router-dom'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
@@ -58,8 +50,11 @@ export function ContatoCard({ contato, onClick }: ContatoCardProps) {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-gray-900 truncate">{contato.nome}</h3>
-                            <Badge variant={statusColor} className="flex-shrink-0">
+                            <ClienteNome
+                                contato={contato}
+                                className="truncate flex-1 min-w-0"
+                            />
+                            <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
                                 {CONTATO_STATUS_LABELS[contato.status]}
                             </Badge>
                         </div>
