@@ -19,9 +19,10 @@ import type { Contato } from '../../types/database'
 interface ContatoCardProps {
     contato: Contato
     onClick?: () => void
+    nomeIndicador?: string | null
 }
 
-export function ContatoCard({ contato, onClick }: ContatoCardProps) {
+export function ContatoCard({ contato, onClick, nomeIndicador }: ContatoCardProps) {
     const navigate = useNavigate()
 
     const handleClick = () => {
@@ -82,7 +83,9 @@ export function ContatoCard({ contato, onClick }: ContatoCardProps) {
                             {contato.origem === 'indicacao' && (
                                 <>
                                     <span>•</span>
-                                    <span>📣 Indicação</span>
+                                    <span className="text-accent-600">
+                                        📣 {nomeIndicador ? `Indicado por: ${nomeIndicador}` : 'Indicação'}
+                                    </span>
                                 </>
                             )}
                         </div>

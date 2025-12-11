@@ -179,6 +179,7 @@ export type Database = {
                     observacoes: string | null
                     status: string
                     total: number
+                    pago: boolean
                 }
                 Insert: {
                     atualizado_em?: string
@@ -191,6 +192,7 @@ export type Database = {
                     observacoes?: string | null
                     status?: string
                     total: number
+                    pago?: boolean
                 }
                 Update: {
                     atualizado_em?: string
@@ -203,6 +205,7 @@ export type Database = {
                     observacoes?: string | null
                     status?: string
                     total?: number
+                    pago?: boolean
                 }
                 Relationships: [
                     {

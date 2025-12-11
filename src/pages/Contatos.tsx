@@ -20,7 +20,7 @@ export function Contatos() {
     const [showFilters, setShowFilters] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    const { contatos, loading, error } = useContatos()
+    const { contatos, loading, error, getNomeIndicador } = useContatos()
 
     // Filter contacts locally for instant feedback
     const filteredContatos = useMemo(() => {
@@ -194,7 +194,11 @@ export function Contatos() {
                 {!loading && !error && filteredContatos.length > 0 && (
                     <div className="space-y-3">
                         {filteredContatos.map((contato) => (
-                            <ContatoCard key={contato.id} contato={contato} />
+                            <ContatoCard 
+                                key={contato.id} 
+                                contato={contato} 
+                                nomeIndicador={getNomeIndicador(contato.indicado_por_id)}
+                            />
                         ))}
                     </div>
                 )}

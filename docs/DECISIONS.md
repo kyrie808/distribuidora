@@ -92,6 +92,20 @@
 
 ---
 
+## 008 - Remoção de Self-Joins no PostgREST
+
+**Data:** Dezembro/2024  
+**Contexto:** Queries com joins auto-referenciais (`indicador:contatos!fkey`) causavam erro 400 no Supabase  
+**Decisão:** Remover self-joins e buscar dados de indicador separadamente quando necessário  
+**Motivo:**
+- Sintaxe de self-join não é bem suportada em todas versões do PostgREST
+- Queries simples são mais estáveis e debugáveis
+- Performance não impactada para volume atual
+
+**Trade-off:** Badge "Indicado por" não exibe nome do indicador diretamente (requer query adicional se implementado)
+
+---
+
 ## Template para novas decisões
 
 ```markdown

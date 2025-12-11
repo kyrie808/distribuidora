@@ -171,3 +171,31 @@
 ### Arquivos criados:
 - `src/pages/Configuracoes.tsx`
 
+---
+
+## Milestone 8: Melhorias Pós-MVP ✅
+
+**Data:** 11/Dezembro/2024  
+**Status:** Concluído
+
+### Entregas:
+- ✅ Correção de bug na contagem de itens nos cards de venda
+- ✅ Novo KPI de "Produtos Vendidos" no Dashboard (Total, 1kg, 4kg)
+- ✅ Componente `ClienteNome` para exibir badge de indicação
+- ✅ Integração do `ClienteNome` em Contatos, Vendas e Indicações
+- ✅ Configuração de deploy Vercel (`vercel.json`, `base: '/'`)
+- ✅ Correção de queries Supabase (remoção de self-joins problemáticos)
+- ✅ "📣 Indicado por: [Nome]" exibido em todos os cards (Contatos, Dashboard, Vendas)
+- ✅ Toggle de status de entrega (pendente ↔ entregue) em VendaDetalhe
+- ✅ Toggle de pagamento (pago ↔ não pago) em VendaDetalhe
+- ✅ Campo `pago` adicionado à tabela `vendas`
+
+### Arquivos criados/modificados:
+- `src/components/contatos/ClienteNome.tsx` (novo)
+- `src/hooks/useVendas.ts` (métricas de produtos)
+- `src/hooks/useContatos.ts` (simplificação de queries)
+- `src/hooks/useIndicacoes.ts` (simplificação de queries)
+- `src/pages/Dashboard.tsx` (novo KPI card)
+- `vercel.json` (novo)
+- `vite.config.ts` (base path)
+

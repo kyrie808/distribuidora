@@ -18,6 +18,7 @@ interface UseContatosReturn {
     deleteContato: (id: string) => Promise<boolean>
     getContatoById: (id: string) => Promise<Contato | null>
     searchContatos: (query: string) => Promise<Contato[]>
+    getNomeIndicador: (indicadoPorId: string | null) => string | null
 }
 
 export function useContatos(options: UseContatosOptions = {}): UseContatosReturn {
@@ -188,6 +189,13 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         }
     }
 
+    // Get nome do indicador by ID (sync lookup from cached contatos)
+    const getNomeIndicador = useCallback((indicadoPorId: string | null): string | null => {
+        if (!indicadoPorId) return null
+        const indicador = contatos.find(c => c.id === indicadoPorId)
+        return indicador?.nome || null
+    }, [contatos])
+
     return {
         contatos,
         loading,
@@ -198,6 +206,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         deleteContato,
         getContatoById,
         searchContatos,
+        getNomeIndicador,
     }
 }
 

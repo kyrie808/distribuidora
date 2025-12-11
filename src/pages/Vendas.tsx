@@ -10,6 +10,7 @@ import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
 import { ClienteNome } from '../components/contatos'
 import { useVendas } from '../hooks/useVendas'
+import { useContatos } from '../hooks/useContatos'
 import { formatCurrency, formatDate, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 
@@ -36,6 +37,7 @@ export function Vendas() {
             periodo: periodoFilter,
         },
     })
+    const { getNomeIndicador } = useContatos()
 
     const hasActiveFilters = statusFilter !== 'todos' || periodoFilter !== 'todos'
 
@@ -192,6 +194,13 @@ export function Vendas() {
 
                                         <p className="text-xs text-gray-400 mt-1">
                                             {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} item(s)
+                                            {venda.contato?.origem === 'indicacao' && (
+                                                <span className="ml-2 text-accent-600">
+                                                    📣 {getNomeIndicador(venda.contato?.indicado_por_id ?? null)
+                                                        ? `Indicado por: ${getNomeIndicador(venda.contato?.indicado_por_id ?? null)}`
+                                                        : 'Indicação'}
+                                                </span>
+                                            )}
                                         </p>
                                     </div>
 

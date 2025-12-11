@@ -49,6 +49,7 @@ interface UseVendasReturn {
     refetch: () => Promise<void>
     createVenda: (data: VendaFormData) => Promise<Venda | null>
     updateVendaStatus: (id: string, status: 'pendente' | 'entregue' | 'cancelada') => Promise<boolean>
+    updateVendaPago: (id: string, pago: boolean) => Promise<boolean>
     deleteVenda: (id: string) => Promise<boolean>
     getVendaById: (id: string) => Promise<VendaComItens | null>
 }
@@ -271,6 +272,22 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         }
     }
 
+    // Update venda pago status
+    const updateVendaPago = async (id: string, pago: boolean): Promise<boolean> => {
+        try {
+            const { error } = await supabase
+                .from('vendas')
+                .update({ pago })
+                .eq('id', id)
+
+            if (error) throw error
+            return true
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao atualizar pagamento')
+            return false
+        }
+    }
+
     // Delete venda
     const deleteVenda = async (id: string): Promise<boolean> => {
         try {
@@ -321,6 +338,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         refetch: fetchVendas,
         createVenda,
         updateVendaStatus,
+        updateVendaPago,
         deleteVenda,
         getVendaById,
     }

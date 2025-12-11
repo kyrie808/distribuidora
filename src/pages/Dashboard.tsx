@@ -29,7 +29,7 @@ export function Dashboard() {
 
     // Fetch data
     const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({})
-    const { contatos, loading: loadingContatos, refetch: refetchContatos } = useContatos({})
+    const { contatos, loading: loadingContatos, refetch: refetchContatos, getNomeIndicador } = useContatos({})
     const { contatos: recompraContatos, atrasados, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
     const { indicadores, loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
 
@@ -284,6 +284,13 @@ export function Dashboard() {
                                                     </p>
                                                     <p className="text-xs text-gray-500">
                                                         {formatRelativeDate(venda.criado_em)} • {VENDA_STATUS_LABELS[venda.status]}
+                                                        {venda.contato?.origem === 'indicacao' && (
+                                                            <span className="ml-1 text-accent-600">
+                                                                • 📣 {getNomeIndicador(venda.contato?.indicado_por_id ?? null)
+                                                                    ? `Indicado por: ${getNomeIndicador(venda.contato?.indicado_por_id ?? null)}`
+                                                                    : 'Indicação'}
+                                                            </span>
+                                                        )}
                                                     </p>
                                                 </div>
                                                 <p className="font-bold text-primary-600">

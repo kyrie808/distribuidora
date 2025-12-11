@@ -20,6 +20,7 @@ const {
   updateContato,   // (id, data) => Promise<Contato | null>
   deleteContato,   // (id) => Promise<boolean>
   searchContatos,  // (query) => Promise<Contato[]>
+  getNomeIndicador,// (id) => string | null (lookup sync)
 } = useContatos({ 
   filtros: { busca, tipo, status },
   realtime: true  // default
@@ -82,15 +83,17 @@ const {
     faturamentoMes,
     totalVendas,
     vendasMes,
-    ticketMedio
+    ticketMedio,
+    produtosVendidos: { total, pote1kg, pote4kg }  // NOVO
   },
   refetch,          
   createVenda,      // (data) => Promise<Venda | null>
   updateVendaStatus,// (id, status) => Promise<boolean>
+  updateVendaPago,  // (id, pago) => Promise<boolean>
   deleteVenda,      // (id) => Promise<boolean>
   getVendaById,     // (id) => Promise<VendaComItens | null>
 } = useVendas({ 
-  filtros: { status, forma_pagamento, periodo },
+  filtros: { status, forma_pagamento, periodo, contatoId },  // contatoId adicionado
   realtime: true  // default
 })
 ```

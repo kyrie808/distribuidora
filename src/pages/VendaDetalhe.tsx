@@ -10,6 +10,8 @@ import {
     X,
     Trash2,
     MessageCircle,
+    DollarSign,
+    RotateCcw,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -30,7 +32,7 @@ export function VendaDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { venda, loading, error } = useVenda(id)
-    const { updateVendaStatus, deleteVenda } = useVendas({ realtime: false })
+    const { updateVendaStatus, updateVendaPago, deleteVenda } = useVendas({ realtime: false })
 
     const [isUpdating, setIsUpdating] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -45,10 +47,40 @@ export function VendaDetalhe() {
 
         if (success) {
             toast.success('Venda marcada como entregue!')
-            // Refresh page
             window.location.reload()
         } else {
             toast.error('Erro ao atualizar status')
+        }
+    }
+
+    const handleMarkAsPending = async () => {
+        if (!venda) return
+
+        setIsUpdating(true)
+        const success = await updateVendaStatus(venda.id, 'pendente')
+        setIsUpdating(false)
+
+        if (success) {
+            toast.success('Venda marcada como pendente')
+            window.location.reload()
+        } else {
+            toast.error('Erro ao atualizar status')
+        }
+    }
+
+    const handleTogglePago = async () => {
+        if (!venda) return
+
+        setIsUpdating(true)
+        const newPago = !venda.pago
+        const success = await updateVendaPago(venda.id, newPago)
+        setIsUpdating(false)
+
+        if (success) {
+            toast.success(newPago ? 'Venda marcada como paga' : 'Pagamento desmarcado')
+            window.location.reload()
+        } else {
+            toast.error('Erro ao atualizar pagamento')
         }
     }
 
@@ -130,9 +162,16 @@ export function VendaDetalhe() {
                 {/* Status Card */}
                 <Card className="mb-4">
                     <div className="flex items-center justify-between mb-4">
-                        <Badge variant={getStatusBadgeVariant(venda.status)} className="text-sm py-1 px-3">
-                            {VENDA_STATUS_LABELS[venda.status]}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                            <Badge variant={getStatusBadgeVariant(venda.status)} className="text-sm py-1 px-3">
+                                {VENDA_STATUS_LABELS[venda.status]}
+                            </Badge>
+                            {venda.pago && (
+                                <Badge variant="success" className="text-sm py-1 px-3">
+                                    💰 Pago
+                                </Badge>
+                            )}
+                        </div>
                         <span className="text-sm text-gray-500">
                             {formatRelativeDate(venda.criado_em)}
                         </span>
@@ -145,28 +184,71 @@ export function VendaDetalhe() {
                         <p className="text-gray-500">{venda.itens.length} item(s)</p>
                     </div>
 
-                    {/* Quick Actions */}
-                    {venda.status === 'pendente' && (
-                        <div className="flex gap-2 pt-4 border-t border-gray-200">
+                    {/* Status de Entrega */}
+                    <div className="pt-4 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                            <Package className="h-3 w-3" /> Status de Entrega
+                        </p>
+                        {venda.status === 'cancelada' ? (
                             <Button
-                                variant="primary"
-                                className="flex-1"
-                                leftIcon={<Check className="h-4 w-4" />}
-                                onClick={handleMarkAsDelivered}
+                                variant="secondary"
+                                className="w-full"
+                                leftIcon={<RotateCcw className="h-4 w-4" />}
+                                onClick={handleMarkAsPending}
                                 isLoading={isUpdating}
                             >
-                                Marcar Entregue
+                                Restaurar Venda (voltar para Pendente)
                             </Button>
-                            <Button
-                                variant="ghost"
-                                className="text-danger-500"
-                                onClick={handleCancelSale}
-                                disabled={isUpdating}
-                            >
-                                <X className="h-5 w-5" />
-                            </Button>
-                        </div>
-                    )}
+                        ) : (
+                            <div className="flex gap-2">
+                                {venda.status === 'pendente' ? (
+                                    <Button
+                                        variant="primary"
+                                        className="flex-1"
+                                        leftIcon={<Check className="h-4 w-4" />}
+                                        onClick={handleMarkAsDelivered}
+                                        isLoading={isUpdating}
+                                    >
+                                        Marcar Entregue
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        variant="secondary"
+                                        className="flex-1"
+                                        leftIcon={<RotateCcw className="h-4 w-4" />}
+                                        onClick={handleMarkAsPending}
+                                        isLoading={isUpdating}
+                                    >
+                                        Voltar para Pendente
+                                    </Button>
+                                )}
+                                <Button
+                                    variant="danger"
+                                    onClick={handleCancelSale}
+                                    disabled={isUpdating}
+                                    title="Cancelar venda"
+                                >
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Status de Pagamento */}
+                    <div className="pt-4 mt-4 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                            <DollarSign className="h-3 w-3" /> Status de Pagamento
+                        </p>
+                        <Button
+                            variant={venda.pago ? "secondary" : "primary"}
+                            className="w-full"
+                            leftIcon={venda.pago ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                            onClick={handleTogglePago}
+                            isLoading={isUpdating}
+                        >
+                            {venda.pago ? 'Desmarcar Pago' : 'Marcar como Pago'}
+                        </Button>
+                    </div>
                 </Card>
 
                 {/* Client Info */}
