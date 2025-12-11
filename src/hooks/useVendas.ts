@@ -84,8 +84,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 .from('vendas')
                 .select(`
           *,
-          *,
-          contato:contatos(id, nome, telefone, origem, indicado_por_id, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)),
+          contato:contatos(id, nome, telefone, origem, indicado_por_id),
           itens:itens_venda(*, produto:produtos(codigo))
         `)
                 .order('data', { ascending: false })

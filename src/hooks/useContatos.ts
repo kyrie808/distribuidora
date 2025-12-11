@@ -34,7 +34,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         try {
             let query = supabase
                 .from('contatos')
-                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
+                .select('*')
                 .order('criado_em', { ascending: false })
 
             // Apply filters

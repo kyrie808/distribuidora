@@ -43,7 +43,7 @@ export function useIndicacoes(): UseIndicacoesReturn {
             // Fetch all contacts that have indicated someone
             const { data: contatos, error: contatosError } = await supabase
                 .from('contatos')
-                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
+                .select('*')
                 .not('indicado_por_id', 'is', null)
 
             if (contatosError) throw contatosError
@@ -57,7 +57,7 @@ export function useIndicacoes(): UseIndicacoesReturn {
             // Fetch all contacts that are indicadores (have indicated at least one person)
             const { data: todosContatos, error: todosError } = await supabase
                 .from('contatos')
-                .select('*, indicador:contatos!contatos_indicado_por_id_fkey(id, nome)')
+                .select('*')
 
             if (todosError) throw todosError
             const allContatos = ((todosContatos as any[]) ?? []).map(c => ({
