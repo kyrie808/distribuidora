@@ -61,12 +61,18 @@ export function formatDateTime(date: string | Date): string {
 
 /**
  * Formatar data relativa (ex: "há 3 dias")
+ * Compara apenas a data (sem hora) para evitar problemas de timezone
  */
 export function formatRelativeDate(date: string | Date): string {
     const d = typeof date === 'string' ? new Date(date) : date
     const now = new Date()
-    const diffMs = now.getTime() - d.getTime()
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+    // Normalizar para comparar apenas a data (ignorar hora)
+    const dateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+    const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+
+    const diffMs = todayOnly.getTime() - dateOnly.getTime()
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
 
     if (diffDays === 0) return 'Hoje'
     if (diffDays === 1) return 'Ontem'

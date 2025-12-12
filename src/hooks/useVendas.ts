@@ -94,7 +94,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
           contato:contatos(id, nome, telefone, origem, indicado_por_id),
           itens:itens_venda(*, produto:produtos(codigo))
         `)
-                .order('data', { ascending: false })
+                .order('criado_em', { ascending: false })
 
             // Apply filters
             if (filtros?.status && filtros.status !== 'todos') {
