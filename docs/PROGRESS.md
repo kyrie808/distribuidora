@@ -268,4 +268,47 @@
 - `src/App.tsx` (novas rotas)
 - `src/pages/index.ts` (exports)
 
+---
+
+## Milestone 9: Integração Aceternity UI ✅
+
+**Data:** 12/Dezembro/2024  
+**Status:** Concluído
+
+### Entregas:
+
+#### Dependências Instaladas
+- `framer-motion` - Animações declarativas
+- `clsx` - Concatenação de classes condicionais
+- `tailwind-merge` - Merge inteligente de classes Tailwind
+
+#### Novos Componentes
+- ✅ `cn()` utility (`src/utils/cn.ts`) - Merge de classes Tailwind
+- ✅ `FloatingDock` (`src/components/ui/FloatingDock.tsx`) - Dock estilo macOS
+
+#### FloatingDock - Características
+- Animação de hover estilo macOS dock (ícones expandem ao aproximar mouse)
+- Spring physics via framer-motion (mass, stiffness, damping)
+- Glassmorphism com backdrop-blur
+- Botão central FAB com gradient e sombra
+- Suporte a item ativo com highlight
+- Responsivo (7 itens navegáveis)
+
+#### BottomNav Atualizado
+- Refatorado para usar `FloatingDock`
+- Navegação: Dashboard, Contatos, (+), Indicações, Recompra, Produtos, Config
+
+### Arquivos criados:
+- `src/utils/cn.ts`
+- `src/components/ui/FloatingDock.tsx`
+
+### Arquivos modificados:
+- `src/components/layout/BottomNav.tsx` (usa FloatingDock)
+- `package.json` (novas dependências)
+
+### Referência
+- Aceternity UI: https://ui.aceternity.com/components
+- Componente base: Floating Dock
+
+
 

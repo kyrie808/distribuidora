@@ -18,6 +18,42 @@
 | `Spinner` | `size` | Loading spinner |
 | `LoadingScreen` | `message` | Tela de carregamento |
 | `EmptyState` | `icon`, `title`, `description`, `action` | Estado vazio de listas |
+| `FloatingDock` | `items`, `onItemClick`, `className` | Dock flutuante estilo macOS (Aceternity UI) |
+
+### Aceternity UI Components
+
+O projeto utiliza componentes inspirados na [Aceternity UI](https://ui.aceternity.com/components), uma biblioteca de componentes visuais modernos com animações sofisticadas.
+
+**Dependências necessárias:**
+```bash
+npm install framer-motion clsx tailwind-merge
+```
+
+**Utility `cn()` (`src/utils/cn.ts`):**
+```tsx
+import { cn } from '@/utils/cn'
+
+// Merge inteligente de classes Tailwind
+<div className={cn("base-class", isActive && "active-class")} />
+```
+
+**FloatingDock (`src/components/ui/FloatingDock.tsx`):**
+```tsx
+import { FloatingDock } from '@/components/ui/FloatingDock'
+
+const items = [
+  { href: '/', icon: <Home />, title: 'Home' },
+  { href: '/add', icon: <Plus />, title: 'Adicionar', isCenter: true },
+]
+
+<FloatingDock items={items} onItemClick={(href) => navigate(href)} />
+```
+
+**Características do FloatingDock:**
+- Animação de hover estilo macOS dock
+- Spring physics via framer-motion
+- Glassmorphism backdrop-blur
+- Suporte a botão central destacado
 
 ### Exemplo de uso:
 
@@ -36,7 +72,7 @@ import { Button, Card, Input, Badge, Modal } from '@/components/ui'
 | Componente | Props | Uso |
 |------------|-------|-----|
 | `Header` | `title`, `showBack`, `rightAction` | Cabeçalho de página |
-| `BottomNav` | - | Navegação principal (5 itens) |
+| `BottomNav` | - | Navegação principal (usa FloatingDock, 7 itens) |
 | `PageContainer` | `noPadding`, `className` | Container de página com padding |
 | `AppLayout` | - | Layout principal com Outlet + BottomNav |
 
