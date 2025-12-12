@@ -102,16 +102,72 @@
 ## Indicacoes (`/indicacoes`)
 
 **Arquivo:** `src/pages/Indicacoes.tsx`  
-**Função:** Rede de indicações (placeholder)  
-**Status:** 🚧 Pendente
+**Função:** Rede de indicações com estatísticas  
+**Hooks:** `useIndicacoes`  
+**Componentes:** Header, PageContainer, Card, Badge
+
+**Features:**
+- Lista de indicadores com recompensas
+- Estatísticas de conversão
+- Total de indicações e taxa
 
 ---
 
 ## Recompra (`/recompra`)
 
 **Arquivo:** `src/pages/Recompra.tsx`  
-**Função:** Alertas de recompra (placeholder)  
-**Status:** 🚧 Pendente
+**Função:** Alertas de recompra  
+**Hooks:** `useRecompra`, `useContatos`  
+**Componentes:** Header, PageContainer, Card, Badge
+
+---
+
+## Configuracoes (`/configuracoes`)
+
+**Arquivo:** `src/pages/Configuracoes.tsx`  
+**Função:** Configurações do sistema e links de navegação  
+**Hooks:** `useConfiguracoes`  
+**Componentes:** Header, PageContainer, Card, Button, Input
+
+**Features:**
+- Dias de intervalo de recompra
+- Valor da recompensa por indicação
+- Números de WhatsApp (suporte, pedidos)
+- Links para Produtos e Relatório Fábrica
+
+---
+
+## Produtos (`/produtos`)
+
+**Arquivo:** `src/pages/Produtos.tsx`  
+**Função:** Gestão completa de produtos  
+**Hooks:** `useProdutos`  
+**Componentes:** Header, PageContainer, Card, Badge, Button, Modal, Input
+
+**Features:**
+- Listagem de produtos ativos e inativos
+- Cards com nome, código, preço, custo e margem
+- Badge de status Ativo/Inativo
+- Modal de criação com validação de código único
+- Modal de edição com cálculo de margem em tempo real
+- Toggle para ativar/desativar produto
+- Alerta visual para margens negativas
+
+---
+
+## RelatorioFabrica (`/relatorio-fabrica`)
+
+**Arquivo:** `src/pages/RelatorioFabrica.tsx`  
+**Função:** Relatório consolidado de pedido para fábrica  
+**Hooks:** `useRelatorioFabrica`  
+**Componentes:** Header, PageContainer, Card, Button, Input
+
+**Features:**
+- Seletor de período (data início e fim)
+- Agregação de vendas por produto
+- Cards por produto com quantidade total
+- Card de resumo com total geral
+- Botão de envio via WhatsApp com mensagem formatada em português
 
 ---
 
@@ -127,5 +183,9 @@
   <Route path="/vendas/:id" element={<VendaDetalhe />} />
   <Route path="/indicacoes" element={<Indicacoes />} />
   <Route path="/recompra" element={<Recompra />} />
+  <Route path="/configuracoes" element={<Configuracoes />} />
+  <Route path="/produtos" element={<Produtos />} />
+  <Route path="/relatorio-fabrica" element={<RelatorioFabrica />} />
 </Route>
 ```
+

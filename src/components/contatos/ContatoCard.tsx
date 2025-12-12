@@ -20,9 +20,10 @@ interface ContatoCardProps {
     contato: Contato
     onClick?: () => void
     nomeIndicador?: string | null
+    nivelEmoji?: string
 }
 
-export function ContatoCard({ contato, onClick, nomeIndicador }: ContatoCardProps) {
+export function ContatoCard({ contato, onClick, nomeIndicador, nivelEmoji }: ContatoCardProps) {
     const navigate = useNavigate()
 
     const handleClick = () => {
@@ -58,6 +59,9 @@ export function ContatoCard({ contato, onClick, nomeIndicador }: ContatoCardProp
                             <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
                                 {CONTATO_STATUS_LABELS[contato.status]}
                             </Badge>
+                            {nivelEmoji && (
+                                <span className="text-sm" title="Nível do cliente">{nivelEmoji}</span>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-1 text-sm text-gray-500 mb-1">

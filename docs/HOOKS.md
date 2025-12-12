@@ -44,21 +44,67 @@ const {
 ## useProdutos
 
 **Arquivo:** `src/hooks/useProdutos.ts`  
-**Responsabilidade:** Leitura de produtos ativos
+**Responsabilidade:** CRUD de produtos
 
 ### Funções exportadas:
 
-#### `useProdutos()`
-Lista todos os produtos ativos.
+#### `useProdutos(options?)`
+Lista produtos com opções de filtro.
 
 ```tsx
 const { 
-  produtos,       // Produto[]
+  produtos,        // Produto[]
   loading,        
   error,          
   refetch,        
-  getProdutoById  // (id) => Produto | undefined
-} = useProdutos()
+  getProdutoById,  // (id) => Produto | undefined
+  createProduto,   // (data) => Promise<Produto | null>
+  updateProduto    // (id, data) => Promise<Produto | null>
+} = useProdutos({
+  includeInactive: false  // default: só ativos
+})
+```
+
+---
+
+## useRelatorioFabrica
+
+**Arquivo:** `src/hooks/useRelatorioFabrica.ts`  
+**Responsabilidade:** Gerar relatório agregado de pedido para fábrica
+
+### Funções exportadas:
+
+#### `useRelatorioFabrica()`
+Gera relatório consolidado de vendas por produto em um período.
+
+```tsx
+const { 
+  relatorio,       // RelatorioData | null
+  loading,        
+  error,          
+  gerarRelatorio   // (dataInicio, dataFim) => Promise<void>
+} = useRelatorioFabrica()
+
+// Helper
+const { dataInicio, dataFim } = getDefaultDates() // 1º dia do mês até hoje
+```
+
+### Tipos:
+
+```tsx
+interface ProdutoAgregado {
+  produtoId: string
+  nome: string
+  codigo: string
+  quantidade: number
+}
+
+interface RelatorioData {
+  produtos: ProdutoAgregado[]
+  total: number
+  dataInicio: string
+  dataFim: string
+}
 ```
 
 ---

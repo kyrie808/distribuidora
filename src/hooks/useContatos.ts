@@ -217,46 +217,50 @@ export function useContato(id: string | undefined) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
+    const fetchContato = useCallback(async () => {
         if (!id) {
             setLoading(false)
             return
         }
 
-        const fetchContato = async () => {
-            setLoading(true)
-            setError(null)
+        setLoading(true)
+        setError(null)
 
-            try {
-                // Fetch contato
-                const { data, error: queryError } = await supabase
+        try {
+            // Fetch contato
+            const { data, error: queryError } = await supabase
+                .from('contatos')
+                .select('*')
+                .eq('id', id)
+                .single()
+
+            if (queryError) throw queryError
+            const contatoData = data as Contato
+            setContato(contatoData)
+
+            // Fetch indicador if exists
+            if (contatoData?.indicado_por_id) {
+                const { data: indicadorData } = await supabase
                     .from('contatos')
                     .select('*')
-                    .eq('id', id)
+                    .eq('id', contatoData.indicado_por_id)
                     .single()
 
-                if (queryError) throw queryError
-                const contatoData = data as Contato
-                setContato(contatoData)
-
-                // Fetch indicador if exists
-                if (contatoData?.indicado_por_id) {
-                    const { data: indicadorData } = await supabase
-                        .from('contatos')
-                        .select('*')
-                        .eq('id', contatoData.indicado_por_id)
-                        .single()
-
-                    setIndicador(indicadorData as Contato | null)
-                }
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erro ao carregar contato')
-            } finally {
-                setLoading(false)
+                setIndicador(indicadorData as Contato | null)
+            } else {
+                setIndicador(null)
             }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao carregar contato')
+        } finally {
+            setLoading(false)
         }
+    }, [id])
 
+    useEffect(() => {
         fetchContato()
+
+        if (!id) return
 
         // Setup realtime for this specific contato
         const channel = supabase
@@ -278,7 +282,7 @@ export function useContato(id: string | undefined) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [id])
+    }, [id, fetchContato])
 
-    return { contato, indicador, loading, error }
+    return { contato, indicador, loading, error, refetch: fetchContato }
 }

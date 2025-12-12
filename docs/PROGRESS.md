@@ -209,3 +209,63 @@
 - `vercel.json` (novo)
 - `vite.config.ts` (base path)
 
+---
+
+## Milestone 8: Features para Reunião com Fornecedor ✅
+
+**Data:** 12/Dezembro/2024  
+**Status:** Concluído
+
+### Entregas:
+
+#### Feature 1: Página de Produtos
+- ✅ Hook `useProdutos` expandido com `createProduto` e `updateProduto` mutations
+- ✅ Opção `includeInactive` para listar produtos inativos
+- ✅ Página `/produtos` com listagem completa
+- ✅ Cards de produto exibindo nome, código, preço, custo e margem
+- ✅ Badge de status Ativo/Inativo
+- ✅ Modal de criação com validação de código único
+- ✅ Modal de edição com cálculo de margem em tempo real
+- ✅ Alerta visual para margens negativas
+- ✅ Toggle para ativar/desativar produto
+
+#### Feature 2: Relatório de Pedido para Fábrica
+- ✅ Hook `useRelatorioFabrica` com query agregada
+- ✅ Página `/relatorio-fabrica` com seletor de período (data início/fim)
+- ✅ Agregação de vendas por produto no período
+- ✅ Cards por produto com quantidade total
+- ✅ Card de resumo com total geral
+- ✅ Botão de envio via WhatsApp com mensagem formatada em PT-BR:
+  ```
+  📋 *PEDIDO GILMAR DISTRIBUIDOR*
+  Período: 01/12 - 10/12/2024
+  📦 Pão de Queijo 1kg: 18 un
+  ─────────────────
+  Total: 29 unidades
+  ```
+- ✅ Links de acesso no Dashboard e Configurações
+
+#### Feature 3: Gamificação v1 - Níveis do Cliente
+- ✅ Função `calcularNivelCliente` em `calculations.ts`
+- ✅ Níveis: 🥉 Bronze (0-2 compras), 🥈 Prata (3-5), 🥇 Ouro (6+ ou 2+ indicações)
+- ✅ Badge de nível no perfil do cliente (`ContatoDetalhe.tsx`)
+- ✅ Barra de progresso com texto "Faltam X compras para [nível]"
+- ✅ Prop `nivelEmoji` no `ContatoCard` para exibir badge na lista
+- ✅ Filtragem de vendas canceladas na contagem
+
+### Arquivos criados:
+- `src/pages/Produtos.tsx`
+- `src/pages/RelatorioFabrica.tsx`
+- `src/hooks/useRelatorioFabrica.ts`
+
+### Arquivos modificados:
+- `src/hooks/useProdutos.ts` (mutations, includeInactive)
+- `src/utils/calculations.ts` (calcularNivelCliente)
+- `src/pages/ContatoDetalhe.tsx` (badge, barra de progresso)
+- `src/components/contatos/ContatoCard.tsx` (nivelEmoji prop)
+- `src/pages/Dashboard.tsx` (link para Relatório Fábrica)
+- `src/pages/Configuracoes.tsx` (links para Produtos e Relatório)
+- `src/App.tsx` (novas rotas)
+- `src/pages/index.ts` (exports)
+
+

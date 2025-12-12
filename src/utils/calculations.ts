@@ -100,3 +100,52 @@ export function agruparVendasPorMes(vendas: Venda[]): Record<string, Venda[]> {
         return acc
     }, {} as Record<string, Venda[]>)
 }
+
+/**
+ * Calcula o nível do cliente baseado em compras e indicações
+ * Níveis:
+ * - 🥉 Bronze (0-2 compras): "Novo"
+ * - 🥈 Prata (3-5 compras): "Recorrente"
+ * - 🥇 Ouro (6+ compras OU 2+ indicações convertidas): "VIP"
+ */
+export interface NivelCliente {
+    nivel: 'bronze' | 'prata' | 'ouro'
+    emoji: string
+    label: string
+    proximoNivel: string | null
+    comprasFaltando: number
+}
+
+export function calcularNivelCliente(totalCompras: number, indicacoesConvertidas: number): NivelCliente {
+    // Ouro: 6+ compras OU 2+ indicações convertidas
+    if (totalCompras >= 6 || indicacoesConvertidas >= 2) {
+        return {
+            nivel: 'ouro',
+            emoji: '🥇',
+            label: 'VIP',
+            proximoNivel: null,
+            comprasFaltando: 0,
+        }
+    }
+
+    // Prata: 3-5 compras
+    if (totalCompras >= 3) {
+        return {
+            nivel: 'prata',
+            emoji: '🥈',
+            label: 'Recorrente',
+            proximoNivel: 'Ouro',
+            comprasFaltando: 6 - totalCompras,
+        }
+    }
+
+    // Bronze: 0-2 compras
+    return {
+        nivel: 'bronze',
+        emoji: '🥉',
+        label: 'Novo',
+        proximoNivel: 'Prata',
+        comprasFaltando: 3 - totalCompras,
+    }
+}
+

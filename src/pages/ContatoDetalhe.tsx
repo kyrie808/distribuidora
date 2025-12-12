@@ -33,6 +33,8 @@ import {
 } from '../constants'
 import { useVendas } from '../hooks/useVendas'
 import { formatCurrency } from '../utils/formatters'
+import { calcularNivelCliente } from '../utils/calculations'
+import { useIndicacoes } from '../hooks/useIndicacoes'
 
 function VendasHistorico({ contatoId }: { contatoId: string }) {
     const { vendas, loading, error } = useVendas({
@@ -73,8 +75,16 @@ export function ContatoDetalhe() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const toast = useToast()
-    const { contato, indicador, loading, error } = useContato(id)
+    const { contato, indicador, loading, error, refetch } = useContato(id)
     const { deleteContato } = useContatos({ realtime: false })
+    const { vendas: todasVendas } = useVendas({ filtros: { contatoId: id, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' } })
+    const { getIndicadorById } = useIndicacoes()
+
+    // Calcular nível do cliente (apenas vendas não canceladas)
+    const vendasValidas = todasVendas.filter(v => v.status !== 'cancelada')
+    const indicadorInfo = getIndicadorById(id || '')
+    const indicacoesConvertidas = indicadorInfo?.indicacoesConvertidas || 0
+    const nivelCliente = calcularNivelCliente(vendasValidas.length, indicacoesConvertidas)
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
@@ -174,6 +184,38 @@ export function ContatoDetalhe() {
                                     </span>
                                 )}
                             </div>
+
+                            {/* Badge de Nível */}
+                            <div className="flex items-center gap-2 mb-2">
+                                <span className="text-lg">{nivelCliente.emoji}</span>
+                                <span className={`font-medium ${nivelCliente.nivel === 'ouro' ? 'text-yellow-600' :
+                                    nivelCliente.nivel === 'prata' ? 'text-gray-500' :
+                                        'text-orange-600'
+                                    }`}>
+                                    {nivelCliente.label}
+                                </span>
+                            </div>
+
+                            {/* Barra de Progresso */}
+                            {nivelCliente.proximoNivel && (
+                                <div className="mb-3">
+                                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                        <span>Progresso</span>
+                                        <span>Faltam {nivelCliente.comprasFaltando} compras para {nivelCliente.proximoNivel === 'Ouro' ? '🥇' : '🥈'} {nivelCliente.proximoNivel}</span>
+                                    </div>
+                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div
+                                            className={`h-full rounded-full transition-all ${nivelCliente.nivel === 'prata' ? 'bg-gray-400' : 'bg-orange-400'
+                                                }`}
+                                            style={{
+                                                width: `${nivelCliente.nivel === 'prata'
+                                                    ? ((vendasValidas.length - 3) / 3) * 100
+                                                    : (vendasValidas.length / 3) * 100}%`
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                            )}
                             <button
                                 onClick={handleWhatsApp}
                                 className="inline-flex items-center gap-2 text-primary-500 hover:text-primary-600 font-medium"
@@ -295,6 +337,7 @@ export function ContatoDetalhe() {
                     isOpen={isEditModalOpen}
                     onClose={() => setIsEditModalOpen(false)}
                     contato={contato}
+                    onSuccess={() => refetch()}
                 />
 
                 {/* Delete Confirmation Modal */}

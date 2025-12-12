@@ -12,6 +12,7 @@ import {
     Bell,
     Share2,
     Package,
+    ClipboardList,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -186,13 +187,25 @@ export function Dashboard() {
                                 <Users className="h-4 w-4" /> Clientes
                             </h2>
                             <div className="grid grid-cols-2 gap-3">
-                                {/* Clientes Ativos */}
                                 <Card>
                                     <div className="flex items-center gap-2 mb-2">
                                         <Users className="h-5 w-5 text-primary-500" />
                                     </div>
                                     <p className="text-2xl font-bold text-gray-900">{clientesAtivos}</p>
                                     <p className="text-sm text-gray-500">Clientes ativos</p>
+                                </Card>
+
+                                {/* Link Relatório Fábrica */}
+                                <Card
+                                    hover
+                                    onClick={() => navigate('/relatorio-fabrica')}
+                                    className="cursor-pointer"
+                                >
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <ClipboardList className="h-5 w-5 text-accent-500" />
+                                    </div>
+                                    <p className="text-lg font-bold text-gray-900">Pedido Fábrica</p>
+                                    <p className="text-sm text-gray-500">Gerar relatório</p>
                                 </Card>
                             </div>
                         </section>

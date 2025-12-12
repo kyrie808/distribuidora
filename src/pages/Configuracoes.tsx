@@ -6,6 +6,8 @@ import {
     Save,
     RefreshCw,
     Info,
+    Package,
+    ChevronRight,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -13,8 +15,10 @@ import { Card, Button, LoadingScreen } from '../components/ui'
 import { useConfiguracoes } from '../hooks/useConfiguracoes'
 import { useToast } from '../components/ui/Toast'
 import { supabase } from '../lib/supabase'
+import { useNavigate } from 'react-router-dom'
 
 export function Configuracoes() {
+    const navigate = useNavigate()
     const toast = useToast()
     const { config, loading, refetch } = useConfiguracoes()
 
@@ -204,6 +208,45 @@ export function Configuracoes() {
                                 <span className="text-xs text-gray-500">Variáveis:</span>
                                 <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{nome}}'}</code>
                                 <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{dias}}'}</code>
+                            </div>
+                        </Card>
+
+                        {/* Links de navegação */}
+                        <Card
+                            hover
+                            onClick={() => navigate('/produtos')}
+                            className="cursor-pointer"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                        <Package className="h-5 w-5 text-indigo-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Gerenciar Produtos</h3>
+                                        <p className="text-sm text-gray-500">Adicionar, editar e desativar produtos</p>
+                                    </div>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-gray-400" />
+                            </div>
+                        </Card>
+
+                        <Card
+                            hover
+                            onClick={() => navigate('/relatorio-fabrica')}
+                            className="cursor-pointer"
+                        >
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center">
+                                        <MessageSquare className="h-5 w-5 text-accent-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Relatório para Fábrica</h3>
+                                        <p className="text-sm text-gray-500">Gerar pedido por período</p>
+                                    </div>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-gray-400" />
                             </div>
                         </Card>
 

@@ -7,4 +7,6 @@ export { VendaDetalhe } from './VendaDetalhe'
 export { Indicacoes } from './Indicacoes'
 export { Recompra } from './Recompra'
 export { Configuracoes } from './Configuracoes'
+export { Produtos } from './Produtos'
+export { RelatorioFabrica } from './RelatorioFabrica'
 
