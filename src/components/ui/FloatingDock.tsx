@@ -24,14 +24,17 @@ interface FloatingDockProps {
     onItemClick?: (href: string) => void
 }
 
-// Hook para detectar se é dispositivo touch
+// Hook para detectar dispositivo mobile (usa pointer: coarse para detectar touch primário)
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(false)
 
     useEffect(() => {
         const checkMobile = () => {
-            setIsMobile(window.matchMedia('(max-width: 768px)').matches ||
-                'ontouchstart' in window)
+            // pointer: coarse = dispositivo touch como entrada primária
+            // max-width: 768px = tela pequena
+            const isTouchPrimary = window.matchMedia('(pointer: coarse)').matches
+            const isSmallScreen = window.matchMedia('(max-width: 768px)').matches
+            setIsMobile(isTouchPrimary && isSmallScreen)
         }
         checkMobile()
         window.addEventListener('resize', checkMobile)
