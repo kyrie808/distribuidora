@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Gilmar Massas</string>
+    <string name="title_activity_main">Gilmar Massas</string>
+    <string name="package_name">com.gilmarmassas.app</string>
+    <string name="custom_url_scheme">com.gilmarmassas.app</string>
+</resources>

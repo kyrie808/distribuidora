@@ -124,6 +124,29 @@
 
 ---
 
+---
+
+## 010 - Capacitor para App Android Nativo
+
+**Data:** Dezembro/2024  
+**Contexto:** Necessidade de transformar o app web em APK Android  
+**Decisão:** Usar Capacitor para gerar aplicativo nativo  
+**Motivo:**
+- Reutiliza 100% do código React existente
+- Acesso nativo via plugins (câmera, localização, etc.)
+- Build simples com Android Studio
+- Sem necessidade de reescrever em React Native ou Flutter
+- Suporte oficial do Ionic Team
+
+**Implementação:**
+- App Name: "Gilmar Massas"
+- App ID: "com.gilmarmassas.app"
+- `HashRouter` no lugar de `BrowserRouter` (compatível com `file://`)
+- `viewport-fit=cover` para safe area em devices com notch
+- Build: `npm run build` + `npx cap copy` + `npx cap open android`
+
+---
+
 ## Template para novas decisões
 
 ```markdown
