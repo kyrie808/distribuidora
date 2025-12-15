@@ -11,6 +11,7 @@ import {
     Calendar,
     Share2,
     ShoppingCart,
+    ChevronRight,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -37,6 +38,7 @@ import { calcularNivelCliente } from '../utils/calculations'
 import { useIndicacoes } from '../hooks/useIndicacoes'
 
 function VendasHistorico({ contatoId }: { contatoId: string }) {
+    const navigate = useNavigate()
     const { vendas, loading, error } = useVendas({
         filtros: { contatoId, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' }
     })
@@ -48,7 +50,11 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
     return (
         <div className="space-y-3">
             {vendas.map((venda) => (
-                <div key={venda.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <div
+                    key={venda.id}
+                    onClick={() => navigate(`/vendas/${venda.id}`)}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer transition-colors hover:bg-gray-100 active:bg-gray-200"
+                >
                     <div>
                         <div className="text-sm font-medium text-gray-900">
                             {formatDate(venda.data)}
@@ -57,13 +63,16 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                             {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} {venda.itens.reduce((acc, item) => acc + item.quantidade, 0) === 1 ? 'item' : 'itens'}
                         </div>
                     </div>
-                    <div className="text-right">
-                        <div className="text-sm font-bold text-gray-900">
-                            {formatCurrency(venda.total)}
+                    <div className="flex items-center gap-2">
+                        <div className="text-right">
+                            <div className="text-sm font-bold text-gray-900">
+                                {formatCurrency(venda.total)}
+                            </div>
+                            <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
+                                {venda.status}
+                            </Badge>
                         </div>
-                        <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
-                            {venda.status}
-                        </Badge>
+                        <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
                 </div>
             ))}
