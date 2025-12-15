@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     ShoppingCart,
     Filter,
     Calendar,
+    Truck,
+    DollarSign,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -16,6 +18,7 @@ import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 
 type StatusFilter = 'todos' | 'pendente' | 'entregue' | 'cancelada'
 type PeriodoFilter = 'todos' | 'hoje' | 'semana' | 'mes'
+type PagamentoFilter = 'todos' | 'pago' | 'nao_pago'
 
 const PERIODO_LABELS = {
     todos: 'Todos',
@@ -28,22 +31,48 @@ export function Vendas() {
     const navigate = useNavigate()
     const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
     const [periodoFilter, setPeriodoFilter] = useState<PeriodoFilter>('todos')
+    const [pagamentoFilter, setPagamentoFilter] = useState<PagamentoFilter>('todos')
     const [showFilters, setShowFilters] = useState(false)
 
+    // Buscar TODAS as vendas do período para calcular contadores
     const { vendas, loading, error, metrics } = useVendas({
         filtros: {
-            status: statusFilter,
+            status: 'todos', // Sempre buscar todas para contagens corretas
             forma_pagamento: 'todos',
             periodo: periodoFilter,
         },
     })
     const { getNomeIndicador } = useContatos()
 
-    const hasActiveFilters = statusFilter !== 'todos' || periodoFilter !== 'todos'
+    // Filtragem local com ambos filtros (status + pagamento)
+    const filteredVendas = useMemo(() => {
+        return vendas.filter((venda) => {
+            // Filtro de status de entrega
+            if (statusFilter !== 'todos' && venda.status !== statusFilter) {
+                return false
+            }
+
+            // Filtro de pagamento
+            if (pagamentoFilter === 'pago' && !venda.pago) return false
+            if (pagamentoFilter === 'nao_pago' && venda.pago) return false
+
+            return true
+        })
+    }, [vendas, statusFilter, pagamentoFilter])
+
+    // Contagens dinâmicas para badges (baseado em TODAS as vendas)
+    const totalEntregasPendentes = vendas.filter(v => v.status === 'pendente').length
+    const totalEntregues = vendas.filter(v => v.status === 'entregue').length
+    const totalCanceladas = vendas.filter(v => v.status === 'cancelada').length
+    const totalPagos = vendas.filter(v => v.pago === true).length
+    const totalAReceber = vendas.filter(v => v.pago === false).length
+
+    const hasActiveFilters = statusFilter !== 'todos' || periodoFilter !== 'todos' || pagamentoFilter !== 'todos'
 
     const clearFilters = () => {
         setStatusFilter('todos')
         setPeriodoFilter('todos')
+        setPagamentoFilter('todos')
     }
 
     const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'warning' => {
@@ -84,6 +113,103 @@ export function Vendas() {
                     </Card>
                 </div>
 
+
+                {/* Filter Chips - Linha Única com Scroll Horizontal */}
+                <div className="flex gap-2 mb-4 overflow-x-auto px-2 py-2">
+                    {/* Grupo: Status de Entrega */}
+                    <button
+                        onClick={() => setStatusFilter('todos')}
+                        className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="gray"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            <Truck className="h-3 w-3 mr-1 inline" />
+                            {vendas.length} Todas
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setStatusFilter('pendente')}
+                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="warning"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalEntregasPendentes} Pendentes
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setStatusFilter('entregue')}
+                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="success"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalEntregues} Entregues
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setStatusFilter('cancelada')}
+                        className="focus:outline-none focus:ring-2 focus:ring-danger-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="danger"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalCanceladas} Canceladas
+                        </Badge>
+                    </button>
+
+                    {/* Separador Visual */}
+                    <div className="w-px bg-gray-300 mx-2 h-6 self-center shrink-0" />
+
+                    {/* Grupo: Status de Pagamento */}
+                    <button
+                        onClick={() => setPagamentoFilter('todos')}
+                        className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="gray"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            <DollarSign className="h-3 w-3 mr-1 inline" />
+                            {vendas.length} Todas
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setPagamentoFilter('pago')}
+                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="success"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalPagos} Pagos
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setPagamentoFilter('nao_pago')}
+                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="warning"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalAReceber} A Receber
+                        </Badge>
+                    </button>
+                </div>
+
                 {/* Filters Panel */}
                 {showFilters && (
                     <Card className="mb-4">
@@ -99,26 +225,9 @@ export function Vendas() {
                             )}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Status Filter */}
-                            <div>
-                                <label className="text-sm text-gray-600 mb-1 block">Status</label>
-                                <select
-                                    value={statusFilter}
-                                    onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
-                                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                >
-                                    <option value="todos">Todos</option>
-                                    {Object.entries(VENDA_STATUS_LABELS).map(([value, label]) => (
-                                        <option key={value} value={value}>
-                                            {label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
+                        <div>
                             {/* Periodo Filter */}
-                            <div>
+                            <div className="max-w-xs">
                                 <label className="text-sm text-gray-600 mb-1 block">Período</label>
                                 <select
                                     value={periodoFilter}
@@ -147,7 +256,7 @@ export function Vendas() {
                 )}
 
                 {/* Empty state */}
-                {!loading && !error && vendas.length === 0 && (
+                {!loading && !error && filteredVendas.length === 0 && (
                     <EmptyState
                         icon={<ShoppingCart className="h-16 w-16" />}
                         title={hasActiveFilters ? 'Nenhuma venda encontrada' : 'Nenhuma venda registrada'}
@@ -160,9 +269,9 @@ export function Vendas() {
                 )}
 
                 {/* Sales List */}
-                {!loading && !error && vendas.length > 0 && (
+                {!loading && !error && filteredVendas.length > 0 && (
                     <div className="space-y-3">
-                        {vendas.map((venda) => (
+                        {filteredVendas.map((venda) => (
                             <Card
                                 key={venda.id}
                                 hover

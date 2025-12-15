@@ -74,17 +74,44 @@ export function Contatos() {
                 }
             />
             <PageContainer>
-                {/* Stats */}
-                <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-                    <Badge variant="gray" className="whitespace-nowrap">
-                        {totalContatos} contatos
-                    </Badge>
-                    <Badge variant="success" className="whitespace-nowrap">
-                        {totalClientes} clientes
-                    </Badge>
-                    <Badge variant="warning" className="whitespace-nowrap">
-                        {totalLeads} leads
-                    </Badge>
+                {/* Stats - Interactive Filter Chips */}
+                <div className="flex gap-2 mb-4 overflow-x-auto px-2 py-2">
+                    <button
+                        onClick={() => setStatusFilter('todos')}
+                        className="focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="gray"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalContatos} contatos
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setStatusFilter('cliente')}
+                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="success"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cliente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalClientes} clientes
+                        </Badge>
+                    </button>
+                    <button
+                        onClick={() => setStatusFilter('lead')}
+                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
+                    >
+                        <Badge
+                            variant="warning"
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'lead' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                }`}
+                        >
+                            {totalLeads} leads
+                        </Badge>
+                    </button>
                 </div>
 
                 {/* Search */}
@@ -194,9 +221,9 @@ export function Contatos() {
                 {!loading && !error && filteredContatos.length > 0 && (
                     <div className="space-y-3">
                         {filteredContatos.map((contato) => (
-                            <ContatoCard 
-                                key={contato.id} 
-                                contato={contato} 
+                            <ContatoCard
+                                key={contato.id}
+                                contato={contato}
                                 nomeIndicador={getNomeIndicador(contato.indicado_por_id)}
                             />
                         ))}
