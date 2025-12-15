@@ -1,6 +1,7 @@
 import { useState, Suspense, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, useGLTF, Environment } from '@react-three/drei'
+import { useControls, folder } from 'leva'
 import * as THREE from 'three'
 import { Minus, Plus, Box } from 'lucide-react'
 import { Header } from '../components/layout/Header'
@@ -16,29 +17,74 @@ const COLORS = {
     accent: '#F97316',  // Laranja - 1kg
 }
 
-// Componente 3D: Pote de massa
-interface Pote3DProps {
-    tipo: '1kg' | '4kg'
+// Interface para Zona de Armazenamento
+interface ShelfZone {
     position: [number, number, number]
+    dimensions: [number, number, number] // width, height, depth
 }
 
-function Pote3D({ tipo, position }: Pote3DProps) {
-    const is1kg = tipo === '1kg'
-    // Tamanhos diferenciados: 1kg = pequeno (manteiga), 4kg = grande (balde)
-    const radius = is1kg ? 0.04 : 0.14
-    const height = is1kg ? 0.08 : 0.22
-    const color = is1kg ? COLORS.accent : COLORS.primary
+// Fun\u00e7\u00e3o de Bin Packing: Calcula posi\u00e7\u00f5es automaticamente
+function calculateBucketPositions(
+    zone: ShelfZone,
+    bucketRadius: number,
+    bucketHeight: number,
+    quantity: number,
+    padding: number
+): [number, number, number][] {
+    const positions: [number, number, number][] = []
+    const [zoneX, zoneY, zoneZ] = zone.position
+    const [width, height, depth] = zone.dimensions
 
+    const bucketDiameter = bucketRadius * 2
+    const spacingX = bucketDiameter + padding
+    const spacingZ = bucketDiameter + padding
+    const spacingY = bucketHeight + padding * 0.5
+
+    // Calcular quantos cabem em cada dimensão
+    const bucketsPerRow = Math.max(1, Math.floor(width / spacingX))
+    const bucketsPerDepth = Math.max(1, Math.floor(depth / spacingZ))
+    const bucketsPerHeight = Math.max(1, Math.floor(height / spacingY))
+
+    const maxCapacity = bucketsPerRow * bucketsPerDepth * bucketsPerHeight
+    const actualQuantity = Math.min(quantity, maxCapacity)
+
+    // Offset para centralizar na zona
+    const startX = zoneX - (width / 2) + (bucketDiameter / 2) + (padding / 2)
+    const startZ = zoneZ - (depth / 2) + (bucketDiameter / 2) + (padding / 2)
+    const startY = zoneY - (height / 2) + (bucketHeight / 2)
+
+    for (let i = 0; i < actualQuantity; i++) {
+        const col = i % bucketsPerRow
+        const layer = Math.floor(i / bucketsPerRow) % bucketsPerDepth
+        const row = Math.floor(i / (bucketsPerRow * bucketsPerDepth))
+
+        positions.push([
+            startX + col * spacingX + (Math.random() * 0.01 - 0.005),
+            startY + row * spacingY,
+            startZ + layer * spacingZ + (Math.random() * 0.01 - 0.005)
+        ])
+    }
+
+    return positions
+}
+
+// Componente para visualizar zona (wireframe box)
+function ZoneVisualizer({ zone, color }: { zone: ShelfZone; color: string }) {
     return (
-        <mesh position={position} castShadow>
-            <cylinderGeometry args={[radius, radius, height, 32]} />
-            <meshStandardMaterial color={color} roughness={0.4} metalness={0.1} />
+        <mesh position={zone.position}>
+            <boxGeometry args={zone.dimensions} />
+            <meshBasicMaterial color={color} wireframe />
         </mesh>
     )
 }
 
 // Componente 3D: Modelo da Geladeira
-function GeladeiraModel() {
+interface GeladeiraModelProps {
+    rotation: [number, number, number]
+    scale: number
+}
+
+function GeladeiraModel({ rotation, scale }: GeladeiraModelProps) {
     const { scene } = useGLTF('/geladeira.glb')
 
     // Aplicar material plástico brilhante em todos os meshes
@@ -60,9 +106,9 @@ function GeladeiraModel() {
     return (
         <primitive
             object={scene}
-            scale={0.4}
+            scale={scale}
             position={[0, -1.6, 0]}
-            rotation={[0, 0, 0]}
+            rotation={rotation}
         />
     )
 }
@@ -76,7 +122,68 @@ interface GeladeiraSceneProps {
 }
 
 function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
-    // Separar produtos por tipo (baseado no nome/código)
+    // CONTROLES LEVA - SMART SHELVES SYSTEM
+    const controls = useControls({
+        // Geladeira
+        Geladeira: folder({
+            fridgeRotY: { value: -90, min: -360, max: 360, step: 15, label: 'Rotação Y' },
+            fridgeScale: { value: 0.5, min: 0.1, max: 5, step: 0.1, label: 'Escala' }
+        }),
+        // Baldes
+        'Baldes 1kg': folder({
+            bucketScale_1kg: { value: 5.1, min: 0.1, max: 10, step: 0.1, label: 'Escala' },
+            bucket1kgRadius: { value: 0.12, min: 0.01, max: 1, step: 0.01, label: 'Raio' },
+            bucket1kgHeight: { value: 0.25, min: 0.05, max: 2, step: 0.01, label: 'Altura' },
+            rotX_1kg: { value: 180, min: 0, max: 360, step: 15, label: 'Rotação X' }
+        }),
+        'Baldes 4kg': folder({
+            bucketScale_4kg: { value: 2.8, min: 0.1, max: 10, step: 0.1, label: 'Escala' },
+            bucket4kgRadius: { value: 0.35, min: 0.01, max: 1, step: 0.01, label: 'Raio' },
+            bucket4kgHeight: { value: 0.65, min: 0.05, max: 2, step: 0.01, label: 'Altura' },
+            rotX_4kg: { value: 180, min: 0, max: 360, step: 15, label: 'Rotação X' }
+        }),
+        //ZONES (Prateleiras)
+        'Zona 1 (1kg - Topo)': folder({
+            z1_x: { value: 0, min: -10, max: 10, step: 0.05 },
+            z1_y: { value: 0.85, min: -10, max: 10, step: 0.05 },
+            z1_z: { value: -7.1, min: -15, max: 10, step: 0.05 },
+            z1_width: { value: 10, min: 0.1, max: 10, step: 0.1 },
+            z1_height: { value: 3.4, min: 0.1, max: 5, step: 0.1 },
+            z1_depth: { value: 6.4, min: 0.1, max: 10, step: 0.1 }
+        }),
+        'Zona 2 (1kg - Meio)': folder({
+            z2_x: { value: 0, min: -2, max: 2, step: 0.05 },
+            z2_y: { value: -3.65, min: -15, max: 10, step: 0.05 },
+            z2_z: { value: -6.75, min: -15, max: 10, step: 0.05 },
+            z2_width: { value: 10, min: 0.1, max: 10, step: 0.1 },
+            z2_height: { value: 3.3, min: 0.1, max: 5, step: 0.1 },
+            z2_depth: { value: 6.4, min: 0.1, max: 10, step: 0.1 }
+        }),
+        'Zona 3 (4kg - Meio-Baixo)': folder({
+            z3_x: { value: 0, min: -10, max: 10, step: 0.05 },
+            z3_y: { value: -7.1, min: -15, max: 10, step: 0.05 },
+            z3_z: { value: -5.7, min: -15, max: 10, step: 0.05 },
+            z3_width: { value: 10, min: 0.1, max: 10, step: 0.1 },
+            z3_height: { value: 3.3, min: 0.1, max: 5, step: 0.1 },
+            z3_depth: { value: 6.1, min: 0.1, max: 10, step: 0.1 }
+        }),
+        'Zona 4 (4kg - Base)': folder({
+            z4_x: { value: 0, min: -10, max: 10, step: 0.05 },
+            z4_y: { value: -11.4, min: -15, max: 10, step: 0.05 },
+            z4_z: { value: -5, min: -15, max: 10, step: 0.05 },
+            z4_width: { value: 10, min: 0.1, max: 10, step: 0.1 },
+            z4_height: { value: 4, min: 0.1, max: 5, step: 0.1 },
+            z4_depth: { value: 5, min: 0.1, max: 10, step: 0.1 }
+        }),
+        // Geral
+        'Espaçamento': folder({
+            padding_1kg: { value: 1.08, min: 0, max: 2, step: 0.01, label: 'Baldes 1kg' },
+            padding_4kg: { value: 1.28, min: 0, max: 2, step: 0.01, label: 'Baldes 4kg' }
+        }),
+        showZones: { value: true, label: 'Mostrar Zonas' }
+    })
+
+    // Separar produtos por tipo
     const produtos1kg = produtos.filter(p =>
         p.nome.toLowerCase().includes('1kg') || p.codigo.includes('1KG')
     )
@@ -84,37 +191,47 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
         p.nome.toLowerCase().includes('4kg') || p.codigo.includes('4KG')
     )
 
-    // Offsets de prateleira (ajustado para nova escala 0.4)
-    const prateleira1kgY = 0.0    // Prateleira do meio
-    const prateleira4kgY = -0.65  // Prateleira de baixo
+    // Definir zonas baseadas nos controles
+    const zone1: ShelfZone = {
+        position: [controls.z1_x, controls.z1_y, controls.z1_z],
+        dimensions: [controls.z1_width, controls.z1_height, controls.z1_depth]
+    }
+    const zone2: ShelfZone = {
+        position: [controls.z2_x, controls.z2_y, controls.z2_z],
+        dimensions: [controls.z2_width, controls.z2_height, controls.z2_depth]
+    }
+    const zone3: ShelfZone = {
+        position: [controls.z3_x, controls.z3_y, controls.z3_z],
+        dimensions: [controls.z3_width, controls.z3_height, controls.z3_depth]
+    }
+    const zone4: ShelfZone = {
+        position: [controls.z4_x, controls.z4_y, controls.z4_z],
+        dimensions: [controls.z4_width, controls.z4_height, controls.z4_depth]
+    }
 
-    // Gerar posições para potes de 1kg (prateleira de cima) com espalhamento natural
-    const potes1kg: [number, number, number][] = []
+    // Calcular quantidades
     const total1kg = produtos1kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
-    for (let i = 0; i < Math.min(total1kg, 20); i++) {
-        const col = i % 5
-        const row = Math.floor(i / 5)
-        const stack = Math.floor(i / 10)
-        potes1kg.push([
-            -0.24 + col * 0.14 + (Math.random() * 0.02 - 0.01),  // X: com leve aleatoriedade
-            prateleira1kgY + row * 0.12,                         // Y: empilhar verticalmente
-            -0.4 + stack * 0.16 + (Math.random() * 0.02 - 0.01)  // Z: com leve aleatoriedade
-        ])
-    }
-
-    // Gerar posições para potes de 4kg (prateleira de baixo) com espalhamento natural
-    const potes4kg: [number, number, number][] = []
     const total4kg = produtos4kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
-    for (let i = 0; i < Math.min(total4kg, 12); i++) {
-        const col = i % 4
-        const row = Math.floor(i / 4)
-        const stack = Math.floor(i / 8)
-        potes4kg.push([
-            -0.20 + col * 0.18 + (Math.random() * 0.02 - 0.01),  // X: com leve aleatoriedade
-            prateleira4kgY + row * 0.16,                         // Y: empilhar verticalmente
-            -0.4 + stack * 0.20 + (Math.random() * 0.02 - 0.01)  // Z: com leve aleatoriedade
-        ])
-    }
+
+    // Distribuir 1kg entre zonas 1 e 2
+    const qty1_zone1 = Math.min(total1kg, 20)
+    const qty1_zone2 = Math.max(0, total1kg - 20)
+
+    // Distribuir 4kg entre zonas 3 e 4
+    const qty4_zone3 = Math.min(total4kg, 15)
+    const qty4_zone4 = Math.max(0, total4kg - 15)
+
+    // Calcular posi\u00e7\u00f5es usando bin packing
+    const potes1kg_z1 = calculateBucketPositions(zone1, controls.bucket1kgRadius, controls.bucket1kgHeight, qty1_zone1, controls.padding_1kg)
+    const potes1kg_z2 = calculateBucketPositions(zone2, controls.bucket1kgRadius, controls.bucket1kgHeight, qty1_zone2, controls.padding_1kg)
+    const potes4kg_z3 = calculateBucketPositions(zone3, controls.bucket4kgRadius, controls.bucket4kgHeight, qty4_zone3, controls.padding_4kg)
+    const potes4kg_z4 = calculateBucketPositions(zone4, controls.bucket4kgRadius, controls.bucket4kgHeight, qty4_zone4, controls.padding_4kg)
+
+    const allPotes1kg = [...potes1kg_z1, ...potes1kg_z2]
+    const allPotes4kg = [...potes4kg_z3, ...potes4kg_z4]
+
+    const rotacaoRadianos1kg = controls.rotX_1kg * (Math.PI / 180)
+    const rotacaoRadianos4kg = controls.rotX_4kg * (Math.PI / 180)
 
     return (
         <>
@@ -132,17 +249,39 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
 
             {/* Modelo 3D da Geladeira */}
             <Suspense fallback={null}>
-                <GeladeiraModel />
+                <GeladeiraModel
+                    rotation={[0, controls.fridgeRotY * (Math.PI / 180), 0]}
+                    scale={controls.fridgeScale}
+                />
             </Suspense>
 
-            {/* Potes 1kg (cima - laranja) */}
-            {potes1kg.map((pos, i) => (
-                <Pote3D key={`1kg-${i}`} tipo="1kg" position={pos} />
+            {/* DEBUG: Eixos XYZ */}
+            <axesHelper args={[5]} />
+
+            {/* Zonas Wireframe (Vis\u00edveis se showZones ativado) */}
+            {controls.showZones && (
+                <>
+                    <ZoneVisualizer zone={zone1} color="#ff6b00" />
+                    <ZoneVisualizer zone={zone2} color="#ff9900" />
+                    <ZoneVisualizer zone={zone3} color="#9900ff" />
+                    <ZoneVisualizer zone={zone4} color="#6600cc" />
+                </>
+            )}
+
+            {/* Baldes 1kg (laranja) - Tamanho Din\u00e2mico */}
+            {allPotes1kg.map((pos: [number, number, number], i: number) => (
+                <mesh key={`1kg-${i}`} position={pos} rotation={[rotacaoRadianos1kg, 0, 0]} scale={[controls.bucketScale_1kg, controls.bucketScale_1kg, controls.bucketScale_1kg]} castShadow>
+                    <cylinderGeometry args={[controls.bucket1kgRadius, controls.bucket1kgRadius, controls.bucket1kgHeight, 32]} />
+                    <meshStandardMaterial color={COLORS.accent} roughness={0.4} metalness={0.1} />
+                </mesh>
             ))}
 
-            {/* Potes 4kg (baixo - roxo) */}
-            {potes4kg.map((pos, i) => (
-                <Pote3D key={`4kg-${i}`} tipo="4kg" position={pos} />
+            {/* Baldes 4kg (roxo) - Tamanho Din\u00e2mico */}
+            {allPotes4kg.map((pos: [number, number, number], i: number) => (
+                <mesh key={`4kg-${i}`} position={pos} rotation={[rotacaoRadianos4kg, 0, 0]} scale={[controls.bucketScale_4kg, controls.bucketScale_4kg, controls.bucketScale_4kg]} castShadow>
+                    <cylinderGeometry args={[controls.bucket4kgRadius, controls.bucket4kgRadius, controls.bucket4kgHeight, 32]} />
+                    <meshStandardMaterial color={COLORS.primary} roughness={0.4} metalness={0.1} />
+                </mesh>
             ))}
 
             {/* Controles de câmera */}

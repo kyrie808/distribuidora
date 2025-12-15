@@ -98,6 +98,13 @@ export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn
 
     const updateEstoque = async (id: string, quantidade: number): Promise<Produto | null> => {
         try {
+            // Optimistic update: atualiza estado local imediatamente
+            setProdutos(prevProdutos =>
+                prevProdutos.map(p =>
+                    p.id === id ? { ...p, estoque_atual: quantidade } : p
+                )
+            )
+
             const { data: updatedProduto, error } = await supabase
                 .from('produtos')
                 .update({ estoque_atual: quantidade })
@@ -105,14 +112,11 @@ export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn
                 .select()
                 .single()
 
-            if (error) throw error
-
-            // Optimistic update: Update local state instead of full refetch
-            setProdutos(prevProdutos =>
-                prevProdutos.map(p =>
-                    p.id === id ? { ...p, estoque_atual: quantidade } : p
-                )
-            )
+            if (error) {
+                // Reverte em caso de erro
+                await fetchProdutos()
+                throw error
+            }
 
             return updatedProduto as Produto
         } catch (err) {
