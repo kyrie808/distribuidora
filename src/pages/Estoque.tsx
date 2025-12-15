@@ -161,8 +161,8 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
         }),
         'Zona 3 (4kg - Meio-Baixo)': folder({
             z3_x: { value: 0, min: -10, max: 10, step: 0.05 },
-            z3_y: { value: -7.1, min: -15, max: 10, step: 0.05 },
-            z3_z: { value: -5.7, min: -15, max: 10, step: 0.05 },
+            z3_y: { value: -6.65, min: -15, max: 10, step: 0.05 },
+            z3_z: { value: -6.4, min: -15, max: 10, step: 0.05 },
             z3_width: { value: 10, min: 0.1, max: 10, step: 0.1 },
             z3_height: { value: 3.3, min: 0.1, max: 5, step: 0.1 },
             z3_depth: { value: 6.1, min: 0.1, max: 10, step: 0.1 }
@@ -213,13 +213,32 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
     const total1kg = produtos1kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
     const total4kg = produtos4kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
 
-    // Distribuir 1kg entre zonas 1 e 2
-    const qty1_zone1 = Math.min(total1kg, 20)
-    const qty1_zone2 = Math.max(0, total1kg - 20)
+    // Calcular capacidade real de cada zona
+    const calcCapacity = (width: number, height: number, depth: number, radius: number, bucketHeight: number, padding: number): number => {
+        const diameter = radius * 2
+        const spacingX = diameter + padding
+        const spacingZ = diameter + padding
+        const spacingY = bucketHeight + padding * 0.5
 
-    // Distribuir 4kg entre zonas 3 e 4
-    const qty4_zone3 = Math.min(total4kg, 15)
-    const qty4_zone4 = Math.max(0, total4kg - 15)
+        const perRow = Math.max(1, Math.floor(width / spacingX))
+        const perDepth = Math.max(1, Math.floor(depth / spacingZ))
+        const perHeight = Math.max(1, Math.floor(height / spacingY))
+
+        return perRow * perDepth * perHeight
+    }
+
+    const capacity1_zone1 = calcCapacity(controls.z1_width, controls.z1_height, controls.z1_depth, controls.bucket1kgRadius, controls.bucket1kgHeight, controls.padding_1kg)
+    const capacity1_zone2 = calcCapacity(controls.z2_width, controls.z2_height, controls.z2_depth, controls.bucket1kgRadius, controls.bucket1kgHeight, controls.padding_1kg)
+    const capacity4_zone3 = calcCapacity(controls.z3_width, controls.z3_height, controls.z3_depth, controls.bucket4kgRadius, controls.bucket4kgHeight, controls.padding_4kg)
+    const capacity4_zone4 = calcCapacity(controls.z4_width, controls.z4_height, controls.z4_depth, controls.bucket4kgRadius, controls.bucket4kgHeight, controls.padding_4kg)
+
+    // Distribuir 1kg entre zonas 1 e 2 com base na capacidade real
+    const qty1_zone1 = Math.min(total1kg, capacity1_zone1)
+    const qty1_zone2 = Math.max(0, Math.min(total1kg - qty1_zone1, capacity1_zone2))
+
+    // Distribuir 4kg entre zonas 3 e 4 com base na capacidade real
+    const qty4_zone3 = Math.min(total4kg, capacity4_zone3)
+    const qty4_zone4 = Math.max(0, Math.min(total4kg - qty4_zone3, capacity4_zone4))
 
     // Calcular posi\u00e7\u00f5es usando bin packing
     const potes1kg_z1 = calculateBucketPositions(zone1, controls.bucket1kgRadius, controls.bucket1kgHeight, qty1_zone1, controls.padding_1kg)
@@ -430,6 +449,12 @@ export function Estoque() {
                             <div className="w-3 h-3 rounded-full bg-primary-500" />
                             <span className="font-medium">4kg: {total4kg}</span>
                         </div>
+                    </div>
+
+                    {/* DEBUG: Capacidade das zonas */}
+                    <div className="absolute top-3 left-3 bg-black/75 text-white px-3 py-2 rounded text-xs font-mono">
+                        <div>Z1: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
+                        <div>Z2: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
                     </div>
                 </div>
 
