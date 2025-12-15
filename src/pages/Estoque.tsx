@@ -24,9 +24,9 @@ interface Pote3DProps {
 
 function Pote3D({ tipo, position }: Pote3DProps) {
     const is1kg = tipo === '1kg'
-    // Tamanhos ajustados para nova escala (80% do anterior)
-    const radius = is1kg ? 0.06 : 0.10
-    const height = is1kg ? 0.10 : 0.15
+    // Tamanhos diferenciados: 1kg = pequeno (manteiga), 4kg = grande (balde)
+    const radius = is1kg ? 0.04 : 0.14
+    const height = is1kg ? 0.08 : 0.22
     const color = is1kg ? COLORS.accent : COLORS.primary
 
     return (
@@ -88,7 +88,7 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
     const prateleira1kgY = 0.0    // Prateleira do meio
     const prateleira4kgY = -0.65  // Prateleira de baixo
 
-    // Gerar posições para potes de 1kg (prateleira de cima)
+    // Gerar posições para potes de 1kg (prateleira de cima) com espalhamento natural
     const potes1kg: [number, number, number][] = []
     const total1kg = produtos1kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
     for (let i = 0; i < Math.min(total1kg, 20); i++) {
@@ -96,13 +96,13 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
         const row = Math.floor(i / 5)
         const stack = Math.floor(i / 10)
         potes1kg.push([
-            -0.24 + col * 0.14,          // X: espalhar horizontalmente (80%)
-            prateleira1kgY + row * 0.12, // Y: empilhar verticalmente
-            -0.4 + stack * 0.16          // Z: dentro da geladeira
+            -0.24 + col * 0.14 + (Math.random() * 0.02 - 0.01),  // X: com leve aleatoriedade
+            prateleira1kgY + row * 0.12,                         // Y: empilhar verticalmente
+            -0.4 + stack * 0.16 + (Math.random() * 0.02 - 0.01)  // Z: com leve aleatoriedade
         ])
     }
 
-    // Gerar posições para potes de 4kg (prateleira de baixo)
+    // Gerar posições para potes de 4kg (prateleira de baixo) com espalhamento natural
     const potes4kg: [number, number, number][] = []
     const total4kg = produtos4kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
     for (let i = 0; i < Math.min(total4kg, 12); i++) {
@@ -110,9 +110,9 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
         const row = Math.floor(i / 4)
         const stack = Math.floor(i / 8)
         potes4kg.push([
-            -0.20 + col * 0.18,          // X: espalhar horizontalmente (80%)
-            prateleira4kgY + row * 0.16, // Y: empilhar verticalmente
-            -0.4 + stack * 0.20          // Z: dentro da geladeira
+            -0.20 + col * 0.18 + (Math.random() * 0.02 - 0.01),  // X: com leve aleatoriedade
+            prateleira4kgY + row * 0.16,                         // Y: empilhar verticalmente
+            -0.4 + stack * 0.20 + (Math.random() * 0.02 - 0.01)  // Z: com leve aleatoriedade
         ])
     }
 
@@ -183,7 +183,12 @@ function EstoqueCard({ produto, onIncrement, onDecrement, isUpdating }: EstoqueC
 
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={onDecrement}
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            onDecrement()
+                        }}
                         disabled={isUpdating || (produto.estoque_atual || 0) <= 0}
                         className={`
                             w-10 h-10 rounded-full flex items-center justify-center
@@ -199,7 +204,12 @@ function EstoqueCard({ produto, onIncrement, onDecrement, isUpdating }: EstoqueC
                     </span>
 
                     <button
-                        onClick={onIncrement}
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            onIncrement()
+                        }}
                         disabled={isUpdating}
                         className={`
                             w-10 h-10 rounded-full flex items-center justify-center

@@ -107,8 +107,13 @@ export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn
 
             if (error) throw error
 
-            // Refresh list
-            await fetchProdutos()
+            // Optimistic update: Update local state instead of full refetch
+            setProdutos(prevProdutos =>
+                prevProdutos.map(p =>
+                    p.id === id ? { ...p, estoque_atual: quantidade } : p
+                )
+            )
+
             return updatedProduto as Produto
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao atualizar estoque')
