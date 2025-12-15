@@ -142,6 +142,7 @@ export type Database = {
                     nome: string
                     preco: number
                     unidade: string
+                    estoque_atual: number
                 }
                 Insert: {
                     ativo?: boolean
@@ -153,6 +154,7 @@ export type Database = {
                     nome: string
                     preco: number
                     unidade?: string
+                    estoque_atual?: number
                 }
                 Update: {
                     ativo?: boolean
@@ -164,6 +166,7 @@ export type Database = {
                     nome?: string
                     preco?: number
                     unidade?: string
+                    estoque_atual?: number
                 }
                 Relationships: []
             }

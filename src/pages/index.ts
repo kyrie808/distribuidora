@@ -9,4 +9,5 @@ export { Recompra } from './Recompra'
 export { Configuracoes } from './Configuracoes'
 export { Produtos } from './Produtos'
 export { RelatorioFabrica } from './RelatorioFabrica'
+export { Estoque } from './Estoque'
 

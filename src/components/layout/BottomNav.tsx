@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, ShoppingCart, Plus, Share2, Bell, Package, Settings } from 'lucide-react'
+import { LayoutDashboard, Users, ShoppingCart, Plus, Share2, Bell, Package, Settings, Refrigerator } from 'lucide-react'
 import { FloatingDock } from '../ui/FloatingDock'
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
     { href: '/nova-venda', icon: <Plus className="h-6 w-6" />, title: 'Nova Venda', isCenter: true },
     { href: '/recompra', icon: <Bell className="h-5 w-5" />, title: 'Recompra' },
     { href: '/produtos', icon: <Package className="h-5 w-5" />, title: 'Produtos' },
+    { href: '/estoque', icon: <Refrigerator className="h-5 w-5" />, title: 'Estoque' },
     { href: '/configuracoes', icon: <Settings className="h-5 w-5" />, title: 'Config' },
 ]
 

@@ -14,6 +14,7 @@ interface UseProdutosReturn {
     getProdutoById: (id: string) => Produto | undefined
     createProduto: (data: ProdutoInsert) => Promise<Produto | null>
     updateProduto: (id: string, data: ProdutoUpdate) => Promise<Produto | null>
+    updateEstoque: (id: string, quantidade: number) => Promise<Produto | null>
 }
 
 export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn {
@@ -95,6 +96,26 @@ export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn
         }
     }
 
+    const updateEstoque = async (id: string, quantidade: number): Promise<Produto | null> => {
+        try {
+            const { data: updatedProduto, error } = await supabase
+                .from('produtos')
+                .update({ estoque_atual: quantidade })
+                .eq('id', id)
+                .select()
+                .single()
+
+            if (error) throw error
+
+            // Refresh list
+            await fetchProdutos()
+            return updatedProduto as Produto
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao atualizar estoque')
+            return null
+        }
+    }
+
     return {
         produtos,
         loading,
@@ -103,5 +124,6 @@ export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn
         getProdutoById,
         createProduto,
         updateProduto,
+        updateEstoque,
     }
 }
