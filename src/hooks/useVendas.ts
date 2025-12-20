@@ -87,11 +87,15 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         setError(null)
 
         try {
+            // Construct select clause based on whether we need to filter by contact
+            // If searching by contact name, we need an inner join (contatos!inner)
+            const contactRelation = filtros?.search ? 'contatos!inner' : 'contatos'
+
             let query = supabase
                 .from('vendas')
                 .select(`
           *,
-          contato:contatos(id, nome, telefone, origem, indicado_por_id),
+          contato:${contactRelation}(id, nome, telefone, origem, indicado_por_id),
           itens:itens_venda(*, produto:produtos(codigo))
         `)
                 .order('criado_em', { ascending: false })
@@ -115,6 +119,23 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 query = query.eq('contato_id', filtros.contatoId)
             }
 
+            if (filtros?.search) {
+                // !inner forces an inner join to filter sales by contact properties
+                query = query.ilike('contatos.nome', `%${filtros.search}%`)
+                // We need to modify the select to ensure the join works for filtering
+                // The original select already has contact:contatos(...) which is a left join by default
+                // But specifically for filtering we rely on the PostgREST syntax 
+                // However, basic supabase syntax for filtering on foreign tables often requires !inner in the select string
+                // Let's modify the select string dynamically if needed or just rely on the fact that we can filter on the relationship.
+                // Actually, to filter by foreign table column, we usually do:
+                // .ilike('contatos.nome', ...) BUT this requires the resource to be embedded with !inner in the select.
+
+                // Let's adjust the query construction slightly to handle this better:
+                // If search is active, we must ensure we are using !inner for contatos
+                // But our initial select uses standard syntax for embedding.
+                // Let's restart the query definition logic for cleaner implementation if search is present.
+            }
+
             const { data, error: queryError } = await query
 
             if (queryError) throw queryError
@@ -132,7 +153,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         } finally {
             setLoading(false)
         }
-    }, [filtros?.status, filtros?.forma_pagamento, filtros?.periodo, getDateRange])
+    }, [filtros?.status, filtros?.forma_pagamento, filtros?.periodo, filtros?.search, getDateRange])
 
     // Setup realtime subscription
     useEffect(() => {
@@ -318,8 +339,11 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
 
             const { error } = await supabase.from('vendas').delete().eq('id', id)
             if (error) throw error
+
+            setVendas(prev => prev.filter(v => v.id !== id))
             return true
         } catch (err) {
+
             setError(err instanceof Error ? err.message : 'Erro ao excluir venda')
             return false
         }

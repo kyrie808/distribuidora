@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
     ShoppingCart,
@@ -6,10 +6,14 @@ import {
     Calendar,
     Truck,
     DollarSign,
+    Search,
+    Trash2,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
+import { Modal, ModalActions } from '../components/ui/Modal'
+import { Button } from '../components/ui/Button'
 import { ClienteNome } from '../components/contatos'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
@@ -33,13 +37,26 @@ export function Vendas() {
     const [periodoFilter, setPeriodoFilter] = useState<PeriodoFilter>('todos')
     const [pagamentoFilter, setPagamentoFilter] = useState<PagamentoFilter>('todos')
     const [showFilters, setShowFilters] = useState(false)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [debouncedSearch, setDebouncedSearch] = useState('')
+
+    const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery)
+        }, 500)
+        return () => clearTimeout(timer)
+    }, [searchQuery])
 
     // Buscar TODAS as vendas do período para calcular contadores
-    const { vendas, loading, error, metrics } = useVendas({
+    const { vendas, loading, error, metrics, deleteVenda } = useVendas({
         filtros: {
             status: 'todos', // Sempre buscar todas para contagens corretas
             forma_pagamento: 'todos',
             periodo: periodoFilter,
+            search: debouncedSearch,
         },
     })
     const { getNomeIndicador } = useContatos()
@@ -86,6 +103,16 @@ export function Vendas() {
         }
     }
 
+    const handleDelete = (id: string) => {
+        setVendaToDelete(id)
+    }
+
+    const confirmDelete = async () => {
+        if (!vendaToDelete) return
+        await deleteVenda(vendaToDelete)
+        setVendaToDelete(null)
+    }
+
     return (
         <>
             <Header
@@ -113,6 +140,19 @@ export function Vendas() {
                     </Card>
                 </div>
 
+                {/* Search Bar */}
+                <div className="mb-4">
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Buscar por nome do cliente..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        />
+                        <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                    </div>
+                </div>
 
                 {/* Filter Chips - Linha Única com Scroll Horizontal */}
                 <div className="flex gap-2 mb-4 overflow-x-auto px-2 py-2">
@@ -325,6 +365,21 @@ export function Vendas() {
                                         <p className="text-xs text-gray-400">
                                             {formatRelativeDate(venda.criado_em)}
                                         </p>
+
+                                        {venda.status === 'cancelada' && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+
+                                                    handleDelete(venda.id)
+                                                }}
+                                                className="mt-2 p-2 hover:bg-danger-50 text-danger-500 rounded-full transition-colors relative z-10"
+                                                title="Excluir venda cancelada"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </Card>
@@ -332,6 +387,34 @@ export function Vendas() {
                     </div>
                 )}
             </PageContainer>
+
+
+            <Modal
+                isOpen={!!vendaToDelete}
+                onClose={() => setVendaToDelete(null)}
+                title="Confirmar Exclusão"
+                size="sm"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600">
+                        Tem certeza que deseja excluir esta venda cancelada? Esta ação não pode ser desfeita.
+                    </p>
+                    <ModalActions>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setVendaToDelete(null)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={confirmDelete}
+                        >
+                            Excluir Venda
+                        </Button>
+                    </ModalActions>
+                </div>
+            </Modal>
         </>
     )
 }

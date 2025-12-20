@@ -28,6 +28,7 @@ export const vendaFiltrosSchema = z.object({
     forma_pagamento: z.enum(['pix', 'dinheiro', 'cartao', 'fiado', 'todos']).default('todos'),
     periodo: z.enum(['hoje', 'semana', 'mes', 'todos']).default('todos'),
     contatoId: z.string().optional(),
+    search: z.string().optional(),
 })
 
 export type VendaFiltros = z.infer<typeof vendaFiltrosSchema>
