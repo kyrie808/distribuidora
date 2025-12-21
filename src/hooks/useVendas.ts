@@ -256,6 +256,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 taxa_entrega: data.taxa_entrega || 0,
                 forma_pagamento: data.forma_pagamento,
                 status: 'pendente',
+                pago: data.forma_pagamento === 'brinde',
                 observacoes: data.observacoes || null,
             }
 

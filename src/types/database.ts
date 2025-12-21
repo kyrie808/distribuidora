@@ -205,7 +205,7 @@ export type Database = {
                 }
                 Update: {
                     atualizado_em?: string
-                    contato_id: string
+                    contato_id?: string
                     criado_em?: string
                     data?: string
                     data_entrega?: string | null
