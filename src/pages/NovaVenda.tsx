@@ -46,6 +46,9 @@ export function NovaVenda() {
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [temEntrega, setTemEntrega] = useState(false)
     const [valorEntrega, setValorEntrega] = useState(0)
+    const [parcelas, setParcelas] = useState(1)
+    const [dataPrevista, setDataPrevista] = useState('')
+    const [paymentMethodDetails, setPaymentMethodDetails] = useState<string | null>(null)
 
     // Load existing sale data for editing
     useEffect(() => {
@@ -216,7 +219,9 @@ export function NovaVenda() {
         const vendaData: VendaFormData = {
             contato_id: selectedContato.id,
             data: new Date().toISOString().split('T')[0],
-            forma_pagamento: formaPagamento as 'pix' | 'dinheiro' | 'cartao' | 'fiado',
+            forma_pagamento: formaPagamento as any,
+            parcelas: formaPagamento === 'cartao' ? parcelas : 1,
+            data_prevista_pagamento: formaPagamento === 'fiado' && dataPrevista ? dataPrevista : null,
             itens: cart.map((item) => ({
                 produto_id: item.produto_id,
                 quantidade: item.quantidade,
@@ -503,18 +508,81 @@ export function NovaVenda() {
                         {/* Payment Methods */}
                         <Card>
                             <h3 className="font-medium text-gray-900 mb-3">Forma de Pagamento</h3>
-                            <div className="grid grid-cols-2 gap-3">
-                                {Object.entries(FORMA_PAGAMENTO_LABELS).map(([key, label]) => (
-                                    <button
-                                        key={key}
-                                        onClick={() => handleSubmitVenda(key)}
-                                        disabled={isSubmitting}
-                                        className="py-4 px-4 bg-gray-50 hover:bg-primary-50 border-2 border-gray-200 hover:border-primary-500 rounded-xl font-medium text-gray-900 transition-colors disabled:opacity-50"
+
+                            {paymentMethodDetails ? (
+                                <div className="space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h4 className="text-lg font-semibold capitalize">{FORMA_PAGAMENTO_LABELS[paymentMethodDetails]}</h4>
+                                        <button onClick={() => setPaymentMethodDetails(null)} className="text-sm text-primary-500">Alterar</button>
+                                    </div>
+
+                                    {paymentMethodDetails === 'cartao' && (
+                                        <div className="space-y-2">
+                                            <label className="block text-sm font-medium text-gray-700">Quantidade de Parcelas</label>
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => setParcelas(Math.max(1, parcelas - 1))}
+                                                    className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
+                                                >
+                                                    <Minus className="h-4 w-4" />
+                                                </button>
+                                                <span className="text-xl font-bold w-12 text-center">{parcelas}x</span>
+                                                <button
+                                                    onClick={() => setParcelas(Math.min(12, parcelas + 1))}
+                                                    className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {paymentMethodDetails === 'fiado' && (
+                                        <Input
+                                            type="date"
+                                            label="Data Prevista de Pagamento"
+                                            value={dataPrevista}
+                                            onChange={(e) => setDataPrevista(e.target.value)}
+                                        />
+                                    )}
+
+                                    <Button
+                                        onClick={() => {
+                                            if (paymentMethodDetails) {
+                                                handleSubmitVenda(paymentMethodDetails)
+                                            }
+                                        }}
+                                        className="w-full"
+                                        isLoading={isSubmitting}
                                     >
-                                        {label}
-                                    </button>
-                                ))}
-                            </div>
+                                        Confirmar Venda {paymentMethodDetails === 'cartao' && parcelas > 1 ? `(${parcelas}x)` : ''}
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {Object.entries(FORMA_PAGAMENTO_LABELS).map(([key, label]) => (
+                                        <button
+                                            key={key}
+                                            onClick={() => {
+                                                if (key === 'cartao' || key === 'fiado') {
+                                                    setPaymentMethodDetails(key)
+                                                    if (key === 'fiado') {
+                                                        const d = new Date()
+                                                        d.setDate(d.getDate() + 30)
+                                                        setDataPrevista(d.toISOString().split('T')[0])
+                                                    }
+                                                } else {
+                                                    handleSubmitVenda(key)
+                                                }
+                                            }}
+                                            disabled={isSubmitting}
+                                            className="py-4 px-4 bg-gray-50 hover:bg-primary-50 border-2 border-gray-200 hover:border-primary-500 rounded-xl font-medium text-gray-900 transition-colors disabled:opacity-50"
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
                         </Card>
 
                         {/* Back button */}

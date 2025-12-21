@@ -184,6 +184,8 @@ export type Database = {
                     total: number
                     pago: boolean
                     taxa_entrega: number
+                    parcelas: number | null
+                    data_prevista_pagamento: string | null
                 }
                 Insert: {
                     atualizado_em?: string
@@ -198,10 +200,12 @@ export type Database = {
                     total: number
                     pago?: boolean
                     taxa_entrega?: number
+                    parcelas?: number
+                    data_prevista_pagamento?: string | null
                 }
                 Update: {
                     atualizado_em?: string
-                    contato_id?: string
+                    contato_id: string
                     criado_em?: string
                     data?: string
                     data_entrega?: string | null
@@ -212,6 +216,8 @@ export type Database = {
                     total?: number
                     pago?: boolean
                     taxa_entrega?: number
+                    parcelas?: number
+                    data_prevista_pagamento?: string | null
                 }
                 Relationships: [
                     {

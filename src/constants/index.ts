@@ -85,6 +85,7 @@ export const FORMA_PAGAMENTO = {
     dinheiro: 'dinheiro',
     cartao: 'cartao',
     fiado: 'fiado',
+    brinde: 'brinde',
 } as const
 
 export const FORMA_PAGAMENTO_LABELS: Record<string, string> = {
@@ -92,6 +93,7 @@ export const FORMA_PAGAMENTO_LABELS: Record<string, string> = {
     dinheiro: 'Dinheiro',
     cartao: 'Cartão',
     fiado: 'Fiado',
+    brinde: 'Brinde',
 }
 
 export const FORMA_PAGAMENTO_ICONS: Record<string, string> = {
@@ -99,6 +101,7 @@ export const FORMA_PAGAMENTO_ICONS: Record<string, string> = {
     dinheiro: '💵',
     cartao: '💳',
     fiado: '📝',
+    brinde: '🎁',
 }
 
 // Configurações padrão

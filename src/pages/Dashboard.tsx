@@ -355,24 +355,11 @@ export function Dashboard() {
                                             onClick={() => navigate(`/vendas/${venda.id}`)}
                                             className="cursor-pointer"
                                         >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <p className="font-medium text-gray-900 truncate">
-                                                            {venda.contato?.nome || 'Cliente'}
-                                                        </p>
-                                                        <Badge
-                                                            variant={venda.status === 'entregue' ? 'success' : venda.status === 'cancelada' ? 'danger' : 'warning'}
-                                                            className="text-xs"
-                                                        >
-                                                            {VENDA_STATUS_LABELS[venda.status]}
-                                                        </Badge>
-                                                        {venda.pago ? (
-                                                            <Badge variant="success" className="text-xs">💰</Badge>
-                                                        ) : (
-                                                            <Badge variant="gray" className="text-xs">⏳</Badge>
-                                                        )}
-                                                    </div>
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 min-w-0 mr-4">
+                                                    <p className="font-medium text-gray-900 truncate mb-1">
+                                                        {venda.contato?.nome || 'Cliente'}
+                                                    </p>
                                                     <p className="text-xs text-gray-500">
                                                         {formatRelativeDate(venda.criado_em)}
                                                         {venda.contato?.origem === 'indicacao' && (
@@ -384,9 +371,28 @@ export function Dashboard() {
                                                         )}
                                                     </p>
                                                 </div>
-                                                <p className="font-bold text-primary-600 flex-shrink-0">
-                                                    {formatCurrency(Number(venda.total))}
-                                                </p>
+                                                <div className="flex items-center gap-3 flex-shrink-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <div title={VENDA_STATUS_LABELS[venda.status]} className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-100 transition-colors">
+                                                            <div className={`w-2.5 h-2.5 rounded-full ${venda.status === 'entregue' ? 'bg-success-500' :
+                                                                venda.status === 'cancelada' ? 'bg-danger-500' :
+                                                                    'bg-warning-500'
+                                                                }`} />
+                                                        </div>
+                                                        {venda.pago ? (
+                                                            <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                                <span>💰</span> Pago
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                                <span>⏳</span> Não pago
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <p className="font-bold text-primary-600 w-24 text-right">
+                                                        {formatCurrency(Number(venda.total))}
+                                                    </p>
+                                                </div>
                                             </div>
                                         </Card>
                                     ))}
