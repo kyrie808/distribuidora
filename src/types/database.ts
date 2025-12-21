@@ -183,6 +183,7 @@ export type Database = {
                     status: string
                     total: number
                     pago: boolean
+                    taxa_entrega: number
                 }
                 Insert: {
                     atualizado_em?: string
@@ -196,6 +197,7 @@ export type Database = {
                     status?: string
                     total: number
                     pago?: boolean
+                    taxa_entrega?: number
                 }
                 Update: {
                     atualizado_em?: string
@@ -209,6 +211,7 @@ export type Database = {
                     status?: string
                     total?: number
                     pago?: boolean
+                    taxa_entrega?: number
                 }
                 Relationships: [
                     {

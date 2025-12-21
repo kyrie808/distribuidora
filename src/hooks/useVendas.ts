@@ -7,6 +7,8 @@ import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth 
 export interface VendaComItens extends Venda {
     itens: (ItemVenda & {
         produto?: {
+            id: string
+            nome: string
             codigo: string
         }
     })[]
@@ -57,6 +59,7 @@ interface UseVendasReturn {
     updateVendaStatus: (id: string, status: 'pendente' | 'entregue' | 'cancelada') => Promise<boolean>
     updateVendaPago: (id: string, pago: boolean) => Promise<boolean>
     deleteVenda: (id: string) => Promise<boolean>
+    updateVenda: (id: string, data: VendaFormData) => Promise<Venda | null>
     getVendaById: (id: string) => Promise<VendaComItens | null>
 }
 
@@ -96,7 +99,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 .select(`
           *,
           contato:${contactRelation}(id, nome, telefone, origem, indicado_por_id),
-          itens:itens_venda(*, produto:produtos(codigo))
+          itens:itens_venda(*, produto:produtos(id, nome, codigo))
         `)
                 .order('criado_em', { ascending: false })
 
@@ -249,7 +252,8 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 contato_id: data.contato_id,
                 data: data.data,
                 data_entrega: data.data_entrega || null,
-                total,
+                total: total + (data.taxa_entrega || 0),
+                taxa_entrega: data.taxa_entrega || 0,
                 forma_pagamento: data.forma_pagamento,
                 status: 'pendente',
                 observacoes: data.observacoes || null,
@@ -289,6 +293,26 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 })
                 .eq('id', data.contato_id)
 
+            // Update stock (decrement) for each item
+            for (const item of data.itens) {
+                // Get current stock
+                const { data: prodData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('estoque_atual')
+                    .eq('id', item.produto_id)
+                    .single()
+
+                if (prodError) throw prodError
+
+                // Decrement stock
+                const { error: updateError } = await supabase
+                    .from('produtos')
+                    .update({ estoque_atual: (prodData.estoque_atual || 0) - item.quantidade })
+                    .eq('id', item.produto_id)
+
+                if (updateError) throw updateError
+            }
+
             return typedVenda
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao criar venda')
@@ -315,6 +339,106 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         }
     }
 
+    // Update Venda completa com gestão de estoque
+    const updateVenda = async (id: string, data: VendaFormData): Promise<Venda | null> => {
+        try {
+            // 1. Recuperar itens antigos para devolver ao estoque
+            const { data: oldItems, error: oldItemsError } = await supabase
+                .from('itens_venda')
+                .select('produto_id, quantidade')
+                .eq('venda_id', id)
+
+            if (oldItemsError) throw oldItemsError
+
+            // 2. Devolver estoque dos itens antigos
+            for (const item of oldItems || []) {
+                // Buscar estoque atual
+                const { data: prodData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('estoque_atual')
+                    .eq('id', item.produto_id)
+                    .single()
+
+                if (prodError) throw prodError
+
+                // Atualizar com incremento
+                const { error: updateError } = await supabase
+                    .from('produtos')
+                    .update({ estoque_atual: (prodData.estoque_atual || 0) + item.quantidade })
+                    .eq('id', item.produto_id)
+
+                if (updateError) throw updateError
+            }
+
+            // 3. Atualizar dados da venda
+            const total = data.itens.reduce((acc, item) => acc + item.subtotal, 0)
+            const { data: vendaUpdated, error: vendaError } = await supabase
+                .from('vendas')
+                .update({
+                    contato_id: data.contato_id,
+                    data: data.data,
+                    data_entrega: data.data_entrega || null,
+                    total: total + (data.taxa_entrega || 0),
+                    taxa_entrega: data.taxa_entrega || 0,
+                    forma_pagamento: data.forma_pagamento,
+                    observacoes: data.observacoes || null,
+                })
+                .eq('id', id)
+                .select()
+                .single()
+
+            if (vendaError) throw vendaError
+
+            // 4. Limpar itens antigos (Delete)
+            const { error: deleteError } = await supabase
+                .from('itens_venda')
+                .delete()
+                .eq('venda_id', id)
+
+            if (deleteError) throw deleteError
+
+            // 5. Inserir novos itens
+            const itensInsert: ItemVendaInsert[] = data.itens.map((item) => ({
+                venda_id: id,
+                produto_id: item.produto_id,
+                quantidade: item.quantidade,
+                preco_unitario: item.preco_unitario,
+                subtotal: item.subtotal,
+            }))
+
+            const { error: insertError } = await supabase
+                .from('itens_venda')
+                .insert(itensInsert)
+
+            if (insertError) throw insertError
+
+            // 6. Baixar novo estoque
+            for (const item of data.itens) {
+                // Buscar estoque atual
+                const { data: prodData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('estoque_atual')
+                    .eq('id', item.produto_id)
+                    .single()
+
+                if (prodError) throw prodError
+
+                // Atualizar com decremento
+                const { error: updateError } = await supabase
+                    .from('produtos')
+                    .update({ estoque_atual: (prodData.estoque_atual || 0) - item.quantidade })
+                    .eq('id', item.produto_id)
+
+                if (updateError) throw updateError
+            }
+
+            return vendaUpdated as Venda
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao atualizar venda')
+            return null
+        }
+    }
+
     // Update venda pago status
     const updateVendaPago = async (id: string, pago: boolean): Promise<boolean> => {
         try {
@@ -334,16 +458,44 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
     // Delete venda
     const deleteVenda = async (id: string): Promise<boolean> => {
         try {
-            // Delete items first (cascade should handle but being explicit)
+            // 1. Get items to restore stock
+            const { data: items, error: itemsError } = await supabase
+                .from('itens_venda')
+                .select('produto_id, quantidade')
+                .eq('venda_id', id)
+
+            if (itemsError) throw itemsError
+
+            // 2. Restore stock (increment)
+            for (const item of items || []) {
+                // Get current stock
+                const { data: prodData, error: prodError } = await supabase
+                    .from('produtos')
+                    .select('estoque_atual')
+                    .eq('id', item.produto_id)
+                    .single()
+
+                if (prodError) throw prodError
+
+                // Increment stock
+                const { error: updateError } = await supabase
+                    .from('produtos')
+                    .update({ estoque_atual: (prodData.estoque_atual || 0) + item.quantidade })
+                    .eq('id', item.produto_id)
+
+                if (updateError) throw updateError
+            }
+
+            // 3. Delete items first (cascade should handle but being explicit)
             await supabase.from('itens_venda').delete().eq('venda_id', id)
 
+            // 4. Delete sale
             const { error } = await supabase.from('vendas').delete().eq('id', id)
             if (error) throw error
 
             setVendas(prev => prev.filter(v => v.id !== id))
             return true
         } catch (err) {
-
             setError(err instanceof Error ? err.message : 'Erro ao excluir venda')
             return false
         }
@@ -385,6 +537,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         createVenda,
         updateVendaStatus,
         updateVendaPago,
+        updateVenda,
         deleteVenda,
         getVendaById,
     }

@@ -12,6 +12,7 @@ import {
     Share2,
     ShoppingCart,
     ChevronRight,
+    Eye,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -39,9 +40,17 @@ import { useIndicacoes } from '../hooks/useIndicacoes'
 
 function VendasHistorico({ contatoId }: { contatoId: string }) {
     const navigate = useNavigate()
-    const { vendas, loading, error } = useVendas({
+    const { vendas, loading, error, deleteVenda } = useVendas({
         filtros: { contatoId, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' }
     })
+    const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
+    const [expandedVendaId, setExpandedVendaId] = useState<string | null>(null)
+
+    const handleDelete = async () => {
+        if (!vendaToDelete) return
+        await deleteVenda(vendaToDelete)
+        setVendaToDelete(null)
+    }
 
     if (loading) return <div className="text-center py-4 text-gray-500">Carregando histórico...</div>
     if (error) return <div className="text-center py-4 text-danger-500">Erro ao carregar histórico</div>
@@ -52,30 +61,129 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
             {vendas.map((venda) => (
                 <div
                     key={venda.id}
-                    onClick={() => navigate(`/vendas/${venda.id}`)}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 cursor-pointer transition-colors hover:bg-gray-100 active:bg-gray-200"
+                    className="bg-gray-50 rounded-lg border border-gray-100 overflow-hidden transition-all hover:bg-gray-100"
                 >
-                    <div>
-                        <div className="text-sm font-medium text-gray-900">
-                            {formatDate(venda.data)}
-                        </div>
-                        <div className="text-xs text-gray-500 mt-1">
-                            {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} {venda.itens.reduce((acc, item) => acc + item.quantidade, 0) === 1 ? 'item' : 'itens'}
-                        </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <div className="text-right">
-                            <div className="text-sm font-bold text-gray-900">
-                                {formatCurrency(venda.total)}
+                    <div
+                        onClick={() => navigate(`/vendas/${venda.id}`)}
+                        className="flex items-center justify-between p-3 cursor-pointer group"
+                    >
+                        <div>
+                            <div className="text-sm font-medium text-gray-900">
+                                {formatDate(venda.data)}
                             </div>
-                            <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
-                                {venda.status}
-                            </Badge>
+                            <div className="text-xs text-gray-500 mt-1">
+                                {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} {venda.itens.reduce((acc, item) => acc + item.quantidade, 0) === 1 ? 'item' : 'itens'}
+                            </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-gray-400" />
+                        <div className="flex items-center gap-2">
+                            <div className="text-right mr-1">
+                                <div className="text-sm font-bold text-gray-900">
+                                    {formatCurrency(venda.total)}
+                                </div>
+                                <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
+                                    {venda.status}
+                                </Badge>
+                            </div>
+
+                            {/* Actions - Always visible now */}
+                            <div className="flex items-center gap-1">
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                        setExpandedVendaId(expandedVendaId === venda.id ? null : venda.id)
+                                    }}
+                                    className={`p-1.5 rounded-lg transition-colors ${expandedVendaId === venda.id ? 'bg-primary-100 text-primary-600' : 'hover:bg-white text-gray-500 hover:text-primary-600'}`}
+                                    title="Ver itens"
+                                >
+                                    <Eye className="h-4 w-4" />
+                                </button>
+
+                                {venda.status !== 'cancelada' && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            navigate(`/vendas/${venda.id}/editar`)
+                                        }}
+                                        className="p-1.5 hover:bg-white text-primary-600 rounded-lg transition-colors"
+                                        title="Editar"
+                                    >
+                                        <Edit className="h-4 w-4" />
+                                    </button>
+                                )}
+                                {venda.status === 'cancelada' && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            setVendaToDelete(venda.id)
+                                        }}
+                                        className="p-1.5 hover:bg-white text-danger-500 rounded-lg transition-colors"
+                                        title="Excluir"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
+
+                            <ChevronRight className="h-4 w-4 text-gray-400" />
+                        </div>
                     </div>
+
+                    {/* Preview Dropdown/Accordion */}
+                    {expandedVendaId === venda.id && (
+                        <div className="px-3 pb-3 pt-0 border-t border-gray-200/50 bg-white ml-3 mr-3 mb-3 rounded-b-lg shadow-sm">
+                            <div className="pt-2 mb-2 flex justify-between items-center text-xs text-gray-500">
+                                <span>Itens do Pedido</span>
+                                <span>{venda.forma_pagamento ? venda.forma_pagamento.replace('_', ' ').toUpperCase() : '-'}</span>
+                            </div>
+                            <div className="space-y-1">
+                                {venda.itens.map((item: any, idx: number) => (
+                                    <div key={idx} className="flex justify-between text-sm">
+                                        <span className="text-gray-700">
+                                            {item.quantidade}x {item.produto?.nome || 'Produto'}
+                                        </span>
+                                        <span className="font-medium text-gray-900">
+                                            {formatCurrency(Number(item.subtotal))}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                            {Number(venda.taxa_entrega) > 0 && (
+                                <div className="flex justify-between text-sm mt-2 pt-2 border-t border-dashed border-gray-200">
+                                    <span className="text-gray-600">Taxa de Entrega</span>
+                                    <span className="font-medium text-gray-900">{formatCurrency(Number(venda.taxa_entrega))}</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
             ))}
+
+            <Modal
+                isOpen={!!vendaToDelete}
+                onClose={() => setVendaToDelete(null)}
+                title="Confirmar Exclusão"
+                size="sm"
+            >
+                <div className="space-y-4">
+                    <p className="text-gray-600">
+                        Tem certeza que deseja excluir esta venda cancelada? Esta ação não pode ser desfeita.
+                    </p>
+                    <ModalActions>
+                        <Button
+                            variant="secondary"
+                            onClick={() => setVendaToDelete(null)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="danger"
+                            onClick={handleDelete}
+                        >
+                            Excluir Venda
+                        </Button>
+                    </ModalActions>
+                </div>
+            </Modal>
         </div>
     )
 }
@@ -154,9 +262,11 @@ export function ContatoDetalhe() {
                 rightAction={
                     <button
                         onClick={() => setIsEditModalOpen(true)}
-                        className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                        className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white font-medium"
+                        title="Editar Contato"
                     >
-                        <Edit className="h-5 w-5" />
+                        <Edit className="h-4 w-4" />
+                        <span>Editar</span>
                     </button>
                 }
             />
@@ -337,8 +447,8 @@ export function ContatoDetalhe() {
 
                 {/* Delete Button */}
                 <Button
-                    variant="ghost"
-                    className="w-full text-danger-500 hover:bg-danger-50"
+                    variant="danger"
+                    className="w-full"
                     leftIcon={<Trash2 className="h-4 w-4" />}
                     onClick={() => setIsDeleteModalOpen(true)}
                 >

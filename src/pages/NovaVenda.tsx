@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, useParams } from 'react-router-dom'
 import {
     Search,
     Plus,
@@ -29,9 +29,12 @@ export function NovaVenda() {
     const location = useLocation()
     const toast = useToast()
 
+    const { id } = useParams<{ id: string }>()
+    const isEditing = Boolean(id)
+
     const { contatos, searchContatos, createContato } = useContatos({ realtime: false })
     const { produtos, loading: loadingProdutos } = useProdutos()
-    const { createVenda } = useVendas({ realtime: false })
+    const { createVenda, getVendaById, updateVenda } = useVendas({ realtime: false })
 
     // State
     const [step, setStep] = useState<'cliente' | 'produtos' | 'pagamento'>('cliente')
@@ -41,6 +44,40 @@ export function NovaVenda() {
     const [showContatoDropdown, setShowContatoDropdown] = useState(false)
     const [cart, setCart] = useState<CartItem[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [temEntrega, setTemEntrega] = useState(false)
+    const [valorEntrega, setValorEntrega] = useState(0)
+
+    // Load existing sale data for editing
+    useEffect(() => {
+        if (id) {
+            const loadVenda = async () => {
+                const venda = await getVendaById(id)
+                if (venda) {
+                    // Populate contact
+                    if (venda.contato) {
+                        setSelectedContato(venda.contato as unknown as Contato)
+                    }
+
+                    // Populate cart
+                    const items = venda.itens.map(item => ({
+                        ...item,
+                        produto: item.produto! // Assuming produto is populated from fetch
+                    })) as unknown as CartItem[]
+                    setCart(items)
+
+                    // Populate delivery fee
+                    if (Number(venda.taxa_entrega) > 0) {
+                        setTemEntrega(true)
+                        setValorEntrega(Number(venda.taxa_entrega))
+                    }
+
+                    // Set step to products
+                    setStep('produtos')
+                }
+            }
+            loadVenda()
+        }
+    }, [id]) // Removed getVendaById dependency to avoid infinite loop if reference unstable
 
     // Quick add contact modal
     const [showQuickAddModal, setShowQuickAddModal] = useState(false)
@@ -48,17 +85,17 @@ export function NovaVenda() {
     const [quickAddPhone, setQuickAddPhone] = useState('')
     const [isCreatingContato, setIsCreatingContato] = useState(false)
 
-    // Check if came from contact detail page
+    // Check if came from contact detail page (only if not editing)
     useEffect(() => {
         const contatoId = location.state?.contatoId
-        if (contatoId) {
+        if (contatoId && !isEditing) {
             const found = contatos.find((c) => c.id === contatoId)
             if (found) {
                 setSelectedContato(found)
                 setStep('produtos')
             }
         }
-    }, [location.state?.contatoId, contatos])
+    }, [location.state?.contatoId, contatos, isEditing])
 
     // Search for contacts
     useEffect(() => {
@@ -171,6 +208,7 @@ export function NovaVenda() {
 
     // Submit sale
     const handleSubmitVenda = async (formaPagamento: string) => {
+        if (isSubmitting) return
         if (!selectedContato || cart.length === 0) return
 
         setIsSubmitting(true)
@@ -185,16 +223,23 @@ export function NovaVenda() {
                 preco_unitario: item.preco_unitario,
                 subtotal: item.subtotal,
             })),
+            taxa_entrega: temEntrega ? valorEntrega : 0,
         }
 
-        const result = await createVenda(vendaData)
+        let result
+        if (isEditing && id) {
+            result = await updateVenda(id, vendaData)
+        } else {
+            result = await createVenda(vendaData)
+        }
+
         setIsSubmitting(false)
 
         if (result) {
-            toast.success('Venda registrada!')
+            toast.success(isEditing ? 'Venda atualizada!' : 'Venda registrada!')
             navigate(`/vendas/${result.id}`)
         } else {
-            toast.error('Erro ao registrar venda')
+            toast.error(isEditing ? 'Erro ao atualizar venda' : 'Erro ao registrar venda')
         }
     }
 
@@ -209,9 +254,9 @@ export function NovaVenda() {
             <Header
                 title={
                     step === 'cliente'
-                        ? 'Selecionar Cliente'
+                        ? (isEditing ? 'Editar - Selecionar Cliente' : 'Selecionar Cliente')
                         : step === 'produtos'
-                            ? 'Adicionar Produtos'
+                            ? (isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Adicionar Produtos')
                             : 'Pagamento'
                 }
                 showBack
@@ -271,7 +316,7 @@ export function NovaVenda() {
                             <div>
                                 <h3 className="text-sm font-medium text-gray-500 mb-2">Clientes recentes</h3>
                                 <div className="space-y-2">
-                                    {contatos.slice(0, 5).map((contato) => (
+                                    {contatos.slice(0, 20).map((contato) => (
                                         <button
                                             key={contato.id}
                                             onClick={() => handleSelectContato(contato)}
@@ -403,10 +448,56 @@ export function NovaVenda() {
                                     </div>
                                 ))}
                             </div>
+                            {temEntrega && (
+                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                    <span className="text-gray-900">Taxa de Entrega</span>
+                                    <span className="font-medium">{formatCurrency(valorEntrega)}</span>
+                                </div>
+                            )}
                             <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-3">
                                 <span className="font-bold text-gray-900">Total</span>
-                                <span className="text-2xl font-bold text-primary-600">{formatCurrency(cartTotal)}</span>
+                                <span className="text-2xl font-bold text-primary-600">{formatCurrency(cartTotal + (temEntrega ? valorEntrega : 0))}</span>
                             </div>
+                        </Card>
+
+                        {/* Delivery Fee Toggle */}
+                        <Card>
+                            <div className="flex items-center justify-between mb-4">
+                                <span className="font-medium text-gray-900">Cobrar Taxa de Entrega</span>
+                                <button
+                                    role="switch"
+                                    aria-checked={temEntrega}
+                                    onClick={() => setTemEntrega(!temEntrega)}
+                                    className={`${temEntrega ? 'bg-primary-600' : 'bg-gray-200'
+                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2`}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className={`${temEntrega ? 'translate-x-5' : 'translate-x-0'
+                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                </button>
+                            </div>
+
+                            {temEntrega && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Valor da Entrega
+                                    </label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            value={valorEntrega || ''}
+                                            onChange={(e) => setValorEntrega(Number(e.target.value))}
+                                            placeholder="0,00"
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </Card>
 
                         {/* Payment Methods */}
@@ -428,13 +519,14 @@ export function NovaVenda() {
 
                         {/* Back button */}
                         <Button
-                            variant="ghost"
+                            variant="accent"
                             className="w-full"
+                            leftIcon={<ShoppingCart className="h-4 w-4" />}
                             onClick={() => setStep('produtos')}
                         >
                             Voltar para produtos
                         </Button>
-                    </div>
+                    </div >
                 )}
 
                 {/* Quick Add Contact Modal */}
@@ -468,7 +560,7 @@ export function NovaVenda() {
                         </Button>
                     </ModalActions>
                 </Modal>
-            </PageContainer>
+            </PageContainer >
         </>
     )
 }

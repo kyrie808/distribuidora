@@ -17,6 +17,7 @@ export const vendaSchema = z.object({
     data_entrega: z.string().optional().nullable(),
     forma_pagamento: z.enum(['pix', 'dinheiro', 'cartao', 'fiado']),
     observacoes: z.string().optional().nullable(),
+    taxa_entrega: z.number().min(0).default(0),
     itens: z.array(itemVendaSchema).min(1, 'Adicione pelo menos um produto'),
 })
 

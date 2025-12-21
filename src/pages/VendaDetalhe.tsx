@@ -12,6 +12,7 @@ import {
     MessageCircle,
     DollarSign,
     RotateCcw,
+    Edit,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -157,7 +158,22 @@ export function VendaDetalhe() {
 
     return (
         <>
-            <Header title={`Venda #${venda.id.slice(0, 8)}`} showBack />
+            <Header
+                title={`Venda #${venda.id.slice(0, 8)}`}
+                showBack
+                rightAction={
+                    venda.status !== 'cancelada' && (
+                        <button
+                            onClick={() => navigate(`/vendas/${venda.id}/editar`)}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white font-medium"
+                            title="Editar Venda"
+                        >
+                            <Edit className="h-4 w-4" />
+                            <span>Editar</span>
+                        </button>
+                    )
+                }
+            />
             <PageContainer>
                 {/* Status Card */}
                 <Card className="mb-4">
@@ -338,6 +354,13 @@ export function VendaDetalhe() {
                         ))}
                     </div>
 
+                    {Number(venda.taxa_entrega) > 0 && (
+                        <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                            <span className="text-gray-900">Taxa de Entrega</span>
+                            <span className="font-medium">{formatCurrency(Number(venda.taxa_entrega))}</span>
+                        </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-3">
                         <span className="font-bold text-gray-900">Total</span>
                         <span className="text-xl font-bold text-primary-600">{formatCurrency(Number(venda.total))}</span>
@@ -354,8 +377,8 @@ export function VendaDetalhe() {
 
                 {/* Delete Button */}
                 <Button
-                    variant="ghost"
-                    className="w-full text-danger-500 hover:bg-danger-50"
+                    variant="danger"
+                    className="w-full"
                     leftIcon={<Trash2 className="h-4 w-4" />}
                     onClick={() => setShowDeleteModal(true)}
                 >

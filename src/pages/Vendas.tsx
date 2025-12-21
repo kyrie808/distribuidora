@@ -8,6 +8,7 @@ import {
     DollarSign,
     Search,
     Trash2,
+    Edit,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -358,7 +359,7 @@ export function Vendas() {
                                         </p>
                                     </div>
 
-                                    <div className="text-right">
+                                    <div className="text-right flex flex-col items-end gap-1">
                                         <p className="text-lg font-bold text-primary-600">
                                             {formatCurrency(Number(venda.total))}
                                         </p>
@@ -366,20 +367,35 @@ export function Vendas() {
                                             {formatRelativeDate(venda.criado_em)}
                                         </p>
 
-                                        {venda.status === 'cancelada' && (
-                                            <button
-                                                type="button"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
+                                        <div className="flex items-center gap-1 mt-1">
+                                            {venda.status !== 'cancelada' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        navigate(`/vendas/${venda.id}/editar`)
+                                                    }}
+                                                    className="p-1.5 hover:bg-primary-50 text-primary-600 rounded-lg transition-colors relative z-10"
+                                                    title="Editar venda"
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </button>
+                                            )}
 
-                                                    handleDelete(venda.id)
-                                                }}
-                                                className="mt-2 p-2 hover:bg-danger-50 text-danger-500 rounded-full transition-colors relative z-10"
-                                                title="Excluir venda cancelada"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
-                                        )}
+                                            {venda.status === 'cancelada' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        handleDelete(venda.id)
+                                                    }}
+                                                    className="p-1.5 hover:bg-danger-50 text-danger-500 rounded-lg transition-colors relative z-10"
+                                                    title="Excluir venda cancelada"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             </Card>

@@ -26,6 +26,7 @@ function App() {
           <Route path="/nova-venda" element={<NovaVenda />} />
           <Route path="/vendas" element={<Vendas />} />
           <Route path="/vendas/:id" element={<VendaDetalhe />} />
+          <Route path="/vendas/:id/editar" element={<NovaVenda />} />
           <Route path="/indicacoes" element={<Indicacoes />} />
           <Route path="/recompra" element={<Recompra />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
