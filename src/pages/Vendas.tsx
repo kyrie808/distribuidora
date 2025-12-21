@@ -187,7 +187,7 @@ export function Vendas() {
                     {/* Grupo: Status de Entrega */}
                     <div className="flex items-center gap-1.5 px-0">
                         <Truck className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <div className="flex gap-1 overflow-x-auto p-1 pl-0 scrollbar-hide items-center flex-1">
+                        <div className="flex gap-1 overflow-x-auto p-1 pl-2 scrollbar-hide items-center flex-1">
                             <button
                                 onClick={() => setStatusFilter('todos')}
                                 className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
@@ -251,7 +251,7 @@ export function Vendas() {
                     {/* Grupo: Status de Pagamento */}
                     <div className="flex items-center gap-1.5 px-0">
                         <DollarSign className="h-4 w-4 text-gray-400 flex-shrink-0" />
-                        <div className="flex gap-1 overflow-x-auto p-1 pl-0 scrollbar-hide items-center flex-1">
+                        <div className="flex gap-1 overflow-x-auto p-1 pl-2 scrollbar-hide items-center flex-1">
                             <button
                                 onClick={() => setPagamentoFilter('todos')}
                                 className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
