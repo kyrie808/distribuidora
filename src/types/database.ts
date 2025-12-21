@@ -97,6 +97,7 @@ export type Database = {
                     quantidade: number
                     subtotal: number
                     venda_id: string
+                    custo_unitario: number
                 }
                 Insert: {
                     id?: string
@@ -105,6 +106,7 @@ export type Database = {
                     quantidade: number
                     subtotal: number
                     venda_id: string
+                    custo_unitario: number
                 }
                 Update: {
                     id?: string
@@ -113,6 +115,7 @@ export type Database = {
                     quantidade?: number
                     subtotal?: number
                     venda_id?: string
+                    custo_unitario?: number
                 }
                 Relationships: [
                     {
@@ -186,6 +189,7 @@ export type Database = {
                     taxa_entrega: number
                     parcelas: number | null
                     data_prevista_pagamento: string | null
+                    custo_total: number
                 }
                 Insert: {
                     atualizado_em?: string
@@ -202,6 +206,7 @@ export type Database = {
                     taxa_entrega?: number
                     parcelas?: number
                     data_prevista_pagamento?: string | null
+                    custo_total?: number
                 }
                 Update: {
                     atualizado_em?: string
@@ -218,6 +223,7 @@ export type Database = {
                     taxa_entrega?: number
                     parcelas?: number
                     data_prevista_pagamento?: string | null
+                    custo_total?: number
                 }
                 Relationships: [
                     {

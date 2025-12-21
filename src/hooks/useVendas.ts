@@ -199,8 +199,12 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         const vendasNaoCanceladas = vendas.filter((v) => v.status !== 'cancelada')
         const vendasMesNaoCanceladas = vendasDoMes.filter((v) => v.status !== 'cancelada')
 
-        const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) => acc + Number(v.total), 0)
-        const faturamentoMes = vendasMesNaoCanceladas.reduce((acc, v) => acc + Number(v.total), 0)
+        // Exclude 'brinde' from faturamento
+        const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) =>
+            acc + (v.pago && v.forma_pagamento !== 'brinde' ? Number(v.total) : 0), 0)
+
+        const faturamentoMes = vendasMesNaoCanceladas.reduce((acc, v) =>
+            acc + (v.pago && v.forma_pagamento !== 'brinde' ? Number(v.total) : 0), 0)
 
         // Product metrics
         const produtosVendidos = vendasMesNaoCanceladas.reduce((acc, v) => {
@@ -217,10 +221,11 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
 
         // Payment metrics
         const recebido = vendasNaoCanceladas
-            .filter(v => v.pago === true)
+            .filter(v => v.pago === true && v.forma_pagamento !== 'brinde')
             .reduce((acc, v) => acc + Number(v.total), 0)
+
         const aReceber = vendasNaoCanceladas
-            .filter(v => v.pago !== true)
+            .filter(v => v.pago !== true && v.forma_pagamento !== 'brinde')
             .reduce((acc, v) => acc + Number(v.total), 0)
 
         // Delivery metrics
@@ -244,6 +249,20 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
     // Create venda with items and update contact status
     const createVenda = async (data: VendaFormData): Promise<Venda | null> => {
         try {
+            // Fetch product costs first
+            const { data: produtos } = await supabase
+                .from('produtos')
+                .select('id, custo')
+                .in('id', data.itens.map(i => i.produto_id))
+
+            const produtoMap = new Map(produtos?.map(p => [p.id, p]))
+
+            // Calculate costs
+            const custoTotal = data.itens.reduce((acc, item) => {
+                const custoItem = produtoMap.get(item.produto_id)?.custo || 0
+                return acc + (custoItem * item.quantidade)
+            }, 0)
+
             // Calculate total
             const total = data.itens.reduce((acc, item) => acc + item.subtotal, 0)
 
@@ -256,8 +275,9 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 taxa_entrega: data.taxa_entrega || 0,
                 forma_pagamento: data.forma_pagamento,
                 status: 'pendente',
-                pago: data.forma_pagamento === 'brinde',
+                pago: ['pix', 'dinheiro', 'cartao'].includes(data.forma_pagamento),
                 observacoes: data.observacoes || null,
+                custo_total: custoTotal,
             }
 
             const { data: newVenda, error: vendaError } = await supabase
@@ -277,6 +297,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 quantidade: item.quantidade,
                 preco_unitario: item.preco_unitario,
                 subtotal: item.subtotal,
+                custo_unitario: produtoMap.get(item.produto_id)?.custo || 0,
             }))
 
             const { error: itensError } = await supabase
@@ -371,6 +392,20 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 if (updateError) throw updateError
             }
 
+            // Fetch product costs for NEW items
+            const { data: produtos } = await supabase
+                .from('produtos')
+                .select('id, custo')
+                .in('id', data.itens.map(i => i.produto_id))
+
+            const produtoMap = new Map(produtos?.map(p => [p.id, p]))
+
+            // Calculate costs
+            const custoTotal = data.itens.reduce((acc, item) => {
+                const custoItem = produtoMap.get(item.produto_id)?.custo || 0
+                return acc + (custoItem * item.quantidade)
+            }, 0)
+
             // 3. Atualizar dados da venda
             const total = data.itens.reduce((acc, item) => acc + item.subtotal, 0)
             const { data: vendaUpdated, error: vendaError } = await supabase
@@ -383,6 +418,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                     taxa_entrega: data.taxa_entrega || 0,
                     forma_pagamento: data.forma_pagamento,
                     observacoes: data.observacoes || null,
+                    custo_total: custoTotal,
                 })
                 .eq('id', id)
                 .select()
@@ -405,6 +441,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 quantidade: item.quantidade,
                 preco_unitario: item.preco_unitario,
                 subtotal: item.subtotal,
+                custo_unitario: produtoMap.get(item.produto_id)?.custo || 0,
             }))
 
             const { error: insertError } = await supabase

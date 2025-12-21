@@ -104,8 +104,12 @@ export function Vendas() {
             }
 
             // Filtro de pagamento
-            if (pagamentoFilter === 'pago' && !venda.pago) return false
-            if (pagamentoFilter === 'nao_pago' && venda.pago) return false
+            if (pagamentoFilter === 'pago') {
+                if (!venda.pago || venda.forma_pagamento === 'brinde') return false
+            }
+            if (pagamentoFilter === 'nao_pago') {
+                if (venda.pago || venda.forma_pagamento === 'brinde') return false
+            }
 
             return true
         })
@@ -377,7 +381,11 @@ export function Vendas() {
                                                             'bg-warning-500'
                                                             }`} />
                                                     </div>
-                                                    {venda.pago ? (
+                                                    {venda.forma_pagamento === 'brinde' ? (
+                                                        <Badge variant="gray" className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
+                                                            <span>🎁</span> Brinde
+                                                        </Badge>
+                                                    ) : venda.pago ? (
                                                         <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
                                                             <span>💰</span> Pago
                                                         </Badge>

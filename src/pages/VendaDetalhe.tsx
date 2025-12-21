@@ -182,7 +182,11 @@ export function VendaDetalhe() {
                             <Badge variant={getStatusBadgeVariant(venda.status)} className="text-sm py-1 px-3">
                                 {VENDA_STATUS_LABELS[venda.status]}
                             </Badge>
-                            {venda.pago && (
+                            {venda.forma_pagamento === 'brinde' ? (
+                                <Badge variant="gray" className="text-sm py-1 px-3 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
+                                    🎁 Brinde
+                                </Badge>
+                            ) : venda.pago && (
                                 <Badge variant="success" className="text-sm py-1 px-3">
                                     💰 Pago
                                 </Badge>
@@ -251,20 +255,22 @@ export function VendaDetalhe() {
                     </div>
 
                     {/* Status de Pagamento */}
-                    <div className="pt-4 mt-4 border-t border-gray-200">
-                        <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
-                            <DollarSign className="h-3 w-3" /> Status de Pagamento
-                        </p>
-                        <Button
-                            variant={venda.pago ? "secondary" : "primary"}
-                            className="w-full"
-                            leftIcon={venda.pago ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                            onClick={handleTogglePago}
-                            isLoading={isUpdating}
-                        >
-                            {venda.pago ? 'Desmarcar Pago' : 'Marcar como Pago'}
-                        </Button>
-                    </div>
+                    {venda.forma_pagamento !== 'brinde' && (
+                        <div className="pt-4 mt-4 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
+                                <DollarSign className="h-3 w-3" /> Status de Pagamento
+                            </p>
+                            <Button
+                                variant={venda.pago ? "secondary" : "primary"}
+                                className="w-full"
+                                leftIcon={venda.pago ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                                onClick={handleTogglePago}
+                                isLoading={isUpdating}
+                            >
+                                {venda.pago ? 'Desmarcar Pago' : 'Marcar como Pago'}
+                            </Button>
+                        </div>
+                    )}
                 </Card>
 
                 {/* Client Info */}
