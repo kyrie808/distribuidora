@@ -197,7 +197,7 @@ export function Vendas() {
                         >
                             <Badge
                                 variant="gray"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-gray-400 ring-offset-1'
                                     }`}
                             >
                                 <Truck className="h-3 w-3 mr-1" />
@@ -205,24 +205,24 @@ export function Vendas() {
                             </Badge>
                         </button>
                         <button
-                            onClick={() => setStatusFilter('entregue')}
+                            onClick={() => setStatusFilter(statusFilter === 'entregue' ? 'todos' : 'entregue')}
                             className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="success"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-success-500 ring-offset-1'
                                     }`}
                             >
                                 {totalEntregues} Entregues
                             </Badge>
                         </button>
                         <button
-                            onClick={() => setStatusFilter('pendente')}
+                            onClick={() => setStatusFilter(statusFilter === 'pendente' ? 'todos' : 'pendente')}
                             className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="warning"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-warning-500 ring-offset-1'
                                     }`}
                             >
                                 {totalEntregasPendentes} Pendentes
@@ -230,15 +230,19 @@ export function Vendas() {
                         </button>
                         <button
                             onClick={() => {
-                                setStatusFilter('cancelada');
-                                setPagamentoFilter('todos'); // Reset payment filter to show all cancelled
+                                if (statusFilter === 'cancelada') {
+                                    setStatusFilter('todos');
+                                } else {
+                                    setStatusFilter('cancelada');
+                                    setPagamentoFilter('todos'); // Reset payment filter to show all cancelled
+                                }
                             }}
                             className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                             title="Vendas Canceladas"
                         >
                             <Badge
                                 variant="danger"
-                                className={`h-7 flex items-center gap-1 whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center gap-1 whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-danger-500 ring-offset-1'
                                     }`}
                             >
                                 <XCircle className="h-3.5 w-3.5" />
@@ -255,7 +259,7 @@ export function Vendas() {
                         >
                             <Badge
                                 variant="gray"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-gray-400 ring-offset-1'
                                     }`}
                             >
                                 <DollarSign className="h-3 w-3 mr-1" />
@@ -263,24 +267,24 @@ export function Vendas() {
                             </Badge>
                         </button>
                         <button
-                            onClick={() => setPagamentoFilter('pago')}
+                            onClick={() => setPagamentoFilter(pagamentoFilter === 'pago' ? 'todos' : 'pago')}
                             className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="success"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-success-500 ring-offset-1'
                                     }`}
                             >
                                 {totalPagos} Pagos
                             </Badge>
                         </button>
                         <button
-                            onClick={() => setPagamentoFilter('nao_pago')}
+                            onClick={() => setPagamentoFilter(pagamentoFilter === 'nao_pago' ? 'todos' : 'nao_pago')}
                             className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="warning"
-                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-warning-500 ring-offset-1'
                                     }`}
                             >
                                 {totalAReceber} A Receber
@@ -360,20 +364,27 @@ export function Vendas() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <div className="font-semibold text-gray-900 truncate">
+                                            <div className="font-semibold text-gray-900 truncate w-[130px] sm:w-[150px]">
                                                 {venda.contato ? (
                                                     <ClienteNome contato={venda.contato} />
                                                 ) : (
                                                     'Cliente desconhecido'
                                                 )}
                                             </div>
-                                            <Badge variant={getStatusBadgeVariant(venda.status)}>
-                                                {VENDA_STATUS_LABELS[venda.status]}
-                                            </Badge>
+                                            <div title={VENDA_STATUS_LABELS[venda.status]} className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-100 transition-colors">
+                                                <div className={`w-2.5 h-2.5 rounded-full ${venda.status === 'entregue' ? 'bg-success-500' :
+                                                    venda.status === 'pendente' ? 'bg-warning-500' :
+                                                        'bg-danger-500'
+                                                    }`} />
+                                            </div>
                                             {venda.pago ? (
-                                                <Badge variant="success">💰 Pago</Badge>
+                                                <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                    <span>💰</span> Pago
+                                                </Badge>
                                             ) : (
-                                                <Badge variant="gray">⏳ Não pago</Badge>
+                                                <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                    <span>⏳</span> Não pago
+                                                </Badge>
                                             )}
                                         </div>
 
