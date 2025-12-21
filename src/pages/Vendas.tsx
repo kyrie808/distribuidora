@@ -197,23 +197,11 @@ export function Vendas() {
                         >
                             <Badge
                                 variant="gray"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
                                     }`}
                             >
-                                <Truck className="h-3 w-3 mr-1 inline" />
+                                <Truck className="h-3 w-3 mr-1" />
                                 {vendas.length} Todas
-                            </Badge>
-                        </button>
-                        <button
-                            onClick={() => setStatusFilter('pendente')}
-                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
-                        >
-                            <Badge
-                                variant="warning"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                    }`}
-                            >
-                                {totalEntregasPendentes} Pendentes
                             </Badge>
                         </button>
                         <button
@@ -222,10 +210,22 @@ export function Vendas() {
                         >
                             <Badge
                                 variant="success"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
                                     }`}
                             >
                                 {totalEntregues} Entregues
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('pendente')}
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
+                        >
+                            <Badge
+                                variant="warning"
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                {totalEntregasPendentes} Pendentes
                             </Badge>
                         </button>
                         <button
@@ -238,37 +238,37 @@ export function Vendas() {
                         >
                             <Badge
                                 variant="danger"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                    } flex items-center justify-center w-10 h-6 px-0`} // Compact dimensions
+                                className={`h-7 flex items-center gap-1 whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
                             >
-                                <XCircle className="h-4 w-4" />
-                                <span className="ml-1 text-xs">{totalCanceladas}</span>
+                                <XCircle className="h-3.5 w-3.5" />
+                                <span>{totalCanceladas}</span>
                             </Badge>
                         </button>
                     </div>
 
                     {/* Grupo: Status de Pagamento */}
-                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                    <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide items-center">
                         <button
                             onClick={() => setPagamentoFilter('todos')}
-                            className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full flex-shrink-0"
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="gray"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
                                     }`}
                             >
-                                <DollarSign className="h-3 w-3 mr-1 inline" />
+                                <DollarSign className="h-3 w-3 mr-1" />
                                 {vendas.length} Todas
                             </Badge>
                         </button>
                         <button
                             onClick={() => setPagamentoFilter('pago')}
-                            className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full flex-shrink-0"
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="success"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
                                     }`}
                             >
                                 {totalPagos} Pagos
@@ -276,11 +276,11 @@ export function Vendas() {
                         </button>
                         <button
                             onClick={() => setPagamentoFilter('nao_pago')}
-                            className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full flex-shrink-0"
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
                             <Badge
                                 variant="warning"
-                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
                                     }`}
                             >
                                 {totalAReceber} A Receber
