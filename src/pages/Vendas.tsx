@@ -67,6 +67,10 @@ export function Vendas() {
     const [searchQuery, setSearchQuery] = useState('')
     const [debouncedSearch, setDebouncedSearch] = useState('')
 
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
+
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
 
     // Debounce search
@@ -368,27 +372,30 @@ export function Vendas() {
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2 mb-1">
-                                            <div className="font-semibold text-gray-900 truncate w-[130px] sm:w-[150px]">
-                                                {venda.contato ? (
-                                                    <ClienteNome contato={venda.contato} />
-                                                ) : (
-                                                    'Cliente desconhecido'
-                                                )}
+                                            <div title={venda.contato?.nome || 'Cliente'} className="font-semibold text-gray-900 truncate w-[140px] sm:w-[150px]">
+                                                {venda.contato?.nome || 'Cliente'}
                                             </div>
-                                            <div title={VENDA_STATUS_LABELS[venda.status]} className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-100 transition-colors">
-                                                <div className={`w-2.5 h-2.5 rounded-full ${venda.status === 'entregue' ? 'bg-success-500' :
-                                                    venda.status === 'pendente' ? 'bg-warning-500' :
-                                                        'bg-danger-500'
-                                                    }`} />
-                                            </div>
-                                            {venda.pago ? (
-                                                <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
-                                                    <span>💰</span> Pago
+                                            {venda.status === 'cancelada' ? (
+                                                <Badge variant="danger" className="w-36 justify-center py-1">
+                                                    Cancelada
                                                 </Badge>
                                             ) : (
-                                                <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
-                                                    <span>⏳</span> Não pago
-                                                </Badge>
+                                                <>
+                                                    <div title={VENDA_STATUS_LABELS[venda.status]} className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-100 transition-colors">
+                                                        <div className={`w-2.5 h-2.5 rounded-full ${venda.status === 'entregue' ? 'bg-success-500' :
+                                                            'bg-warning-500'
+                                                            }`} />
+                                                    </div>
+                                                    {venda.pago ? (
+                                                        <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                            <span>💰</span> Pago
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
+                                                            <span>⏳</span> Não pago
+                                                        </Badge>
+                                                    )}
+                                                </>
                                             )}
                                         </div>
 

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Plus, Search, Filter, X, Users } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -19,6 +19,10 @@ export function Contatos() {
     const [tipoFilter, setTipoFilter] = useState<TipoFilter>('todos')
     const [showFilters, setShowFilters] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+
+    useEffect(() => {
+        window.scrollTo(0, 0)
+    }, [])
 
     const { contatos, loading, error, getNomeIndicador } = useContatos()
 
@@ -78,11 +82,11 @@ export function Contatos() {
                 <div className="flex gap-2 mb-4 overflow-x-auto px-2 py-2">
                     <button
                         onClick={() => setStatusFilter('todos')}
-                        className="focus:outline-none focus:ring-2 focus:ring-primary-500 rounded-full overflow-hidden"
+                        className="focus:outline-none rounded-full active:scale-95 transition-transform"
                     >
                         <Badge
                             variant="gray"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-gray-400 ring-offset-1'
                                 }`}
                         >
                             {totalContatos} contatos
@@ -90,11 +94,11 @@ export function Contatos() {
                     </button>
                     <button
                         onClick={() => setStatusFilter('cliente')}
-                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
+                        className="focus:outline-none rounded-full active:scale-95 transition-transform"
                     >
                         <Badge
                             variant="success"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cliente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cliente' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-success-500 ring-offset-1'
                                 }`}
                         >
                             {totalClientes} clientes
@@ -102,11 +106,11 @@ export function Contatos() {
                     </button>
                     <button
                         onClick={() => setStatusFilter('lead')}
-                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
+                        className="focus:outline-none rounded-full active:scale-95 transition-transform"
                     >
                         <Badge
                             variant="warning"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'lead' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'lead' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-warning-500 ring-offset-1'
                                 }`}
                         >
                             {totalLeads} leads

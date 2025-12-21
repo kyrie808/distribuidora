@@ -1,5 +1,5 @@
 import { Phone, MapPin, User, Building2 } from 'lucide-react'
-import { ClienteNome } from './ClienteNome' // Added import
+
 
 // ...
 
@@ -52,10 +52,9 @@ export function ContatoCard({ contato, onClick, nomeIndicador, nivelEmoji }: Con
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                            <ClienteNome
-                                contato={contato}
-                                className="truncate flex-1 min-w-0"
-                            />
+                            <div className="font-semibold text-gray-900 truncate w-[140px] sm:w-[150px]" title={contato.nome}>
+                                {contato.nome}
+                            </div>
                             <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
                                 {CONTATO_STATUS_LABELS[contato.status]}
                             </Badge>
