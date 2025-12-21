@@ -16,7 +16,7 @@ import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
 import { Modal, ModalActions } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
-import { ClienteNome } from '../components/contatos'
+
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
 import { useScrollPersistence } from '../hooks/useScrollPersistence'
@@ -129,16 +129,7 @@ export function Vendas() {
         })
     }
 
-    const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'warning' => {
-        switch (status) {
-            case 'entregue':
-                return 'success'
-            case 'cancelada':
-                return 'danger'
-            default:
-                return 'warning'
-        }
-    }
+
 
     const handleDelete = (id: string) => {
         setVendaToDelete(id)
