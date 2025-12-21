@@ -9,6 +9,7 @@ import {
     Search,
     Trash2,
     Edit,
+    XCircle,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -186,100 +187,106 @@ export function Vendas() {
                     </div>
                 </div>
 
-                {/* Filter Chips - Linha Única com Scroll Horizontal */}
-                <div className="flex gap-2 mb-4 overflow-x-auto px-2 py-2">
+                {/* Filter Chips - Duas Linhas com Scroll Horizontal */}
+                <div className="flex flex-col gap-2 mb-4 px-2 py-2">
                     {/* Grupo: Status de Entrega */}
-                    <button
-                        onClick={() => setStatusFilter('todos')}
-                        className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="gray"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                    <div className="flex gap-2 overflow-x-auto p-2 scrollbar-hide items-center">
+                        <button
+                            onClick={() => setStatusFilter('todos')}
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
-                            <Truck className="h-3 w-3 mr-1 inline" />
-                            {vendas.length} Todas
-                        </Badge>
-                    </button>
-                    <button
-                        onClick={() => setStatusFilter('pendente')}
-                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="warning"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                            <Badge
+                                variant="gray"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                <Truck className="h-3 w-3 mr-1 inline" />
+                                {vendas.length} Todas
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('pendente')}
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
-                            {totalEntregasPendentes} Pendentes
-                        </Badge>
-                    </button>
-                    <button
-                        onClick={() => setStatusFilter('entregue')}
-                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="success"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                            <Badge
+                                variant="warning"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                {totalEntregasPendentes} Pendentes
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => setStatusFilter('entregue')}
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                         >
-                            {totalEntregues} Entregues
-                        </Badge>
-                    </button>
-                    <button
-                        onClick={() => setStatusFilter('cancelada')}
-                        className="focus:outline-none focus:ring-2 focus:ring-danger-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="danger"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                            <Badge
+                                variant="success"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'entregue' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                {totalEntregues} Entregues
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => {
+                                setStatusFilter('cancelada');
+                                setPagamentoFilter('todos'); // Reset payment filter to show all cancelled
+                            }}
+                            className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
+                            title="Vendas Canceladas"
                         >
-                            {totalCanceladas} Canceladas
-                        </Badge>
-                    </button>
-
-                    {/* Separador Visual */}
-                    <div className="w-px bg-gray-300 mx-2 h-6 self-center shrink-0" />
+                            <Badge
+                                variant="danger"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${statusFilter !== 'cancelada' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    } flex items-center justify-center w-10 h-6 px-0`} // Compact dimensions
+                            >
+                                <XCircle className="h-4 w-4" />
+                                <span className="ml-1 text-xs">{totalCanceladas}</span>
+                            </Badge>
+                        </button>
+                    </div>
 
                     {/* Grupo: Status de Pagamento */}
-                    <button
-                        onClick={() => setPagamentoFilter('todos')}
-                        className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="gray"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        <button
+                            onClick={() => setPagamentoFilter('todos')}
+                            className="focus:outline-none focus:ring-2 focus:ring-gray-500 rounded-full flex-shrink-0"
                         >
-                            <DollarSign className="h-3 w-3 mr-1 inline" />
-                            {vendas.length} Todas
-                        </Badge>
-                    </button>
-                    <button
-                        onClick={() => setPagamentoFilter('pago')}
-                        className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="success"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                            <Badge
+                                variant="gray"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                <DollarSign className="h-3 w-3 mr-1 inline" />
+                                {vendas.length} Todas
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => setPagamentoFilter('pago')}
+                            className="focus:outline-none focus:ring-2 focus:ring-success-500 rounded-full flex-shrink-0"
                         >
-                            {totalPagos} Pagos
-                        </Badge>
-                    </button>
-                    <button
-                        onClick={() => setPagamentoFilter('nao_pago')}
-                        className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full overflow-hidden"
-                    >
-                        <Badge
-                            variant="warning"
-                            className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
-                                }`}
+                            <Badge
+                                variant="success"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                {totalPagos} Pagos
+                            </Badge>
+                        </button>
+                        <button
+                            onClick={() => setPagamentoFilter('nao_pago')}
+                            className="focus:outline-none focus:ring-2 focus:ring-warning-500 rounded-full flex-shrink-0"
                         >
-                            {totalAReceber} A Receber
-                        </Badge>
-                    </button>
+                            <Badge
+                                variant="warning"
+                                className={`whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-sm'
+                                    }`}
+                            >
+                                {totalAReceber} A Receber
+                            </Badge>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Filters Panel */}
@@ -433,7 +440,7 @@ export function Vendas() {
                         ))}
                     </div>
                 )}
-            </PageContainer>
+            </PageContainer >
 
 
             <Modal

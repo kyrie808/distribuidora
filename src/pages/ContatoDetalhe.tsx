@@ -13,6 +13,11 @@ import {
     ShoppingCart,
     ChevronRight,
     Eye,
+    Truck,
+    Banknote,
+    CheckCircle,
+    AlertCircle,
+    Clock,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -75,17 +80,40 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                                 {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} {venda.itens.reduce((acc, item) => acc + item.quantidade, 0) === 1 ? 'item' : 'itens'}
                             </div>
                         </div>
+
                         <div className="flex items-center gap-2">
-                            <div className="text-right mr-1">
+                            <div className="flex flex-col items-end gap-1.5 mr-2">
                                 <div className="text-sm font-bold text-gray-900">
                                     {formatCurrency(venda.total)}
                                 </div>
-                                <Badge variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}>
-                                    {venda.status}
-                                </Badge>
+                                <div className="flex items-center gap-1">
+                                    <Badge
+                                        variant={CONTATO_STATUS_COLORS[venda.status === 'entregue' ? 'cliente' : 'lead'] as any}
+                                        className="flex items-center gap-1"
+                                    >
+                                        <Truck className="h-3 w-3" />
+                                        {venda.status}
+                                    </Badge>
+
+                                    <Badge
+                                        variant={venda.pago ? 'success' : 'warning'}
+                                        className="flex items-center gap-1"
+                                    >
+                                        {venda.pago ? (
+                                            <>
+                                                <Banknote className="h-3 w-3" />
+                                                Pago
+                                            </>
+                                        ) : (
+                                            <>
+                                                <AlertCircle className="h-3 w-3" />
+                                                A Receber
+                                            </>
+                                        )}
+                                    </Badge>
+                                </div>
                             </div>
 
-                            {/* Actions - Always visible now */}
                             <div className="flex items-center gap-1">
                                 <button
                                     onClick={(e) => {
@@ -128,12 +156,22 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                         </div>
                     </div>
 
-                    {/* Preview Dropdown/Accordion */}
                     {expandedVendaId === venda.id && (
                         <div className="px-3 pb-3 pt-0 border-t border-gray-200/50 bg-white ml-3 mr-3 mb-3 rounded-b-lg shadow-sm">
                             <div className="pt-2 mb-2 flex justify-between items-center text-xs text-gray-500">
                                 <span>Itens do Pedido</span>
-                                <span>{venda.forma_pagamento ? venda.forma_pagamento.replace('_', ' ').toUpperCase() : '-'}</span>
+                                <div className="flex items-center gap-2">
+                                    <span>{venda.forma_pagamento ? venda.forma_pagamento.replace('_', ' ').toUpperCase() : '-'}</span>
+                                    {venda.pago ? (
+                                        <span className="flex items-center text-success-600 gap-1 ml-2 inline-flex">
+                                            <CheckCircle className="h-3 w-3" /> Pago
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center text-warning-600 gap-1 ml-2 inline-flex">
+                                            <Clock className="h-3 w-3" /> Aguardando
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                             <div className="space-y-1">
                                 {venda.itens.map((item: any, idx: number) => (

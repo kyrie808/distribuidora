@@ -1,0 +1,89 @@
+{
+  "sales": [
+    {
+      "id": "60302e3f-3f86-42e5-99a6-a1313cb8b57b",
+      "contato_id": "18e07874-a4a2-4864-be3e-697993bf6939",
+      "data": "2025-12-21",
+      "data_entrega": null,
+      "total": 23,
+      "forma_pagamento": "pix",
+      "status": "entregue",
+      "observacoes": null,
+      "criado_em": "2025-12-15T09:07:35.777638+00:00",
+      "atualizado_em": "2025-12-21T17:31:04.777623+00:00",
+      "pago": true,
+      "taxa_entrega": 0,
+      "itens_venda": [
+        {
+          "id": "77b54695-cfaa-4915-b9e8-5cae98f883d9",
+          "produtos": {
+            "nome": "Massa Pão de Queijo 1kg",
+            "unidade": "kg"
+          },
+          "subtotal": 23,
+          "venda_id": "60302e3f-3f86-42e5-99a6-a1313cb8b57b",
+          "produto_id": "487fef98-5d10-42e4-a628-2f7d176ce87e",
+          "quantidade": 1,
+          "preco_unitario": 23
+        }
+      ]
+    },
+    {
+      "id": "ac41f437-217e-4b2f-aefe-0211ed4df055",
+      "contato_id": "00dd1b76-9572-455d-b945-977659783d49",
+      "data": "2025-12-20",
+      "data_entrega": null,
+      "total": 23,
+      "forma_pagamento": "pix",
+      "status": "entregue",
+      "observacoes": null,
+      "criado_em": "2025-12-20T21:32:14.471393+00:00",
+      "atualizado_em": "2025-12-20T22:44:16.890974+00:00",
+      "pago": true,
+      "taxa_entrega": 0,
+      "itens_venda": [
+        {
+          "id": "74364e12-1121-4379-b5c7-89ac01e7cc3a",
+          "produtos": {
+            "nome": "Massa Pão de Queijo 1kg",
+            "unidade": "kg"
+          },
+          "subtotal": 23,
+          "venda_id": "ac41f437-217e-4b2f-aefe-0211ed4df055",
+          "produto_id": "487fef98-5d10-42e4-a628-2f7d176ce87e",
+          "quantidade": 1,
+          "preco_unitario": 23
+        }
+      ]
+    },
+    {
+      "id": "ae2e75d9-c123-4f41-9546-9a5760fc2b3a",
+      "contato_id": "18e07874-a4a2-4864-be3e-697993bf6939",
+      "data": "2025-12-20",
+      "data_entrega": null,
+      "total": 61,
+      "forma_pagamento": "pix",
+      "status": "entregue",
+      "observacoes": null,
+      "criado_em": "2025-12-21T17:31:04.777623+00:00",
+      "atualizado_em": "2025-12-21T17:31:04.777623+00:00",
+      "pago": false,
+      "taxa_entrega": 0,
+      "itens_venda": [
+        {
+          "id": "19c198b4-adfd-4094-a787-02ce1c2c3612",
+          "produtos": {
+            "nome": "Massa Pão de Queijo 4kg",
+            "unidade": "kg"
+          },
+          "subtotal": 61,
+          "venda_id": "ae2e75d9-c123-4f41-9546-9a5760fc2b3a",
+          "produto_id": "3074f382-ee98-4cf5-9d6d-e403c7d61166",
+          "quantidade": 1,
+          "preco_unitario": 61
+        }
+      ]
+    }
+  ],
+  "movements": []
+}

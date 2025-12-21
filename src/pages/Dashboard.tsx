@@ -117,7 +117,10 @@ export function Dashboard() {
                                 </Card>
 
                                 {/* A Receber */}
-                                <Card className="bg-gradient-to-br from-amber-500 to-amber-600 text-white">
+                                <Card
+                                    className="bg-gradient-to-br from-amber-500 to-amber-600 text-white cursor-pointer hover:opacity-95 transition-opacity"
+                                    onClick={() => navigate('/vendas?pagamento=nao_pago')}
+                                >
                                     <div className="flex items-center justify-between mb-2">
                                         <DollarSign className="h-5 w-5 opacity-80" />
                                         <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">⏳</span>
@@ -162,7 +165,10 @@ export function Dashboard() {
                                 </Card>
 
                                 {/* Entregas Pendentes */}
-                                <Card className="border-l-4 border-l-warning-500">
+                                <Card
+                                    className="border-l-4 border-l-warning-500 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    onClick={() => navigate('/vendas?status=pendente')}
+                                >
                                     <div className="flex items-center gap-2 mb-2">
                                         <Package className="h-5 w-5 text-warning-500" />
                                     </div>
