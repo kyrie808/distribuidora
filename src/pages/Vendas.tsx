@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
     ShoppingCart,
     Filter,
@@ -18,6 +18,7 @@ import { Button } from '../components/ui/Button'
 import { ClienteNome } from '../components/contatos'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
+import { useScrollPersistence } from '../hooks/useScrollPersistence'
 import { formatCurrency, formatDate, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 
@@ -34,9 +35,33 @@ const PERIODO_LABELS = {
 
 export function Vendas() {
     const navigate = useNavigate()
-    const [statusFilter, setStatusFilter] = useState<StatusFilter>('todos')
-    const [periodoFilter, setPeriodoFilter] = useState<PeriodoFilter>('todos')
-    const [pagamentoFilter, setPagamentoFilter] = useState<PagamentoFilter>('todos')
+    const [searchParams, setSearchParams] = useSearchParams()
+
+    // Derived state from URL
+    const statusFilter = (searchParams.get('status') as StatusFilter) || 'todos'
+    const periodoFilter = (searchParams.get('periodo') as PeriodoFilter) || 'todos'
+    const pagamentoFilter = (searchParams.get('pagamento') as PagamentoFilter) || 'todos'
+
+    // Helpers to update URL
+    const setStatusFilter = (val: StatusFilter) => {
+        setSearchParams(prev => {
+            prev.set('status', val)
+            return prev
+        })
+    }
+    const setPeriodoFilter = (val: PeriodoFilter) => {
+        setSearchParams(prev => {
+            prev.set('periodo', val)
+            return prev
+        })
+    }
+    const setPagamentoFilter = (val: PagamentoFilter) => {
+        setSearchParams(prev => {
+            prev.set('pagamento', val)
+            return prev
+        })
+    }
+
     const [showFilters, setShowFilters] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
     const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -61,6 +86,9 @@ export function Vendas() {
         },
     })
     const { getNomeIndicador } = useContatos()
+
+    // Persist Scroll
+    useScrollPersistence('vendas_list', loading)
 
     // Filtragem local com ambos filtros (status + pagamento)
     const filteredVendas = useMemo(() => {
@@ -88,9 +116,12 @@ export function Vendas() {
     const hasActiveFilters = statusFilter !== 'todos' || periodoFilter !== 'todos' || pagamentoFilter !== 'todos'
 
     const clearFilters = () => {
-        setStatusFilter('todos')
-        setPeriodoFilter('todos')
-        setPagamentoFilter('todos')
+        setSearchParams(prev => {
+            prev.delete('status')
+            prev.delete('periodo')
+            prev.delete('pagamento')
+            return prev
+        })
     }
 
     const getStatusBadgeVariant = (status: string): 'success' | 'danger' | 'warning' => {
