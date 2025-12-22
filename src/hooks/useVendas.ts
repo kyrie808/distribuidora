@@ -199,12 +199,12 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         const vendasNaoCanceladas = vendas.filter((v) => v.status !== 'cancelada')
         const vendasMesNaoCanceladas = vendasDoMes.filter((v) => v.status !== 'cancelada')
 
-        // Exclude 'brinde' from faturamento
+        // Exclude 'brinde' and unpaid (fiado) from faturamento. ALSO exclude delivery fee.
         const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) =>
-            acc + (v.pago && v.forma_pagamento !== 'brinde' ? Number(v.total) : 0), 0)
+            acc + (v.pago && v.forma_pagamento !== 'brinde' ? (Number(v.total) - (v.taxa_entrega || 0)) : 0), 0)
 
         const faturamentoMes = vendasMesNaoCanceladas.reduce((acc, v) =>
-            acc + (v.pago && v.forma_pagamento !== 'brinde' ? Number(v.total) : 0), 0)
+            acc + (v.pago && v.forma_pagamento !== 'brinde' ? (Number(v.total) - (v.taxa_entrega || 0)) : 0), 0)
 
         // Product metrics
         const produtosVendidos = vendasMesNaoCanceladas.reduce((acc, v) => {
@@ -219,14 +219,22 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             return acc
         }, { total: 0, pote1kg: 0, pote4kg: 0 })
 
-        // Payment metrics
+        // Payment metrics (Net of delivery fee)
         const recebido = vendasNaoCanceladas
             .filter(v => v.pago === true && v.forma_pagamento !== 'brinde')
-            .reduce((acc, v) => acc + Number(v.total), 0)
+            .reduce((acc, v) => acc + (Number(v.total) - (v.taxa_entrega || 0)), 0)
 
         const aReceber = vendasNaoCanceladas
             .filter(v => v.pago !== true && v.forma_pagamento !== 'brinde')
-            .reduce((acc, v) => acc + Number(v.total), 0)
+            .reduce((acc, v) => acc + (Number(v.total) - (v.taxa_entrega || 0)), 0)
+
+        // Profit metric (Monthly) - Net of delivery fee
+        const lucroMes = vendasMesNaoCanceladas.reduce((acc, v) => {
+            if (v.pago && v.forma_pagamento !== 'brinde') {
+                return acc + ((Number(v.total) - (v.taxa_entrega || 0)) - (v.custo_total || 0))
+            }
+            return acc
+        }, 0)
 
         // Delivery metrics
         const entregasPendentes = vendas.filter(v => v.status === 'pendente').length
@@ -235,6 +243,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         return {
             faturamentoTotal,
             faturamentoMes,
+            lucroMes,
             totalVendas: vendasNaoCanceladas.length,
             vendasMes: vendasMesNaoCanceladas.length,
             ticketMedio: vendasNaoCanceladas.length > 0 ? faturamentoTotal / vendasNaoCanceladas.length : 0,

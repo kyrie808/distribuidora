@@ -107,13 +107,14 @@ export function Dashboard() {
                                 </Card>
 
                                 {/* Recebido */}
-                                <Card className="bg-gradient-to-br from-success-500 to-success-600 text-white">
+                                {/* Lucro do Mês */}
+                                <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
                                     <div className="flex items-center justify-between mb-2">
-                                        <DollarSign className="h-5 w-5 opacity-80" />
-                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">💰</span>
+                                        <TrendingUp className="h-5 w-5 opacity-80" />
+                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">📈</span>
                                     </div>
-                                    <p className="text-2xl font-bold">{formatCurrency(metrics.recebido)}</p>
-                                    <p className="text-sm opacity-80">Recebido</p>
+                                    <p className="text-2xl font-bold">{formatCurrency((metrics as any).lucroMes || 0)}</p>
+                                    <p className="text-sm opacity-80">Lucro do mês</p>
                                 </Card>
 
                                 {/* A Receber */}
