@@ -178,7 +178,10 @@ export function Dashboard() {
                                 </Card>
 
                                 {/* Entregas Realizadas */}
-                                <Card className="border-l-4 border-l-success-500">
+                                <Card
+                                    className="border-l-4 border-l-success-500 cursor-pointer hover:bg-gray-50 transition-colors"
+                                    onClick={() => navigate('/vendas?status=entregue')}
+                                >
                                     <div className="flex items-center gap-2 mb-2">
                                         <Package className="h-5 w-5 text-success-500" />
                                     </div>
