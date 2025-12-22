@@ -63,7 +63,7 @@ export function usePurchaseOrders() {
         setError(null)
         try {
             // 1. Create Header
-            const { data: orderData, error: orderError } = await supabase
+            const { data, error: orderError } = await supabase
                 .from('purchase_orders')
                 .insert({
                     supplier_id: order.supplier_id || 'Fabricante',
@@ -79,6 +79,9 @@ export function usePurchaseOrders() {
                 .single()
 
             if (orderError) throw orderError
+
+            // Fix TS error: ensure data is typed or accessed safely
+            const orderData = data as PurchaseOrder
 
             // 2. Create Items
             if (items.length > 0) {
@@ -156,7 +159,7 @@ export function usePurchaseOrders() {
         setError(null)
         try {
             const { error } = await supabase
-                .rpc('receive_purchase_order', { p_order_id: id })
+                .rpc('receive_purchase_order', { p_order_id: id } as any)
 
             if (error) throw error
             return true
