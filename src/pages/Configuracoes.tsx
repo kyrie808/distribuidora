@@ -89,7 +89,7 @@ export function Configuracoes() {
                 .select('*')
                 .eq('chave', 'locais_partida')
                 .maybeSingle() // Use maybeSingle to avoid 406 on no rows
-                .then(({ data, error }) => {
+                .then(({ data }) => {
                     if (data) {
                         const val = (data as any)?.valor
                         if (val && Array.isArray(val)) {
