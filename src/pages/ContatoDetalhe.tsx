@@ -440,11 +440,23 @@ export function ContatoDetalhe() {
                                 <div className="w-10 h-10 bg-success-50 rounded-full flex items-center justify-center">
                                     <MapPin className="h-5 w-5 text-success-500" />
                                 </div>
-                                <div>
+                                <div className="flex-1">
                                     <p className="text-sm text-gray-500">Endereço</p>
                                     <p className="font-medium text-gray-900">
                                         {[contato.endereco, contato.bairro].filter(Boolean).join(', ')}
                                     </p>
+                                    <button
+                                        onClick={() => {
+                                            const fullAddress = [contato.endereco, contato.bairro, 'São Paulo', 'Brasil'].filter(Boolean).join(', ')
+                                            const params = new URLSearchParams()
+                                            params.append('api', '1')
+                                            params.append('query', fullAddress)
+                                            window.open(`https://www.google.com/maps/search/?${params.toString()}`, '_blank')
+                                        }}
+                                        className="text-xs text-primary-600 hover:text-primary-700 font-medium flex items-center gap-1 mt-1 transition-colors"
+                                    >
+                                        Ver no Mapa <ChevronRight className="h-3 w-3" />
+                                    </button>
                                 </div>
                             </div>
                         </Card>

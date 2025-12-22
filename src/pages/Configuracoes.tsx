@@ -7,15 +7,29 @@ import {
     RefreshCw,
     Info,
     Package,
-    ChevronRight,
+    MapPin,
+    Trash2,
+    Plus,
+    ChevronRight
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, Button, LoadingScreen } from '../components/ui'
+import { Card, Button, LoadingScreen, Input } from '../components/ui'
 import { useConfiguracoes } from '../hooks/useConfiguracoes'
 import { useToast } from '../components/ui/Toast'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
+import { getCoordinates } from '../utils/geocoding'
+import { useCep } from '../hooks/useCep'
+import type { Json } from '../types/database'
+
+interface LocalPartida {
+    id: string
+    nome: string
+    endereco: string
+    lat: number
+    lng: number
+}
 
 export function Configuracoes() {
     const navigate = useNavigate()
@@ -27,6 +41,31 @@ export function Configuracoes() {
     const [cicloB2B, setCicloB2B] = useState(7)
     const [recompensaValor, setRecompensaValor] = useState(5)
     const [mensagemRecompra, setMensagemRecompra] = useState('')
+
+    // Locais de Partida State
+    const [locais, setLocais] = useState<LocalPartida[]>([])
+    const [novoLocalNome, setNovoLocalNome] = useState('')
+    const [novoLocalEndereco, setNovoLocalEndereco] = useState('')
+    const [addingLocal, setAddingLocal] = useState(false)
+
+    const { fetchCep } = useCep()
+
+    const handleEnderecoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value
+        setNovoLocalEndereco(value)
+
+        // Auto-complete if it looks like a CEP (8 digits)
+        const cleanValue = value.replace(/\D/g, '')
+        if (cleanValue.length === 8) {
+            const addressData = await fetchCep(cleanValue)
+            if (addressData) {
+                const fullAddress = `${addressData.street}, , ${addressData.neighborhood}, ${addressData.city} - ${addressData.state}`
+                setNovoLocalEndereco(fullAddress)
+                toast.success('Endereço completado pelo CEP!')
+            }
+        }
+    }
+
     const [saving, setSaving] = useState(false)
 
     // Sync with config when loaded
@@ -36,8 +75,89 @@ export function Configuracoes() {
             setCicloB2B(config.cicloRecompra.b2b)
             setRecompensaValor(config.recompensaIndicacao.valor)
             setMensagemRecompra(config.mensagemRecompra)
+
+            // Load locais from config if available (Need to verify how `config` is structured in hook, 
+            // but assuming we might need to fetch it or it is part of config object.
+            // For now, let's fetch 'locais_partida' directly here if not in hook yet, 
+            // OR assuming user will update useConfiguracoes later. 
+            // Actually, let's just fetch it here to be safe or assuming the hook returns all configs.)
+            // NOTE: The `useConfiguracoes` hook likely summarizes configs. 
+            // I'll fetch 'locais_partida' separately to avoid breaking the hook type for now, or assume it's there.
+            // Let's safe fetch:
+            // Fetch saved locations explicitly to ensure we have them even if useConfiguracoes is shallow
+            supabase.from('configuracoes')
+                .select('*')
+                .eq('chave', 'locais_partida')
+                .maybeSingle() // Use maybeSingle to avoid 406 on no rows
+                .then(({ data, error }) => {
+                    if (data) {
+                        const val = (data as any)?.valor
+                        if (val && Array.isArray(val)) {
+                            console.log('📍 Locais carregados:', val)
+                            setLocais(val as LocalPartida[])
+                        }
+                    }
+                })
         }
     }, [config, loading])
+
+    const handleAddLocal = async () => {
+        if (!novoLocalNome || !novoLocalEndereco) {
+            toast.error('Preencha nome e endereço')
+            return
+        }
+
+        setAddingLocal(true)
+        try {
+            const coords = await getCoordinates(novoLocalEndereco)
+            if (!coords) {
+                toast.error('Endereço não encontrado')
+                return
+            }
+
+            const novoLocal: LocalPartida = {
+                id: crypto.randomUUID(),
+                nome: novoLocalNome,
+                endereco: novoLocalEndereco,
+                lat: coords.lat,
+                lng: coords.lng
+            }
+
+            const updatedLocais = [...locais, novoLocal]
+            setLocais(updatedLocais)
+
+            // Auto-save changes to DB
+            await supabase.from('configuracoes').upsert({
+                chave: 'locais_partida',
+                valor: updatedLocais as unknown as Json
+            }, { onConflict: 'chave' })
+
+            setNovoLocalNome('')
+            setNovoLocalEndereco('')
+            toast.success('Local adicionado e salvo!')
+        } catch (error) {
+            toast.error('Erro ao adicionar local')
+            console.error(error)
+        } finally {
+            setAddingLocal(false)
+        }
+    }
+
+    const handleRemoveLocal = async (id: string) => {
+        const updatedLocais = locais.filter(l => l.id !== id)
+        setLocais(updatedLocais)
+
+        try {
+            await supabase.from('configuracoes').upsert({
+                chave: 'locais_partida',
+                valor: updatedLocais as unknown as Json
+            }, { onConflict: 'chave' })
+            toast.success('Local removido!')
+        } catch (error) {
+            toast.error('Erro ao remover local')
+            console.error(error)
+        }
+    }
 
     const handleSave = async () => {
         setSaving(true)
@@ -49,7 +169,7 @@ export function Configuracoes() {
                 .upsert({
                     chave: 'ciclo_recompra',
                     valor: { b2c: cicloB2C, b2b: cicloB2B },
-                })
+                }, { onConflict: 'chave' })
 
             // Update recompensa_indicacao
             await supabase
@@ -57,7 +177,7 @@ export function Configuracoes() {
                 .upsert({
                     chave: 'recompensa_indicacao',
                     valor: { tipo: 'desconto', valor: recompensaValor },
-                })
+                }, { onConflict: 'chave' })
 
             // Update mensagem_recompra
             await supabase
@@ -65,7 +185,15 @@ export function Configuracoes() {
                 .upsert({
                     chave: 'mensagem_recompra',
                     valor: { texto: mensagemRecompra },
-                })
+                }, { onConflict: 'chave' })
+
+            // Update locais_partida
+            await supabase
+                .from('configuracoes')
+                .upsert({
+                    chave: 'locais_partida',
+                    valor: locais as unknown as Json
+                }, { onConflict: 'chave' })
 
             await refetch()
             toast.success('Configurações salvas!')
@@ -82,6 +210,14 @@ export function Configuracoes() {
         setCicloB2B(config.cicloRecompra.b2b)
         setRecompensaValor(config.recompensaIndicacao.valor)
         setMensagemRecompra(config.mensagemRecompra)
+        // Refresh locais from DB
+        supabase.from('configuracoes').select('*').eq('chave', 'locais_partida').maybeSingle()
+            .then(({ data }) => {
+                const val = (data as any)?.valor
+                if (val && Array.isArray(val)) {
+                    setLocais(val as LocalPartida[])
+                }
+            })
         toast.info('Alterações descartadas')
     }
 
@@ -211,6 +347,65 @@ export function Configuracoes() {
                             </div>
                         </Card>
 
+
+
+                        {/* Locais de Partida */}
+                        <Card>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                    <MapPin className="h-5 w-5 text-primary-600" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-gray-900">Locais de Partida</h3>
+                                    <p className="text-sm text-gray-500">Pontos iniciais para rotas</p>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {locais.map(local => (
+                                    <div key={local.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                        <div>
+                                            <p className="font-medium text-gray-900">{local.nome}</p>
+                                            <p className="text-xs text-gray-500">{local.endereco}</p>
+                                            <p className="text-[10px] text-gray-400 mt-1">
+                                                Lat: {local.lat.toFixed(4)}, Lng: {local.lng.toFixed(4)}
+                                            </p>
+                                        </div>
+                                        <button
+                                            onClick={() => handleRemoveLocal(local.id)}
+                                            className="text-red-500 hover:text-red-700 p-2"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ))}
+
+                                <div className="grid gap-2 border-t pt-4">
+                                    <h4 className="text-sm font-medium">Novo Local</h4>
+                                    <Input
+                                        placeholder="Nome (Ex: Sede)"
+                                        value={novoLocalNome}
+                                        onChange={e => setNovoLocalNome(e.target.value)}
+                                    />
+                                    <div className="flex gap-2">
+                                        <Input
+                                            placeholder="Endereço completo ou CEP"
+                                            value={novoLocalEndereco}
+                                            onChange={handleEnderecoChange}
+                                            className="flex-1"
+                                        />
+                                        <Button
+                                            onClick={handleAddLocal}
+                                            disabled={addingLocal}
+                                            isLoading={addingLocal}
+                                        >
+                                            <Plus className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Card>
+
                         {/* Links de navegação */}
                         <Card
                             hover
@@ -274,10 +469,6 @@ export function Configuracoes() {
                         </div>
 
                         {/* App Info */}
-                        <div className="text-center text-xs text-gray-400 py-4">
-                            <p>Gilmar Distribuidor Massas v1.0</p>
-                            <p>Sistema de Gestão Comercial</p>
-                        </div>
                     </div>
                 )}
             </PageContainer>

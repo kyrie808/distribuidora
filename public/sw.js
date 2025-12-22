@@ -16,6 +16,11 @@ self.addEventListener('install', (event) => {
 
 // Fetch
 self.addEventListener('fetch', (event) => {
+    // Ignore external API requests (Nominatim/OpenStreetMap) to avoid CORS issues
+    if (event.request.url.includes('openstreetmap.org')) {
+        return;
+    }
+
     event.respondWith(
         caches.match(event.request)
             .then((response) => {

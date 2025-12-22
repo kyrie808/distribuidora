@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Search, X, Check } from 'lucide-react'
+import { Search, X, Check, Loader2 } from 'lucide-react'
 import { Modal, ModalActions, Button, Input, Select } from '../ui'
 import { contatoSchema, type ContatoFormData } from '../../schemas/contato'
 import { useContatos } from '../../hooks/useContatos'
 import { useToast } from '../ui/Toast'
+import { useCep } from '../../hooks/useCep'
 import { formatPhone } from '../../utils/formatters'
 import {
     CONTATO_TIPO_LABELS,
@@ -14,6 +15,16 @@ import {
     CONTATO_STATUS_LABELS,
 } from '../../constants'
 import type { Contato } from '../../types/database'
+
+// Extended form data to handle split address fields locally
+interface ExtendedFormData extends ContatoFormData {
+    logradouro?: string
+    numero?: string
+    complemento?: string
+    cidade?: string
+    uf?: string
+    cep_input?: string // Local field for the mask
+}
 
 interface ContatoFormModalProps {
     isOpen: boolean
@@ -31,6 +42,7 @@ export function ContatoFormModal({
     const isEditing = !!contato
     const toast = useToast()
     const { createContato, updateContato, searchContatos } = useContatos({ realtime: false })
+    const { fetchCep, loading: loadingCep } = useCep()
 
     // Autocomplete state
     const [indicadorSearch, setIndicadorSearch] = useState('')
@@ -45,8 +57,10 @@ export function ContatoFormModal({
         watch,
         setValue,
         reset,
+        setFocus,
+        getValues,
         formState: { errors, isSubmitting },
-    } = useForm<ContatoFormData>({
+    } = useForm<ExtendedFormData>({
         resolver: zodResolver(contatoSchema),
         defaultValues: {
             nome: '',
@@ -59,15 +73,53 @@ export function ContatoFormModal({
             endereco: null,
             bairro: null,
             observacoes: null,
+            // Extended fields
+            cep: '',
+            logradouro: '',
+            numero: '',
+            complemento: '',
+            cidade: '',
+            uf: '',
         },
     })
 
     const tipoValue = watch('tipo')
     const origemValue = watch('origem')
+    const cepValue = watch('cep')
+
+    // Watch for CEP changes to trigger fetch
+    useEffect(() => {
+        if (cepValue && cepValue.length >= 8) {
+            const clean = cepValue.replace(/\D/g, '')
+            if (clean.length === 8) {
+                handleFetchCep(clean)
+            }
+        }
+    }, [cepValue])
+
+    const handleFetchCep = async (cep: string) => {
+        const data = await fetchCep(cep)
+        if (data) {
+            setValue('logradouro', data.street)
+            setValue('bairro', data.neighborhood)
+            setValue('cidade', data.city)
+            setValue('uf', data.state)
+            // Focus on number field
+            setTimeout(() => {
+                setFocus('numero')
+            }, 100)
+        } else {
+            toast.error('CEP não encontrado. Preencha o endereço manualmente.')
+        }
+    }
 
     // Reset form when modal opens/closes or contato changes
     useEffect(() => {
         if (isOpen && contato) {
+            // If editing, we might have the composite address string but not the split parts
+            // For now, we populate what we can. If strict splitting is needed for legacy data,
+            // we'd need a parser or just accept it's "dirty" until updated.
+
             reset({
                 nome: contato.nome,
                 telefone: contato.telefone,
@@ -79,6 +131,13 @@ export function ContatoFormModal({
                 endereco: contato.endereco,
                 bairro: contato.bairro,
                 observacoes: contato.observacoes,
+                cep: contato.cep || '',
+                // Populate logradouro with full address as fallback/legacy handling
+                logradouro: contato.endereco || '',
+                numero: '',
+                complemento: '',
+                cidade: '', // We don't have city/uf stored separately yet for legacy
+                uf: '',
             })
         } else if (isOpen) {
             reset({
@@ -92,6 +151,12 @@ export function ContatoFormModal({
                 endereco: null,
                 bairro: null,
                 observacoes: null,
+                cep: '',
+                logradouro: '',
+                numero: '',
+                complemento: '',
+                cidade: '',
+                uf: '',
             })
             setSelectedIndicador(null)
             setIndicadorSearch('')
@@ -103,7 +168,6 @@ export function ContatoFormModal({
         const searchIndicadores = async () => {
             if (indicadorSearch.length >= 2) {
                 const results = await searchContatos(indicadorSearch)
-                // Filter out the current contato if editing
                 setIndicadorResults(
                     results.filter((c) => c.id !== contato?.id)
                 )
@@ -142,14 +206,38 @@ export function ContatoFormModal({
         setIndicadorSearch('')
     }
 
-    const onSubmit = async (data: ContatoFormData) => {
+    const onSubmit = async (data: ExtendedFormData) => {
         try {
+            // Get raw values to ensure we have fields that might be stripped by Zod if schema is stale
+            const rawValues = getValues()
+            // Merge raw values over data for specific address fields to ensure we have them
+            const formDataKeyed = { ...data, ...rawValues }
+
+            // Construct the final address string
+            // Logic: use manual inputs if provided, otherwise fallback to existing data
+            let enderecoFinal = formDataKeyed.endereco
+
+            // Only reconstruct if we have the specific fields
+            if (formDataKeyed.logradouro) {
+                enderecoFinal = `${formDataKeyed.logradouro}, ${formDataKeyed.numero || 'S/N'}${formDataKeyed.complemento ? ' - ' + formDataKeyed.complemento : ''}`
+                if (formDataKeyed.cidade && formDataKeyed.uf) {
+                    enderecoFinal += ` - ${formDataKeyed.cidade}/${formDataKeyed.uf}`
+                }
+            }
+
+            const payload: ContatoFormData = {
+                ...formDataKeyed, // Use the full set
+                endereco: enderecoFinal,
+                bairro: formDataKeyed.bairro, // Ensure bairro is passed explicitly
+                cep: formDataKeyed.cep?.replace(/\D/g, '') || null // Clean CEP before saving
+            }
+
             let result: Contato | null
 
             if (isEditing && contato) {
-                result = await updateContato(contato.id, data)
+                result = await updateContato(contato.id, payload)
             } else {
-                result = await createContato(data)
+                result = await createContato(payload)
             }
 
             if (result) {
@@ -288,18 +376,70 @@ export function ContatoFormModal({
                     </div>
                 )}
 
-                {/* Endereço e Bairro */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                        label="Endereço"
-                        placeholder="Rua, número..."
-                        {...register('endereco')}
-                    />
-                    <Input
-                        label="Bairro"
-                        placeholder="Bairro"
-                        {...register('bairro')}
-                    />
+                {/* Seção de Endereço Inteligente */}
+                <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <h3 className="font-medium text-gray-900">Endereço</h3>
+
+                    {/* Linha 1: CEP */}
+                    <div className="max-w-[150px] relative">
+                        <Input
+                            label="CEP"
+                            placeholder="00000-000"
+                            maxLength={9}
+                            {...register('cep')}
+                        />
+                        {loadingCep && (
+                            <div className="absolute right-3 top-[38px]">
+                                <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Linha 2: Logradouro e Número */}
+                    <div className="grid grid-cols-[1fr_100px] gap-4">
+                        <Input
+                            label="Logradouro"
+                            placeholder="Rua, Avenida, etc."
+                            {...register('logradouro')}
+                        />
+                        <Input
+                            label="Número"
+                            placeholder="123"
+                            {...register('numero')}
+                        />
+                    </div>
+
+                    {/* Linha 3: Complemento e Bairro */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Input
+                            label="Complemento"
+                            placeholder="Apto 101, Casa A"
+                            {...register('complemento')}
+                        />
+                        <Input
+                            label="Bairro"
+                            placeholder="Bairro"
+                            {...register('bairro')}
+                        />
+                    </div>
+
+                    {/* Linha 4: Cidade e UF */}
+                    <div className="grid grid-cols-[1fr_80px] gap-4">
+                        <Input
+                            label="Cidade"
+                            placeholder="Cidade"
+                            readOnly
+                            className="bg-gray-50"
+                            {...register('cidade')}
+                        />
+                        <Input
+                            label="UF"
+                            placeholder="UF"
+                            readOnly
+                            className="bg-gray-50"
+                            {...register('uf')}
+                        />
+                    </div>
                 </div>
 
                 {/* Observações */}

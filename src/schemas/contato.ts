@@ -18,8 +18,15 @@ export const contatoSchema = z.object({
     origem: z.enum(['direto', 'indicacao']),
     indicado_por_id: z.string().uuid().optional().nullable(),
     endereco: z.string().optional().nullable(),
+    cep: z.string().optional().nullable(),
     bairro: z.string().optional().nullable(),
     observacoes: z.string().optional().nullable(),
+    // Campos de UI (não salvos diretamente no banco, mas usados para compor o endereço)
+    logradouro: z.string().optional(),
+    numero: z.string().optional(),
+    complemento: z.string().optional(),
+    cidade: z.string().optional(),
+    uf: z.string().optional(),
 })
 
 export type ContatoFormData = z.infer<typeof contatoSchema>

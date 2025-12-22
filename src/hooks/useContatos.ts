@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Contato, ContatoInsert, ContatoUpdate } from '../types/database'
 import type { ContatoFiltros } from '../schemas/contato'
+import { getCoordinates } from '../utils/geocoding'
 
 interface UseContatosOptions {
     filtros?: ContatoFiltros
@@ -106,9 +107,42 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
     // Create contato
     const createContato = async (data: ContatoInsert): Promise<Contato | null> => {
         try {
+            // Geocode address if provided
+            // Geocode address if provided
+            let latLongData = {}
+            if (data.endereco) {
+                // Try to use structured data if available (passed from form but not in DB schema)
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const formData = data as any
+                let searchAddress = ''
+
+                if (formData.logradouro && formData.cidade && formData.uf) {
+                    // High precision search with structured data
+                    const numero = formData.numero && formData.numero !== 'S/N' ? `, ${formData.numero}` : ''
+                    const bairro = formData.bairro ? `, ${formData.bairro}` : ''
+                    searchAddress = `${formData.logradouro}${numero}${bairro}, ${formData.cidade} - ${formData.uf}`
+                } else {
+                    // Fallback to composite address
+                    searchAddress = `${data.endereco}${data.bairro ? `, ${data.bairro}` : ''}`
+                }
+
+                // console.log('Geocoding search:', searchAddress); // Debug
+
+                const coords = await getCoordinates(searchAddress)
+                if (coords) {
+                    latLongData = { latitude: coords.lat, longitude: coords.lng }
+                }
+            }
+
+
+
+            // Remove UI-only fields before sending to Supabase
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { logradouro, numero, complemento, cidade, uf, ...dbData } = data as any
+
             const { data: newContato, error } = await supabase
                 .from('contatos')
-                .insert(data)
+                .insert({ ...dbData, ...latLongData })
                 .select()
                 .single()
 
@@ -126,9 +160,49 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         data: ContatoUpdate
     ): Promise<Contato | null> => {
         try {
+            // Geocode if address changed
+            let latLongData = {}
+            if (data.endereco || data.bairro) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const formData = data as any
+                let searchAddress = ''
+
+                if (formData.logradouro && formData.cidade && formData.uf) {
+                    // High precision search with structured data from form
+                    const numero = formData.numero && formData.numero !== 'S/N' ? `, ${formData.numero}` : ''
+                    const bairro = formData.bairro ? `, ${formData.bairro}` : ''
+                    searchAddress = `${formData.logradouro}${numero}${bairro}, ${formData.cidade} - ${formData.uf}`
+                } else if (data.endereco) {
+                    // Fallback to existing logic if we don't have atomic fields
+                    // Use 'any' cast to safely access 'cidade' if it exists in runtime payload even if not in type
+                    const cidade = formData.cidade || 'São Bernardo do Campo'
+                    const uf = formData.uf || 'SP'
+
+                    const parts = [
+                        data.endereco,
+                        data.bairro,
+                        cidade,
+                        uf
+                    ].filter(Boolean)
+
+                    searchAddress = parts.join(', ')
+                }
+
+                if (searchAddress) {
+                    const coords = await getCoordinates(searchAddress)
+                    if (coords) {
+                        latLongData = { latitude: coords.lat, longitude: coords.lng }
+                    }
+                }
+            }
+
+            // Remove UI-only fields before sending to Supabase
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { logradouro, numero, complemento, cidade, uf, ...dbData } = data as any
+
             const { data: updatedContato, error } = await supabase
                 .from('contatos')
-                .update(data)
+                .update({ ...dbData, ...latLongData })
                 .eq('id', id)
                 .select()
                 .single()

@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, ShoppingCart, Plus, Share2, Bell, Package, Settings, Refrigerator } from 'lucide-react'
+import { LayoutDashboard, Users, ShoppingCart, Plus, Share2, Bell, Package, Settings, Refrigerator, Truck } from 'lucide-react'
 import { FloatingDock } from '../ui/FloatingDock'
 import { ENABLE_GELADEIRA, ENABLE_RECOMPRA } from '../../constants/flags'
 
@@ -7,6 +7,7 @@ const allNavItems = [
     { href: '/', icon: <LayoutDashboard className="h-5 w-5" />, title: 'Dashboard' },
     { href: '/contatos', icon: <Users className="h-5 w-5" />, title: 'Contatos' },
     { href: '/vendas', icon: <ShoppingCart className="h-5 w-5" />, title: 'Vendas' },
+    { href: '/entregas', icon: <Truck className="h-5 w-5" />, title: 'Entregas' },
     { href: '/nova-venda', icon: <Plus className="h-6 w-6" />, title: 'Nova Venda', isCenter: true },
     { href: '/indicacoes', icon: <Share2 className="h-5 w-5" />, title: 'Indicações' },
     { href: '/recompra', icon: <Bell className="h-5 w-5" />, title: 'Recompra', requiresFlag: 'recompra' },

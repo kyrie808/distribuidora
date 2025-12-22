@@ -34,6 +34,7 @@ export type Database = {
                 Row: {
                     atualizado_em: string
                     bairro: string | null
+                    cep: string | null
                     criado_em: string
                     endereco: string | null
                     id: string
@@ -46,6 +47,8 @@ export type Database = {
                     telefone: string
                     tipo: string
                     ultimo_contato: string | null
+                    latitude: number | null
+                    longitude: number | null
                 }
                 Insert: {
                     atualizado_em?: string
@@ -62,6 +65,8 @@ export type Database = {
                     telefone: string
                     tipo: string
                     ultimo_contato?: string | null
+                    latitude?: number | null
+                    longitude?: number | null
                 }
                 Update: {
                     atualizado_em?: string
@@ -78,6 +83,8 @@ export type Database = {
                     telefone?: string
                     tipo?: string
                     ultimo_contato?: string | null
+                    latitude?: number | null
+                    longitude?: number | null
                 }
                 Relationships: [
                     {
