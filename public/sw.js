@@ -1,49 +1,31 @@
-// Service Worker básico para Gilmar Distribuidor Massas
-const CACHE_NAME = 'gilmar-massas-v1';
-const urlsToCache = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-];
+const CACHE_NAME = 'massas-crm-v1';
 
-// Install
+// Instalação: Força o novo SW a assumir imediatamente
 self.addEventListener('install', (event) => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => cache.addAll(urlsToCache))
-    );
+    self.skipWaiting();
 });
 
-// Fetch
-self.addEventListener('fetch', (event) => {
-    // Ignore external API requests (Nominatim/OpenStreetMap) to avoid CORS issues
-    if (event.request.url.includes('openstreetmap.org')) {
-        return;
-    }
-
-    event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                // Cache hit - return response
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
-});
-
-// Activate
+// Ativação: LIMPEZA TOTAL de caches antigos
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
-                cacheNames.filter((cacheName) => {
-                    return cacheName !== CACHE_NAME;
-                }).map((cacheName) => {
+                cacheNames.map((cacheName) => {
+                    // Deleta qualquer cache existente para evitar tela branca
+                    console.log('SW: Limpando cache antigo', cacheName);
                     return caches.delete(cacheName);
                 })
             );
         })
     );
+    // Toma controle de todas as abas abertas imediatamente
+    self.clients.claim();
+});
+
+// Fetch: NETWORK ONLY (Pass-through)
+// Não interceptamos para cache, apenas deixamos a rede fluir.
+// Isso resolve problemas de CORS e garante que o usuário sempre pegue a versão nova.
+self.addEventListener('fetch', (event) => {
+    // Nenhuma lógica de cache aqui. O navegador gerencia a rede.
+    return;
 });
