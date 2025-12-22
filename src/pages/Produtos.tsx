@@ -5,6 +5,7 @@ import {
     TrendingUp,
     TrendingDown,
     AlertTriangle,
+    Pencil,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -59,7 +60,7 @@ function ProdutoCard({ produto, onEdit }: { produto: Produto; onEdit: () => void
                     </div>
                 </div>
 
-                <div className="text-right flex-shrink-0">
+                <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
                     <div className={`flex items-center gap-1 ${margemNegativa ? 'text-danger-600' : 'text-success-600'}`}>
                         {margemNegativa ? (
                             <TrendingDown className="h-4 w-4" />
@@ -68,7 +69,19 @@ function ProdutoCard({ produto, onEdit }: { produto: Produto; onEdit: () => void
                         )}
                         <span className="font-bold">{margem.toFixed(1)}%</span>
                     </div>
-                    <p className="text-xs text-gray-500">margem</p>
+
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation()
+                            onEdit()
+                        }}
+                        className="opacity-100 hover:bg-gray-200"
+                    >
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                        Editar
+                    </Button>
                 </div>
             </div>
         </Card>
@@ -86,6 +99,7 @@ export function Produtos() {
     // Form states for create
     const [newNome, setNewNome] = useState('')
     const [newCodigo, setNewCodigo] = useState('')
+    const [newApelido, setNewApelido] = useState('')
     const [newPreco, setNewPreco] = useState('')
     const [newCusto, setNewCusto] = useState('')
     const [newUnidade, setNewUnidade] = useState('un')
@@ -93,6 +107,8 @@ export function Produtos() {
 
     // Form states for edit
     const [editNome, setEditNome] = useState('')
+    const [editCodigo, setEditCodigo] = useState('')
+    const [editApelido, setEditApelido] = useState('')
     const [editPreco, setEditPreco] = useState('')
     const [editCusto, setEditCusto] = useState('')
     const [editAtivo, setEditAtivo] = useState(true)
@@ -106,6 +122,8 @@ export function Produtos() {
     const handleOpenEdit = (produto: Produto) => {
         setEditingProduto(produto)
         setEditNome(produto.nome)
+        setEditCodigo(produto.codigo)
+        setEditApelido(produto.apelido || '')
         setEditPreco(String(produto.preco))
         setEditCusto(String(produto.custo))
         setEditAtivo(produto.ativo)
@@ -115,6 +133,8 @@ export function Produtos() {
     const handleCloseEdit = () => {
         setEditingProduto(null)
         setEditNome('')
+        setEditCodigo('')
+        setEditApelido('')
         setEditPreco('')
         setEditCusto('')
         setEditAtivo(true)
@@ -124,6 +144,7 @@ export function Produtos() {
     const handleOpenCreate = () => {
         setNewNome('')
         setNewCodigo('')
+        setNewApelido('')
         setNewPreco('')
         setNewCusto('')
         setNewUnidade('un')
@@ -160,7 +181,8 @@ export function Produtos() {
 
         const data: ProdutoInsert = {
             nome: newNome.trim(),
-            codigo: newCodigo.trim().toUpperCase(),
+            codigo: newCodigo.trim(),
+            apelido: newApelido.trim() || null,
             preco,
             custo,
             unidade: newUnidade,
@@ -196,10 +218,20 @@ export function Produtos() {
             return
         }
 
+        // Check unique code (excluding current product)
+        if (editCodigo.trim() !== editingProduto.codigo) {
+            if (produtos.some(p => p.id !== editingProduto.id && p.codigo.toLowerCase() === editCodigo.trim().toLowerCase())) {
+                toast.error('Código já existe')
+                return
+            }
+        }
+
         setUpdating(true)
 
         const data: ProdutoUpdate = {
             nome: editNome.trim(),
+            codigo: editCodigo.trim(),
+            apelido: editApelido.trim() || null,
             preco,
             custo,
             ativo: editAtivo,
@@ -293,12 +325,21 @@ export function Produtos() {
                             placeholder="Ex: Massa Pão de Queijo 1kg"
                         />
 
-                        <Input
-                            label="Código *"
-                            value={newCodigo}
-                            onChange={(e) => setNewCodigo(e.target.value.toUpperCase())}
-                            placeholder="Ex: PDQ1KG"
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Input
+                                label="Código *"
+                                value={newCodigo}
+                                onChange={(e) => setNewCodigo(e.target.value)}
+                                placeholder="Ex: PDQ1KG"
+                            />
+                            <Input
+                                label="Apelido (Sigla)"
+                                value={newApelido}
+                                onChange={(e) => setNewApelido(e.target.value)}
+                                placeholder="Ex: B"
+                                maxLength={3}
+                            />
+                        </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <Input
@@ -373,12 +414,20 @@ export function Produtos() {
                                 onChange={(e) => setEditNome(e.target.value)}
                             />
 
-                            <Input
-                                label="Código"
-                                value={editingProduto.codigo}
-                                disabled
-                                className="bg-gray-100"
-                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Código"
+                                    value={editCodigo}
+                                    onChange={(e) => setEditCodigo(e.target.value)}
+                                />
+                                <Input
+                                    label="Apelido (Sigla)"
+                                    value={editApelido}
+                                    onChange={(e) => setEditApelido(e.target.value)}
+                                    placeholder="Ex: B"
+                                    maxLength={3}
+                                />
+                            </div>
 
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
@@ -422,16 +471,10 @@ export function Produtos() {
                                 <button
                                     type="button"
                                     onClick={() => setEditAtivo(!editAtivo)}
-                                    className={`
-                                        relative inline-flex h-6 w-11 items-center rounded-full transition-colors
-                                        ${editAtivo ? 'bg-success-500' : 'bg-gray-300'}
-                                    `}
+                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editAtivo ? 'bg-success-500' : 'bg-gray-300'}`}
                                 >
                                     <span
-                                        className={`
-                                            inline-block h-4 w-4 transform rounded-full bg-white transition-transform
-                                            ${editAtivo ? 'translate-x-6' : 'translate-x-1'}
-                                        `}
+                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editAtivo ? 'translate-x-6' : 'translate-x-1'}`}
                                     />
                                 </button>
                             </div>

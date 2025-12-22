@@ -11,5 +11,6 @@ export { Produtos } from './Produtos'
 export { RelatorioFabrica } from './RelatorioFabrica'
 export { Estoque } from './Estoque'
 export { Entregas } from './Entregas'
+export { PedidosCompra } from './PedidosCompra'
 
 

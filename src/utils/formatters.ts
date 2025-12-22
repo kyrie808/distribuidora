@@ -42,20 +42,34 @@ export function isValidPhone(phone: string): boolean {
 
 /**
  * Formatar data para exibição
+ * Força timezone America/Sao_Paulo
  */
 export function formatDate(date: string | Date): string {
-    const d = typeof date === 'string' ? new Date(date) : date
-    return new Intl.DateTimeFormat('pt-BR').format(d)
+    let d = date
+    if (typeof date === 'string') {
+        // Se for string de data simples (YYYY-MM-DD), garantir interpretação correta
+        if (date.length === 10 && date.includes('-')) {
+            d = new Date(`${date}T12:00:00`)
+        } else {
+            d = new Date(date)
+        }
+    }
+
+    return new Intl.DateTimeFormat('pt-BR', {
+        timeZone: 'America/Sao_Paulo'
+    }).format(d as Date)
 }
 
 /**
  * Formatar data e hora para exibição
+ * Força timezone America/Sao_Paulo
  */
 export function formatDateTime(date: string | Date): string {
     const d = typeof date === 'string' ? new Date(date) : date
     return new Intl.DateTimeFormat('pt-BR', {
         dateStyle: 'short',
         timeStyle: 'short',
+        timeZone: 'America/Sao_Paulo'
     }).format(d)
 }
 

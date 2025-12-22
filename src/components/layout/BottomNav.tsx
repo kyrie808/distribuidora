@@ -8,6 +8,7 @@ const allNavItems = [
     { href: '/contatos', icon: <Users className="h-5 w-5" />, title: 'Contatos' },
     { href: '/vendas', icon: <ShoppingCart className="h-5 w-5" />, title: 'Vendas' },
     { href: '/entregas', icon: <Truck className="h-5 w-5" />, title: 'Entregas' },
+    { href: '/pedidos-compra', icon: <Package className="h-5 w-5" />, title: 'Pedidos', requiresFlag: 'purchase_orders' },
     { href: '/nova-venda', icon: <Plus className="h-6 w-6" />, title: 'Nova Venda', isCenter: true },
     { href: '/indicacoes', icon: <Share2 className="h-5 w-5" />, title: 'Indicações' },
     { href: '/recompra', icon: <Bell className="h-5 w-5" />, title: 'Recompra', requiresFlag: 'recompra' },
@@ -20,6 +21,7 @@ const allNavItems = [
 const navItems = allNavItems.filter(item => {
     if (item.requiresFlag === 'recompra') return ENABLE_RECOMPRA
     if (item.requiresFlag === 'geladeira') return ENABLE_GELADEIRA
+    if (item.requiresFlag === 'purchase_orders') return true // Always enabled new module
     return true
 })
 

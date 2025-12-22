@@ -153,6 +153,7 @@ export type Database = {
                     preco: number
                     unidade: string
                     estoque_atual: number
+                    apelido: string | null
                 }
                 Insert: {
                     ativo?: boolean
@@ -165,6 +166,7 @@ export type Database = {
                     preco: number
                     unidade?: string
                     estoque_atual?: number
+                    apelido?: string | null
                 }
                 Update: {
                     ativo?: boolean
@@ -177,6 +179,7 @@ export type Database = {
                     preco?: number
                     unidade?: string
                     estoque_atual?: number
+                    apelido?: string | null
                 }
                 Relationships: []
             }
@@ -242,12 +245,123 @@ export type Database = {
                     }
                 ]
             }
+            purchase_orders: {
+                Row: {
+                    id: string
+                    supplier_id: string | null
+                    order_date: string
+                    status: 'pending' | 'received' | 'cancelled'
+                    payment_status: 'paid' | 'partial' | 'unpaid'
+                    total_amount: number
+                    notes: string | null
+                    received_at: string | null
+                    amount_paid: number
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    supplier_id?: string | null
+                    order_date?: string
+                    status?: 'pending' | 'received' | 'cancelled'
+                    payment_status?: 'paid' | 'partial' | 'unpaid'
+                    total_amount?: number
+                    notes?: string | null
+                    data_recebimento?: string | null
+                    amount_paid?: number
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    supplier_id?: string | null
+                    order_date?: string
+                    status?: 'pending' | 'received' | 'cancelled'
+                    payment_status?: 'paid' | 'partial' | 'unpaid'
+                    total_amount?: number
+                    notes?: string | null
+                    data_recebimento?: string | null
+                    amount_paid?: number
+                    created_at?: string
+                    updated_at?: string
+                }
+                Relationships: []
+            }
+            purchase_order_items: {
+                Row: {
+                    id: string
+                    purchase_order_id: string
+                    product_id: string
+                    quantity: number
+                    unit_cost: number
+                    total_cost: number
+                }
+                Insert: {
+                    id?: string
+                    purchase_order_id: string
+                    product_id: string
+                    quantity: number
+                    unit_cost: number
+                    total_cost?: number
+                }
+                Update: {
+                    id?: string
+                    purchase_order_id?: string
+                    product_id?: string
+                    quantity?: number
+                    unit_cost?: number
+                    total_cost?: number
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "purchase_order_items_purchase_order_id_fkey"
+                        columns: ["purchase_order_id"]
+                        isOneToOne: false
+                        referencedRelation: "purchase_orders"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "purchase_order_items_product_id_fkey"
+                        columns: ["product_id"]
+                        isOneToOne: false
+                        referencedRelation: "produtos"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
         }
         Views: Record<string, never>
         Functions: Record<string, never>
         Enums: Record<string, never>
         CompositeTypes: Record<string, never>
     }
+}
+
+export type PurchaseOrder = {
+    id: string
+    supplier_id: string | null
+    order_date: string
+    status: 'pending' | 'received' | 'cancelled'
+    payment_status: 'paid' | 'partial' | 'unpaid'
+    total_amount: number
+    notes: string | null
+    data_recebimento: string | null
+    amount_paid: number
+    created_at: string
+    updated_at: string
+}
+
+export type PurchaseOrderItem = {
+    id: string
+    purchase_order_id: string
+    product_id: string
+    quantity: number
+    unit_cost: number
+    total_cost: number
+}
+
+export type PurchaseOrderWithItems = PurchaseOrder & {
+    items: (PurchaseOrderItem & { product: Produto })[]
 }
 
 // Convenience types

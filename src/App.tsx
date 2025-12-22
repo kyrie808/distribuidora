@@ -13,7 +13,8 @@ import {
   Produtos,
   RelatorioFabrica,
   Estoque,
-  Entregas
+  Entregas,
+  PedidosCompra
 } from './pages'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
           <Route path="/vendas/:id" element={<VendaDetalhe />} />
           <Route path="/vendas/:id/editar" element={<NovaVenda />} />
           <Route path="/indicacoes" element={<Indicacoes />} />
+          <Route path="/pedidos-compra" element={<PedidosCompra />} />
           <Route path="/recompra" element={<Recompra />} />
           <Route path="/configuracoes" element={<Configuracoes />} />
           <Route path="/produtos" element={<Produtos />} />
