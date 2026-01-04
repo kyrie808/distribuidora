@@ -385,6 +385,10 @@ export function Vendas() {
                                                         <Badge variant="gray" className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
                                                             <span>🎁</span> Brinde
                                                         </Badge>
+                                                    ) : venda.forma_pagamento === 'pre_venda' ? (
+                                                        <Badge variant="gray" className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-purple-50 text-purple-700 border-purple-200 ring-purple-200">
+                                                            <span>📅</span> Pré-venda
+                                                        </Badge>
                                                     ) : venda.pago ? (
                                                         <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
                                                             <span>💰</span> Pago
