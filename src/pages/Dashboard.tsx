@@ -17,19 +17,22 @@ import {
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, LoadingScreen } from '../components/ui'
+import { MonthPicker } from '../components/dashboard/MonthPicker'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
 import { useRecompra } from '../hooks/useRecompra'
 import { useIndicacoes } from '../hooks/useIndicacoes'
+import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { formatCurrency, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS } from '../constants'
 
 export function Dashboard() {
     const navigate = useNavigate()
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const { startDate, endDate } = useDashboardFilter()
 
     // Fetch data
-    const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({})
+    const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
     const { contatos, loading: loadingContatos, refetch: refetchContatos, getNomeIndicador } = useContatos({})
     const { contatos: recompraContatos, atrasados, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
     const { indicadores, loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
@@ -73,6 +76,11 @@ export function Dashboard() {
                 }
             />
             <PageContainer>
+                {/* Global Filter */}
+                <div className="mb-6">
+                    <MonthPicker />
+                </div>
+
                 {loading && !isRefreshing && <LoadingScreen message="Carregando dashboard..." />}
 
                 {!loading && (
@@ -92,7 +100,7 @@ export function Dashboard() {
                                         </span>
                                     </div>
                                     <p className="text-2xl font-bold">{formatCurrency(metrics.faturamentoMes)}</p>
-                                    <p className="text-sm opacity-80">Faturamento do mês</p>
+                                    <p className="text-sm opacity-80">Faturamento</p>
                                 </Card>
 
                                 {/* Ticket Médio */}
@@ -114,7 +122,7 @@ export function Dashboard() {
                                         <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">📈</span>
                                     </div>
                                     <p className="text-2xl font-bold">{formatCurrency((metrics as any).lucroMes || 0)}</p>
-                                    <p className="text-sm opacity-80">Lucro do mês</p>
+                                    <p className="text-sm opacity-80">Lucro</p>
                                 </Card>
 
                                 {/* A Receber */}
@@ -144,7 +152,7 @@ export function Dashboard() {
                                         <ShoppingCart className="h-5 w-5 opacity-80" />
                                     </div>
                                     <p className="text-2xl font-bold">{metrics.vendasMes}</p>
-                                    <p className="text-sm opacity-80">Vendas do mês</p>
+                                    <p className="text-sm opacity-80">Vendas</p>
                                 </Card>
 
                                 {/* Produtos Vendidos */}

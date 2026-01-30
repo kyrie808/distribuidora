@@ -42,11 +42,14 @@ interface VendasMetrics {
     // Entregas
     entregasPendentes: number
     entregasRealizadas: number
+    lucroMes: number
 }
 
 interface UseVendasOptions {
     filtros?: VendaFiltros
     realtime?: boolean
+    startDate?: Date
+    endDate?: Date
 }
 
 interface UseVendasReturn {
@@ -64,7 +67,7 @@ interface UseVendasReturn {
 }
 
 export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
-    const { filtros, realtime = true } = options
+    const { filtros, realtime = true, startDate, endDate } = options
     const [vendas, setVendas] = useState<VendaComItens[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -110,7 +113,13 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             if (filtros?.forma_pagamento && filtros.forma_pagamento !== 'todos') {
                 query = query.eq('forma_pagamento', filtros.forma_pagamento)
             }
-            if (filtros?.periodo && filtros.periodo !== 'todos') {
+
+            // Date filtering priority: Explicit Range > Period Filter
+            if (startDate && endDate) {
+                 query = query
+                    .gte('data', startDate.toISOString().split('T')[0])
+                    .lte('data', endDate.toISOString().split('T')[0])
+            } else if (filtros?.periodo && filtros.periodo !== 'todos') {
                 const dateRange = getDateRange(filtros.periodo)
                 if (dateRange) {
                     query = query
@@ -118,6 +127,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                         .lte('data', dateRange.end.toISOString().split('T')[0])
                 }
             }
+
             if (filtros?.contatoId) {
                 query = query.eq('contato_id', filtros.contatoId)
             }
@@ -125,18 +135,6 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             if (filtros?.search) {
                 // !inner forces an inner join to filter sales by contact properties
                 query = query.ilike('contatos.nome', `%${filtros.search}%`)
-                // We need to modify the select to ensure the join works for filtering
-                // The original select already has contact:contatos(...) which is a left join by default
-                // But specifically for filtering we rely on the PostgREST syntax 
-                // However, basic supabase syntax for filtering on foreign tables often requires !inner in the select string
-                // Let's modify the select string dynamically if needed or just rely on the fact that we can filter on the relationship.
-                // Actually, to filter by foreign table column, we usually do:
-                // .ilike('contatos.nome', ...) BUT this requires the resource to be embedded with !inner in the select.
-
-                // Let's adjust the query construction slightly to handle this better:
-                // If search is active, we must ensure we are using !inner for contatos
-                // But our initial select uses standard syntax for embedding.
-                // Let's restart the query definition logic for cleaner implementation if search is present.
             }
 
             const { data, error: queryError } = await query
@@ -156,7 +154,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         } finally {
             setLoading(false)
         }
-    }, [filtros?.status, filtros?.forma_pagamento, filtros?.periodo, filtros?.search, getDateRange])
+    }, [filtros?.status, filtros?.forma_pagamento, filtros?.periodo, filtros?.search, getDateRange, startDate, endDate])
 
     // Setup realtime subscription
     useEffect(() => {
@@ -185,29 +183,23 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         }
     }, [fetchVendas, realtime])
 
-    // Calculate metrics
+    // Fetched vendas are ALREADY filtered by date range from the query.
+    // So we don't need to filter by month/year again here for the main metrics.
+    // However, for consistency if no filter was applied (e.g. all history), we might want to be careful.
+    // But per our plan, we are now driving this by the global filter.
+    // Let's assume 'vendas' contains exactly what we want to analyze.
     const metrics: VendasMetrics = (() => {
-        const now = new Date()
-        const mesAtual = now.getMonth()
-        const anoAtual = now.getFullYear()
-
-        const vendasDoMes = vendas.filter((v) => {
-            const dataVenda = new Date(v.data)
-            return dataVenda.getMonth() === mesAtual && dataVenda.getFullYear() === anoAtual
-        })
-
         const vendasNaoCanceladas = vendas.filter((v) => v.status !== 'cancelada')
-        const vendasMesNaoCanceladas = vendasDoMes.filter((v) => v.status !== 'cancelada')
-
-        // Exclude 'brinde' and unpaid (fiado) from faturamento. ALSO exclude delivery fee.
+        
+        // Faturamento (Net of delivery fee)
         const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) =>
             acc + (v.pago && v.forma_pagamento !== 'brinde' ? (Number(v.total) - (v.taxa_entrega || 0)) : 0), 0)
 
-        const faturamentoMes = vendasMesNaoCanceladas.reduce((acc, v) =>
-            acc + (v.pago && v.forma_pagamento !== 'brinde' ? (Number(v.total) - (v.taxa_entrega || 0)) : 0), 0)
+        // For "faturamentoMes", since the list is already filtered by the selected period, it is the same as total.
+        const faturamentoMes = faturamentoTotal
 
         // Product metrics
-        const produtosVendidos = vendasMesNaoCanceladas.reduce((acc, v) => {
+        const produtosVendidos = vendasNaoCanceladas.reduce((acc, v) => {
             v.itens.forEach(item => {
                 acc.total += item.quantidade
                 if (item.produto?.codigo === 'pao_queijo_1kg') {
@@ -228,8 +220,8 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             .filter(v => v.pago !== true && v.forma_pagamento !== 'brinde')
             .reduce((acc, v) => acc + (Number(v.total) - (v.taxa_entrega || 0)), 0)
 
-        // Profit metric (Monthly) - Net of delivery fee
-        const lucroMes = vendasMesNaoCanceladas.reduce((acc, v) => {
+        // Profit metric
+        const lucroMes = vendasNaoCanceladas.reduce((acc, v) => {
             if (v.pago && v.forma_pagamento !== 'brinde') {
                 return acc + ((Number(v.total) - (v.taxa_entrega || 0)) - (v.custo_total || 0))
             }
@@ -245,7 +237,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             faturamentoMes,
             lucroMes,
             totalVendas: vendasNaoCanceladas.length,
-            vendasMes: vendasMesNaoCanceladas.length,
+            vendasMes: vendasNaoCanceladas.length, // Same as totalVendas in this filtered context
             ticketMedio: vendasNaoCanceladas.length > 0 ? faturamentoTotal / vendasNaoCanceladas.length : 0,
             produtosVendidos,
             recebido,
