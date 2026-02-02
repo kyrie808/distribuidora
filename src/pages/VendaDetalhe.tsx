@@ -18,7 +18,9 @@ import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button, Card, Badge, LoadingScreen, Modal, ModalActions } from '../components/ui'
 import { useVenda, useVendas } from '../hooks/useVendas'
+import type { PagamentoFormData } from '../schemas/venda'
 import { useToast } from '../components/ui/Toast'
+import { PaymentModal } from '../components/features/vendas/PaymentModal'
 import {
     formatCurrency,
     formatDate,
@@ -32,11 +34,12 @@ export function VendaDetalhe() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
     const toast = useToast()
-    const { venda, loading, error } = useVenda(id)
-    const { updateVendaStatus, updateVendaPago, deleteVenda } = useVendas({ realtime: false })
+    const { venda, loading, error, refetch } = useVenda(id)
+    const { updateVendaStatus, updateVendaPago, deleteVenda, addPagamento } = useVendas({ realtime: false })
 
     const [isUpdating, setIsUpdating] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
     const handleMarkAsDelivered = async () => {
@@ -48,7 +51,7 @@ export function VendaDetalhe() {
 
         if (success) {
             toast.success('Venda marcada como entregue!')
-            window.location.reload()
+            await refetch()
         } else {
             toast.error('Erro ao atualizar status')
         }
@@ -63,12 +66,13 @@ export function VendaDetalhe() {
 
         if (success) {
             toast.success('Venda marcada como pendente')
-            window.location.reload()
+            await refetch()
         } else {
             toast.error('Erro ao atualizar status')
         }
     }
 
+    // Toggle Payment Status (Legacy/Full Payment Toggle)
     const handleTogglePago = async () => {
         if (!venda) return
 
@@ -79,7 +83,7 @@ export function VendaDetalhe() {
 
         if (success) {
             toast.success(newPago ? 'Venda marcada como paga' : 'Pagamento desmarcado')
-            window.location.reload()
+            await refetch()
         } else {
             toast.error('Erro ao atualizar pagamento')
         }
@@ -94,10 +98,21 @@ export function VendaDetalhe() {
 
         if (success) {
             toast.success('Venda cancelada')
-            window.location.reload()
+            await refetch()
         } else {
             toast.error('Erro ao cancelar venda')
         }
+    }
+
+    const handlePaymentConfirm = async (data: PagamentoFormData): Promise<boolean> => {
+        const success = await addPagamento(data)
+        if (success) {
+            setShowPaymentModal(false)
+            toast.success('Pagamento registrado')
+            await refetch()
+            return true
+        }
+        return false
     }
 
     const handleDelete = async () => {
@@ -156,6 +171,10 @@ export function VendaDetalhe() {
         )
     }
 
+    const valorPago = venda.valor_pago || 0
+    const restante = Math.max(0, venda.total - valorPago)
+    const isPartial = valorPago > 0 && !venda.pago
+
     return (
         <>
             <Header
@@ -186,9 +205,17 @@ export function VendaDetalhe() {
                                 <Badge variant="gray" className="text-sm py-1 px-3 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
                                     🎁 Brinde
                                 </Badge>
-                            ) : venda.pago && (
+                            ) : venda.pago ? (
                                 <Badge variant="success" className="text-sm py-1 px-3">
                                     💰 Pago
+                                </Badge>
+                            ) : isPartial ? (
+                                <Badge className="text-sm py-1 px-3 bg-yellow-100 text-yellow-800 border-yellow-200 ring-yellow-200">
+                                    🕒 Parcial
+                                </Badge>
+                            ) : (
+                                <Badge variant="warning" className="text-sm py-1 px-3">
+                                    ⏳ Pendente
                                 </Badge>
                             )}
                         </div>
@@ -254,21 +281,79 @@ export function VendaDetalhe() {
                         )}
                     </div>
 
-                    {/* Status de Pagamento */}
+                    {/* Status Financeiro & Pagamentos */}
                     {venda.forma_pagamento !== 'brinde' && (
                         <div className="pt-4 mt-4 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 mb-2 flex items-center gap-1">
-                                <DollarSign className="h-3 w-3" /> Status de Pagamento
-                            </p>
-                            <Button
-                                variant={venda.pago ? "secondary" : "primary"}
-                                className="w-full"
-                                leftIcon={venda.pago ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
-                                onClick={handleTogglePago}
-                                isLoading={isUpdating}
-                            >
-                                {venda.pago ? 'Desmarcar Pago' : 'Marcar como Pago'}
-                            </Button>
+                            <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs text-gray-500 flex items-center gap-1">
+                                    <DollarSign className="h-3 w-3" /> Financeiro
+                                </p>
+                                {!venda.pago && (
+                                    <span className="text-xs font-semibold text-danger-600">
+                                        Restante: {formatCurrency(restante)}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Barra de Progresso */}
+                            {!venda.pago && (
+                                <div className="w-full bg-gray-100 rounded-full h-2.5 mb-3">
+                                    <div
+                                        className="bg-primary-500 h-2.5 rounded-full transition-all duration-300"
+                                        style={{ width: `${Math.min(100, (valorPago / venda.total) * 100)}%` }}
+                                    ></div>
+                                </div>
+                            )}
+
+                            {/* Botões de Ação */}
+                            <div className="grid grid-cols-2 gap-2 mb-4">
+                                {!venda.pago && (
+                                    <Button
+                                        variant="success"
+                                        className="w-full"
+                                        leftIcon={<DollarSign className="h-4 w-4" />}
+                                        onClick={() => setShowPaymentModal(true)}
+                                        isLoading={isUpdating}
+                                    >
+                                        Registrar
+                                    </Button>
+                                )}
+                                <Button
+                                    variant={venda.pago ? "secondary" : "ghost"}
+                                    className={`w-full ${!venda.pago ? 'border border-gray-200' : ''}`}
+                                    leftIcon={venda.pago ? <X className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                                    onClick={handleTogglePago}
+                                    isLoading={isUpdating}
+                                >
+                                    {venda.pago ? 'Reabrir' : 'Quitar'}
+                                </Button>
+                            </div>
+
+                            {/* Histórico de Pagamentos */}
+                            {venda.pagamentos && venda.pagamentos.length > 0 && (
+                                <div className="bg-gray-50 rounded-lg p-3 space-y-2 mt-2">
+                                    <p className="text-xs font-medium text-gray-500 mb-1">Histórico</p>
+                                    {venda.pagamentos.map((pag, idx) => (
+                                        <div key={idx} className="flex justify-between items-center text-sm border-b border-gray-100 last:border-0 pb-1 last:pb-0">
+                                            <div className="flex flex-col">
+                                                <span className="text-gray-900 font-medium">
+                                                    {formatCurrency(Number(pag.valor))}
+                                                </span>
+                                                <span className="text-xs text-gray-500">
+                                                    {formatDate(pag.data)} • {pag.metodo}
+                                                </span>
+                                                {pag.observacao && (
+                                                    <span className="text-xs text-gray-400 italic">"{pag.observacao}"</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+                                        <span className="text-sm font-medium text-gray-700">Total Pago</span>
+                                        <span className="text-sm font-bold text-success-600">{formatCurrency(valorPago)}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     )}
                 </Card>
@@ -414,6 +499,20 @@ export function VendaDetalhe() {
                         </Button>
                     </ModalActions>
                 </Modal>
+
+                {/* MODAL DE PAGAMENTO */}
+                {venda && (
+                    <PaymentModal
+                        isOpen={showPaymentModal}
+                        onClose={() => setShowPaymentModal(false)}
+                        onConfirm={handlePaymentConfirm}
+                        vendaId={venda.id}
+                        total={venda.total}
+                        valorPago={venda.valor_pago || 0}
+                        historico={venda.pagamentos || []}
+                        customerName={venda.contato?.nome || 'Cliente'}
+                    />
+                )}
             </PageContainer>
         </>
     )

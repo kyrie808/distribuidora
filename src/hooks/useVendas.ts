@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Venda, VendaInsert, ItemVenda, ItemVendaInsert } from '../types/database'
-import type { VendaFiltros, VendaFormData } from '../schemas/venda'
+import type { Venda, VendaInsert, ItemVenda, ItemVendaInsert, PagamentoVenda } from '../types/database'
+import type { VendaFiltros, VendaFormData, PagamentoFormData } from '../schemas/venda'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth } from 'date-fns'
 
 export interface VendaComItens extends Venda {
@@ -23,6 +23,7 @@ export interface VendaComItens extends Venda {
             nome: string
         } | null
     }
+    pagamentos?: PagamentoVenda[]
 }
 
 interface VendasMetrics {
@@ -64,6 +65,7 @@ interface UseVendasReturn {
     deleteVenda: (id: string) => Promise<boolean>
     updateVenda: (id: string, data: VendaFormData) => Promise<Venda | null>
     getVendaById: (id: string) => Promise<VendaComItens | null>
+    addPagamento: (data: PagamentoFormData) => Promise<boolean>
 }
 
 export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
@@ -548,9 +550,11 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 .select(`
           *,
           contato:contatos(id, nome, telefone),
-          itens:itens_venda(*, produto:produtos(*))
+          itens:itens_venda(*, produto:produtos(*)),
+          pagamentos:pagamentos_venda(*)
         `)
                 .eq('id', id)
+                .order('data', { foreignTable: 'pagamentos_venda', ascending: false })
                 .single()
 
             if (error) throw error
@@ -560,10 +564,32 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 ...vendaData,
                 contato: Array.isArray(vendaData.contato) ? vendaData.contato[0] : vendaData.contato,
                 itens: vendaData.itens ?? [],
+                pagamentos: vendaData.pagamentos ?? []
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Erro ao buscar venda')
             return null
+        }
+    }
+
+    // Registrar pagamento
+    const addPagamento = async (data: PagamentoFormData): Promise<boolean> => {
+        try {
+            const { error } = await supabase
+                .from('pagamentos_venda')
+                .insert({
+                    venda_id: data.venda_id,
+                    valor: data.valor,
+                    metodo: data.metodo,
+                    observacao: data.observacao,
+                    data: data.data
+                })
+
+            if (error) throw error
+            return true
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao registrar pagamento')
+            return false
         }
     }
 
@@ -579,6 +605,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
         updateVenda,
         deleteVenda,
         getVendaById,
+        addPagamento,
     }
 }
 
@@ -588,44 +615,47 @@ export function useVenda(id: string | undefined) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    useEffect(() => {
+    const fetchVenda = useCallback(async () => {
         if (!id) {
             setLoading(false)
             return
         }
 
-        const fetchVenda = async () => {
-            setLoading(true)
-            setError(null)
+        setLoading(true)
+        setError(null)
 
-            try {
-                const { data, error: queryError } = await supabase
-                    .from('vendas')
-                    .select(`
+        try {
+            const { data, error: queryError } = await supabase
+                .from('vendas')
+                .select(`
             *,
             contato:contatos(id, nome, telefone, tipo, status),
-            itens:itens_venda(*, produto:produtos(id, nome, codigo, preco, unidade))
+            itens:itens_venda(*, produto:produtos(id, nome, codigo, preco, unidade)),
+            pagamentos:pagamentos_venda(*)
           `)
-                    .eq('id', id)
-                    .single()
+                .eq('id', id)
+                .order('data', { foreignTable: 'pagamentos_venda', ascending: false })
+                .single()
 
-                if (queryError) throw queryError
+            if (queryError) throw queryError
 
-                const vendaData = data as unknown as VendaComItens
-                setVenda({
-                    ...vendaData,
-                    contato: Array.isArray(vendaData.contato) ? vendaData.contato[0] : vendaData.contato,
-                    itens: vendaData.itens ?? [],
-                })
-            } catch (err) {
-                setError(err instanceof Error ? err.message : 'Erro ao carregar venda')
-            } finally {
-                setLoading(false)
-            }
+            const vendaData = data as unknown as VendaComItens
+            setVenda({
+                ...vendaData,
+                contato: Array.isArray(vendaData.contato) ? vendaData.contato[0] : vendaData.contato,
+                itens: vendaData.itens ?? [],
+                pagamentos: vendaData.pagamentos ?? []
+            })
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Erro ao carregar venda')
+        } finally {
+            setLoading(false)
         }
-
-        fetchVenda()
     }, [id])
 
-    return { venda, loading, error }
+    useEffect(() => {
+        fetchVenda()
+    }, [fetchVenda])
+
+    return { venda, loading, error, refetch: fetchVenda }
 }

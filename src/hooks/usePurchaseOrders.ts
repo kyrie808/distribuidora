@@ -17,7 +17,8 @@ export function usePurchaseOrders() {
                     items:purchase_order_items(
                         *,
                         product:produtos(*)
-                    )
+                    ),
+                    payments:purchase_order_payments(*)
                 `)
                 .order('order_date', { ascending: false })
 
@@ -42,13 +43,19 @@ export function usePurchaseOrders() {
           items:purchase_order_items(
             *,
             product:produtos(*)
-          )
+          ),
+          payments:purchase_order_payments(*)
         `)
                 .eq('id', id)
                 .single()
 
             if (error) throw error
-            return data as PurchaseOrderWithItems
+            // Sort payments by date desc locally
+            const order = data as PurchaseOrderWithItems
+            if (order.payments) {
+                order.payments.sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
+            }
+            return order
         } catch (err: any) {
             console.error('Error fetching order:', err)
             setError(err.message)
@@ -74,7 +81,7 @@ export function usePurchaseOrders() {
                     notes: order.notes,
                     amount_paid: order.amount_paid || 0,
                     data_recebimento: order.data_recebimento
-                })
+                } as any)
                 .select()
                 .single()
 
@@ -89,12 +96,13 @@ export function usePurchaseOrders() {
                     purchase_order_id: orderData.id,
                     product_id: item.product_id,
                     quantity: item.quantity,
-                    unit_cost: item.unit_cost
+                    unit_cost: item.unit_cost,
+                    total_cost: item.unit_cost * item.quantity
                 }))
 
                 const { error: itemsError } = await supabase
                     .from('purchase_order_items')
-                    .insert(itemsToInsert)
+                    .insert(itemsToInsert as any) // Explicitly cast to avoid strict type mismatch on insert
 
                 if (itemsError) throw itemsError
             }
@@ -135,12 +143,13 @@ export function usePurchaseOrders() {
                     purchase_order_id: id,
                     product_id: item.product_id,
                     quantity: item.quantity,
-                    unit_cost: item.unit_cost
+                    unit_cost: item.unit_cost,
+                    total_cost: item.unit_cost * item.quantity
                 }))
 
                 const { error: insertError } = await supabase
                     .from('purchase_order_items')
-                    .insert(itemsToInsert)
+                    .insert(itemsToInsert as any)
 
                 if (insertError) throw insertError
             }
@@ -158,8 +167,9 @@ export function usePurchaseOrders() {
         setLoading(true)
         setError(null)
         try {
-            const { error } = await supabase
-                .rpc('receive_purchase_order', { p_order_id: id } as any)
+            // Force cast to any to bypass 'never' type on RPC function name due to missing types
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const { error } = await (supabase.rpc as any)('receive_purchase_order', { p_order_id: id })
 
             if (error) throw error
             return true
@@ -189,6 +199,31 @@ export function usePurchaseOrders() {
         }
     }, [])
 
+    const addPayment = useCallback(async (orderId: string, paymentData: { amount: number, payment_method: string, payment_date: string, notes?: string }) => {
+        setLoading(true)
+        try {
+            const { error } = await supabase
+                .from('purchase_order_payments')
+                .insert({
+                    purchase_order_id: orderId,
+                    amount: paymentData.amount,
+                    payment_method: paymentData.payment_method,
+                    payment_date: paymentData.payment_date,
+                    notes: paymentData.notes
+                })
+
+            if (error) throw error
+
+            // Note: Trigger will update the order status
+            return true
+        } catch (err: any) {
+            setError(err.message)
+            throw err
+        } finally {
+            setLoading(false)
+        }
+    }, [])
+
     return {
         loading,
         error,
@@ -197,6 +232,7 @@ export function usePurchaseOrders() {
         createOrder,
         updateOrder,
         receiveOrder,
-        deleteOrder
+        deleteOrder,
+        addPayment
     }
 }

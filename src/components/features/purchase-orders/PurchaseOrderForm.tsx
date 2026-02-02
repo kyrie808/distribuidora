@@ -255,7 +255,9 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
                                 min="0"
                                 value={amountPaid}
                                 onChange={(e) => setAmountPaid(Number(e.target.value))}
-                                className="pr-12"
+                                className="pr-12 bg-gray-100/50 cursor-not-allowed text-gray-500"
+                                disabled
+                                title="O valor pago é calculado automaticamente com base nos pagamentos registrados."
                             />
                             {totalAmount > 0 && (
                                 <div className="absolute right-0 top-0 text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-bl-lg">

@@ -42,6 +42,7 @@ export function RelatorioFabrica() {
     // Auto-generate on first load
     useEffect(() => {
         gerarRelatorio(dataInicio, dataFim)
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []) // Only on mount
 
     const handleGerar = () => {

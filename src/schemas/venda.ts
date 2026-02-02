@@ -35,3 +35,13 @@ export const vendaFiltrosSchema = z.object({
 })
 
 export type VendaFiltros = z.infer<typeof vendaFiltrosSchema>
+
+export const pagamentoSchema = z.object({
+    venda_id: z.string().uuid(),
+    valor: z.number().min(0.01, 'Valor deve ser maior que zero'),
+    data: z.string().default(() => new Date().toISOString()),
+    metodo: z.enum(['pix', 'dinheiro', 'cartao', 'fiado', 'brinde', 'pre_venda']).default('pix'),
+    observacao: z.string().optional(),
+})
+
+export type PagamentoFormData = z.infer<typeof pagamentoSchema>

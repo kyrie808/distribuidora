@@ -9,23 +9,23 @@ import {
     Search,
     Trash2,
     Edit,
-    XCircle,
+    XCircle
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, EmptyState, LoadingScreen } from '../components/ui'
 import { Modal, ModalActions } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
+import { PaymentModal } from '../components/features/vendas/PaymentModal'
 
-import { useVendas } from '../hooks/useVendas'
-import { useContatos } from '../hooks/useContatos'
+import { useVendas, type VendaComItens } from '../hooks/useVendas'
 import { useScrollPersistence } from '../hooks/useScrollPersistence'
 import { formatCurrency, formatDate, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 
 type StatusFilter = 'todos' | 'pendente' | 'entregue' | 'cancelada'
 type PeriodoFilter = 'todos' | 'hoje' | 'semana' | 'mes'
-type PagamentoFilter = 'todos' | 'pago' | 'nao_pago'
+type PagamentoFilter = 'todos' | 'pago' | 'parcial' | 'pendente'
 
 const PERIODO_LABELS = {
     todos: 'Todos',
@@ -72,6 +72,7 @@ export function Vendas() {
     }, [])
 
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
+    const [paymentVenda, setPaymentVenda] = useState<VendaComItens | null>(null) // State for payment modal
 
     // Debounce search
     useEffect(() => {
@@ -82,7 +83,7 @@ export function Vendas() {
     }, [searchQuery])
 
     // Buscar TODAS as vendas do período para calcular contadores
-    const { vendas, loading, error, metrics, deleteVenda } = useVendas({
+    const { vendas, loading, error, metrics, deleteVenda, addPagamento, getVendaById } = useVendas({
         filtros: {
             status: 'todos', // Sempre buscar todas para contagens corretas
             forma_pagamento: 'todos',
@@ -90,7 +91,6 @@ export function Vendas() {
             search: debouncedSearch,
         },
     })
-    const { getNomeIndicador } = useContatos()
 
     // Persist Scroll
     useScrollPersistence('vendas_list', loading)
@@ -107,8 +107,11 @@ export function Vendas() {
             if (pagamentoFilter === 'pago') {
                 if (!venda.pago || venda.forma_pagamento === 'brinde') return false
             }
-            if (pagamentoFilter === 'nao_pago') {
-                if (venda.pago || venda.forma_pagamento === 'brinde') return false
+            if (pagamentoFilter === 'parcial') {
+                if (venda.pago || (venda.valor_pago || 0) === 0 || venda.forma_pagamento === 'brinde') return false
+            }
+            if (pagamentoFilter === 'pendente') {
+                if (venda.pago || (venda.valor_pago || 0) > 0 || venda.forma_pagamento === 'brinde') return false
             }
 
             return true
@@ -119,8 +122,11 @@ export function Vendas() {
     const totalEntregasPendentes = vendas.filter(v => v.status === 'pendente').length
     const totalEntregues = vendas.filter(v => v.status === 'entregue').length
     const totalCanceladas = vendas.filter(v => v.status === 'cancelada').length
+    
+    // Status metrics logic updated
     const totalPagos = vendas.filter(v => v.pago === true).length
-    const totalAReceber = vendas.filter(v => v.pago === false).length
+    const totalParcial = vendas.filter(v => !v.pago && (v.valor_pago || 0) > 0).length
+    const totalPendentesFinanceiro = vendas.filter(v => !v.pago && (v.valor_pago || 0) === 0 && v.forma_pagamento !== 'brinde').length
 
     const hasActiveFilters = statusFilter !== 'todos' || periodoFilter !== 'todos' || pagamentoFilter !== 'todos'
 
@@ -133,8 +139,6 @@ export function Vendas() {
         })
     }
 
-
-
     const handleDelete = (id: string) => {
         setVendaToDelete(id)
     }
@@ -143,6 +147,15 @@ export function Vendas() {
         if (!vendaToDelete) return
         await deleteVenda(vendaToDelete)
         setVendaToDelete(null)
+    }
+
+    // Handle opening payment modal - Fetches full details for history
+    const handleOpenPayment = async (e: React.MouseEvent, vendaId: string) => {
+        e.stopPropagation()
+        const fullVenda = await getVendaById(vendaId)
+        if (fullVenda) {
+            setPaymentVenda(fullVenda)
+        }
     }
 
     return (
@@ -186,7 +199,7 @@ export function Vendas() {
                     </div>
                 </div>
 
-                {/* Filter Chips - Duas Linhas com Scroll Horizontal */}
+                {/* Filter Chips */}
                 <div className="flex flex-col gap-2 mb-4 px-2 py-2">
                     {/* Grupo: Status de Entrega */}
                     <div className="flex items-center gap-1.5 px-0">
@@ -234,7 +247,7 @@ export function Vendas() {
                                         setStatusFilter('todos');
                                     } else {
                                         setStatusFilter('cancelada');
-                                        setPagamentoFilter('todos'); // Reset payment filter to show all cancelled
+                                        setPagamentoFilter('todos');
                                     }
                                 }}
                                 className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
@@ -265,7 +278,7 @@ export function Vendas() {
                                     className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'todos' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-gray-400 ring-offset-1'
                                         }`}
                                 >
-                                    {vendas.length} Todas
+                                    Ver todas
                                 </Badge>
                             </button>
                             <button
@@ -277,19 +290,30 @@ export function Vendas() {
                                     className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pago' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-success-500 ring-offset-1'
                                         }`}
                                 >
-                                    {totalPagos} Pagos
+                                    {totalPagos} Quitados
                                 </Badge>
                             </button>
                             <button
-                                onClick={() => setPagamentoFilter(pagamentoFilter === 'nao_pago' ? 'todos' : 'nao_pago')}
+                                onClick={() => setPagamentoFilter(pagamentoFilter === 'parcial' ? 'todos' : 'parcial')}
+                                className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
+                            >
+                                <Badge
+                                    className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 bg-yellow-100 text-yellow-800 border-yellow-200 ${pagamentoFilter !== 'parcial' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-yellow-400 ring-offset-1'
+                                        }`}
+                                >
+                                    {totalParcial} Parciais
+                                </Badge>
+                            </button>
+                            <button
+                                onClick={() => setPagamentoFilter(pagamentoFilter === 'pendente' ? 'todos' : 'pendente')}
                                 className="focus:outline-none rounded-full flex-shrink-0 active:scale-95 transition-transform"
                             >
                                 <Badge
                                     variant="warning"
-                                    className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'nao_pago' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-warning-500 ring-offset-1'
+                                    className={`h-7 flex items-center whitespace-nowrap cursor-pointer transition-all duration-200 hover:scale-105 active:scale-95 ${pagamentoFilter !== 'pendente' ? 'opacity-50 hover:opacity-70' : 'shadow-md ring-2 ring-warning-500 ring-offset-1'
                                         }`}
                                 >
-                                    {totalAReceber} A Receber
+                                    {totalPendentesFinanceiro} Pendentes
                                 </Badge>
                             </button>
                         </div>
@@ -381,6 +405,8 @@ export function Vendas() {
                                                             'bg-warning-500'
                                                             }`} />
                                                     </div>
+                                                    
+                                                    {/* Badge Lógica Nova */}
                                                     {venda.forma_pagamento === 'brinde' ? (
                                                         <Badge variant="gray" className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
                                                             <span>🎁</span> Brinde
@@ -393,9 +419,13 @@ export function Vendas() {
                                                         <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
                                                             <span>💰</span> Pago
                                                         </Badge>
+                                                    ) : (venda.valor_pago || 0) > 0 ? (
+                                                        <Badge className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-yellow-100 text-yellow-800 border-yellow-200 ring-yellow-200">
+                                                            <span>🕒</span> Parcial
+                                                        </Badge>
                                                     ) : (
                                                         <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
-                                                            <span>⏳</span> Não pago
+                                                            <span>⏳</span> Pendente
                                                         </Badge>
                                                     )}
                                                 </>
@@ -412,13 +442,11 @@ export function Vendas() {
 
                                         <p className="text-xs text-gray-400 mt-1">
                                             {venda.itens.reduce((acc, item) => acc + item.quantidade, 0)} item(s)
-                                            {venda.contato?.origem === 'indicacao' && (
-                                                <span className="ml-2 text-accent-600">
-                                                    📣 {getNomeIndicador(venda.contato?.indicado_por_id ?? null)
-                                                        ? `Indicado por: ${getNomeIndicador(venda.contato?.indicado_por_id ?? null)}`
-                                                        : 'Indicação'}
+                                            {venda.valor_pago && venda.valor_pago > 0 && !venda.pago ? (
+                                                <span className="ml-2 font-medium text-yellow-600">
+                                                    (Pago: {formatCurrency(venda.valor_pago)})
                                                 </span>
-                                            )}
+                                            ) : null}
                                         </p>
                                     </div>
 
@@ -431,6 +459,18 @@ export function Vendas() {
                                         </p>
 
                                         <div className="flex items-center gap-1 mt-1">
+                                            {/* Quick Actions */}
+                                            {venda.status !== 'cancelada' && !venda.pago && venda.forma_pagamento !== 'brinde' && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => handleOpenPayment(e, venda.id)}
+                                                    className="p-1.5 hover:bg-green-50 text-green-600 rounded-lg transition-colors relative z-10"
+                                                    title="Informar Pagamento"
+                                                >
+                                                    <DollarSign className="h-4 w-4" />
+                                                </button>
+                                            )}
+
                                             {venda.status !== 'cancelada' && (
                                                 <button
                                                     type="button"
@@ -494,6 +534,20 @@ export function Vendas() {
                     </ModalActions>
                 </div>
             </Modal>
+            
+            {/* Payment Modal */}
+            {paymentVenda && (
+                <PaymentModal
+                    isOpen={!!paymentVenda}
+                    onClose={() => setPaymentVenda(null)}
+                    onConfirm={addPagamento}
+                    vendaId={paymentVenda.id}
+                    total={paymentVenda.total}
+                    valorPago={paymentVenda.valor_pago || 0}
+                    historico={paymentVenda.pagamentos}
+                    customerName={paymentVenda.contato?.nome || 'Cliente'}
+                />
+            )}
         </>
     )
 }
