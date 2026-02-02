@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { AlertasFinanceiroWidget } from '../components/dashboard/AlertasFinanceiroWidget'
 import { AlertasRecompraWidget } from '../components/dashboard/AlertasRecompraWidget'
+import { EstoqueWidget } from '../components/dashboard/EstoqueWidget'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, LoadingScreen } from '../components/ui'
@@ -200,6 +201,12 @@ export function Dashboard() {
                             </div>
                         </section>
 
+                        {/* 🔔 ALERTAS & SMOKE DETECTORS */}
+                        <div className="grid grid-cols-1 gap-4 mb-6">
+                            {/* Alerta de Estoque (Smoke Detector) */}
+                            <EstoqueWidget />
+                        </div>
+
                         {/* 👥 CLIENTES */}
                         <section className="mb-6">
                             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
@@ -382,7 +389,7 @@ export function Dashboard() {
                         </section>
                     </div>
                 )}
-            </PageContainer>
+            </PageContainer >
         </>
     )
 }

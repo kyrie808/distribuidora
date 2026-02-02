@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
     Package,
     Plus,
@@ -6,6 +7,7 @@ import {
     TrendingDown,
     AlertTriangle,
     Pencil,
+    X
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -26,35 +28,60 @@ function ProdutoCard({ produto, onEdit }: { produto: Produto; onEdit: () => void
     const margem = calcularMargem(Number(produto.preco), Number(produto.custo))
     const margemNegativa = margem < 0
 
+    // Low stock logic
+    const estoqueAtual = produto.estoque_atual || 0
+    const estoqueMinimo = produto.estoque_minimo || 10
+    const isBaixoEstoque = estoqueAtual <= estoqueMinimo
+
     return (
-        <Card hover onClick={onEdit} className="cursor-pointer">
+        <Card
+            hover
+            onClick={onEdit}
+            className={`cursor-pointer border-l-4 ${isBaixoEstoque ? 'border-l-warning-500 bg-warning-50/10' : 'border-l-transparent'}`}
+        >
             <div className="flex items-start justify-between">
                 <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className={`
-                        flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
+                        flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center relative
                         ${produto.ativo ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-400'}
                     `}>
                         <Package className="h-5 w-5" />
+                        {isBaixoEstoque && (
+                            <div className="absolute -top-1 -right-1 bg-warning-500 text-white rounded-full p-0.5 border-2 border-white">
+                                <AlertTriangle className="h-2.5 w-2.5" />
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
                             <p className="font-medium text-gray-900 truncate">{produto.nome}</p>
-                            <Badge variant={produto.ativo ? 'success' : 'gray'}>
-                                {produto.ativo ? 'Ativo' : 'Inativo'}
-                            </Badge>
+                            {isBaixoEstoque && (
+                                <Badge variant="warning" className="h-5 px-1.5 text-[10px]">
+                                    Baixo Estoque
+                                </Badge>
+                            )}
+                            {!isBaixoEstoque && (
+                                <Badge variant={produto.ativo ? 'success' : 'gray'}>
+                                    {produto.ativo ? 'Ativo' : 'Inativo'}
+                                </Badge>
+                            )}
                         </div>
 
-                        <p className="text-xs text-gray-500 mb-2">Código: {produto.codigo}</p>
+                        <p className="text-xs text-gray-500 mb-2">Código: {produto.codigo} • Estoque Mín: {estoqueMinimo}</p>
 
-                        <div className="flex items-center gap-4 text-sm">
-                            <div>
-                                <span className="text-gray-500">Venda: </span>
-                                <span className="font-semibold text-gray-900">{formatCurrency(Number(produto.preco))}</span>
+                        <div className="flex items-center gap-4 text-sm mt-2">
+                            {/* Estoque Atual */}
+                            <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded text-gray-700">
+                                <Package className="h-3.5 w-3.5 opacity-50" />
+                                <span className={isBaixoEstoque ? 'font-bold text-warning-700' : ''}>
+                                    {estoqueAtual} {produto.unidade || 'un'}
+                                </span>
                             </div>
+
                             <div>
-                                <span className="text-gray-500">Custo: </span>
-                                <span className="font-medium text-gray-700">{formatCurrency(Number(produto.custo))}</span>
+                                <span className="text-gray-500 text-xs">Venda: </span>
+                                <span className="font-semibold text-gray-900">{formatCurrency(Number(produto.preco))}</span>
                             </div>
                         </div>
                     </div>
@@ -90,7 +117,28 @@ function ProdutoCard({ produto, onEdit }: { produto: Produto; onEdit: () => void
 
 export function Produtos() {
     const toast = useToast()
+    const [searchParams, setSearchParams] = useSearchParams()
     const { produtos, loading, createProduto, updateProduto } = useProdutos({ includeInactive: true })
+
+    // Filters
+    const filterBaixoEstoque = searchParams.get('filtro') === 'baixo_estoque'
+
+    const filteredProdutos = useMemo(() => {
+        if (!filterBaixoEstoque) return produtos
+
+        return produtos.filter(p => {
+            const atual = p.estoque_atual || 0
+            const minimo = p.estoque_minimo || 10
+            return atual <= minimo && p.ativo
+        })
+    }, [produtos, filterBaixoEstoque])
+
+    const clearFilter = () => {
+        setSearchParams(prev => {
+            prev.delete('filtro')
+            return prev
+        })
+    }
 
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
@@ -103,6 +151,7 @@ export function Produtos() {
     const [newPreco, setNewPreco] = useState('')
     const [newCusto, setNewCusto] = useState('')
     const [newUnidade, setNewUnidade] = useState('un')
+    const [newEstoqueMinimo, setNewEstoqueMinimo] = useState('10')
     const [creating, setCreating] = useState(false)
 
     // Form states for edit
@@ -111,12 +160,17 @@ export function Produtos() {
     const [editApelido, setEditApelido] = useState('')
     const [editPreco, setEditPreco] = useState('')
     const [editCusto, setEditCusto] = useState('')
+    const [editEstoqueMinimo, setEditEstoqueMinimo] = useState('')
     const [editAtivo, setEditAtivo] = useState(true)
     const [updating, setUpdating] = useState(false)
 
     // Stats
     const produtosAtivos = produtos.filter(p => p.ativo).length
-    const produtosInativos = produtos.filter(p => !p.ativo).length
+    const produtosBaixoEstoqueCount = produtos.filter(p => {
+        const atual = p.estoque_atual || 0
+        const minimo = p.estoque_minimo || 10
+        return atual <= minimo && p.ativo
+    }).length
 
     // Open edit modal
     const handleOpenEdit = (produto: Produto) => {
@@ -126,6 +180,7 @@ export function Produtos() {
         setEditApelido(produto.apelido || '')
         setEditPreco(String(produto.preco))
         setEditCusto(String(produto.custo))
+        setEditEstoqueMinimo(String(produto.estoque_minimo || 10))
         setEditAtivo(produto.ativo)
     }
 
@@ -137,6 +192,7 @@ export function Produtos() {
         setEditApelido('')
         setEditPreco('')
         setEditCusto('')
+        setEditEstoqueMinimo('')
         setEditAtivo(true)
     }
 
@@ -148,6 +204,7 @@ export function Produtos() {
         setNewPreco('')
         setNewCusto('')
         setNewUnidade('un')
+        setNewEstoqueMinimo('10')
         setIsCreateModalOpen(true)
     }
 
@@ -186,6 +243,7 @@ export function Produtos() {
             preco,
             custo,
             unidade: newUnidade,
+            estoque_minimo: parseInt(newEstoqueMinimo) || 10,
             ativo: true,
         }
 
@@ -207,6 +265,7 @@ export function Produtos() {
 
         const preco = parseFloat(editPreco)
         const custo = parseFloat(editCusto)
+        const estoqueMinimo = parseInt(editEstoqueMinimo) || 10
 
         if (isNaN(preco) || preco <= 0) {
             toast.error('Preço deve ser maior que zero')
@@ -234,6 +293,7 @@ export function Produtos() {
             apelido: editApelido.trim() || null,
             preco,
             custo,
+            estoque_minimo: estoqueMinimo,
             ativo: editAtivo,
         }
 
@@ -278,21 +338,45 @@ export function Produtos() {
 
                 {!loading && (
                     <div className="space-y-4">
+                        {/* Active Filter Banner */}
+                        {filterBaixoEstoque && (
+                            <div className="bg-warning-50 border border-warning-200 rounded-lg p-3 flex items-center justify-between mb-4 animate-in fade-in slide-in-from-top-2">
+                                <div className="flex items-center gap-2 text-warning-800">
+                                    <AlertTriangle className="h-5 w-5 text-warning-600" />
+                                    <span className="font-medium text-sm">
+                                        Exibindo {filteredProdutos.length} produtos com baixo estoque
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={clearFilter}
+                                    className="text-xs font-semibold text-warning-700 hover:text-warning-900 flex items-center gap-1 bg-warning-100 hover:bg-warning-200 px-2 py-1 rounded transition-colors"
+                                >
+                                    Limpar Filtro
+                                    <X className="h-3 w-3" />
+                                </button>
+                            </div>
+                        )}
+
                         {/* Stats */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <Card className="text-center">
-                                <p className="text-2xl font-bold text-gray-900">{produtosAtivos}</p>
-                                <p className="text-sm text-gray-500">Ativos</p>
-                            </Card>
-                            <Card className="text-center">
-                                <p className="text-2xl font-bold text-gray-400">{produtosInativos}</p>
-                                <p className="text-sm text-gray-500">Inativos</p>
-                            </Card>
-                        </div>
+                        {!filterBaixoEstoque && (
+                            <div className="grid grid-cols-2 gap-3">
+                                <Card className="text-center">
+                                    <p className="text-2xl font-bold text-gray-900">{produtosAtivos}</p>
+                                    <p className="text-sm text-gray-500">Ativos</p>
+                                </Card>
+                                <Card
+                                    className="text-center cursor-pointer hover:bg-red-50 transition-colors border-l-4 border-l-transparent hover:border-l-warning-500"
+                                    onClick={() => setSearchParams({ filtro: 'baixo_estoque' })}
+                                >
+                                    <p className="text-2xl font-bold text-warning-600">{produtosBaixoEstoqueCount}</p>
+                                    <p className="text-sm text-gray-500">Baixo Estoque</p>
+                                </Card>
+                            </div>
+                        )}
 
                         {/* Product List */}
                         <div className="space-y-2">
-                            {produtos.map(produto => (
+                            {filteredProdutos.map(produto => (
                                 <ProdutoCard
                                     key={produto.id}
                                     produto={produto}
@@ -301,7 +385,7 @@ export function Produtos() {
                             ))}
                         </div>
 
-                        {produtos.length === 0 && (
+                        {filteredProdutos.length === 0 && (
                             <Card className="text-center py-8 text-gray-500">
                                 <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
                                 <p>Nenhum produto cadastrado</p>
@@ -368,6 +452,16 @@ export function Produtos() {
                             value={newUnidade}
                             onChange={(e) => setNewUnidade(e.target.value)}
                             placeholder="un, kg, etc"
+                        />
+
+                        <Input
+                            label="Estoque Mínimo (Alerta)"
+                            type="number"
+                            min="0"
+                            value={newEstoqueMinimo}
+                            onChange={(e) => setNewEstoqueMinimo(e.target.value)}
+                            placeholder="10"
+                            helperText="Quantidade para gerar alerta de baixo estoque"
                         />
 
                         {/* Margem Preview */}
@@ -448,6 +542,15 @@ export function Produtos() {
                                     onChange={(e) => setEditCusto(e.target.value)}
                                 />
                             </div>
+
+                            <Input
+                                label="Estoque Mínimo (Alerta)"
+                                type="number"
+                                min="0"
+                                value={editEstoqueMinimo}
+                                onChange={(e) => setEditEstoqueMinimo(e.target.value)}
+                                helperText="Quantidade para gerar alerta de baixo estoque no Dashboard"
+                            />
 
                             {/* Margem Preview */}
                             <div className={`p-3 rounded-lg ${editMargem < 0 ? 'bg-danger-50' : 'bg-success-50'}`}>
