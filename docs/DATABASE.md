@@ -76,46 +76,59 @@ Registra pagamentos parciais ou totais de uma venda.
 | observacao | text | Não | Notas opcionais |
 | criado_em | timestamp | Sim | Default: now() |
 
-### 7. purchase_orders (Atualizado)
+### 7. purchase_orders
 Pedidos de compra aos fornecedores.
 
 | Coluna | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| id | uuid | Sim | PK |
-| supplier_id | uuid | Não | FK -> contatos.id |
-| order_date | date | Sim | Data do pedido |
-| status | enum | Sim | `pending`, `received`, `cancelled` |
-| payment_status | enum | Sim | `paid`, `partial`, `unpaid` |
-| total_amount | numeric | Sim | Valor total do pedido |
-| amount_paid | numeric | Sim | Total já pago (Auto-calc trigger) |
-| notes | text | Não | Observações |
-| data_recebimento | timestamp | Não | Data de recebimento |
-| created_at | timestamp | Sim | Default: now() |
+| `id` | uuid | Sim | PK |
+| `supplier_id` | uuid | Não | FK -> contatos.id |
+| `order_date` | date | Sim | Data do pedido |
+| `status` | enum | Sim | `pending`, `received`, `cancelled` |
+| `payment_status` | enum | Sim | `paid`, `partial`, `unpaid` |
+| `total_amount` | numeric | Sim | Valor total do pedido |
+| `amount_paid` | numeric | Sim | Total já pago (Auto-calc trigger) |
+| `notes` | text | Não | Observações |
+| `received_date` | timestamp | Não | Data de recebimento |
+| `created_at` | timestamp | Sim | Default: now() |
 
-### 8. purchase_order_items (Atualizado)
+### 8. purchase_order_items
 Itens de um pedido de compra.
 
 | Coluna | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| id | uuid | Sim | PK |
-| purchase_order_id | uuid | Sim | FK -> purchase_orders.id |
-| product_id | uuid | Sim | FK -> produtos.id |
-| quantity | numeric | Sim | Quantidade comprada |
-| unit_cost | numeric | Sim | Custo unitário |
-| total_cost | numeric | Sim | Custo total (qtd * unit) |
+| `id` | uuid | Sim | PK |
+| `purchase_order_id` | uuid | Sim | FK -> purchase_orders.id |
+| `product_id` | uuid | Sim | FK -> produtos.id |
+| `quantity` | numeric | Sim | Quantidade comprada |
+| `unit_cost` | numeric | Sim | Custo unitário |
+| `total_cost` | numeric | Sim | Custo total (qtd * unit) |
 
 ### 9. purchase_order_payments
 Registra pagamentos parciais ou totais de um pedido de compra.
 
 | Coluna | Tipo | Obrigatório | Descrição |
 |---|---|---|---|
-| id | uuid | Sim | PK |
-| purchase_order_id | uuid | Sim | FK -> purchase_orders.id |
-| amount | numeric | Sim | Valor pago |
-| payment_date | date | Sim | Data do pagamento |
-| payment_method | text | Não | Pix, Boleto, etc. |
-| notes | text | Não | Observações |
-| created_at | timestamp | Sim | Default: now() |
+| `id` | uuid | Sim | PK |
+| `purchase_order_id` | uuid | Sim | FK -> purchase_orders.id |
+| `amount` | numeric | Sim | Valor pago |
+| `payment_date` | timestamp | Sim | Data do pagamento |
+| `payment_method` | text | Não | Default: 'pix' |
+| `notes` | text | Não | Observações |
+| `created_at` | timestamp | Sim | Default: now() |
+
+### 10. pagamentos_venda
+Registra pagamentos parciais ou totais de uma venda.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| `id` | uuid | Sim | PK |
+| `venda_id` | uuid | Sim | FK -> vendas.id |
+| `valor` | numeric | Sim | Valor do pagamento |
+| `data` | timestamp | Sim | Data do pagamento |
+| `metodo` | text | Sim | Default: 'pix' |
+| `observacao` | text | Não | Notas opcionais |
+| `criado_em` | timestamp | Sim | Default: now() |
 
 ## Enums (PostgreSQL)
 

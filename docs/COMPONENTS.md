@@ -117,6 +117,17 @@ import { ContatoCard, ContatoFormModal } from '@/components/contatos'
 | `PurchaseOrderForm` | `isOpen`, `onClose`, `initialData` | Modal de criação/edição de pedido |
 | `MonthPicker` | `currentDate`, `onDateChange` | Seletor de Mês/Ano para dashboard |
 
+
+---
+
+## Dashboard Widgets (`components/dashboard/`)
+
+| Componente | Props | Uso |
+|------------|-------|-----|
+| `AlertasFinanceiroWidget` | - | Exibe contas a receber atrasadas/hoje com link p/ WhatsApp |
+| `AlertasRecompraWidget` | `contatos`, `atrasados`, `loading` | Exibe clientes que precisam de recompra |
+| `MonthPicker` | `currentDate`, `onDateChange` | Seletor de mês para filtro global |
+
 ---
 
 ## Convenções

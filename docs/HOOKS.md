@@ -297,6 +297,40 @@ const {
 
 ---
 
+## useAlertasFinanceiros
+
+**Arquivo:** `src/hooks/useAlertasFinanceiros.ts`
+**Responsabilidade:** Lógica de contas a receber (Fiado) e alertas de atraso.
+
+### Funções exportadas:
+
+#### `useAlertasFinanceiros()`
+Busca vendas fiado não pagas e classifica status.
+
+```tsx
+const {
+  alertas,          // AlertaFinanceiro[]
+  loading,
+  error,
+  totalAtrasado,    // R$ Soma atrasados
+  totalHoje,        // R$ Soma vencendo hoje
+  totalProximo,     // R$ Soma vencendo em 3 dias
+  refetch
+} = useAlertasFinanceiros()
+```
+
+### Tipo `AlertaFinanceiro`:
+```tsx
+{
+  venda: VendaComItens,
+  diasAtraso: number,
+  status: 'atrasado' | 'hoje' | 'proximo',
+  dataPrevista: Date
+}
+```
+
+---
+
 ## Padrões de Hooks
 
 ### Retorno padrão:
