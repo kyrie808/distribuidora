@@ -5,15 +5,16 @@ import {
     ShoppingCart,
     Users,
     TrendingUp,
-    AlertCircle,
+    Package,
+
+    RefreshCcw,
     Trophy,
     ChevronRight,
-    RefreshCcw,
-    Bell,
     Share2,
-    Package,
     ClipboardList,
 } from 'lucide-react'
+import { AlertasFinanceiroWidget } from '../components/dashboard/AlertasFinanceiroWidget'
+import { AlertasRecompraWidget } from '../components/dashboard/AlertasRecompraWidget'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Badge, LoadingScreen } from '../components/ui'
@@ -55,7 +56,7 @@ export function Dashboard() {
     const clientesAtivos = contatos.filter((c) => c.status === 'cliente').length
     const ultimasVendas = vendas.slice(0, 5)
     const topIndicadores = indicadores.slice(0, 3)
-    const alertasUrgentes = recompraContatos.filter((c) => c.status === 'atrasado').slice(0, 5)
+
 
     // Variation (placeholder - would need previous month data)
     const variacao = metrics.vendasMes > 0 ? '+12%' : '0%'
@@ -228,57 +229,18 @@ export function Dashboard() {
                             </div>
                         </section>
 
-                        {/* Alertas de Recompra */}
-                        <section>
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Bell className="h-5 w-5 text-danger-500" />
-                                    Alertas de Recompra
-                                    {atrasados > 0 && (
-                                        <Badge variant="danger">{atrasados}</Badge>
-                                    )}
-                                </h2>
-                                <button
-                                    onClick={() => navigate('/recompra')}
-                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
-                                >
-                                    Ver todos <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
+                        {/* GRID DE ALERTAS (FINANCEIRO + ESTOQUE) */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            {/* Alertas Financeiros (Fiado) */}
+                            <AlertasFinanceiroWidget />
 
-                            {alertasUrgentes.length === 0 ? (
-                                <Card className="text-center py-8 text-gray-500">
-                                    <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>Nenhum cliente atrasado</p>
-                                </Card>
-                            ) : (
-                                <div className="space-y-2">
-                                    {alertasUrgentes.map((item) => (
-                                        <Card
-                                            key={item.contato.id}
-                                            hover
-                                            onClick={() => navigate(`/contatos/${item.contato.id}`)}
-                                            className="cursor-pointer"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 bg-danger-100 rounded-full flex items-center justify-center">
-                                                        <AlertCircle className="h-4 w-4 text-danger-500" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{item.contato.nome}</p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {item.diasSemCompra} dias sem comprar
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <ChevronRight className="h-5 w-5 text-gray-400" />
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            )}
-                        </section>
+                            {/* Alertas de Recompra */}
+                            <AlertasRecompraWidget
+                                contatos={recompraContatos}
+                                atrasados={atrasados}
+                                loading={loadingRecompra}
+                            />
+                        </div>
 
                         {/* Top Indicadores */}
                         <section>

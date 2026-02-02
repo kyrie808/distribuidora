@@ -118,7 +118,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
 
             // Date filtering priority: Explicit Range > Period Filter
             if (startDate && endDate) {
-                 query = query
+                query = query
                     .gte('data', startDate.toISOString().split('T')[0])
                     .lte('data', endDate.toISOString().split('T')[0])
             } else if (filtros?.periodo && filtros.periodo !== 'todos') {
@@ -192,7 +192,7 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
     // Let's assume 'vendas' contains exactly what we want to analyze.
     const metrics: VendasMetrics = (() => {
         const vendasNaoCanceladas = vendas.filter((v) => v.status !== 'cancelada')
-        
+
         // Faturamento (Net of delivery fee)
         const faturamentoTotal = vendasNaoCanceladas.reduce((acc, v) =>
             acc + (v.pago && v.forma_pagamento !== 'brinde' ? (Number(v.total) - (v.taxa_entrega || 0)) : 0), 0)
@@ -281,6 +281,9 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
                 pago: ['pix', 'dinheiro', 'cartao'].includes(data.forma_pagamento),
                 observacoes: data.observacoes || null,
                 custo_total: custoTotal,
+                // Mapeamento de campos adicionais refatorado
+                parcelas: data.parcelas || null,
+                data_prevista_pagamento: data.data_prevista_pagamento || null,
             }
 
             const { data: newVenda, error: vendaError } = await supabase
@@ -292,6 +295,25 @@ export function useVendas(options: UseVendasOptions = {}): UseVendasReturn {
             if (vendaError) throw vendaError
 
             const typedVenda = newVenda as Venda
+
+            // Financial Mirroring: Auto-create payment if paid at sale creation
+            // This ensures data consistency between Sales and Financial modules
+            if (vendaInsert.pago) {
+                const { error: pgtoError } = await supabase
+                    .from('pagamentos_venda')
+                    .insert({
+                        venda_id: typedVenda.id,
+                        valor: typedVenda.total,
+                        metodo: data.forma_pagamento,
+                        data: new Date().toISOString(),
+                        observacao: 'Pagamento automático na criação da venda'
+                    })
+
+                if (pgtoError) {
+                    console.error('Erro ao registrar pagamento automático:', pgtoError)
+                    throw new Error(`Erro ao registrar pagamento automático: ${pgtoError.message}`)
+                }
+            }
 
             // Insert items
             const itensInsert: ItemVendaInsert[] = data.itens.map((item) => ({
