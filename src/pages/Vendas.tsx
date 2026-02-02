@@ -122,7 +122,7 @@ export function Vendas() {
     const totalEntregasPendentes = vendas.filter(v => v.status === 'pendente').length
     const totalEntregues = vendas.filter(v => v.status === 'entregue').length
     const totalCanceladas = vendas.filter(v => v.status === 'cancelada').length
-    
+
     // Status metrics logic updated
     const totalPagos = vendas.filter(v => v.pago === true).length
     const totalParcial = vendas.filter(v => !v.pago && (v.valor_pago || 0) > 0).length
@@ -405,7 +405,7 @@ export function Vendas() {
                                                             'bg-warning-500'
                                                             }`} />
                                                     </div>
-                                                    
+
                                                     {/* Badge Lógica Nova */}
                                                     {venda.forma_pagamento === 'brinde' ? (
                                                         <Badge variant="gray" className="w-28 justify-center whitespace-nowrap flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 ring-blue-200">
@@ -534,7 +534,7 @@ export function Vendas() {
                     </ModalActions>
                 </div>
             </Modal>
-            
+
             {/* Payment Modal */}
             {paymentVenda && (
                 <PaymentModal
@@ -544,7 +544,7 @@ export function Vendas() {
                     vendaId={paymentVenda.id}
                     total={paymentVenda.total}
                     valorPago={paymentVenda.valor_pago || 0}
-                    historico={paymentVenda.pagamentos}
+                    historico={paymentVenda.pagamentos || []}
                     customerName={paymentVenda.contato?.nome || 'Cliente'}
                 />
             )}
