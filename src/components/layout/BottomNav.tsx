@@ -1,43 +1,60 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, ShoppingCart, Plus, Share2, Bell, Package, Settings, Refrigerator, Truck } from 'lucide-react'
-import { FloatingDock } from '../ui/FloatingDock'
-import { ENABLE_GELADEIRA, ENABLE_RECOMPRA } from '../../constants/flags'
-
-const allNavItems = [
-    { href: '/', icon: <LayoutDashboard className="h-5 w-5" />, title: 'Dashboard' },
-    { href: '/contatos', icon: <Users className="h-5 w-5" />, title: 'Contatos' },
-    { href: '/vendas', icon: <ShoppingCart className="h-5 w-5" />, title: 'Vendas' },
-    { href: '/entregas', icon: <Truck className="h-5 w-5" />, title: 'Entregas' },
-    { href: '/pedidos-compra', icon: <Package className="h-5 w-5" />, title: 'Pedidos', requiresFlag: 'purchase_orders' },
-    { href: '/nova-venda', icon: <Plus className="h-6 w-6" />, title: 'Nova Venda', isCenter: true },
-    { href: '/indicacoes', icon: <Share2 className="h-5 w-5" />, title: 'Indicações' },
-    { href: '/recompra', icon: <Bell className="h-5 w-5" />, title: 'Recompra', requiresFlag: 'recompra' },
-    { href: '/produtos', icon: <Package className="h-5 w-5" />, title: 'Produtos' },
-    { href: '/estoque', icon: <Refrigerator className="h-5 w-5" />, title: 'Geladeira', requiresFlag: 'geladeira' },
-    { href: '/configuracoes', icon: <Settings className="h-5 w-5" />, title: 'Config' },
-]
-
-// Filtrar itens baseado em feature flags
-const navItems = allNavItems.filter(item => {
-    if (item.requiresFlag === 'recompra') return ENABLE_RECOMPRA
-    if (item.requiresFlag === 'geladeira') return ENABLE_GELADEIRA
-    if (item.requiresFlag === 'purchase_orders') return true // Always enabled new module
-    return true
-})
+import { LayoutDashboard, Users, ShoppingCart, Menu, Plus } from 'lucide-react'
 
 export function BottomNav() {
     const navigate = useNavigate()
     const location = useLocation()
 
-    const itemsWithActive = navItems.map(item => ({
-        ...item,
-        isActive: location.pathname === item.href
-    }))
+    const isActive = (path: string) => location.pathname === path
 
     return (
-        <FloatingDock
-            items={itemsWithActive}
-            onItemClick={(href) => navigate(href)}
-        />
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-2 flex justify-between items-center z-50 safe-bottom h-[60px]">
+            {/* Início */}
+            <button
+                onClick={() => navigate('/')}
+                className={`flex flex-col items-center gap-1 ${isActive('/') ? 'text-primary-600' : 'text-gray-400'}`}
+            >
+                <LayoutDashboard className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Início</span>
+            </button>
+
+            {/* Clientes */}
+            <button
+                onClick={() => navigate('/contatos')}
+                className={`flex flex-col items-center gap-1 ${isActive('/contatos') ? 'text-primary-600' : 'text-gray-400'}`}
+            >
+                <Users className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Clientes</span>
+            </button>
+
+            {/* NOVA VENDA (FAB) */}
+            <div className="relative -mt-12">
+                <button
+                    onClick={() => navigate('/nova-venda')}
+                    className="bg-primary-600 text-white p-3.5 rounded-full shadow-lg hover:bg-primary-700 transition-colors active:scale-95 border-4 border-white"
+                    aria-label="Nova Venda"
+                >
+                    <Plus className="h-8 w-8" />
+                </button>
+            </div>
+
+            {/* Vendas */}
+            <button
+                onClick={() => navigate('/vendas')}
+                className={`flex flex-col items-center gap-1 ${isActive('/vendas') ? 'text-primary-600' : 'text-gray-400'}`}
+            >
+                <ShoppingCart className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Vendas</span>
+            </button>
+
+            {/* Menu */}
+            <button
+                onClick={() => navigate('/menu')}
+                className={`flex flex-col items-center gap-1 ${isActive('/menu') ? 'text-primary-600' : 'text-gray-400'}`}
+            >
+                <Menu className="h-6 w-6" />
+                <span className="text-[10px] font-medium">Menu</span>
+            </button>
+        </nav>
     )
 }

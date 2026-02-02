@@ -14,7 +14,8 @@ import {
   RelatorioFabrica,
   Estoque,
   Entregas,
-  PedidosCompra
+  PedidosCompra,
+  Menu
 } from './pages'
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
           <Route path="/relatorio-fabrica" element={<RelatorioFabrica />} />
           <Route path="/estoque" element={<Estoque />} />
           <Route path="/entregas" element={<Entregas />} />
+          <Route path="/menu" element={<Menu />} />
         </Route>
       </Routes>
     </HashRouter>
