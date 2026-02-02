@@ -171,6 +171,23 @@
 
 ---
 
+## Pedidos de Compra (`/compras`)
+
+**Arquivo:** `src/pages/PedidosCompra.tsx`  
+**Função:** Gestão de compras e recebimento de mercadoria  
+**Hooks:** `usePurchaseOrders`  
+**Componentes:** Header, PageContainer, Modal, StatusBadge, PaymentModal  
+
+**Features:**
+- Listagem com expansão para ver detalhes e histórico
+- KPI financeiro (Pago vs Aberto)
+- **Modal de Pagamento Parcial:** Permite pagar parcelas
+- **Recebimento:** Dá entrada no estoque automaticamente
+- Barra de progresso de pagamento visual
+- Filtros por status de recebimento (Pendente/Recebido)
+
+---
+
 ## Rotas (App.tsx)
 
 ```tsx

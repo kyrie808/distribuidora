@@ -108,6 +108,17 @@ import { ContatoCard, ContatoFormModal } from '@/components/contatos'
 
 ---
 
+## Features Financeiras (`components/features/`)
+
+| Componente | Props | Uso |
+|------------|-------|-----|
+| `PaymentModal` | `isOpen`, `onClose`, `onSave`, `sale`, `remainingAmount` | Modal para registrar pagamento de venda |
+| `PurchaseOrderPaymentModal` | `isOpen`, `onClose`, `order` | Modal para pagamento de compra |
+| `PurchaseOrderForm` | `isOpen`, `onClose`, `initialData` | Modal de criação/edição de pedido |
+| `MonthPicker` | `currentDate`, `onDateChange` | Seletor de Mês/Ano para dashboard |
+
+---
+
 ## Convenções
 
 ### Criando novos componentes:

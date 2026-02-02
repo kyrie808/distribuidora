@@ -147,6 +147,23 @@
 
 ---
 
+## 011 - Triggers de Banco de Dados para Status Financeiro
+
+**Data:** Janeiro/2025  
+**Contexto:** Necessidade de manter `amount_paid` e `status` (pago/parcial) sempre sincronizados com a tabela de pagamentos.  
+**Decisão:** Utilizar Triggers PostgreSQL (`AFTER INSERT/UPDATE/DELETE`) ao invés de cálculo no frontend.  
+**Motivo:**
+- **Single Source of Truth:** O banco garante que o total pago é sempre a soma dos pagamentos.
+- **Race conditions:** Evita problemas de concorrência se dois usuários editarem ao mesmo tempo.
+- **Performance:** Leitura rápida (já calculado) vs agregação em tempo real na query.
+- **Segurança:** Impossível o frontend "fraudar" o status de pago sem registrar o pagamento.
+
+**Implementação:**
+- Trigger em `purchase_order_payments` -> Atualiza `purchase_orders`
+- Trigger em `pagamentos_venda` -> Atualiza `vendas`
+
+---
+
 ## Template para novas decisões
 
 ```markdown

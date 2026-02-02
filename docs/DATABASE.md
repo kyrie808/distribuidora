@@ -62,7 +62,86 @@
 | `data` | DATE | Data da venda |
 | `data_entrega` | DATE | Data prevista de entrega |
 | `total` | DECIMAL(10,2) | Valor total |
-| `forma_pagamento` | TEXT | `pix`, `dinheiro`, `cartao`, `fiado` |
+| `forma_pagamento` | TEXT
+### 6. pagamentos_venda
+Registra pagamentos parciais ou totais de uma venda.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| id | uuid | Sim | PK |
+| venda_id | uuid | Sim | FK -> vendas.id |
+| valor | numeric | Sim | Valor do pagamento |
+| data | date | Sim | Data do pagamento |
+| metodo | text | Sim | Pix, Dinheiro, Cartão, etc. |
+| observacao | text | Não | Notas opcionais |
+| criado_em | timestamp | Sim | Default: now() |
+
+### 7. purchase_orders (Atualizado)
+Pedidos de compra aos fornecedores.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| id | uuid | Sim | PK |
+| supplier_id | uuid | Não | FK -> contatos.id |
+| order_date | date | Sim | Data do pedido |
+| status | enum | Sim | `pending`, `received`, `cancelled` |
+| payment_status | enum | Sim | `paid`, `partial`, `unpaid` |
+| total_amount | numeric | Sim | Valor total do pedido |
+| amount_paid | numeric | Sim | Total já pago (Auto-calc trigger) |
+| notes | text | Não | Observações |
+| data_recebimento | timestamp | Não | Data de recebimento |
+| created_at | timestamp | Sim | Default: now() |
+
+### 8. purchase_order_items (Atualizado)
+Itens de um pedido de compra.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| id | uuid | Sim | PK |
+| purchase_order_id | uuid | Sim | FK -> purchase_orders.id |
+| product_id | uuid | Sim | FK -> produtos.id |
+| quantity | numeric | Sim | Quantidade comprada |
+| unit_cost | numeric | Sim | Custo unitário |
+| total_cost | numeric | Sim | Custo total (qtd * unit) |
+
+### 9. purchase_order_payments
+Registra pagamentos parciais ou totais de um pedido de compra.
+
+| Coluna | Tipo | Obrigatório | Descrição |
+|---|---|---|---|
+| id | uuid | Sim | PK |
+| purchase_order_id | uuid | Sim | FK -> purchase_orders.id |
+| amount | numeric | Sim | Valor pago |
+| payment_date | date | Sim | Data do pagamento |
+| payment_method | text | Não | Pix, Boleto, etc. |
+| notes | text | Não | Observações |
+| created_at | timestamp | Sim | Default: now() |
+
+## Enums (PostgreSQL)
+
+### purchase_order_status
+- `pending`: Pendente
+- `received`: Recebido
+- `cancelled`: Cancelado
+
+### purchase_order_payment_status
+- `paid`: Pago (Quitado)
+- `partial`: Parcialmente Pago
+- `unpaid`: Não Pago (Em Aberto)
+
+## Triggers
+
+### 1. Atualizar Estoque (Vendas)
+- **Quando:** INSERT em `itens_venda` / UPDATE status `vendas`
+- **Ação:** Deduz estoque em `produtos`
+
+### 2. Atualizar Status/Total Pago (Vendas)
+- **Quando:** INSERT/UPDATE/DELETE em `pagamentos_venda`
+- **Ação:** Recalcula `vendas.valor_pago` e define `vendas.pago`
+
+### 3. Atualizar Status/Total Pago (Pedidos Compra)
+- **Quando:** INSERT/UPDATE/DELETE em `purchase_order_payments`
+- **Ação:** Recalcula `purchase_orders.amount_paid` e define `purchase_orders.payment_status`
 | `status` | TEXT | `pendente`, `entregue`, `cancelada` |
 | `observacoes` | TEXT | |
 | `criado_em` | TIMESTAMPTZ | |

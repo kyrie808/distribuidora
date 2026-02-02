@@ -114,16 +114,48 @@ interface RelatorioData {
 **Arquivo:** `src/hooks/useVendas.ts`  
 **Responsabilidade:** CRUD de vendas + métricas + realtime
 
-### Funções exportadas:
+### useVendas
+Gerencia o ciclo de vida das vendas.
 
-#### `useVendas(options?)`
-Lista vendas com filtros, calcula métricas e inclui dados profundos de contato/indicador.
+**Funcionalidades:**
+- `fetchVendas`: Busca vendas com filtros (data, status) e paginação
+- `fetchVendaById`: Busca detalhes completos
+- `createVenda`: Cria venda + itens + baixa estoque (transaction)
+- `updateVendaPago`: Alterna status booleano `pago`
+- `addPayment`: Registra pagamento parcial (`pagamentos_venda`)
+- `deleteVenda`: Remove venda e estorna estoque
 
-```tsx
-const { 
-  vendas,           // VendaComItens[]
-  loading,          
-  error,            
+**Dados:**
+- Retorna `VendaWithItems` (inclui cliente e itens)
+- Calcula KPIs financeiros e de volume
+
+---
+
+### usePurchaseOrders
+Gerencia pedidos de compra aos fornecedores.
+
+**Funcionalidades:**
+- `fetchOrders`: Busca pedidos ordenados por data
+- `createOrder`: Cria pedido + itens
+- `updateOrder`: Atualiza cabeçalho e reescreve itens
+- `receiveOrder`: RPC `receive_purchase_order` (atualiza estoque e status)
+- `addPayment`: Registra pagamento parcial (`purchase_order_payments`)
+
+**Estado:**
+- `loading`: boolean
+- `error`: string | null
+- `orders`: Lista de pedidos com itens e produtos expandidos
+
+---
+
+### useDashboardFilter
+Gerenciador de estado global para filtros de data.
+
+**Funcionalidades:**
+- Store (Zustand) para persistir mês/ano selecionado
+- Afeta KPIs e listas em todo o sistema
+
+---  error,            
   metrics: {
     faturamentoTotal,
     faturamentoMes,
