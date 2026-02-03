@@ -1,29 +1,25 @@
 import { useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-    DollarSign,
-    ShoppingCart,
+    Menu,
+    Bell,
     TrendingUp,
-    Package,
-    RefreshCcw,
-    Trophy,
+    TrendingDown,
+    ArrowUp,
     ChevronRight,
-    ClipboardList,
+    Truck,
+    Map as MapIcon
 } from 'lucide-react'
 import { AlertasFinanceiroWidget } from '../components/dashboard/AlertasFinanceiroWidget'
 import { AlertasRecompraWidget } from '../components/dashboard/AlertasRecompraWidget'
-import { EstoqueWidget } from '../components/dashboard/EstoqueWidget'
-import { Header } from '../components/layout/Header'
-import { PageContainer } from '../components/layout/PageContainer'
-import { Card, CardContent, Badge, Button } from '../components/ui'
 import { MonthPicker } from '../components/dashboard/MonthPicker'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
 import { useRecompra } from '../hooks/useRecompra'
 import { useIndicacoes } from '../hooks/useIndicacoes'
+import { useAlertasFinanceiros } from '../hooks/useAlertasFinanceiros'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
-import { formatCurrency, formatRelativeDate } from '../utils/formatters'
-import { VENDA_STATUS_LABELS } from '../constants'
+import { formatCurrency } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 
 export function Dashboard() {
@@ -32,14 +28,15 @@ export function Dashboard() {
     const { startDate, endDate } = useDashboardFilter()
 
     // Fetch data
-    const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
+    const { metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
     const { loading: loadingContatos, refetch: refetchContatos } = useContatos({})
-    const { contatos: recompraContatos, atrasados, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
-    const { indicadores, loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
+    const { contatos: recompraContatos, atrasados: atrasadosRecompra, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
+    const { loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
+    const { loading: loadingFinanceiro, refetch: refetchFinanceiro } = useAlertasFinanceiros()
 
-    const loading = loadingVendas || loadingContatos || loadingRecompra || loadingIndicacoes
+    const loading = loadingVendas || loadingContatos || loadingRecompra || loadingIndicacoes || loadingFinanceiro
 
-    // Pull to refresh
+    // Pull to refresh action
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true)
         await Promise.all([
@@ -47,347 +44,225 @@ export function Dashboard() {
             refetchContatos(),
             refetchRecompra(),
             refetchIndicacoes(),
+            refetchFinanceiro()
         ])
         setIsRefreshing(false)
-    }, [refetchVendas, refetchContatos, refetchRecompra, refetchIndicacoes])
+    }, [refetchVendas, refetchContatos, refetchRecompra, refetchIndicacoes, refetchFinanceiro])
 
-    // UI Helpers
+    // Calculations for Progress Bars
+    const revenueTarget = 150000
+    const revenueProgress = Math.min((metrics.faturamentoMes / revenueTarget) * 100, 100)
+    const marginPercent = metrics.faturamentoMes > 0 ? (metrics.lucroMes / metrics.faturamentoMes) * 100 : 0
+    const ordersTarget = 100
+    const ordersProgress = Math.min((metrics.vendasMes / ordersTarget) * 100, 100)
 
-    const ultimasVendas = vendas.slice(0, 5)
-    const topIndicadores = indicadores.slice(0, 3)
-
-    // KPI Card Component
-    const KpiCard = ({ title, value, icon: Icon, colorClass, subtext, onClick }: any) => (
-        <Card
-            className={cn("relative overflow-hidden transition-all hover:shadow-md", onClick && "cursor-pointer active:scale-[0.99]")}
-            onClick={onClick}
-        >
-            <CardContent className="p-4 sm:p-6">
-                <div className="flex justify-between items-start">
-                    <div className="space-y-2">
-                        <span className="text-sm font-medium text-muted-foreground">{title}</span>
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-2xl sm:text-3xl font-bold tracking-tight">{value}</span>
-                        </div>
-                        {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
-                    </div>
-                    <div className={cn("p-2 rounded-full", colorClass)}>
-                        <Icon className="h-5 w-5 opacity-90" />
-                    </div>
+    if (loading && !isRefreshing) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-[#102210] relative overflow-hidden">
+                {/* Background Pattern for Loading Screen */}
+                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
                 </div>
-            </CardContent>
-        </Card>
-    )
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin z-10" />
+                <p className="text-primary/70 animate-pulse font-mono tracking-widest text-xs uppercase z-10">Initializing Tactical Command...</p>
+            </div>
+        )
+    }
 
     return (
-        <>
-            <Header
-                title="Dashboard"
-                rightAction={
-                    <button
-                        onClick={handleRefresh}
-                        disabled={isRefreshing}
-                        className={cn(
-                            "p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500",
-                            isRefreshing && "animate-spin"
-                        )}
-                    >
-                        <RefreshCcw className="h-5 w-5" />
-                    </button>
-                }
-            />
-            <PageContainer>
-                {/* Global Filter */}
-                <div className="mb-6 sticky top-[60px] z-20 bg-gray-50/95 backdrop-blur py-2 -mx-4 px-4 border-b border-gray-200/50 sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mx-0">
+        <div className="min-h-screen bg-[#102210] text-foreground pb-24 font-body relative selection:bg-primary/30">
+
+            {/* GLOBAL BACKGROUND TEXTURE (The Fix for "Flat Green") */}
+            <div className="fixed inset-0 z-0 pointer-events-none">
+                {/* 1. Base Gradient to remove flatness */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#1a2e1a] via-[#102210] to-[#0a160a]" />
+
+                {/* 2. Tactical Grid Pattern */}
+                <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
+
+                {/* 3. Vignette */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] opacity-40" />
+            </div>
+
+            {/* Header - Tactical Command */}
+            <header className="flex items-center px-6 py-4 justify-between sticky top-0 z-50 bg-[#102210]/80 backdrop-blur-md border-b border-white/5 shadow-sm">
+                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
+                    <Menu className="h-6 w-6 text-foreground" />
+                </button>
+                <h1 className="text-xl font-bold tracking-tight text-center text-white flex-1 font-mono uppercase tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+                    Tactical Command
+                </h1>
+                <button
+                    className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors relative border border-transparent hover:border-white/10"
+                    onClick={handleRefresh}
+                >
+                    <Bell className={cn("h-6 w-6 text-foreground", isRefreshing && "animate-spin")} />
+                    <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border-2 border-[#102210] shadow-[0_0_5px_var(--destructive)]"></span>
+                </button>
+            </header>
+
+            <main className="flex-1 flex flex-col gap-6 px-4 py-6 max-w-md mx-auto w-full relative z-10">
+
+                {/* Month Selector - Wrapped to remove "Old Clothes" look */}
+                <div className="w-full bg-card/50 backdrop-blur-sm border border-white/5 rounded-xl p-1 shadow-sm">
                     <MonthPicker />
                 </div>
 
-                {loading && !isRefreshing && (
-                    <div className="flex flex-col items-center justify-center p-12 gap-4 text-center animate-pulse">
-                        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                        <p className="text-gray-400 font-medium">Carregando indicadores...</p>
-                    </div>
-                )}
-
-                {!loading && (
-                    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
-                        {/* 📊 BIG NUMBERS (KPIs) */}
-                        <section>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {/* Faturamento */}
-                                <KpiCard
-                                    title="Faturamento"
-                                    value={formatCurrency(metrics.faturamentoMes)}
-                                    icon={DollarSign}
-                                    colorClass="bg-primary/10 text-primary"
-                                    subtext="neste mês"
-                                />
-
-                                {/* Lucro */}
-                                <KpiCard
-                                    title="Lucro Estimado"
-                                    value={formatCurrency((metrics as any).lucroMes || 0)}
-                                    icon={TrendingUp}
-                                    colorClass="bg-green-100 text-green-700"
-                                    subtext="margem aproximada"
-                                />
-
-                                {/* A Receber */}
-                                <KpiCard
-                                    title="A Receber"
-                                    value={formatCurrency(metrics.aReceber)}
-                                    icon={Clock}
-                                    colorClass="bg-amber-100 text-amber-700"
-                                    onClick={() => navigate('/vendas?pagamento=nao_pago')}
-                                    subtext="pendente total"
-                                />
-
-                                {/* Ticket Médio */}
-                                <KpiCard
-                                    title="Ticket Médio"
-                                    value={formatCurrency(metrics.ticketMedio)}
-                                    icon={Shopping}
-                                    colorClass="bg-indigo-100 text-indigo-700"
-                                />
+                {/* KPI Cards Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                    {/* Revenue Card */}
+                    <div className="col-span-2 sm:col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/90 border border-primary/20 shadow-[0_0_15px_rgba(19,236,19,0.15)] backdrop-blur-sm relative overflow-hidden group hover:bg-card/95 transition-all">
+                        <div className="flex justify-between items-start z-10">
+                            <div className="flex flex-col">
+                                <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Revenue (MTD)</span>
+                                <span className="text-3xl font-bold text-white mt-1 drop-shadow-sm">{formatCurrency(metrics.faturamentoMes)}</span>
                             </div>
-                        </section>
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary border border-primary/20">
+                                <TrendingUp className="h-4 w-4" /> 12%
+                            </span>
+                        </div>
+                        {/* Progress Bar */}
+                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden z-10 box-border border-b border-white/5">
+                            <div
+                                className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_var(--primary)]"
+                                style={{ width: `${revenueProgress}%` }}
+                            />
+                        </div>
+                        <span className="text-xs text-zinc-500 z-10">Target: {formatCurrency(revenueTarget)}</span>
 
-                        {/* 🚨 WIDGETS CRÍTICOS (COCKPIT) */}
-                        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            {/* Coluna Principal: Alertas */}
-                            <div className="lg:col-span-2 space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <AlertasFinanceiroWidget />
-                                    <AlertasRecompraWidget
-                                        contatos={recompraContatos}
-                                        atrasados={atrasados}
-                                        loading={loadingRecompra}
-                                    />
-                                </div>
-
-                                {/* Estoque Alert */}
-                                <EstoqueWidget />
-                            </div>
-
-                            {/* Coluna Lateral: Resumo Operacional */}
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
-                                    <Package className="h-4 w-4" /> Operacional
-                                </h3>
-
-                                <Card className="divide-y divide-gray-100">
-                                    <div
-                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
-                                        onClick={() => navigate('/vendas?status=pendente')}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-orange-100 p-2 rounded-lg">
-                                                <Package className="h-5 w-5 text-orange-600" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{metrics.entregasPendentes}</p>
-                                                <p className="text-xs text-gray-500">Entregas Pendentes</p>
-                                            </div>
-                                        </div>
-                                        <ChevronRight className="h-4 w-4 text-gray-300" />
-                                    </div>
-                                    <div
-                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
-                                        onClick={() => navigate('/vendas?status=entregue')}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-green-100 p-2 rounded-lg">
-                                                <Package className="h-5 w-5 text-green-600" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{metrics.entregasRealizadas}</p>
-                                                <p className="text-xs text-gray-500">Entregas Realizadas</p>
-                                            </div>
-                                        </div>
-                                        <ChevronRight className="h-4 w-4 text-gray-300" />
-                                    </div>
-                                    <div className="p-4 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="bg-blue-100 p-2 rounded-lg">
-                                                <ShoppingCart className="h-5 w-5 text-blue-600" />
-                                            </div>
-                                            <div>
-                                                <p className="font-bold text-gray-900">{metrics.vendasMes}</p>
-                                                <p className="text-xs text-gray-500">Vendas no Mês</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </Card>
-
-                                <Card
-                                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors border-dashed bg-gray-50/50"
-                                    onClick={() => navigate('/relatorio-fabrica')}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <div className="bg-white p-2 rounded-lg border shadow-sm">
-                                            <ClipboardList className="h-5 w-5 text-gray-700" />
-                                        </div>
-                                        <div>
-                                            <p className="font-bold text-gray-900">Relatório Fábrica</p>
-                                            <p className="text-xs text-gray-500">Separar carga para amanhã</p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </div>
-                        </section>
-
-                        {/* 👇 LISTAGENS SECUNDÁRIAS */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
-                            {/* Últimas Vendas */}
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                                        <ShoppingCart className="h-4 w-4 text-primary" />
-                                        Últimas Vendas
-                                    </h2>
-                                    <Button
-                                        variant="link"
-                                        className="h-auto p-0 text-primary font-normal text-sm"
-                                        onClick={() => navigate('/vendas')}
-                                    >
-                                        Ver todas
-                                    </Button>
-                                </div>
-
-                                {ultimasVendas.length === 0 ? (
-                                    <Card className="p-8 text-center text-gray-400 bg-gray-50 border-dashed">
-                                        <p>Nenhuma venda recente</p>
-                                    </Card>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {ultimasVendas.map((venda) => (
-                                            <Card
-                                                key={venda.id}
-                                                className="cursor-pointer hover:bg-gray-50 transition-colors"
-                                                onClick={() => navigate(`/vendas/${venda.id}`)}
-                                            >
-                                                <CardContent className="p-4 flex items-center justify-between">
-                                                    <div className="flex flex-col gap-1 min-w-0">
-                                                        <span className="font-semibold text-gray-900 truncate">
-                                                            {venda.contato?.nome || 'Cliente'}
-                                                        </span>
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                            <span>{formatRelativeDate(venda.criadoEm)}</span>
-                                                            {venda.status !== 'entregue' && (
-                                                                <Badge variant="outline" className="text-[10px] px-1 h-5">{VENDA_STATUS_LABELS[venda.status]}</Badge>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex flex-col items-end gap-1">
-                                                        <span className="font-bold text-gray-900">{formatCurrency(Number(venda.total))}</span>
-                                                        {venda.pago ? (
-                                                            <span className="text-[10px] text-green-600 font-bold bg-green-50 px-1.5 rounded">PAGO</span>
-                                                        ) : (
-                                                            <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-1.5 rounded">PENDENTE</span>
-                                                        )}
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-                            </section>
-
-                            {/* Top Indicadores (Gamification Lite) */}
-                            <section>
-                                <div className="flex items-center justify-between mb-4">
-                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
-                                        <Trophy className="h-4 w-4 text-yellow-500" />
-                                        Campeões de Indicação
-                                    </h2>
-                                    <Button
-                                        variant="link"
-                                        className="h-auto p-0 text-primary font-normal text-sm"
-                                        onClick={() => navigate('/indicacoes')}
-                                    >
-                                        Ver Ranking
-                                    </Button>
-                                </div>
-
-                                {topIndicadores.length === 0 ? (
-                                    <Card className="p-8 text-center text-gray-400 bg-gray-50 border-dashed">
-                                        <p>Nenhuma indicação ainda</p>
-                                    </Card>
-                                ) : (
-                                    <div className="space-y-3">
-                                        {topIndicadores.map((item, index) => (
-                                            <Card
-                                                key={item.indicador.id}
-                                                className="cursor-pointer hover:bg-slate-50 transition-colors relative overflow-hidden"
-                                                onClick={() => navigate(`/contatos/${item.indicador.id}`)}
-                                            >
-                                                <div className={cn(
-                                                    "absolute left-0 top-0 bottom-0 w-1",
-                                                    index === 0 ? "bg-yellow-400" : index === 1 ? "bg-gray-300" : "bg-orange-300"
-                                                )} />
-                                                <CardContent className="p-4 flex items-center gap-4">
-                                                    <div className={cn(
-                                                        "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm",
-                                                        index === 0 ? "bg-yellow-100 text-yellow-700" :
-                                                            index === 1 ? "bg-gray-100 text-gray-700" :
-                                                                "bg-orange-100 text-orange-700"
-                                                    )}>
-                                                        {index + 1}º
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-semibold text-gray-900 truncate">{item.indicador.nome}</p>
-                                                        <p className="text-xs text-muted-foreground">{item.indicacoesConvertidas} conversões</p>
-                                                    </div>
-                                                    <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 border-0">
-                                                        +{formatCurrency(item.recompensaAcumulada)}
-                                                    </Badge>
-                                                </CardContent>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                )}
-                            </section>
+                        {/* Decor */}
+                        <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <TrendingUp className="h-24 w-24 -mr-4 -mb-4 text-primary" />
                         </div>
                     </div>
-                )}
-            </PageContainer >
-        </>
-    )
-}
 
-function Shopping({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
-            <path d="M3 6h18" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-        </svg>
-    )
-}
+                    {/* Margin Card */}
+                    <div className="col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/60 border border-white/5 shadow-sm hover:border-white/10 transition-colors backdrop-blur-sm">
+                        <div className="flex flex-col">
+                            <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Margin</span>
+                            <span className="text-2xl font-bold text-foreground mt-1">{marginPercent.toFixed(1)}%</span>
+                        </div>
+                        {/* Progress Bar */}
+                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                            <div
+                                className="bg-accent h-full rounded-full transition-all duration-1000 shadow-[0_0_5px_var(--accent)]"
+                                style={{ width: `${marginPercent}%` }}
+                            />
+                        </div>
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive border border-destructive/20">
+                            <TrendingDown className="h-3 w-3" /> 1.5%
+                        </span>
+                    </div>
 
-function Clock({ className }: { className?: string }) {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className={className}
-        >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-        </svg>
+                    {/* Orders Card */}
+                    <div className="col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/60 border border-white/5 shadow-sm hover:border-white/10 transition-colors backdrop-blur-sm">
+                        <div className="flex flex-col">
+                            <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Orders</span>
+                            <span className="text-2xl font-bold text-foreground mt-1">{metrics.vendasMes}</span>
+                        </div>
+                        {/* Progress Bar */}
+                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
+                            <div
+                                className="bg-blue-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_5px_#3b82f6]"
+                                style={{ width: `${ordersProgress}%` }}
+                            />
+                        </div>
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary border border-primary/20">
+                            <ArrowUp className="h-3 w-3" /> 5%
+                        </span>
+                    </div>
+                </div>
+
+                {/* War Zone Section (Alerts) */}
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between px-1">
+                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_8px_var(--destructive)]"></span>
+                            War Zone
+                        </h2>
+                        <button
+                            className="text-xs font-medium text-zinc-400 hover:text-primary transition-colors"
+                            onClick={() => navigate('/vendas?status=atrasado')}
+                        >
+                            View All
+                        </button>
+                    </div>
+
+                    <AlertasFinanceiroWidget />
+                    <AlertasRecompraWidget
+                        contatos={recompraContatos}
+                        atrasados={atrasadosRecompra}
+                        loading={loadingRecompra}
+                    />
+                </div>
+
+                {/* Logistics Section */}
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between px-1">
+                        <h2 className="text-lg font-bold text-white">Live Logistics</h2>
+                    </div>
+
+                    <div className="flex items-center gap-4 rounded-2xl bg-card/80 border border-white/5 p-4 shadow-sm hover:border-primary/20 transition-all group backdrop-blur-sm">
+                        <div className="relative h-16 w-16 shrink-0 flex items-center justify-center rounded-full border-4 border-primary/10 bg-primary/5 group-hover:border-primary/30 transition-colors">
+                            <Truck className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-center gap-1">
+                            <div className="flex justify-between items-center mb-1">
+                                <h3 className="font-bold text-foreground">Deliveries Today</h3>
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary uppercase tracking-wide border border-primary/20">
+                                    Active
+                                </span>
+                            </div>
+
+                            <p className="text-xs text-muted-foreground mb-2">Driver: System Auto-Route</p>
+
+                            <div className="flex gap-4">
+                                <div className="flex items-center gap-1.5">
+                                    <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_5px_var(--primary)]"></div>
+                                    <span className="text-xs font-medium text-zinc-400">{metrics.entregasRealizadas} Done</span>
+                                </div>
+                                <div className="flex items-center gap-1.5">
+                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
+                                    <span className="text-xs font-medium text-zinc-500">{metrics.entregasPendentes} Left</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            className="shrink-0 h-10 w-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
+                            onClick={() => navigate('/entregas')}
+                        >
+                            <ChevronRight className="h-5 w-5" />
+                        </button>
+                    </div>
+                </div>
+
+                {/* Logistics Map View */}
+                <div
+                    className="w-full h-32 rounded-2xl bg-card/80 relative overflow-hidden group cursor-pointer border border-white/5 shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
+                    onClick={() => navigate('/entregas')}
+                >
+                    {/* Map Grid Pattern */}
+                    <div className="absolute inset-0 bg-[#0c1a0c] flex items-center justify-center opacity-80">
+                        <div className="grid grid-cols-6 grid-rows-3 gap-8 opacity-10 transform -rotate-12 scale-150 w-full h-full">
+                            {[...Array(18)].map((_, i) => (
+                                <div key={i} className="h-full w-px bg-primary/30"></div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/90 to-transparent flex items-center p-6">
+                        <div>
+                            <p className="text-primary text-xs font-bold uppercase tracking-wider mb-1 drop-shadow-[0_0_5px_rgba(19,236,19,0.5)]">Live Tracking</p>
+                            <h3 className="text-white text-lg font-bold">Fleet Map View</h3>
+                        </div>
+                        <div className="ml-auto bg-primary/20 p-2 rounded-full group-hover:bg-primary/30 transition-colors border border-primary/20">
+                            <MapIcon className="text-primary h-6 w-6" />
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+        </div>
     )
 }

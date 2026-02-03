@@ -15,10 +15,8 @@ export function PageContainer({
     return (
         <main
             className={cn(
-                "flex-1 min-h-[calc(100vh-4rem)] bg-gray-50", // background gray-50
-                // Fixed Header spacing (h-16 = 4rem)
+                "flex-1 min-h-[calc(100vh-4rem)] bg-background",
                 "pt-20",
-                // Fixed BottomNav spacing (h-20 approx)
                 "pb-24",
                 noPadding ? '' : 'px-4',
                 className

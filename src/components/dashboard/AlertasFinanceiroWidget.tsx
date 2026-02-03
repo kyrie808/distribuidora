@@ -1,151 +1,75 @@
-import { useNavigate } from 'react-router-dom'
-import {
-    DollarSign,
-    ChevronRight,
-    Calendar,
-    MessageCircle,
-    Clock,
-} from 'lucide-react'
-import { Card, CardContent, Button } from '../ui'
+import { MessageCircle, AlertTriangle } from 'lucide-react'
+import { Card } from '../ui/Card'
 import { useAlertasFinanceiros } from '../../hooks/useAlertasFinanceiros'
-import { formatCurrency, formatPhone } from '../../utils/formatters'
-import { format } from 'date-fns'
-import { cn } from '@/lib/utils'
+import { formatCurrency, formatRelativeDate, formatPhone } from '../../utils/formatters'
 
 export function AlertasFinanceiroWidget() {
-    const navigate = useNavigate()
-    const { alertas, loading, totalAtrasado, totalHoje } = useAlertasFinanceiros()
-
-    // Priorizar: Atrasados > Hoje > Próximos
-    const alertasPrioritarios = alertas.slice(0, 5)
-
-    const handleWhatsAppClick = (e: React.MouseEvent, phone: string, nome: string, valor: number, data: Date, status: string) => {
-        e.stopPropagation()
-
-        const tel = formatPhone(phone).replace(/\D/g, '')
-        const valorFmt = formatCurrency(valor)
-        const dateFmt = format(data, 'dd/MM')
-
-        let msg = ''
-        if (status === 'atrasado') {
-            msg = `Olá ${nome}, vi que seu pagamento de ${valorFmt} venceu dia ${dateFmt}. Podemos acertar?`
-        } else if (status === 'hoje') {
-            msg = `Olá ${nome}, lembrete do seu pagamento de ${valorFmt} que vence hoje!`
-        } else {
-            msg = `Olá ${nome}, lembrete do seu pagamento de ${valorFmt} para dia ${dateFmt}.`
-        }
-
-        window.open(`https://wa.me/55${tel}?text=${encodeURIComponent(msg)}`, '_blank')
-    }
+    const { alertas, loading } = useAlertasFinanceiros()
 
     if (loading) {
         return (
-            <Card className="h-full min-h-[300px] flex flex-col justify-center items-center">
-                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
+            <Card className="p-4 bg-card border-white/5 animate-pulse">
+                <div className="h-20 bg-white/5 rounded-xl"></div>
             </Card>
         )
     }
 
+    if (alertas.length === 0) return null
+
+    // Display only the most critical or recent alert for the widget view
+    const topAlert = alertas[0]
+
+    const handleWhatsApp = (telefone: string, nome: string, valor: number) => {
+        const message = `Olá ${nome}, tudo bem? Estou entrando em contato referente ao valor de ${formatCurrency(valor)} que está em aberto.`
+        const url = `https://wa.me/55${formatPhone(telefone).replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
+        window.open(url, '_blank')
+    }
+
+    // Safely access properties
+    // The hook structure returns alerts where the top-level object has 'venda', 'diasAtraso', 'status', 'dataPrevista'
+    // 'contato' and properties of 'venda' like 'total' are nested inside 'venda'
+    const nomeContato = topAlert.venda.contato?.nome || 'Cliente'
+    const telefoneContato = topAlert.venda.contato?.telefone || ''
+    const valorPendente = topAlert.venda.total
+    const dataVencimento = topAlert.dataPrevista
+
     return (
-        <section className="h-full flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-amber-600" />
-                    Contas a Receber
-                    {(totalAtrasado > 0 || totalHoje > 0) && (
-                        <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
-                    )}
-                </h2>
-                <div className="flex items-center gap-2">
-                    {totalAtrasado > 0 && (
-                        <span className="text-xs font-bold text-destructive bg-destructive/10 px-2 py-1 rounded-md">
-                            -{formatCurrency(totalAtrasado)}
-                        </span>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-primary hover:text-primary/80 h-auto p-0"
-                        onClick={() => navigate('/vendas?pagamento=nao_pago&metodo=fiado')}
+        <Card className="relative overflow-hidden border-l-4 border-l-destructive border-t border-r border-b border-white/5 bg-gradient-to-br from-card to-destructive/5 shadow-sm hover:scale-[1.01] transition-transform duration-300">
+            <div className="flex flex-1 flex-col justify-between p-4 gap-4">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="text-base font-bold text-foreground leading-tight">{nomeContato}</h3>
+                        <div className="flex items-center gap-1 mt-1 text-destructive">
+                            <AlertTriangle className="h-4 w-4" />
+                            <span className="text-xs font-bold uppercase">
+                                Fiado Vencido ({formatRelativeDate(dataVencimento)})
+                            </span>
+                        </div>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-lg font-bold text-foreground">{formatCurrency(valorPendente)}</p>
+                        <p className="text-xs text-muted-foreground">Pendente</p>
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-1">
+                    <span className="text-xs text-muted-foreground">
+                        Vencimento: {new Date(dataVencimento).toLocaleDateString()}
+                    </span>
+                    <button
+                        onClick={() => handleWhatsApp(telefoneContato, nomeContato, valorPendente)}
+                        className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-green-500/20 active:scale-95"
                     >
-                        Ver todos <ChevronRight className="h-4 w-4" />
-                    </Button>
+                        <MessageCircle className="h-4 w-4" />
+                        Cobrar
+                    </button>
                 </div>
             </div>
 
-            {alertasPrioritarios.length === 0 ? (
-                <Card className="flex-1 flex flex-col items-center justify-center py-8 text-muted-foreground bg-muted/20 border-dashed">
-                    <DollarSign className="h-8 w-8 mb-2 opacity-50" />
-                    <p>Nenhuma pendência urgente</p>
-                </Card>
-            ) : (
-                <div className="space-y-3">
-                    {alertasPrioritarios.map((item) => (
-                        <Card
-                            key={item.venda.id}
-                            className={cn(
-                                "cursor-pointer transition-all hover:shadow-md border-l-4",
-                                item.status === 'atrasado' ? "border-l-destructive bg-destructive/5" :
-                                    item.status === 'hoje' ? "border-l-warning bg-warning/5" :
-                                        "border-l-primary"
-                            )}
-                            onClick={() => navigate(`/vendas/${item.venda.id}`)}
-                        >
-                            <CardContent className="p-4 flex items-center justify-between">
-                                <div className="min-w-0 flex-1 mr-3">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <p className="font-bold text-gray-900 truncate text-base">
-                                            {item.venda.contato?.nome || 'Cliente'}
-                                        </p>
-                                        <span className={cn(
-                                            "text-sm font-bold",
-                                            item.status === 'atrasado' ? "text-destructive" :
-                                                item.status === 'hoje' ? "text-warning-600" : "text-primary"
-                                        )}>
-                                            {formatCurrency(item.venda.total)}
-                                        </span>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span className="flex items-center gap-1">
-                                            {item.status === 'atrasado' ? (
-                                                <Clock className="h-3.5 w-3.5 text-destructive" />
-                                            ) : (
-                                                <Calendar className="h-3.5 w-3.5" />
-                                            )}
-                                            <span className={cn(
-                                                "font-medium",
-                                                item.status === 'atrasado' && "text-destructive",
-                                                item.status === 'hoje' && "text-warning-600"
-                                            )}>
-                                                {item.status === 'atrasado' ? `Venceu ${format(item.dataPrevista, 'dd/MM')}` :
-                                                    item.status === 'hoje' ? 'Vence HOJE' :
-                                                        `Vence ${format(item.dataPrevista, 'dd/MM')}`}
-                                            </span>
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <Button
-                                    size="icon"
-                                    className="h-10 w-10 shrink-0 rounded-full bg-green-500 hover:bg-green-600 text-white shadow-sm"
-                                    onClick={(e) => handleWhatsAppClick(
-                                        e,
-                                        item.venda.contato?.telefone || '',
-                                        item.venda.contato?.nome || '',
-                                        item.venda.total,
-                                        item.dataPrevista,
-                                        item.status
-                                    )}
-                                    title="Cobrar no WhatsApp"
-                                >
-                                    <MessageCircle className="h-5 w-5" />
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-            )}
-        </section>
+            {/* Background Pulse Effect for Critical Alert */}
+            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                <AlertTriangle className="h-32 w-32 text-destructive animate-pulse" />
+            </div>
+        </Card>
     )
 }

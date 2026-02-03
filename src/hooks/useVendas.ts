@@ -31,6 +31,7 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
     const [error, setError] = useState<string | null>(null)
     const [metrics, setMetrics] = useState<VendasMetrics>({
         faturamentoTotal: 0,
+        faturamentoDia: 0,
         faturamentoMes: 0,
         totalVendas: 0,
         vendasMes: 0,

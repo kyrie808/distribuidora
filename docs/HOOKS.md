@@ -1,30 +1,60 @@
-# Hooks (`src/hooks/`)
+# Custom Hooks
 
-Hooks customizados para encapsular lógica de negócios e acesso a dados.
+A aplicação utiliza hooks para gerenciar estado e comunicação com a API (Supabase).
 
-| Hook | Função | Retorno Principal |
-|------|--------|-------------------|
-| `useProdutos` | Gerencia lista de produtos, mix de estoque e CRUD. | `produtos`, `loading`, `error`, `createProduto`, `updateProduto`, `updateEstoque` |
-| `useVendas` | Gerencia vendas, filtros por data e status. | `vendas`, `stats`, `loading`, `createVenda`, `updateVendaStatus` |
-| `useContatos` | Gerencia clientes e fornecedores. | `contatos`, `loading`, `createContato`, `updateContato` |
-| `usePurchaseOrders` | Gerencia pedidos de compra (abastecimento). | `orders`, `loading`, `createOrder`, `receiveOrder` |
-| `useEstoqueMetrics` | Análise de saúde do estoque (ruptura, baixo estoque). | `produtosBaixoEstoque`, `produtosZerados`, `custoTotalEstoque` |
-| `useAlertasFinanceiros` | Monitora contas a receber (fiado). | `vendasAtrasadas`, `vendasHoje`, `totalAreceber` |
-| `useRecompra` | Monitora churn de clientes (tempo sem comprar). | `contatos`, `atrasados`, `emDia`, `loading` |
-| `useDashboardFilter` | Store (Zustand) para filtro global de data. | `month`, `year`, `setMonth`, `setYear` |
-| `useConfiguracoes` | Gerencia configurações globais do sistema. | `config`, `updateConfig` |
-| `useRelatorioFabrica` | Gera dados para produção baseada em vendas. | `itensAgrupados`, `totalGeral` |
-| `useIndicacoes` | Gerencia sistema de indicação de clientes. | `indicacoes`, `ranking` |
-| `useCep` | Busca endereço via Viacep. | `buscarCep`, `loading` |
-| `useScrollPersistence` | Mantém posição do scroll ao navegar. | - |
+## Hooks de Nível de Domínio
 
-## Padrões de Implementação
+### `useContatos` e `useContato`
+Gerenciamento de clientes e fornecedores.
+- **Path:** `src/hooks/useContatos.ts`
+- **Exports:**
+    - `useContatos(options)`: Lista contatos com filtros.
+    - `useContato(id)`: Busca detalhada de um contato único (inclui indicador).
+- **Features:** CRUD completo, busca por string, geocoding automático.
 
-### Data Fetching
-A maioria dos hooks de dados (`useProdutos`, `useVendas`, etc.) segue o padrão:
-1. Carregamento inicial via `useEffect`.
-2. Estado local `data`, `loading`, `error`.
-3. Funções de mutação (`create`, `update`) que atualizam o estado local (Optimistic UI) e persistem no Supabase.
+### `useVendas` e `useVenda`
+Gerenciamento de transações.
+- **Path:** `src/hooks/useVendas.ts`
+- **Exports:**
+    - `useVendas()`: Listagem e KPIs.
+    - `useVenda(id)`: Detalhes de uma venda.
+- **Features:** CRUD, cálculo de KPIs financeiros, registro de pagamentos.
 
-### Dashboard Filter
-`useDashboardFilter` utiliza **Zustand** para gerenciamento de estado global, permitindo que o filtro de mês no Header afete todos os widgets do Dashboard sem prop drilling excessivo.
+### `useProdutos`
+Catálogo de produtos.
+- **Path:** `src/hooks/useProdutos.ts`
+- **Features:** Controle de estoque, lista de preços.
+
+### `usePurchaseOrders`
+Módulo de compras.
+- **Path:** `src/hooks/usePurchaseOrders.ts`
+- **Features:** Gestão de pedidos para fornecedores.
+
+### `useIndicacoes`
+Sistema de referral.
+- **Path:** `src/hooks/useIndicacoes.ts`
+- **Features:** Cálculo de conversão e árvores de indicação.
+
+### `useEstoqueMetrics`
+Monitoramento de inventário.
+- **Path:** `src/hooks/useEstoqueMetrics.ts`
+- **Features:** Detecção de baixo estoque.
+
+### `useAlertasFinanceiros`
+Cobranças e fiado.
+- **Path:** `src/hooks/useAlertasFinanceiros.ts`
+- **Features:** Filtro de clientes com débitos vencidos/a vencer.
+
+## Hooks Utilitários
+
+### `useCep`
+Busca de endereço via API ViaCEP.
+- **Path:** `src/hooks/useCep.ts`
+
+### `useToast` e `useToastStore`
+Sistema de notificações global.
+- **Path:** `src/components/ui/Toast.tsx`
+
+### `useDashboardFilter`
+Store global (Zustand) para filtros de período no dashboard.
+- **Path:** `src/hooks/useDashboardFilter.ts`

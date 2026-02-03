@@ -58,6 +58,12 @@
     - Filtro por URL `?filtro=baixo_estoque`
     - Feedback visual no card (ícone de alerta, quantidade em vermelho)
 
+### 2026-02-02 - Estabilização e Correções Críticas
+- **Fix:** Redirecionamento `/clientes` -> `/contatos` implementado (App.tsx).
+- **Fix:** Crash em `ContatoDetalhe.tsx` resolvido (erro de data `undefined` e conflito de tipos).
+- **Refactor:** `ContatoCard` e `ContatoFormModal` migrados para usar tipos de Domínio (`DomainContato`) consistentemente.
+- **Docs:** Atualização completa da documentação (`DATABASE`, `COMPONENTS`, `HOOKS`) refletindo estado atual.
+
 ### 2026-02-02 - Reestruturação de Navegação e UX
 - **Menu Unificado:** Nova página `/menu` para centralizar funções secundárias
 - **BottomNav V2:**

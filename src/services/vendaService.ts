@@ -3,7 +3,7 @@ import type { Venda, ItemVenda, PagamentoVenda } from '../types/database'
 import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
 import type { DomainVenda } from '../types/domain'
 import { toDomainVenda } from './mappers'
-import { startOfDay, endOfDay } from 'date-fns'
+import { startOfDay, endOfDay, isToday } from 'date-fns'
 
 // Internal type for DB response, not exposed anymore
 export interface VendaComItens extends Venda {
@@ -31,6 +31,7 @@ export interface VendaComItens extends Venda {
 
 export interface VendasMetrics {
     faturamentoTotal: number
+    faturamentoDia: number
     faturamentoMes: number
     totalVendas: number
     vendasMes: number
@@ -222,6 +223,13 @@ export const vendaService = {
     calculateKPIs(vendas: DomainVenda[]): VendasMetrics {
         const totalVendas = vendas.length
         const faturamentoTotal = vendas.reduce((acc, v) => acc + v.total, 0)
+
+        // Calculate daily revenue specifically from the current set
+        // Note: If the filter excludes today, this will be 0, which is expected behavior
+        const faturamentoDia = vendas
+            .filter(v => isToday(new Date(v.data)))
+            .reduce((acc, v) => acc + v.total, 0)
+
         const faturamentoMes = faturamentoTotal // Logic matches filtered set
         const vendasMes = totalVendas
 
@@ -255,6 +263,7 @@ export const vendaService = {
 
         return {
             faturamentoTotal,
+            faturamentoDia,
             faturamentoMes,
             totalVendas,
             vendasMes,
