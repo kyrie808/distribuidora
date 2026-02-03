@@ -17,7 +17,7 @@ import { useToast } from '../components/ui/Toast'
 import { type VendaFormData } from '../schemas/venda'
 import { formatCurrency, formatPhone } from '../utils/formatters'
 import { FORMA_PAGAMENTO_LABELS } from '../constants'
-import type { Contato, Produto } from '../types/database'
+import type { DomainContato, DomainProduto } from '../types/domain'
 
 import { useCartStore, type CartItem } from '../stores/useCartStore'
 
@@ -48,7 +48,7 @@ export function NovaVenda() {
     // Local State
     const [step, setStep] = useState<'cliente' | 'produtos' | 'pagamento'>('cliente')
     const [contatoSearch, setContatoSearch] = useState('')
-    const [contatoResults, setContatoResults] = useState<Contato[]>([])
+    const [contatoResults, setContatoResults] = useState<DomainContato[]>([])
     const [showContatoDropdown, setShowContatoDropdown] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [temEntrega, setTemEntrega] = useState(false)
@@ -65,20 +65,36 @@ export function NovaVenda() {
                 if (venda) {
                     // Populate contact
                     if (venda.contato) {
-                        setSelectedContato(venda.contato as unknown as Contato)
+                        // Venda.contato is already DomainContato
+                        setSelectedContato(venda.contato)
                     }
 
                     // Populate cart
                     const items = venda.itens.map(item => ({
-                        ...item,
-                        produto: item.produto! // Assuming produto is populated from fetch
-                    })) as unknown as CartItem[]
+                        produto_id: item.produtoId,
+                        quantidade: item.quantidade,
+                        preco_unitario: item.precoUnitario,
+                        subtotal: item.subtotal,
+                        produto: item.produto || {
+                            id: item.produtoId,
+                            nome: 'Produto Desconhecido',
+                            codigo: 'N/A',
+                            preco: item.precoUnitario,
+                            ativo: true,
+                            custo: 0,
+                            estoqueAtual: 0,
+                            estoqueMinimo: 0,
+                            criadoEm: new Date().toISOString(),
+                            atualizadoEm: new Date().toISOString(),
+                            unidade: 'un'
+                        } as DomainProduto
+                    }))
                     setItems(items)
 
                     // Populate delivery fee
-                    if (Number(venda.taxa_entrega) > 0) {
+                    if (venda.taxaEntrega > 0) {
                         setTemEntrega(true)
-                        setValorEntrega(Number(venda.taxa_entrega))
+                        setValorEntrega(venda.taxaEntrega)
                     }
 
                     // Set step to products
@@ -136,7 +152,7 @@ export function NovaVenda() {
     )
 
     // Select contact
-    const handleSelectContato = (contato: Contato) => {
+    const handleSelectContato = (contato: DomainContato) => {
         setSelectedContato(contato)
         setContatoSearch('')
         setShowContatoDropdown(false)
@@ -171,7 +187,7 @@ export function NovaVenda() {
     }
 
     // Add product to cart
-    const handleAddToCart = (produto: Produto) => {
+    const handleAddToCart = (produto: DomainProduto) => {
         addItem({
             produto_id: produto.id,
             produto,

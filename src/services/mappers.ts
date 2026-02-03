@@ -15,11 +15,20 @@ export const toDomainContato = (dbContato: any): DomainContato => {
         telefone: dbContato.telefone,
         origem: dbContato.origem,
         status: dbContato.status,
+        tipo: dbContato.tipo || 'B2C',
         indicadoPorId: dbContato.indicado_por_id,
         indicador: dbContato.indicador ? {
             id: dbContato.indicador.id,
             nome: dbContato.indicador.nome
-        } : null
+        } : null,
+        criadoEm: dbContato.criado_em || new Date().toISOString(),
+        atualizadoEm: dbContato.atualizado_em || new Date().toISOString(),
+        bairro: dbContato.bairro || null,
+        cep: dbContato.cep || null,
+        endereco: dbContato.endereco || null,
+        lat: dbContato.latitude || null,
+        lng: dbContato.longitude || null,
+        observacoes: dbContato.observacao || null
     }
 }
 
@@ -29,7 +38,14 @@ export const toDomainProduto = (dbProduto: any): DomainProduto => {
         nome: dbProduto.nome,
         codigo: dbProduto.codigo,
         preco: Number(dbProduto.preco),
-        unidade: dbProduto.unidade
+        unidade: dbProduto.unidade || 'un',
+        ativo: dbProduto.ativo ?? true,
+        custo: Number(dbProduto.custo || 0),
+        estoqueAtual: Number(dbProduto.estoque_atual || 0),
+        estoqueMinimo: Number(dbProduto.estoque_minimo || 0),
+        criadoEm: dbProduto.criado_em || new Date().toISOString(),
+        atualizadoEm: dbProduto.atualizado_em || new Date().toISOString(),
+        apelido: dbProduto.apelido || null
     }
 }
 

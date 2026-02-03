@@ -1,19 +1,19 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Contato, Produto } from '../types/database'
+import type { DomainContato, DomainProduto } from '../types/domain'
 import type { ItemVendaFormData } from '../schemas/venda'
 
 export interface CartItem extends ItemVendaFormData {
-    produto: Produto
+    produto: DomainProduto
 }
 
 interface CartState {
     items: CartItem[]
-    cliente: Contato | null
+    cliente: DomainContato | null
     addItem: (item: CartItem) => void
     removeItem: (produtoId: string) => void
     updateQuantity: (produtoId: string, quantidade: number) => void
-    setCliente: (cliente: Contato | null) => void
+    setCliente: (cliente: DomainContato | null) => void
     setItems: (items: CartItem[]) => void
     clearCart: () => void
 }

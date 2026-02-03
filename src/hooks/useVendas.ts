@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
-import { vendaService, type VendasMetrics } from '../services/vendaService'
+import { vendaService, type VendasMetrics, type VendaComItens } from '../services/vendaService'
 import type { DomainVenda } from '../types/domain'
+
+export type { VendaComItens }
 
 interface UseVendasOptions {
     realtime?: boolean

@@ -301,7 +301,7 @@ export function Produtos() {
                                         hover
                                         role="button"
                                         tabIndex={0}
-                                        onKeyDown={(e) => {
+                                        onKeyDown={(e: React.KeyboardEvent) => {
                                             if (e.key === 'Enter' || e.key === ' ') {
                                                 handleOpenEdit(produto)
                                             }
@@ -394,7 +394,7 @@ export function Produtos() {
                         <Input
                             label="Nome *"
                             value={newNome}
-                            onChange={(e) => setNewNome(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewNome(e.target.value)}
                             placeholder="Ex: Massa Pão de Queijo 1kg"
                         />
 
@@ -402,13 +402,13 @@ export function Produtos() {
                             <Input
                                 label="Código *"
                                 value={newCodigo}
-                                onChange={(e) => setNewCodigo(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCodigo(e.target.value)}
                                 placeholder="Ex: PDQ1KG"
                             />
                             <Input
                                 label="Apelido (Sigla)"
                                 value={newApelido}
-                                onChange={(e) => setNewApelido(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewApelido(e.target.value)}
                                 placeholder="Ex: B"
                                 maxLength={3}
                             />
@@ -421,7 +421,7 @@ export function Produtos() {
                                 step="0.01"
                                 min="0.01"
                                 value={newPreco}
-                                onChange={(e) => setNewPreco(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPreco(e.target.value)}
                                 placeholder="0.00"
                             />
 
@@ -431,7 +431,7 @@ export function Produtos() {
                                 step="0.01"
                                 min="0.01"
                                 value={newCusto}
-                                onChange={(e) => setNewCusto(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCusto(e.target.value)}
                                 placeholder="0.00"
                             />
                         </div>
@@ -439,7 +439,7 @@ export function Produtos() {
                         <Input
                             label="Unidade"
                             value={newUnidade}
-                            onChange={(e) => setNewUnidade(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewUnidade(e.target.value)}
                             placeholder="un, kg, etc"
                         />
 
@@ -448,7 +448,7 @@ export function Produtos() {
                             type="number"
                             min="0"
                             value={newEstoqueMinimo}
-                            onChange={(e) => setNewEstoqueMinimo(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewEstoqueMinimo(e.target.value)}
                             placeholder="10"
                             helperText="Quantidade para gerar alerta de baixo estoque"
                         />
@@ -494,19 +494,19 @@ export function Produtos() {
                             <Input
                                 label="Nome"
                                 value={editNome}
-                                onChange={(e) => setEditNome(e.target.value)}
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditNome(e.target.value)}
                             />
 
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     label="Código"
                                     value={editCodigo}
-                                    onChange={(e) => setEditCodigo(e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditCodigo(e.target.value)}
                                 />
                                 <Input
                                     label="Apelido (Sigla)"
                                     value={editApelido}
-                                    onChange={(e) => setEditApelido(e.target.value)}
+                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditApelido(e.target.value)}
                                     placeholder="Ex: B"
                                     maxLength={3}
                                 />

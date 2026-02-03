@@ -1,6 +1,6 @@
 // UI Components barrel export
 export { Button } from './Button'
-export { Input } from './input'
+export { Input } from './Input'
 export { Select } from './Select'
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card'
 export { Modal, ModalActions } from './Modal'

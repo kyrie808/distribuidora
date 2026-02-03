@@ -9,7 +9,7 @@ import { PageContainer } from '../components/layout/PageContainer'
 import { Card, LoadingScreen } from '../components/ui'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
-import type { Produto } from '../types/database'
+import type { DomainProduto } from '../types/domain'
 
 // Cores do design system
 const COLORS = {
@@ -118,7 +118,7 @@ useGLTF.preload('/geladeira.glb')
 
 // Componente 3D: Cena da Geladeira
 interface GeladeiraSceneProps {
-    produtos: Produto[]
+    produtos: DomainProduto[]
 }
 
 function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
@@ -210,8 +210,8 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
     }
 
     // Calcular quantidades
-    const total1kg = produtos1kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
-    const total4kg = produtos4kg.reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
+    const total1kg = produtos1kg.reduce((acc, p) => acc + (p.estoqueAtual || 0), 0)
+    const total4kg = produtos4kg.reduce((acc, p) => acc + (p.estoqueAtual || 0), 0)
 
     // Calcular capacidade real de cada zona
     const calcCapacity = (width: number, height: number, depth: number, radius: number, bucketHeight: number, padding: number): number => {
@@ -320,7 +320,7 @@ function GeladeiraScene({ produtos }: GeladeiraSceneProps) {
 
 // Card de controle de estoque
 interface EstoqueCardProps {
-    produto: Produto
+    produto: DomainProduto
     onIncrement: () => void
     onDecrement: () => void
     isUpdating: boolean
@@ -342,12 +342,12 @@ function EstoqueCard({ produto, onIncrement, onDecrement, isUpdating }: EstoqueC
                 <div className="flex items-center gap-3">
                     <button
                         type="button"
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent) => {
                             e.preventDefault()
                             e.stopPropagation()
                             onDecrement()
                         }}
-                        disabled={isUpdating || (produto.estoque_atual || 0) <= 0}
+                        disabled={isUpdating || (produto.estoqueAtual || 0) <= 0}
                         className={`
                             w-10 h-10 rounded-full flex items-center justify-center
                             bg-gray-200 hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed
@@ -358,12 +358,12 @@ function EstoqueCard({ produto, onIncrement, onDecrement, isUpdating }: EstoqueC
                     </button>
 
                     <span className={`text-3xl font-bold ${textColor} min-w-[3rem] text-center`}>
-                        {produto.estoque_atual || 0}
+                        {produto.estoqueAtual || 0}
                     </span>
 
                     <button
                         type="button"
-                        onClick={(e) => {
+                        onClick={(e: React.MouseEvent) => {
                             e.preventDefault()
                             e.stopPropagation()
                             onIncrement()
@@ -390,8 +390,8 @@ export function Estoque() {
     const { produtos, loading, updateEstoque } = useProdutos({ includeInactive: false })
     const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-    const handleUpdateEstoque = async (produto: Produto, delta: number) => {
-        const novoEstoque = Math.max(0, (produto.estoque_atual || 0) + delta)
+    const handleUpdateEstoque = async (produto: DomainProduto, delta: number) => {
+        const novoEstoque = Math.max(0, (produto.estoqueAtual || 0) + delta)
         setUpdatingId(produto.id)
 
         const result = await updateEstoque(produto.id, novoEstoque)
@@ -412,10 +412,10 @@ export function Estoque() {
     // Totais para exibição
     const total1kg = produtosMassa
         .filter(p => p.nome.toLowerCase().includes('1kg') || p.codigo.includes('1KG'))
-        .reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
+        .reduce((acc, p) => acc + (p.estoqueAtual || 0), 0)
     const total4kg = produtosMassa
         .filter(p => p.nome.toLowerCase().includes('4kg') || p.codigo.includes('4KG'))
-        .reduce((acc, p) => acc + (p.estoque_atual || 0), 0)
+        .reduce((acc, p) => acc + (p.estoqueAtual || 0), 0)
 
     if (loading) {
         return (
