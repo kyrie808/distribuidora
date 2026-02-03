@@ -19,7 +19,7 @@ import { formatCurrency, formatPhone } from '../utils/formatters'
 import { FORMA_PAGAMENTO_LABELS } from '../constants'
 import type { DomainContato, DomainProduto } from '../types/domain'
 
-import { useCartStore, type CartItem } from '../stores/useCartStore'
+import { useCartStore } from '../stores/useCartStore'
 
 export function NovaVenda() {
     const navigate = useNavigate()
