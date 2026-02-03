@@ -22,7 +22,10 @@ A aplicação utiliza `react-router-dom` para navegação.
 ## Detalhes de Implementação
 
 ### Dashboard
-O Dashboard foi refatorado para ser **modular e responsivo**. Ele atua como um container para widgets autônomos:
+O Dashboard foi refatorado para ser **modular e altamente responsivo**:
+- **Mobile**: Grid de 2 colunas (ou pilha vertical) para navegação rápida com uma mão.
+- **Desktop**: Grid de 4 colunas que aproveita a largura da tela (`max-w-7xl`), expandindo Widgets de Alertas lado a lado.
+- Atua como container para:
 - `AlertasFinanceiroWidget`: Monitora pagamentos pendentes ("Fiado").
 - `AlertasRecompraWidget`: Monitora ciclo de vida do cliente.
 - `EstoqueWidget`: Monitora níveis de estoque.

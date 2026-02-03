@@ -16,6 +16,7 @@ Biblioteca de componentes baseada em [Shadcn UI](https://ui.shadcn.com/), utiliz
 | `Spinner` | `size` | Indicador de carregamento. |
 | `EmptyState` | `title`, `description`, `icon` | Placeholder visual para listas vazias. |
 | `LoadingScreen`| `message` | Tela cheia de carregamento. |
+| `ThemeToggle`| | Botão sun/moon com animação transform. |
 
 ## Layout (`components/layout/`)
 

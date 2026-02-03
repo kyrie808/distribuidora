@@ -7,6 +7,40 @@
 
 ## Entregas Recentes
 
+### 2026-02-03 - Correção de Integridade de Dados & Regime de Caixa
+- **Mudança de Lógica Financeira (Critical):**
+  - **Faturamento:** Alterado para **Regime de Caixa** (Apenas vendas com `pago=true`).
+  - **Lucro:** Alterado para `(Faturamento Pago - Custo Pago)`. Anteriormente era uma estimativa fixa.
+  - **Filtros de Data:** Dashboard agora respeita estritamente a **Data da Venda/Entrega** (`data`) ao invés da criação (`criado_em`), resolvendo bugs de "vendas fantasmas" de meses anteriores.
+- **Correções de Dashboard:**
+  - **Ultimas Vendas:** Widget agora respeita o filtro de mês global (não mostra mais vendas globais recentes se estiver filtrado em Janeiro).
+  - **Mourning/Spillover:** Correção de bug de fuso horário que incluía vendas de 01/Fev em Jan.
+  - **Métricas Operacionais:** "Entregues" e "Pendentes" ajustados para mostrar dados **do mês** e não globais.
+- **UI UX:**
+  - Aumento do padding inferior (`pb-32`) para evitar corte de widgets no mobile.
+  - Remoção de duplicidade de lógica entre Local e Main.
+
+### 2026-02-03 - Refatoração UI & "Apple Design" (Dashboard)
+- **Widgets Premium:**
+  - `TopIndicadoresWidget`: Ranking com gradientes Gold/Silver/Bronze e glassmorphism.
+  - `UltimasVendasWidget`: Lista minimalista com indicadores de status visuais.
+  - `AlertasRecompra` e `AlertasFinanceiro`: Migrados para Carrossel Horizontal (`DashboardCarousel`) para economizar espaço vertical.
+- **Frontend Architecture:**
+  - Criação do `docs/FRONTEND_GUIDE.md` para padronização.
+  - Limpeza de Warnings/Lints em componentes chave.
+  - Correção de problemas de importação circular em tipos (`DomainContato`).
+  - **Responsividade Híbrida (Fix):**
+    - Dashboard agora expande para `max-w-7xl` em Desktop (antes travado em mobile).
+    - Grid adaptativo: 1 coluna (Mobile) -> 4 colunas (Desktop).
+    - Correção de badges colapsando (`shrink-0`) em `KpiCard`.
+  - **Sistema de Tema Híbrido:**
+    - Implementação de `ThemeContext` e `ThemeToggle`.
+    - Suporte a Light (Padrão) e Dark (Tactical) modes via toggle no header.
+    - Correção do bug de `createRoot` e tela branca.
+- **Dashboard V2:**
+  - Layout totalmente responsivo com seções claras (Alertas, Indicadores, Vendas).
+  - Tema "Tactical Dark" consolidado.
+
 ### 2026-02-02 - Domain Shielding (Arquitetura & Estabilidade)
 - **Refatoração Maior:** Desacoplamento total da UI do Banco de Dados via **Domain Layer**.
 - **Novo Padrão Arquitetural:**

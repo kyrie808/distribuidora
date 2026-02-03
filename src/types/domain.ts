@@ -65,6 +65,7 @@ export interface DomainVenda {
     contato?: DomainContato
     data: string // ISO Date
     total: number
+    custoTotal?: number
     status: VendaStatus
     pago: boolean
     formaPagamento: PagamentoMetodo

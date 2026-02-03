@@ -1,43 +1,56 @@
-import { useMemo } from 'react'
-import { Select } from '../ui/Select'
-import { useDashboardFilter } from '../../hooks/useDashboardFilter'
-import { subMonths, format, startOfMonth } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
+import { useRef } from 'react'
+import { cn } from '@/lib/utils'
 
-export function MonthPicker() {
-    const { startDate, setMonth } = useDashboardFilter()
+interface MonthPickerProps {
+    selectedMonth: string
+    onMonthSelect: (month: string) => void
+    className?: string
+}
 
-    const options = useMemo(() => {
-        const today = new Date()
-        const months = []
-        for (let i = 0; i < 12; i++) {
-            const date = subMonths(today, i)
-            const value = startOfMonth(date).toISOString()
-            const label = format(date, "MMMM 'de' yyyy", { locale: ptBR })
-            months.push({
-                value,
-                label: label.charAt(0).toUpperCase() + label.slice(1)
-            })
-        }
-        return months
-    }, [])
+const months = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
-    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedDate = new Date(e.target.value)
-        setMonth(selectedDate)
-    }
-
-    // Ensures the Select value matches one of the options
-    const currentValue = startOfMonth(startDate).toISOString()
+export function MonthPicker({ selectedMonth, onMonthSelect, className }: MonthPickerProps) {
+    const scrollContainerRef = useRef<HTMLDivElement>(null)
 
     return (
-        <div className="w-full sm:w-64">
-            <Select
-                options={options}
-                value={currentValue}
-                onChange={handleChange}
-                className="bg-white/90 backdrop-blur border-none shadow-sm"
-            />
+        <div className={cn("w-full", className)}>
+            <div
+                ref={scrollContainerRef}
+                className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar scroll-smooth rounded-full bg-white dark:bg-surface-dark p-1 shadow-sm border border-gray-100 dark:border-gray-800"
+            >
+                {months.map((month) => {
+                    const isSelected = selectedMonth === month
+                    return (
+                        <label
+                            key={month}
+                            className={cn(
+                                "flex-1 cursor-pointer h-9 flex items-center justify-center rounded-full relative z-0 transition-all duration-300 select-none min-w-[3.5rem]",
+                                isSelected ? "flex-grow-[1.5]" : ""
+                            )}
+                            onClick={() => onMonthSelect(month)}
+                        >
+                            <input
+                                type="radio"
+                                name="date_filter"
+                                className="peer sr-only"
+                                checked={isSelected}
+                                readOnly
+                            />
+                            <span className={cn(
+                                "absolute inset-0 rounded-full transition-opacity duration-300",
+                                isSelected ? "bg-primary opacity-100 shadow-sm" : "opacity-0"
+                            )}></span>
+                            <span className={cn(
+                                "relative z-10 text-sm font-medium transition-colors duration-200",
+                                isSelected ? "text-background-dark font-bold" : "text-gray-500 dark:text-gray-400"
+
+                            )}>
+                                {month}
+                            </span>
+                        </label>
+                    )
+                })}
+            </div>
         </div>
     )
 }

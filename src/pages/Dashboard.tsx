@@ -1,268 +1,381 @@
-import { useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useCallback, useEffect } from 'react'
 import {
     Menu,
     Bell,
     TrendingUp,
     TrendingDown,
     ArrowUp,
-    ChevronRight,
+    ShoppingBag,
+    Package,
     Truck,
-    Map as MapIcon
+    CheckCircle,
+    DollarSign,
+    ShoppingCart,
+    Users,
+    ClipboardList
 } from 'lucide-react'
-import { AlertasFinanceiroWidget } from '../components/dashboard/AlertasFinanceiroWidget'
-import { AlertasRecompraWidget } from '../components/dashboard/AlertasRecompraWidget'
-import { MonthPicker } from '../components/dashboard/MonthPicker'
+import { useNavigate } from 'react-router-dom'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
 import { useRecompra } from '../hooks/useRecompra'
-import { useIndicacoes } from '../hooks/useIndicacoes'
 import { useAlertasFinanceiros } from '../hooks/useAlertasFinanceiros'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
+import { useLogistica } from '../hooks/useLogistica'
 import { formatCurrency } from '../utils/formatters'
 import { cn } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
+
+// New Components
+import { KpiCard } from '@/components/dashboard/KpiCard'
+import { LogisticsWidget } from '@/components/dashboard/LogisticsWidget'
+import { AlertasFinanceiroWidget } from '@/components/dashboard/AlertasFinanceiroWidget'
+import { AlertasRecompraWidget } from '@/components/dashboard/AlertasRecompraWidget'
+import { TopIndicadoresWidget } from '@/components/dashboard/TopIndicadoresWidget'
+import { UltimasVendasWidget } from '@/components/dashboard/UltimasVendasWidget'
+import { MonthPicker } from '@/components/dashboard/MonthPicker'
+import { Skeleton } from '@/components/ui/Skeleton'
 
 export function Dashboard() {
-    const navigate = useNavigate()
     const [isRefreshing, setIsRefreshing] = useState(false)
-    const { startDate, endDate } = useDashboardFilter()
+    const [userName, setUserName] = useState<string>('Comandante')
+    const [greeting, setGreeting] = useState<string>('Olá')
+    const { startDate, endDate, setMonth } = useDashboardFilter()
+    const navigate = useNavigate()
+
+    // Greeting & User Logic
+    useEffect(() => {
+        const fetchUserAndGreeting = async () => {
+            // 1. Get User
+            const { data: { user } } = await supabase.auth.getUser()
+            if (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email) {
+                // Try to get first name from metadata or email
+                const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]
+                const firstName = fullName?.split(' ')[0]
+                // Capitalize first letter logic if needed, but usually data is okay
+                if (firstName) setUserName(firstName)
+            }
+
+            // 2. Get Time for Greeting
+            const currentHour = new Date().getHours()
+            if (currentHour >= 5 && currentHour < 12) setGreeting('Bom dia')
+            else if (currentHour >= 12 && currentHour < 18) setGreeting('Boa tarde')
+            else setGreeting('Boa noite')
+        }
+
+        fetchUserAndGreeting()
+    }, [])
+
+    // Derive selected month string from global filter
+    const selectedMonth = startDate.toLocaleString('pt-BR', { month: 'short' }).replace('.', '').replace(/^./, str => str.toUpperCase())
+
+    const handleMonthSelect = (month: string) => {
+        // Map Portuguese months back to indices
+        const monthsMap: { [key: string]: number } = {
+            'Jan': 0, 'Fev': 1, 'Mar': 2, 'Abr': 3, 'Mai': 4, 'Jun': 5,
+            'Jul': 6, 'Ago': 7, 'Set': 8, 'Out': 9, 'Nov': 10, 'Dez': 11
+        }
+
+        const monthIndex = monthsMap[month]
+        if (monthIndex !== undefined) {
+            const currentYear = new Date().getFullYear()
+            const newDate = new Date(currentYear, monthIndex, 1)
+            setMonth(newDate)
+        }
+    }
+
 
     // Fetch data
     const { metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
-    const { loading: loadingContatos, refetch: refetchContatos } = useContatos({})
-    const { contatos: recompraContatos, atrasados: atrasadosRecompra, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
-    const { loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
-    const { loading: loadingFinanceiro, refetch: refetchFinanceiro } = useAlertasFinanceiros()
+    const { metrics: logisticsMetrics, loading: loadingLogistica, refetch: refetchLogistica } = useLogistica() // Global Operational Data
+    const { contatos: recompraContatos, refetch: refetchRecompra } = useRecompra()
+    const { contatos: allContacts, loading: loadingContatos, refetch: refetchContatos } = useContatos()
+    const { alertas: alertasFinanceiros, loading: loadingFinanceiro, refetch: refetchFinanceiro } = useAlertasFinanceiros()
 
-    const loading = loadingVendas || loadingContatos || loadingRecompra || loadingIndicacoes || loadingFinanceiro
+    const loading = loadingVendas || loadingFinanceiro || loadingLogistica || loadingContatos
 
     // Pull to refresh action
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true)
         await Promise.all([
             refetchVendas(),
-            refetchContatos(),
             refetchRecompra(),
-            refetchIndicacoes(),
-            refetchFinanceiro()
+            refetchFinanceiro(),
+            refetchLogistica(),
+            refetchContatos()
         ])
         setIsRefreshing(false)
-    }, [refetchVendas, refetchContatos, refetchRecompra, refetchIndicacoes, refetchFinanceiro])
+    }, [refetchVendas, refetchRecompra, refetchFinanceiro, refetchLogistica, refetchContatos])
 
-    // Calculations for Progress Bars
-    const revenueTarget = 150000
+    // Calculations for KPIs
+    const revenueTarget = 165000 // From HTML: $165k
     const revenueProgress = Math.min((metrics.faturamentoMes / revenueTarget) * 100, 100)
-    const marginPercent = metrics.faturamentoMes > 0 ? (metrics.lucroMes / metrics.faturamentoMes) * 100 : 0
-    const ordersTarget = 100
-    const ordersProgress = Math.min((metrics.vendasMes / ordersTarget) * 100, 100)
 
-    if (loading && !isRefreshing) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-[#102210] relative overflow-hidden">
-                {/* Background Pattern for Loading Screen */}
-                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
-                </div>
-                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin z-10" />
-                <p className="text-primary/70 animate-pulse font-mono tracking-widest text-xs uppercase z-10">Initializing Tactical Command...</p>
-            </div>
-        )
-    }
+
+
+
+
+    // War Zone Data Extraction
+    const atrasadosRecompra = recompraContatos.filter(c => c.status === 'atrasado').length
+    const totalAlerts = atrasadosRecompra + alertasFinanceiros.length
 
     return (
-        <div className="min-h-screen bg-[#102210] text-foreground pb-24 font-body relative selection:bg-primary/30">
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
+            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
 
-            {/* GLOBAL BACKGROUND TEXTURE (The Fix for "Flat Green") */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                {/* 1. Base Gradient to remove flatness */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-[#1a2e1a] via-[#102210] to-[#0a160a]" />
-
-                {/* 2. Tactical Grid Pattern */}
-                <div className="absolute inset-0 opacity-10 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]" />
-
-                {/* 3. Vignette */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] opacity-40" />
-            </div>
-
-            {/* Header - Tactical Command */}
-            <header className="flex items-center px-6 py-4 justify-between sticky top-0 z-50 bg-[#102210]/80 backdrop-blur-md border-b border-white/5 shadow-sm">
-                <button className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full hover:bg-white/5 transition-colors border border-transparent hover:border-white/10">
-                    <Menu className="h-6 w-6 text-foreground" />
-                </button>
-                <h1 className="text-xl font-bold tracking-tight text-center text-white flex-1 font-mono uppercase tracking-widest drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                    Tactical Command
-                </h1>
-                <button
-                    className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-white/5 transition-colors relative border border-transparent hover:border-white/10"
-                    onClick={handleRefresh}
-                >
-                    <Bell className={cn("h-6 w-6 text-foreground", isRefreshing && "animate-spin")} />
-                    <span className="absolute top-2 right-2 h-2 w-2 bg-destructive rounded-full border-2 border-[#102210] shadow-[0_0_5px_var(--destructive)]"></span>
-                </button>
-            </header>
-
-            <main className="flex-1 flex flex-col gap-6 px-4 py-6 max-w-md mx-auto w-full relative z-10">
-
-                {/* Month Selector - Wrapped to remove "Old Clothes" look */}
-                <div className="w-full bg-card/50 backdrop-blur-sm border border-white/5 rounded-xl p-1 shadow-sm">
-                    <MonthPicker />
-                </div>
-
-                {/* KPI Cards Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                    {/* Revenue Card */}
-                    <div className="col-span-2 sm:col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/90 border border-primary/20 shadow-[0_0_15px_rgba(19,236,19,0.15)] backdrop-blur-sm relative overflow-hidden group hover:bg-card/95 transition-all">
-                        <div className="flex justify-between items-start z-10">
-                            <div className="flex flex-col">
-                                <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Revenue (MTD)</span>
-                                <span className="text-3xl font-bold text-white mt-1 drop-shadow-sm">{formatCurrency(metrics.faturamentoMes)}</span>
-                            </div>
-                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary border border-primary/20">
-                                <TrendingUp className="h-4 w-4" /> 12%
-                            </span>
-                        </div>
-                        {/* Progress Bar */}
-                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden z-10 box-border border-b border-white/5">
-                            <div
-                                className="bg-primary h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_var(--primary)]"
-                                style={{ width: `${revenueProgress}%` }}
-                            />
-                        </div>
-                        <span className="text-xs text-zinc-500 z-10">Target: {formatCurrency(revenueTarget)}</span>
-
-                        {/* Decor */}
-                        <div className="absolute right-0 bottom-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <TrendingUp className="h-24 w-24 -mr-4 -mb-4 text-primary" />
-                        </div>
+                {/* TopAppBar */}
+                <header className="flex items-center px-6 py-4 justify-between sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
+                    <button className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+                        <Menu className="text-gray-800 dark:text-gray-200 w-6 h-6" />
+                    </button>
+                    <div className="flex-1 flex justify-center">
+                        <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                            {greeting}, {userName}
+                        </h1>
                     </div>
-
-                    {/* Margin Card */}
-                    <div className="col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/60 border border-white/5 shadow-sm hover:border-white/10 transition-colors backdrop-blur-sm">
-                        <div className="flex flex-col">
-                            <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Margin</span>
-                            <span className="text-2xl font-bold text-foreground mt-1">{marginPercent.toFixed(1)}%</span>
-                        </div>
-                        {/* Progress Bar */}
-                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
-                            <div
-                                className="bg-accent h-full rounded-full transition-all duration-1000 shadow-[0_0_5px_var(--accent)]"
-                                style={{ width: `${marginPercent}%` }}
-                            />
-                        </div>
-                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-bold text-destructive border border-destructive/20">
-                            <TrendingDown className="h-3 w-3" /> 1.5%
-                        </span>
-                    </div>
-
-                    {/* Orders Card */}
-                    <div className="col-span-1 flex flex-col gap-3 rounded-2xl p-5 bg-card/60 border border-white/5 shadow-sm hover:border-white/10 transition-colors backdrop-blur-sm">
-                        <div className="flex flex-col">
-                            <span className="text-xs font-medium uppercase tracking-wider text-zinc-400">Orders</span>
-                            <span className="text-2xl font-bold text-foreground mt-1">{metrics.vendasMes}</span>
-                        </div>
-                        {/* Progress Bar */}
-                        <div className="w-full bg-black/40 h-1.5 rounded-full overflow-hidden">
-                            <div
-                                className="bg-blue-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_5px_#3b82f6]"
-                                style={{ width: `${ordersProgress}%` }}
-                            />
-                        </div>
-                        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary border border-primary/20">
-                            <ArrowUp className="h-3 w-3" /> 5%
-                        </span>
-                    </div>
-                </div>
-
-                {/* War Zone Section (Alerts) */}
-                <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-destructive animate-pulse shadow-[0_0_8px_var(--destructive)]"></span>
-                            War Zone
-                        </h2>
+                    <div className="flex items-center gap-2">
+                        <ThemeToggle />
                         <button
-                            className="text-xs font-medium text-zinc-400 hover:text-primary transition-colors"
-                            onClick={() => navigate('/vendas?status=atrasado')}
+                            className="flex size-10 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative"
+                            onClick={handleRefresh}
                         >
-                            View All
+                            <Bell className={cn("text-gray-800 dark:text-gray-200 w-6 h-6", isRefreshing && "animate-spin")} />
+                            {totalAlerts > 0 && (
+                                <span className="absolute top-2 right-2 size-2 bg-semantic-red rounded-full border-2 border-background-light dark:border-background-dark animate-pulse"></span>
+                            )}
                         </button>
                     </div>
+                </header>
 
-                    <AlertasFinanceiroWidget />
-                    <AlertasRecompraWidget
-                        contatos={recompraContatos}
-                        atrasados={atrasadosRecompra}
-                        loading={loadingRecompra}
-                    />
-                </div>
+                {/* Main Content */}
+                <main className="flex-1 flex flex-col gap-6 px-4 pb-32">
 
-                {/* Logistics Section */}
-                <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between px-1">
-                        <h2 className="text-lg font-bold text-white">Live Logistics</h2>
-                    </div>
+                    {/* Month Picker */}
+                    <MonthPicker selectedMonth={selectedMonth} onMonthSelect={handleMonthSelect} />
 
-                    <div className="flex items-center gap-4 rounded-2xl bg-card/80 border border-white/5 p-4 shadow-sm hover:border-primary/20 transition-all group backdrop-blur-sm">
-                        <div className="relative h-16 w-16 shrink-0 flex items-center justify-center rounded-full border-4 border-primary/10 bg-primary/5 group-hover:border-primary/30 transition-colors">
-                            <Truck className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
+                    {loading ? (
+                        <div className="flex flex-col gap-6">
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Revenue Skeleton */}
+                                <Skeleton className="h-[140px] w-full rounded-xl col-span-2 md:col-span-1" />
+                                {/* Margin Skeleton */}
+                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
+                                {/* Orders Skeleton */}
+                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
+                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
+                            </div>
+                            {/* Widget Skeletons */}
+                            <Skeleton className="h-[200px] w-full rounded-xl" />
+                            <Skeleton className="h-[100px] w-full rounded-xl" />
                         </div>
-
-                        <div className="flex-1 flex flex-col justify-center gap-1">
-                            <div className="flex justify-between items-center mb-1">
-                                <h3 className="font-bold text-foreground">Deliveries Today</h3>
-                                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/10 text-primary uppercase tracking-wide border border-primary/20">
-                                    Active
+                    ) : (
+                        <>
+                            {/* Financeiro Header */}
+                            <div className="flex items-center gap-2 mb-2 px-1">
+                                <DollarSign className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Financeiro
                                 </span>
                             </div>
 
-                            <p className="text-xs text-muted-foreground mb-2">Driver: System Auto-Route</p>
+                            {/* KPI Cards Grid - Faturamento, Ticket Médio, Lucro, A Receber */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                                {/* Faturamento - Neon Green */}
+                                <KpiCard
+                                    title="Faturamento"
+                                    value={formatCurrency(metrics.faturamentoMes)}
+                                    progress={revenueProgress}
+                                    trend="12%"
+                                    trendDirection="up"
+                                    targetLabel="Meta: 165k"
+                                    progressColor="bg-primary"
+                                    trendColor="green"
+                                    icon={TrendingUp}
+                                    className="col-span-2 md:col-span-1"
+                                    variant="default"
+                                />
 
-                            <div className="flex gap-4">
-                                <div className="flex items-center gap-1.5">
-                                    <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_5px_var(--primary)]"></div>
-                                    <span className="text-xs font-medium text-zinc-400">{metrics.entregasRealizadas} Done</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                    <div className="h-2 w-2 rounded-full bg-white/20"></div>
-                                    <span className="text-xs font-medium text-zinc-500">{metrics.entregasPendentes} Left</span>
+                                {/* Ticket Médio - Blue/Info */}
+                                <KpiCard
+                                    title="Ticket Médio"
+                                    value={formatCurrency(metrics.ticketMedio)}
+                                    // Simulated progress/trend for Ticket Médio if not available
+                                    progress={75}
+                                    trend="R$ 5,00"
+                                    trendDirection="up"
+                                    progressColor="bg-blue-500"
+                                    trendColor="green"
+                                    icon={ArrowUp}
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+
+                                {/* Lucro - Semantic Green */}
+                                <KpiCard
+                                    title="Lucro"
+                                    value={formatCurrency(metrics.lucroMes)}
+                                    progress={metrics.totalVendas > 0 ? (metrics.lucroMes / metrics.totalVendas) * 100 : 0}
+                                    trend={`${metrics.totalVendas > 0 ? ((metrics.lucroMes / metrics.totalVendas) * 100).toFixed(1) : '0'}%`}
+                                    trendDirection={(metrics.totalVendas > 0 ? (metrics.lucroMes / metrics.totalVendas) * 100 : 0) > 20 ? "up" : "down"}
+                                    progressColor="bg-semantic-green"
+                                    trendColor="green"
+                                    icon={TrendingUp} // Or DollarSign if available
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+
+                                {/* A Receber - Semantic Yellow */}
+                                <KpiCard
+                                    title="A Receber"
+                                    value={formatCurrency(metrics.aReceber)}
+                                    progress={50} // Arbitrary or calculated based on total credit
+                                    trend="Pendente"
+                                    trendDirection="neutral"
+                                    progressColor="bg-semantic-yellow"
+                                    trendColor="yellow"
+                                    icon={TrendingDown} // Or Clock/AlertCircle
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+                            </div>
+
+                            {/* Vendas & Entregas Header */}
+                            <div className="flex items-center gap-2 mb-2 mt-2 px-1">
+                                <ShoppingCart className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Vendas & Entregas
+                                </span>
+                            </div>
+
+                            {/* Sales & Operations Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Vendas - Neon Green/Primary */}
+                                <KpiCard
+                                    title="Vendas"
+                                    value={metrics.totalVendas.toString()}
+                                    progress={70} // Simulated or calc based on target
+                                    trend="24" // Simulated trend
+                                    trendDirection="up"
+                                    progressColor="bg-primary"
+                                    trendColor="green"
+                                    icon={ShoppingBag}
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+
+                                {/* Itens Vendidos - Blue/Info */}
+                                <KpiCard
+                                    title="Itens"
+                                    value={metrics.produtosVendidos.total.toString()}
+                                    progress={65}
+                                    trend="Vol"
+                                    trendDirection="neutral"
+                                    progressColor="bg-blue-500"
+                                    trendColor="primary"
+                                    icon={Package}
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+
+                                {/* Entregas Pendentes - Yellow/Warning */}
+                                <KpiCard
+                                    title="Pendentes"
+                                    value={metrics.entregasPendentes.toString()}
+                                    progress={metrics.entregasPendentes > 0 ? 50 : 0}
+                                    trend="Total"
+                                    trendDirection="neutral"
+                                    progressColor="bg-semantic-yellow"
+                                    trendColor="yellow"
+                                    icon={Truck}
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+
+                                {/* Entregas Realizadas - Green/Success */}
+                                <KpiCard
+                                    title="Entregues"
+                                    value={metrics.entregasRealizadas.toString()}
+                                    progress={100}
+                                    trend="No Período"
+                                    trendDirection="up"
+                                    progressColor="bg-semantic-green"
+                                    trendColor="green"
+                                    icon={CheckCircle}
+                                    className="col-span-1"
+                                    variant="compact"
+                                />
+                            </div>
+
+                            {/* Clients Header */}
+                            <div className="flex items-center gap-2 mb-2 mt-6 px-1">
+                                <Users className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                                    Clientes
+                                </span>
+                            </div>
+
+                            {/* Clients Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                {/* Clientes Ativos - Purple */}
+                                <KpiCard
+                                    title="Clientes ativos"
+                                    value={allContacts.filter(c => c.status === 'cliente').length.toString()}
+                                    progress={100}
+                                    trend="Total"
+                                    trendDirection="neutral"
+                                    progressColor="bg-violet-600"
+                                    trendColor="primary"
+                                    icon={Users}
+                                    className="col-span-1"
+                                    variant="compact"
+                                    iconColor="text-violet-600 dark:text-violet-400"
+                                />
+                                {/* Pedido Fábrica - Orange - Clickable */}
+                                <div onClick={() => navigate('/relatorio-fabrica')} className="cursor-pointer col-span-1">
+                                    <KpiCard
+                                        title="Pedido Fábrica"
+                                        value="Gerar"
+                                        progress={0}
+                                        trend="Relatório"
+                                        trendDirection="neutral"
+                                        progressColor="bg-orange-500"
+                                        trendColor="primary"
+                                        icon={ClipboardList}
+                                        className="h-full hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                                        variant="compact"
+                                        iconColor="text-orange-500 dark:text-orange-400"
+                                    />
                                 </div>
                             </div>
-                        </div>
-                        <button
-                            className="shrink-0 h-10 w-10 rounded-full bg-white/5 flex items-center justify-center text-zinc-400 hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20"
-                            onClick={() => navigate('/entregas')}
-                        >
-                            <ChevronRight className="h-5 w-5" />
-                        </button>
-                    </div>
-                </div>
 
-                {/* Logistics Map View */}
-                <div
-                    className="w-full h-32 rounded-2xl bg-card/80 relative overflow-hidden group cursor-pointer border border-white/5 shadow-md hover:shadow-lg transition-all backdrop-blur-sm"
-                    onClick={() => navigate('/entregas')}
-                >
-                    {/* Map Grid Pattern */}
-                    <div className="absolute inset-0 bg-[#0c1a0c] flex items-center justify-center opacity-80">
-                        <div className="grid grid-cols-6 grid-rows-3 gap-8 opacity-10 transform -rotate-12 scale-150 w-full h-full">
-                            {[...Array(18)].map((_, i) => (
-                                <div key={i} className="h-full w-px bg-primary/30"></div>
-                            ))}
-                        </div>
-                    </div>
+                            {/* Alerts Section (Carousels) */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                                <div className="col-span-1">
+                                    <AlertasFinanceiroWidget />
+                                </div>
+                                <div className="col-span-1">
+                                    <AlertasRecompraWidget />
+                                </div>
+                                <div className="col-span-1">
+                                    <TopIndicadoresWidget />
+                                </div>
+                                <div className="col-span-1">
+                                    <UltimasVendasWidget />
+                                </div>
+                            </div>
 
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/90 to-transparent flex items-center p-6">
-                        <div>
-                            <p className="text-primary text-xs font-bold uppercase tracking-wider mb-1 drop-shadow-[0_0_5px_rgba(19,236,19,0.5)]">Live Tracking</p>
-                            <h3 className="text-white text-lg font-bold">Fleet Map View</h3>
-                        </div>
-                        <div className="ml-auto bg-primary/20 p-2 rounded-full group-hover:bg-primary/30 transition-colors border border-primary/20">
-                            <MapIcon className="text-primary h-6 w-6" />
-                        </div>
-                    </div>
-                </div>
+                            {/* Logistics Widget */}
+                            <LogisticsWidget
+                                metrics={{
+                                    entregasRealizadas: logisticsMetrics.entregasRealizadasHoje,
+                                    entregasPendentes: logisticsMetrics.entregasPendentesTotal
+                                }}
+                            />
+                        </>
+                    )}
 
-            </main>
+                </main>
+            </div>
         </div>
     )
 }

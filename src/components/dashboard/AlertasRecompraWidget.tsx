@@ -1,81 +1,85 @@
 import { useNavigate } from 'react-router-dom'
-import {
-    Bell,
-    ChevronRight,
-    AlertCircle,
-} from 'lucide-react'
-import { Card, CardContent, Button } from '../ui'
-import type { ContatoRecompra } from '../../hooks/useRecompra'
+import { RotateCw, MessageCircle, Eye, ShoppingCart } from 'lucide-react' // Changed AlertTriangle to RotateCw for Recompra/Cycle context
+import { formatPhone } from '@/utils/formatters'
+import { DashboardCarousel } from './DashboardCarousel'
+import { useRecompra } from '@/hooks/useRecompra'
+import { Card, CardContent } from '@/components/ui/Card'
 
-interface AlertasRecompraWidgetProps {
-    contatos: ContatoRecompra[]
-    atrasados: number
-    loading?: boolean
-}
-
-export function AlertasRecompraWidget({ contatos, atrasados, loading }: AlertasRecompraWidgetProps) {
+export function AlertasRecompraWidget() {
     const navigate = useNavigate()
-    const alertasUrgentes = contatos.filter((c) => c.status === 'atrasado').slice(0, 5)
+    const { contatos, loading } = useRecompra()
 
-    if (loading) {
+    // Filter only those who need repurchase (atrasado)
+    const alertas = contatos.filter(c => c.status === 'atrasado')
+
+    const handleWhatsApp = (telefone: string, nome: string) => {
+        const message = `Olá, ${nome}! Notei que faz um tempinho desde sua última compra. Estamos com promoções especiais hoje!`
+        const url = `https://wa.me/55${formatPhone(telefone).replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
+        window.open(url, '_blank')
+    }
+
+    if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
+
+    if (alertas.length === 0) {
         return (
-            <Card className="h-full min-h-[300px] flex flex-col justify-center items-center">
-                <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full" />
-            </Card>
+            <DashboardCarousel
+                title="Alertas de Recompra"
+                icon={RotateCw}
+                count={0}
+                onViewAll={() => navigate('/clientes')}
+                emptyState={
+                    <div className="w-full flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 border-dashed">
+                        <ShoppingCart className="size-8 text-gray-300 dark:text-gray-600 mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Todos os clientes abastecidos!</p>
+                    </div>
+                }
+            >
+                {null}
+            </DashboardCarousel>
         )
     }
 
     return (
-        <section className="h-full flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-destructive" />
-                    Alertas de Recompra
-                    {atrasados > 0 && (
-                        <div className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
-                    )}
-                </h2>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-primary hover:text-primary/80 h-auto p-0"
-                    onClick={() => navigate('/recompra')}
-                >
-                    Ver todos <ChevronRight className="h-4 w-4" />
-                </Button>
-            </div>
-
-            {alertasUrgentes.length === 0 ? (
-                <Card className="flex-1 flex flex-col items-center justify-center py-8 text-muted-foreground bg-muted/20 border-dashed">
-                    <Bell className="h-8 w-8 mb-2 opacity-50" />
-                    <p>Nenhum cliente atrasado</p>
-                </Card>
-            ) : (
-                <div className="space-y-3">
-                    {alertasUrgentes.map((item) => (
-                        <Card
-                            key={item.contato.id}
-                            className="cursor-pointer border-l-4 border-l-destructive hover:shadow-md transition-shadow bg-destructive/5"
-                            onClick={() => navigate(`/contatos/${item.contato.id}`)}
-                        >
-                            <CardContent className="p-4 flex items-center justify-between">
-                                <div className="flex items-center gap-3 min-w-0">
-                                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center border border-destructive/20 shadow-sm flex-shrink-0">
-                                        <AlertCircle className="h-5 w-5 text-destructive" />
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="font-bold text-gray-900 truncate text-base">{item.contato.nome}</p>
-                                        <p className="text-sm text-destructive font-medium">
-                                            {item.diasSemCompra} dias sem comprar
-                                        </p>
-                                    </div>
+        <DashboardCarousel
+            title="Alertas de Recompra"
+            icon={RotateCw}
+            count={alertas.length}
+            onViewAll={() => navigate('/clientes')}
+        >
+            {alertas.map((alerta) => (
+                <div key={alerta.contato.id} className="min-w-[260px] snap-center">
+                    <Card className="h-full bg-white dark:bg-surface-dark border-l-4 border-l-orange-500 border-y-gray-100 hover:border-y-gray-200 dark:border-y-gray-800 dark:hover:border-y-gray-700 shadow-sm transition-all">
+                        <CardContent className="p-4">
+                            <div className="flex items-start justify-between mb-3">
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white truncate max-w-[140px]">
+                                        {alerta.contato.nome}
+                                    </h3>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 mt-1">
+                                        {alerta.diasSemCompra} dias sem comprar
+                                    </span>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-muted-foreground flex-shrink-0 ml-2" />
-                            </CardContent>
-                        </Card>
-                    ))}
+                                <div className="flex flex-col gap-1">
+                                    <button
+                                        onClick={() => navigate(`/clientes/${alerta.contato.id}`)}
+                                        className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-colors"
+                                    >
+                                        <Eye className="size-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => handleWhatsApp(alerta.contato.telefone, alerta.contato.nome)}
+                                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 transition-colors px-3 py-2 rounded-lg"
+                            >
+                                <MessageCircle className="size-3.5" />
+                                Oferecer Recompra
+                            </button>
+                        </CardContent>
+                    </Card>
                 </div>
-            )}
-        </section>
+            ))}
+        </DashboardCarousel>
     )
 }

@@ -12,7 +12,7 @@ export function Header({ title, showBack = false, rightAction }: HeaderProps) {
     const navigate = useNavigate()
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 h-16 flex items-center justify-between safe-top">
+        <header className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-[#102210] border-b border-gray-100 dark:border-gray-800 px-4 h-16 flex items-center justify-between safe-top">
             <div className="flex items-center gap-2">
                 {showBack && (
                     <Button
@@ -24,7 +24,7 @@ export function Header({ title, showBack = false, rightAction }: HeaderProps) {
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                 )}
-                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                     {title}
                 </h1>
             </div>

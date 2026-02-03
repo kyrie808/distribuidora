@@ -80,6 +80,7 @@ export const toDomainVenda = (dbVenda: VendaComItens): DomainVenda => {
         contato: dbVenda.contato ? toDomainContato(dbVenda.contato) : undefined,
         data: dbVenda.data,
         total: Number(dbVenda.total),
+        custoTotal: Number(dbVenda.custo_total || 0),
         status: dbVenda.status as any,
         pago: dbVenda.pago,
         formaPagamento: dbVenda.forma_pagamento as any,

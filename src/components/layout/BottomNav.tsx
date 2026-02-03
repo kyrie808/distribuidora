@@ -9,7 +9,7 @@ export function BottomNav() {
     const isActive = (path: string) => location.pathname === path
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 safe-bottom">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#102210] border-t border-gray-100 dark:border-gray-800 safe-bottom">
             <div className="flex items-end justify-between px-2 pb-2 h-16">
 
                 {/* Dashboard */}

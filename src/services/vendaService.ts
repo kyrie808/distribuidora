@@ -3,7 +3,7 @@ import type { Venda, ItemVenda, PagamentoVenda } from '../types/database'
 import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
 import type { DomainVenda } from '../types/domain'
 import { toDomainVenda } from './mappers'
-import { startOfDay, endOfDay, isToday } from 'date-fns'
+import { isToday } from 'date-fns'
 
 // Internal type for DB response, not exposed anymore
 export interface VendaComItens extends Venda {
@@ -61,16 +61,23 @@ export const vendaService = {
             .order('criado_em', { ascending: false })
 
         if (startDate) {
-            query = query.gte('criado_em', startOfDay(startDate).toISOString())
+            // Use YYYY-MM-DD format for 'date' column to avoid timezone offset issues (like T03:00:00Z)
+            const startStr = startDate.toISOString().split('T')[0]
+            query = query.gte('data', startStr)
         }
         if (endDate) {
-            query = query.lte('criado_em', endOfDay(endDate).toISOString())
+            // Adjust end date to avoid timezone spillover (e.g., Feb 1st 03:00 UTC for Jan 31st BRT)
+            // Subtracting 12 hours ensures we are safely within the target day in UTC
+            const safeEndDate = new Date(endDate.getTime() - 12 * 60 * 60 * 1000)
+            const endStr = safeEndDate.toISOString().split('T')[0]
+            query = query.lte('data', endStr)
         }
 
         const { data, error } = await query
         if (error) throw error
 
         const rawVendas = (data || []) as unknown as VendaComItens[]
+
         return rawVendas.map(toDomainVenda)
     },
 
@@ -222,17 +229,21 @@ export const vendaService = {
 
     calculateKPIs(vendas: DomainVenda[]): VendasMetrics {
         const totalVendas = vendas.length
-        const faturamentoTotal = vendas.reduce((acc, v) => acc + v.total, 0)
+        // Faturamento (Cash Basis - Only Paid)
+        const faturamentoTotal = vendas
+            .filter(v => v.pago)
+            .reduce((acc, v) => acc + v.total, 0)
 
         // Calculate daily revenue specifically from the current set
         // Note: If the filter excludes today, this will be 0, which is expected behavior
         const faturamentoDia = vendas
-            .filter(v => isToday(new Date(v.data)))
+            .filter(v => isToday(new Date(v.data)) && v.pago)
             .reduce((acc, v) => acc + v.total, 0)
 
-        const faturamentoMes = faturamentoTotal // Logic matches filtered set
+        const faturamentoMes = faturamentoTotal // Matches Vercel logic
         const vendasMes = totalVendas
 
+        // Ticket Médio = Paid Revenue / Total Sales (Standard Vercel logic seems to be this)
         const ticketMedio = totalVendas > 0 ? faturamentoTotal / totalVendas : 0
 
         const produtosVendidos = vendas.reduce(
@@ -258,8 +269,10 @@ export const vendaService = {
         const entregasPendentes = vendas.filter((v) => v.status === 'pendente').length
         const entregasRealizadas = vendas.filter((v) => v.status === 'entregue').length
 
-        // Simple profit calc (placeholder)
-        const lucroMes = faturamentoMes * 0.3
+        // Profit (Lucro) = Paid Revenue - Paid Cost
+        const lucroMes = vendas
+            .filter(v => v.pago)
+            .reduce((acc, v) => acc + (v.total - (v.custoTotal || 0)), 0)
 
         return {
             faturamentoTotal,

@@ -1,23 +1,16 @@
-import { MessageCircle, AlertTriangle } from 'lucide-react'
-import { Card } from '../ui/Card'
-import { useAlertasFinanceiros } from '../../hooks/useAlertasFinanceiros'
-import { formatCurrency, formatRelativeDate, formatPhone } from '../../utils/formatters'
+import { useNavigate } from 'react-router-dom'
+import { DollarSign, MessageCircle, AlertTriangle } from 'lucide-react'
+import { formatCurrency } from '@/utils/formatters'
+import { DashboardCarousel } from './DashboardCarousel'
+import { useAlertasFinanceiros } from '@/hooks/useAlertasFinanceiros'
+import { Card, CardContent } from '@/components/ui/Card'
+import { formatRelativeDate, formatPhone } from '@/utils/formatters'
 
 export function AlertasFinanceiroWidget() {
+    const navigate = useNavigate()
     const { alertas, loading } = useAlertasFinanceiros()
 
-    if (loading) {
-        return (
-            <Card className="p-4 bg-card border-white/5 animate-pulse">
-                <div className="h-20 bg-white/5 rounded-xl"></div>
-            </Card>
-        )
-    }
-
-    if (alertas.length === 0) return null
-
-    // Display only the most critical or recent alert for the widget view
-    const topAlert = alertas[0]
+    const atrasados = alertas.filter(a => a.status === 'atrasado')
 
     const handleWhatsApp = (telefone: string, nome: string, valor: number) => {
         const message = `Olá ${nome}, tudo bem? Estou entrando em contato referente ao valor de ${formatCurrency(valor)} que está em aberto.`
@@ -25,51 +18,76 @@ export function AlertasFinanceiroWidget() {
         window.open(url, '_blank')
     }
 
-    // Safely access properties
-    // The hook structure returns alerts where the top-level object has 'venda', 'diasAtraso', 'status', 'dataPrevista'
-    // 'contato' and properties of 'venda' like 'total' are nested inside 'venda'
-    const nomeContato = topAlert.venda.contato?.nome || 'Cliente'
-    const telefoneContato = topAlert.venda.contato?.telefone || ''
-    const valorPendente = topAlert.venda.total
-    const dataVencimento = topAlert.dataPrevista
+    if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
+
+    // Only show if there are delayed payments
+    if (atrasados.length === 0) {
+        return (
+            <DashboardCarousel
+                title="Contas a Receber"
+                icon={DollarSign}
+                count={0}
+                onViewAll={() => navigate('/vendas?status=atrasado')}
+                emptyState={
+                    <div className="w-full flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 border-dashed">
+                        <DollarSign className="size-8 text-gray-300 dark:text-gray-600 mb-2" />
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma pendência urgente</p>
+                    </div>
+                }
+            >
+                {null}
+            </DashboardCarousel>
+        )
+    }
 
     return (
-        <Card className="relative overflow-hidden border-l-4 border-l-destructive border-t border-r border-b border-white/5 bg-gradient-to-br from-card to-destructive/5 shadow-sm hover:scale-[1.01] transition-transform duration-300">
-            <div className="flex flex-1 flex-col justify-between p-4 gap-4">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="text-base font-bold text-foreground leading-tight">{nomeContato}</h3>
-                        <div className="flex items-center gap-1 mt-1 text-destructive">
-                            <AlertTriangle className="h-4 w-4" />
-                            <span className="text-xs font-bold uppercase">
-                                Fiado Vencido ({formatRelativeDate(dataVencimento)})
-                            </span>
-                        </div>
-                    </div>
-                    <div className="text-right">
-                        <p className="text-lg font-bold text-foreground">{formatCurrency(valorPendente)}</p>
-                        <p className="text-xs text-muted-foreground">Pendente</p>
-                    </div>
-                </div>
+        <DashboardCarousel
+            title="Contas a Receber"
+            icon={DollarSign}
+            count={atrasados.length}
+            onViewAll={() => navigate('/vendas?status=atrasado')}
+        >
+            {atrasados.map((alerta) => (
+                <div key={alerta.venda.id} className="min-w-[280px] snap-center">
+                    <Card className="h-full bg-white dark:bg-surface-dark border-l-4 border-l-semantic-red border-y-gray-100 hover:border-y-gray-200 dark:border-y-gray-800 dark:hover:border-y-gray-700 shadow-sm transition-all">
+                        <CardContent className="p-4">
+                            <div className="flex justify-between items-start mb-2">
+                                <div>
+                                    <h3 className="font-bold text-gray-900 dark:text-white truncate max-w-[160px]">
+                                        {alerta.venda.contato?.nome || 'Cliente'}
+                                    </h3>
+                                    <p className="text-xs text-semantic-red font-semibold flex items-center gap-1 mt-0.5">
+                                        <AlertTriangle className="size-3" />
+                                        {alerta.diasAtraso} dias de atraso
+                                    </p>
+                                </div>
+                                <div className="text-right">
+                                    <span className="block text-lg font-bold text-gray-900 dark:text-white">
+                                        {formatCurrency(alerta.venda.total)}
+                                    </span>
+                                </div>
+                            </div>
 
-                <div className="flex items-center justify-between mt-1">
-                    <span className="text-xs text-muted-foreground">
-                        Vencimento: {new Date(dataVencimento).toLocaleDateString()}
-                    </span>
-                    <button
-                        onClick={() => handleWhatsApp(telefoneContato, nomeContato, valorPendente)}
-                        className="flex items-center gap-2 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm transition-all shadow-lg hover:shadow-green-500/20 active:scale-95"
-                    >
-                        <MessageCircle className="h-4 w-4" />
-                        Cobrar
-                    </button>
+                            <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-50 dark:border-gray-800/50">
+                                <span className="text-xs text-gray-400">
+                                    Vencimento: {formatRelativeDate(alerta.dataPrevista)}
+                                </span>
+                                <button
+                                    onClick={() => handleWhatsApp(
+                                        alerta.venda.contato?.telefone || '',
+                                        alerta.venda.contato?.nome || '',
+                                        alerta.venda.total
+                                    )}
+                                    className="flex items-center gap-1.5 text-xs font-bold text-semantic-green hover:text-green-600 transition-colors bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-full"
+                                >
+                                    <MessageCircle className="size-3.5" />
+                                    Cobrar
+                                </button>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
-            </div>
-
-            {/* Background Pulse Effect for Critical Alert */}
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
-                <AlertTriangle className="h-32 w-32 text-destructive animate-pulse" />
-            </div>
-        </Card>
+            ))}
+        </DashboardCarousel>
     )
 }

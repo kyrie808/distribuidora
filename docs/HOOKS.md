@@ -45,6 +45,17 @@ Cobranças e fiado.
 - **Path:** `src/hooks/useAlertasFinanceiros.ts`
 - **Features:** Filtro de clientes com débitos vencidos/a vencer.
 
+### `useRecompra`
+Monitoramento de ciclo de vida do cliente.
+- **Path:** `src/hooks/useRecompra.ts`
+- **Features:** Identifica clientes inativos baseados na última compra.
+
+### `useTopIndicadores`
+Ranking de performance de indicações.
+- **Path:** `src/hooks/useTopIndicadores.ts`
+- **Features:** Calcula stats de quantos clientes ativos cada indicador trouxe.
+
+
 ## Hooks Utilitários
 
 ### `useCep`

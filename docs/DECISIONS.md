@@ -21,6 +21,39 @@ Refatorar a interface para utilizar **Shadcn UI** e **Tailwind CSS** com uma abo
 
 ---
 
+## 2026-02-03: Adoção de Regime de Caixa (Cash Basis)
+
+### Decisão
+O Dashboard financeiro agora reflete estritamente o **Regime de Caixa** e filtros baseados na **Data de Competência (Venda)**.
+
+### Motivação
+- Discrepâncias entre "Vendas Criadas" e "Dinheiro em Caixa".
+- O usuário precisa ver exatamente quanto *recebeu* e *lucrou* em dinheiro real no mês.
+- Vendas criadas em um mês (ex: Dez) mas com data de entrega futura (ex: Jan) estavam distorcendo os relatórios.
+
+### Implementação
+- **Faturamento**: `SUM(total)` onde `pago = true`.
+- **Lucro**: `SUM(total - custo)` onde `pago = true`.
+- **Filtro**: Queries Typescript alteradas para usar `.gte('data', start)` ao invés de `criado_em`.
+
+---
+
+## 2026-02-03: Sistema de Tema Controlado pelo Usuário
+
+### Decisão
+Transição de "Forced Dark Mode" para **Sistema Híbrido (Toggle)** com default `light`.
+
+### Motivação
+- Preferência do usuário por interface "branca" (clean) no dia a dia.
+- Inconsistências ao forçar dark mode via HTML hardcoded.
+
+### Implementação
+- `ThemeContext` criado para gerenciar estado e persistência.
+- Botão Toggle adicionado ao Header para troca rápida.
+- Performance otimizada (memoização e CSS transforms) para evitar delays na troca.
+
+---
+
 ## 2026-02-01: Modularização do Dashboard
 
 ### Decisão

@@ -1,5 +1,5 @@
-/** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -12,65 +12,44 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+
+        // Custom Tactical Palette - STRICT ENFORCEMENT
+        "background-light": "#f6f8f6",
+        "background-dark": "#102210",
+        "surface-light": "#ffffff",
+        "surface-dark": "#1a2e1a",
+
+        "semantic-red": "#ef4444",
+        "semantic-yellow": "#eab308",
+        "semantic-green": "#22c55e",
+
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
-          50: '#F5F3FF',
-          100: '#EDE9FE',
-          200: '#DDD6FE',
-          300: '#C4B5FD',
-          400: '#A78BFA',
-          500: '#7C3AED',
-          600: '#6D28D9',
-          700: '#5B21B6',
-          800: '#4C1D95',
-          900: '#3B0764',
+          DEFAULT: "#13ec13", // Neon Green
+          foreground: "#1a2e1a", // Dark contrast text
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#1a2e1a", // Surface Dark
+          foreground: "#ffffff",
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
+          DEFAULT: "#ef4444",
+          foreground: "#ffffff",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#1a2e1a", // Surface Dark as muted
+          foreground: "#a3a3a3",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
-          50: '#FFF7ED',
-          100: '#FFEDD5',
-          500: '#F97316',
-          600: '#EA580C',
+          DEFAULT: "#eab308", // Yellow accent
+          foreground: "#1a2e1a",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#1a2e1a",
+          foreground: "#ffffff",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
-        },
-        success: {
-          DEFAULT: '#10B981',
-          50: '#ECFDF5',
-          500: '#10B981',
-          600: '#059669',
-        },
-        danger: {
-          DEFAULT: '#EF4444',
-          50: '#FEF2F2',
-          500: '#EF4444',
-          600: '#DC2626',
-        },
-        warning: {
-          DEFAULT: '#F59E0B',
-          50: '#FFFBEB',
-          500: '#F59E0B',
-          600: '#D97706',
+          DEFAULT: "#1a2e1a",
+          foreground: "#ffffff",
         },
       },
       borderRadius: {
@@ -93,7 +72,9 @@ export default {
         "accordion-up": "accordion-up 0.2s ease-out",
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Lexend', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Lexend', 'sans-serif'],
+        body: ['Noto Sans', 'sans-serif'],
       },
     },
   },
