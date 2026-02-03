@@ -3,117 +3,20 @@ import { useSearchParams } from 'react-router-dom'
 import {
     Package,
     Plus,
-    TrendingUp,
-    TrendingDown,
     AlertTriangle,
-    Pencil,
     X
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Button, Badge, LoadingScreen, Modal, ModalActions, Input } from '../components/ui'
+import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
 import { formatCurrency } from '../utils/formatters'
-import type { Produto, ProdutoInsert, ProdutoUpdate } from '../types/database'
+import type { ProdutoInsert } from '../types/database'
+import type { DomainProduto } from '../types/domain'
 
-// Calcular margem
-function calcularMargem(preco: number, custo: number): number {
-    if (preco === 0) return 0
-    return ((preco - custo) / preco) * 100
-}
 
-// Card de produto
-function ProdutoCard({ produto, onEdit }: { produto: Produto; onEdit: () => void }) {
-    const margem = calcularMargem(Number(produto.preco), Number(produto.custo))
-    const margemNegativa = margem < 0
-
-    // Low stock logic
-    const estoqueAtual = produto.estoque_atual || 0
-    const estoqueMinimo = produto.estoque_minimo || 10
-    const isBaixoEstoque = estoqueAtual <= estoqueMinimo
-
-    return (
-        <Card
-            hover
-            onClick={onEdit}
-            className={`cursor-pointer border-l-4 ${isBaixoEstoque ? 'border-l-warning-500 bg-warning-50/10' : 'border-l-transparent'}`}
-        >
-            <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className={`
-                        flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center relative
-                        ${produto.ativo ? 'bg-primary-100 text-primary-600' : 'bg-gray-100 text-gray-400'}
-                    `}>
-                        <Package className="h-5 w-5" />
-                        {isBaixoEstoque && (
-                            <div className="absolute -top-1 -right-1 bg-warning-500 text-white rounded-full p-0.5 border-2 border-white">
-                                <AlertTriangle className="h-2.5 w-2.5" />
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium text-gray-900 truncate">{produto.nome}</p>
-                            {isBaixoEstoque && (
-                                <Badge variant="warning" className="h-5 px-1.5 text-[10px]">
-                                    Baixo Estoque
-                                </Badge>
-                            )}
-                            {!isBaixoEstoque && (
-                                <Badge variant={produto.ativo ? 'success' : 'gray'}>
-                                    {produto.ativo ? 'Ativo' : 'Inativo'}
-                                </Badge>
-                            )}
-                        </div>
-
-                        <p className="text-xs text-gray-500 mb-2">Código: {produto.codigo} • Estoque Mín: {estoqueMinimo}</p>
-
-                        <div className="flex items-center gap-4 text-sm mt-2">
-                            {/* Estoque Atual */}
-                            <div className="flex items-center gap-1.5 bg-gray-50 px-2 py-0.5 rounded text-gray-700">
-                                <Package className="h-3.5 w-3.5 opacity-50" />
-                                <span className={isBaixoEstoque ? 'font-bold text-warning-700' : ''}>
-                                    {estoqueAtual} {produto.unidade || 'un'}
-                                </span>
-                            </div>
-
-                            <div>
-                                <span className="text-gray-500 text-xs">Venda: </span>
-                                <span className="font-semibold text-gray-900">{formatCurrency(Number(produto.preco))}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="text-right flex-shrink-0 flex flex-col items-end gap-2">
-                    <div className={`flex items-center gap-1 ${margemNegativa ? 'text-danger-600' : 'text-success-600'}`}>
-                        {margemNegativa ? (
-                            <TrendingDown className="h-4 w-4" />
-                        ) : (
-                            <TrendingUp className="h-4 w-4" />
-                        )}
-                        <span className="font-bold">{margem.toFixed(1)}%</span>
-                    </div>
-
-                    <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={(e) => {
-                            e.stopPropagation()
-                            onEdit()
-                        }}
-                        className="opacity-100 hover:bg-gray-200"
-                    >
-                        <Pencil className="h-3.5 w-3.5 mr-1.5" />
-                        Editar
-                    </Button>
-                </div>
-            </div>
-        </Card>
-    )
-}
 
 export function Produtos() {
     const toast = useToast()
@@ -127,8 +30,8 @@ export function Produtos() {
         if (!filterBaixoEstoque) return produtos
 
         return produtos.filter(p => {
-            const atual = p.estoque_atual || 0
-            const minimo = p.estoque_minimo || 10
+            const atual = p.estoqueAtual || 0
+            const minimo = p.estoqueMinimo || 10
             return atual <= minimo && p.ativo
         })
     }, [produtos, filterBaixoEstoque])
@@ -142,7 +45,7 @@ export function Produtos() {
 
     // Modal states
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
-    const [editingProduto, setEditingProduto] = useState<Produto | null>(null)
+    const [editingProduto, setEditingProduto] = useState<DomainProduto | null>(null)
 
     // Form states for create
     const [newNome, setNewNome] = useState('')
@@ -167,20 +70,20 @@ export function Produtos() {
     // Stats
     const produtosAtivos = produtos.filter(p => p.ativo).length
     const produtosBaixoEstoqueCount = produtos.filter(p => {
-        const atual = p.estoque_atual || 0
-        const minimo = p.estoque_minimo || 10
+        const atual = p.estoqueAtual || 0
+        const minimo = p.estoqueMinimo || 10
         return atual <= minimo && p.ativo
     }).length
 
     // Open edit modal
-    const handleOpenEdit = (produto: Produto) => {
+    const handleOpenEdit = (produto: DomainProduto) => {
         setEditingProduto(produto)
         setEditNome(produto.nome)
         setEditCodigo(produto.codigo)
         setEditApelido(produto.apelido || '')
         setEditPreco(String(produto.preco))
         setEditCusto(String(produto.custo))
-        setEditEstoqueMinimo(String(produto.estoque_minimo || 10))
+        setEditEstoqueMinimo(String(produto.estoqueMinimo || 10))
         setEditAtivo(produto.ativo)
     }
 
@@ -265,7 +168,7 @@ export function Produtos() {
 
         const preco = parseFloat(editPreco)
         const custo = parseFloat(editCusto)
-        const estoqueMinimo = parseInt(editEstoqueMinimo) || 10
+
 
         if (isNaN(preco) || preco <= 0) {
             toast.error('Preço deve ser maior que zero')
@@ -287,13 +190,13 @@ export function Produtos() {
 
         setUpdating(true)
 
-        const data: ProdutoUpdate = {
+        const data: Partial<DomainProduto> = {
             nome: editNome.trim(),
             codigo: editCodigo.trim(),
             apelido: editApelido.trim() || null,
             preco,
             custo,
-            estoque_minimo: estoqueMinimo,
+            estoqueMinimo: parseInt(editEstoqueMinimo) || 10,
             ativo: editAtivo,
         }
 
@@ -318,6 +221,11 @@ export function Produtos() {
     const newMargem = newPreco && newCusto
         ? calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
         : 0
+
+    function calcularMargem(preco: number, custo: number): number {
+        if (preco === 0) return 0
+        return ((preco - custo) / preco) * 100
+    }
 
     return (
         <>
@@ -375,14 +283,95 @@ export function Produtos() {
                         )}
 
                         {/* Product List */}
-                        <div className="space-y-2">
-                            {filteredProdutos.map(produto => (
-                                <ProdutoCard
-                                    key={produto.id}
-                                    produto={produto}
-                                    onEdit={() => handleOpenEdit(produto)}
-                                />
-                            ))}
+                        <div className="space-y-3">
+                            {filteredProdutos.map((produto) => {
+                                const isLowStock = produto.estoqueAtual <= produto.estoqueMinimo
+                                const isNoStock = produto.estoqueAtual === 0
+
+                                return (
+                                    <Card
+                                        key={produto.id}
+                                        className={cn(
+                                            "transition-all cursor-pointer hover:shadow-md border-l-4",
+                                            !produto.ativo ? "opacity-60 border-l-gray-300 bg-gray-50" :
+                                                isNoStock ? "border-l-destructive" :
+                                                    isLowStock ? "border-l-warning" : "border-l-success"
+                                        )}
+                                        onClick={() => handleOpenEdit(produto)}
+                                        hover
+                                        role="button"
+                                        tabIndex={0}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' || e.key === ' ') {
+                                                handleOpenEdit(produto)
+                                            }
+                                        }}
+                                    >
+                                        <div className="p-4 flex items-center justify-between">
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <h3 className="font-bold text-gray-900 truncate">
+                                                        {produto.nome}
+                                                    </h3>
+                                                    {!produto.ativo && <Badge variant="gray">Inativo</Badge>}
+                                                    {produto.apelido && (
+                                                        <span className="text-xs text-muted-foreground bg-gray-100 px-1.5 py-0.5 rounded">
+                                                            {produto.apelido}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="text-sm text-gray-500 font-mono mb-2">
+                                                    #{produto.codigo}
+                                                </div>
+
+                                                <div className="flex items-center gap-4 text-sm">
+                                                    <div>
+                                                        <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                            Preço
+                                                        </span>
+                                                        <span className="font-semibold text-gray-900">
+                                                            {formatCurrency(produto.preco)}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                            Custo
+                                                        </span>
+                                                        <span className="text-gray-600">
+                                                            {formatCurrency(produto.custo)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col items-end gap-2 ml-4">
+                                                <div className="text-right">
+                                                    <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                        Estoque
+                                                    </span>
+                                                    <div className={cn(
+                                                        "text-xl font-bold font-mono",
+                                                        isNoStock ? "text-destructive" :
+                                                            isLowStock ? "text-warning-600" : "text-success-600"
+                                                    )}>
+                                                        {produto.estoqueAtual}
+                                                        <span className="text-xs text-gray-400 ml-1 font-sans">
+                                                            {produto.unidade}
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                {isLowStock && (
+                                                    <Badge variant={isNoStock ? "destructive" : "warning"}>
+                                                        {isNoStock ? "Esgotado" : "Baixo"}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Card>
+                                )
+                            })}
                         </div>
 
                         {filteredProdutos.length === 0 && (

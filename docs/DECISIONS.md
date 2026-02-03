@@ -1,177 +1,48 @@
-# Decisões Técnicas
+# Registro de Decisões de Arquitetura (ADR)
 
-## 001 - Supabase desde o MVP
+## 2026-02-02: UI Overhaul & Domain Shielding
 
-**Data:** Dezembro/2024  
-**Contexto:** PRD original sugeria `localStorage` para MVP  
-**Decisão:** Usar Supabase desde o início  
-**Motivo:**
-- Evita refatoração futura
-- Habilita multi-device automaticamente
-- Realtime sync out-of-the-box
-- Backup automático dos dados
-- Schema tipado para TypeScript
+### Decisão
+Refatorar a interface para utilizar **Shadcn UI** e **Tailwind CSS** com uma abordagem Mobile-First rigorosa, e blindar a lógica de negócio com uma Camada de Domínio explícita.
 
----
+### Motivação
+- A UI anterior era inconsistente e difícil de manter.
+- O acoplamento direto entre componentes React e tipos do banco de dados (Snake Case) gerava erros de lint e refatoração difíceis.
+- Necessidade de uma UX "App-like" para operação em campo via celular.
 
-## 002 - TypeScript ao invés de JavaScript
-
-**Data:** Dezembro/2024  
-**Contexto:** PRD mencionava `.jsx` em alguns trechos  
-**Decisão:** TypeScript com `.tsx/.ts` em todo o projeto  
-**Motivo:**
-- Type safety em tempo de desenvolvimento
-- Autocomplete melhor na IDE
-- Menos bugs em runtime
-- Tipos gerados do Supabase funcionam nativamente
+### Detalhes Técnicos
+1. **Shadcn Integration**: Adoção de componentes copy-paste localizados em `src/components/ui`. Isso permite customização total (ao contrário de libs fechadas como MUI) mantendo padrões acessíveis (Radix UI).
+2. **Domain Layer**: Criação de `src/types/domain.ts` (camelCase). Os componentes UI só conhecem esses tipos. O Service Layer (`src/services/`) é responsável pelo mapeamento `DB <-> Domain`.
+3. **Bottom Navigation**: Priorização da navegação inferior para mobile, alinhada aos padrões modernos de UX (polegar alcançável).
 
 ---
 
-## 003 - Zod + React Hook Form para formulários
+## 2026-02-01: Modularização do Dashboard
 
-**Data:** Dezembro/2024  
-**Contexto:** Necessidade de validação robusta  
-**Decisão:** Combinar Zod (schemas) + React Hook Form (estado)  
-**Motivo:**
-- Schemas reutilizáveis
-- Validação declarativa
-- Performance otimizada (menos re-renders)
-- Integração nativa via `@hookform/resolvers`
+### Decisão
+Quebrar o Dashboard monolítico em Widgets independentes (`src/components/dashboard/*Widget.tsx`).
 
----
+### Motivação
+O arquivo `Dashboard.tsx` estava crescendo demais, misturando lógica de financeiro, estoque e CRM.
 
-## 004 - Hooks personalizados para Supabase
-
-**Data:** Dezembro/2024  
-**Contexto:** Escolha entre Tanstack Query ou hooks customizados  
-**Decisão:** Hooks customizados simples (`useContatos`, `useVendas`)  
-**Motivo:**
-- Menor bundle size
-- Controle total sobre realtime
-- Curva de aprendizado menor
-- Suficiente para complexidade atual
-
-**Trade-off:** Sem cache automático (ok para MVP com realtime)
+### Resultado
+- `AlertasFinanceiroWidget`: Focado em receber.
+- `AlertasRecompraWidget`: Focado em reter.
+- `EstoqueWidget`: Focado em controlar.
+Cada widget gerencia seu próprio data fetching (on demand) ou recebe dados via prop drilled de um hook container se houver dependência compartilhada (ex: filtro de data global).
 
 ---
 
-## 005 - BottomNav com FAB central
+## 2025-01-30: Supabase como Backend-as-a-Service
 
-**Data:** Dezembro/2024  
-**Contexto:** Navegação mobile-first  
-**Decisão:** BottomNav fixo com 5 itens, sendo o central um FAB elevado (Nova Venda)  
-**Motivo:**
-- Ação mais frequente (venda) sempre acessível
-- Padrão mobile reconhecível
-- Hierarquia visual clara
+### Decisão
+Migrar todo o backend (anteriormente Python/FastAPI) para Supabase.
 
----
+### Motivação
+- Simplificação da stack (Serverless).
+- Auth, Database e Realtime em uma única plataforma.
+- Tipagem automática com TypeScript via `supabase gen types`.
 
-## 006 - Atualização automática de status do contato
-
-**Data:** Dezembro/2024  
-**Contexto:** PRD define que contato vira "cliente" na primeira venda  
-**Decisão:** Hook `useVendas.createVenda()` atualiza `contatos.status` e `ultimo_contato` automaticamente  
-**Motivo:**
-- Garante consistência de dados
-- Menos código na camada de UI
-- Regra de negócio encapsulada
-
----
-
-## 007 - Fluxo de venda em 3 etapas
-
-**Data:** Dezembro/2024  
-**Contexto:** UX otimizada para operador no celular com pouco tempo  
-**Decisão:** Dividir NovaVenda em 3 telas claras  
-**Motivo:**
-- Foco em uma tarefa por vez
-- Menos scroll
-- Botões grandes para toque rápido
-- Objetivo de < 30 segundos por venda
-
----
-
-## 008 - Remoção de Self-Joins no PostgREST
-
-**Data:** Dezembro/2024  
-**Contexto:** Queries com joins auto-referenciais (`indicador:contatos!fkey`) causavam erro 400 no Supabase  
-**Decisão:** Remover self-joins e buscar dados de indicador separadamente quando necessário  
-**Motivo:**
-- Sintaxe de self-join não é bem suportada em todas versões do PostgREST
-- Queries simples são mais estáveis e debugáveis
-- Performance não impactada para volume atual
-
-**Trade-off:** Resolvido — implementamos lookup síncrono `getNomeIndicador()` que busca o nome do indicador da lista de contatos em memória.
-
----
-
-## 009 - Campo `pago` Boolean para Status de Pagamento
-
-**Data:** Dezembro/2024  
-**Contexto:** Usuários marcavam vendas como pagas/entregues por engano e não conseguiam desfazer  
-**Decisão:** Adicionar campo `pago: boolean` à tabela `vendas` e criar toggles na UI  
-**Motivo:**
-- Solução mais simples (boolean) vs. enum de status de pagamento
-- Permite correção rápida de erros humanos
-- Separação clara entre status de entrega e status de pagamento
-- Campo `atualizado_em` já rastreia alterações
-
-**Implementação:**
-- Migração: `ALTER TABLE vendas ADD COLUMN pago boolean DEFAULT false`
-- Hook: `updateVendaPago(id, pago)`
-- UI: Toggle em VendaDetalhe, badges em Vendas e Dashboard
-
----
-
----
-
-## 010 - Capacitor para App Android Nativo
-
-**Data:** Dezembro/2024  
-**Contexto:** Necessidade de transformar o app web em APK Android  
-**Decisão:** Usar Capacitor para gerar aplicativo nativo  
-**Motivo:**
-- Reutiliza 100% do código React existente
-- Acesso nativo via plugins (câmera, localização, etc.)
-- Build simples com Android Studio
-- Sem necessidade de reescrever em React Native ou Flutter
-- Suporte oficial do Ionic Team
-
-**Implementação:**
-- App Name: "Gilmar Massas"
-- App ID: "com.gilmarmassas.app"
-- `HashRouter` no lugar de `BrowserRouter` (compatível com `file://`)
-- `viewport-fit=cover` para safe area em devices com notch
-- Build: `npm run build` + `npx cap copy` + `npx cap open android`
-
----
-
-## 011 - Triggers de Banco de Dados para Status Financeiro
-
-**Data:** Janeiro/2025  
-**Contexto:** Necessidade de manter `amount_paid` e `status` (pago/parcial) sempre sincronizados com a tabela de pagamentos.  
-**Decisão:** Utilizar Triggers PostgreSQL (`AFTER INSERT/UPDATE/DELETE`) ao invés de cálculo no frontend.  
-**Motivo:**
-- **Single Source of Truth:** O banco garante que o total pago é sempre a soma dos pagamentos.
-- **Race conditions:** Evita problemas de concorrência se dois usuários editarem ao mesmo tempo.
-- **Performance:** Leitura rápida (já calculado) vs agregação em tempo real na query.
-- **Segurança:** Impossível o frontend "fraudar" o status de pago sem registrar o pagamento.
-
-**Implementação:**
-- Trigger em `purchase_order_payments` -> Atualiza `purchase_orders`
-- Trigger em `pagamentos_venda` -> Atualiza `vendas`
-
----
-
-## Template para novas decisões
-
-```markdown
-## XXX - [Título da Decisão]
-
-**Data:** Mês/Ano  
-**Contexto:** [O que motivou a discussão]  
-**Decisão:** [O que foi decidido]  
-**Motivo:** [Por que essa escolha]  
-**Trade-offs:** [O que foi sacrificado, se aplicável]
-```
+### Estratégia
+- Lógica de negócio complexa movida para **Custom Hooks** no frontend ou **Database Functions** (RPC) quando performance for crítica.
+- RLS (Row Level Security) para proteção de dados por tenant/usuário (preparado, atualmente policy permissiva para MVP).

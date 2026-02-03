@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
 import {
   Dashboard,
@@ -39,6 +39,10 @@ function App() {
           <Route path="/estoque" element={<Estoque />} />
           <Route path="/entregas" element={<Entregas />} />
           <Route path="/menu" element={<Menu />} />
+
+          {/* Redirects */}
+          <Route path="/clientes" element={<Navigate to="/contatos" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </HashRouter>

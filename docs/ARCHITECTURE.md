@@ -16,6 +16,26 @@
 | date-fns | 4.x | Date Utilities |
 | Lucide React | 0.x | Icons |
 
+## Arquitetura em Camadas
+
+### 3. Service Layer (`src/services/`)
+- **Responsabilidade**: Orquestração de dados e regras de negócio.
+- **Características**:
+    - Abstrai chamadas ao Supabase (`src/lib/supabase.ts`)
+    - Aplica transformações de dados via Mappers
+    - Retorna tipos do Domínio (`DomainVenda`, `DomainProduto`)
+    - Nunca expõe tipos do banco de dados (`database.types.ts`) para a UI
+
+### 4. Domain Layer (`src/types/domain.ts`)
+- **Responsabilidade**: Definição das entidades de negócio puras.
+- **Padrão**: Objetos em `camelCase` que representam o modelo mental do negócio, desacoplados da implementação do banco (`snake_case`).
+- **Benefícios**:
+    - "Domain Shielding": Mudanças no banco não quebram a UI.
+    - Intellisense e Type Safety superiores.
+    - Facilita testes e manutenção.
+
+### 5. UI Layer (`src/pages/`, `src/components/`)
+
 ## Estrutura de Pastas
 
 ```

@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom'
 import { Refrigerator, AlertTriangle, CheckCircle } from 'lucide-react'
-import { Card } from '../ui'
+import { Card, CardContent } from '../ui'
 import { useEstoqueMetrics } from '../../hooks/useEstoqueMetrics'
 import { ENABLE_GELADEIRA } from '../../constants/flags'
+import { cn } from '@/lib/utils'
 
 export function EstoqueWidget() {
     const navigate = useNavigate()
@@ -12,9 +13,6 @@ export function EstoqueWidget() {
         if (ENABLE_GELADEIRA) {
             navigate('/estoque')
         } else {
-            // Se não tem geladeira, vai para produtos
-            // Idealmente filtraríamos na URL, mas o MVP de produtos não tem filtro de URL ainda.
-            // Vamos apenas listar.
             navigate('/produtos')
         }
     }
@@ -31,36 +29,46 @@ export function EstoqueWidget() {
     }
 
     const isAlert = produtosBaixoEstoque > 0
-    const alertColor = isAlert ? 'bg-warning-50 text-warning-700 border-warning-200' : 'bg-success-50 text-success-700 border-success-200'
-    const iconColor = isAlert ? 'text-warning-600' : 'text-success-600'
 
     return (
         <Card
-            className={`border cursor-pointer transition-all hover:opacity-90 active:scale-95 ${alertColor}`}
+            className={cn(
+                "cursor-pointer transition-all hover:shadow-md border active:scale-[0.99]",
+                isAlert
+                    ? "bg-warning-50/50 border-warning text-warning-900"
+                    : "bg-success-50/50 border-success text-success-900"
+            )}
             onClick={handleNavigate}
         >
-            <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-full bg-white/50 ${iconColor}`}>
-                    {isAlert ? <AlertTriangle className="h-6 w-6" /> : <CheckCircle className="h-6 w-6" />}
+            <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className={cn(
+                        "p-3 rounded-full shadow-sm",
+                        isAlert ? "bg-white text-warning-600" : "bg-white text-success-600"
+                    )}>
+                        {isAlert ? <AlertTriangle className="h-6 w-6" /> : <CheckCircle className="h-6 w-6" />}
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-lg leading-tight">
+                            {isAlert ? 'Atenção ao Estoque' : 'Estoque Saudável'}
+                        </h3>
+                        <p className={cn(
+                            "text-sm font-medium opacity-90",
+                            isAlert ? "text-warning-800" : "text-success-800"
+                        )}>
+                            {isAlert
+                                ? `${produtosBaixoEstoque} produto(s) abaixo do mínimo`
+                                : 'Todos produtos abastecidos'
+                            }
+                        </p>
+                    </div>
                 </div>
-                <div>
-                    <h3 className="font-bold text-lg leading-tight">
-                        {isAlert ? 'Atenção ao Estoque' : 'Estoque Saudável'}
-                    </h3>
-                    <p className="text-sm opacity-90 font-medium">
-                        {isAlert
-                            ? `${produtosBaixoEstoque} produto(s) abaixo do mínimo`
-                            : 'Todos produtos abastecidos'
-                        }
-                    </p>
-                </div>
-            </div>
 
-            {/* Context Label */}
-            <div className="mt-3 flex items-center gap-1 text-xs opacity-75 justify-end uppercase tracking-wide font-bold">
-                <Refrigerator className="h-3 w-3" />
-                <span>Inventário</span>
-            </div>
+                {/* Context Label */}
+                <div className="flex flex-col items-center justify-center opacity-50 px-2">
+                    <Refrigerator className="h-5 w-5" />
+                </div>
+            </CardContent>
         </Card>
     )
 }

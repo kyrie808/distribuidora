@@ -228,7 +228,7 @@ export function Contatos() {
                             <ContatoCard
                                 key={contato.id}
                                 contato={contato}
-                                nomeIndicador={getNomeIndicador(contato.indicado_por_id)}
+                                nomeIndicador={getNomeIndicador(contato)}
                             />
                         ))}
                     </div>

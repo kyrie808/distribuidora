@@ -3,14 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import {
     DollarSign,
     ShoppingCart,
-    Users,
     TrendingUp,
     Package,
-
     RefreshCcw,
     Trophy,
     ChevronRight,
-    Share2,
     ClipboardList,
 } from 'lucide-react'
 import { AlertasFinanceiroWidget } from '../components/dashboard/AlertasFinanceiroWidget'
@@ -18,7 +15,7 @@ import { AlertasRecompraWidget } from '../components/dashboard/AlertasRecompraWi
 import { EstoqueWidget } from '../components/dashboard/EstoqueWidget'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, Badge, LoadingScreen } from '../components/ui'
+import { Card, CardContent, Badge, Button } from '../components/ui'
 import { MonthPicker } from '../components/dashboard/MonthPicker'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
@@ -27,6 +24,7 @@ import { useIndicacoes } from '../hooks/useIndicacoes'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { formatCurrency, formatRelativeDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS } from '../constants'
+import { cn } from '@/lib/utils'
 
 export function Dashboard() {
     const navigate = useNavigate()
@@ -35,7 +33,7 @@ export function Dashboard() {
 
     // Fetch data
     const { vendas, metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
-    const { contatos, loading: loadingContatos, refetch: refetchContatos, getNomeIndicador } = useContatos({})
+    const { loading: loadingContatos, refetch: refetchContatos } = useContatos({})
     const { contatos: recompraContatos, atrasados, loading: loadingRecompra, refetch: refetchRecompra } = useRecompra()
     const { indicadores, loading: loadingIndicacoes, refetch: refetchIndicacoes } = useIndicacoes()
 
@@ -53,14 +51,33 @@ export function Dashboard() {
         setIsRefreshing(false)
     }, [refetchVendas, refetchContatos, refetchRecompra, refetchIndicacoes])
 
-    // Derived metrics
-    const clientesAtivos = contatos.filter((c) => c.status === 'cliente').length
+    // UI Helpers
+
     const ultimasVendas = vendas.slice(0, 5)
     const topIndicadores = indicadores.slice(0, 3)
 
-
-    // Variation (placeholder - would need previous month data)
-    const variacao = metrics.vendasMes > 0 ? '+12%' : '0%'
+    // KPI Card Component
+    const KpiCard = ({ title, value, icon: Icon, colorClass, subtext, onClick }: any) => (
+        <Card
+            className={cn("relative overflow-hidden transition-all hover:shadow-md", onClick && "cursor-pointer active:scale-[0.99]")}
+            onClick={onClick}
+        >
+            <CardContent className="p-4 sm:p-6">
+                <div className="flex justify-between items-start">
+                    <div className="space-y-2">
+                        <span className="text-sm font-medium text-muted-foreground">{title}</span>
+                        <div className="flex items-baseline gap-2">
+                            <span className="text-2xl sm:text-3xl font-bold tracking-tight">{value}</span>
+                        </div>
+                        {subtext && <p className="text-xs text-muted-foreground">{subtext}</p>}
+                    </div>
+                    <div className={cn("p-2 rounded-full", colorClass)}>
+                        <Icon className="h-5 w-5 opacity-90" />
+                    </div>
+                </div>
+            </CardContent>
+        </Card>
+    )
 
     return (
         <>
@@ -70,8 +87,10 @@ export function Dashboard() {
                     <button
                         onClick={handleRefresh}
                         disabled={isRefreshing}
-                        className={`p-2 rounded-lg hover:bg-white/10 transition-colors ${isRefreshing ? 'animate-spin' : ''
-                            }`}
+                        className={cn(
+                            "p-2 rounded-full hover:bg-gray-100 transition-colors text-gray-500",
+                            isRefreshing && "animate-spin"
+                        )}
                     >
                         <RefreshCcw className="h-5 w-5" />
                     </button>
@@ -79,317 +98,296 @@ export function Dashboard() {
             />
             <PageContainer>
                 {/* Global Filter */}
-                <div className="mb-6">
+                <div className="mb-6 sticky top-[60px] z-20 bg-gray-50/95 backdrop-blur py-2 -mx-4 px-4 border-b border-gray-200/50 sm:static sm:bg-transparent sm:border-0 sm:p-0 sm:mx-0">
                     <MonthPicker />
                 </div>
 
-                {loading && !isRefreshing && <LoadingScreen message="Carregando dashboard..." />}
+                {loading && !isRefreshing && (
+                    <div className="flex flex-col items-center justify-center p-12 gap-4 text-center animate-pulse">
+                        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                        <p className="text-gray-400 font-medium">Carregando indicadores...</p>
+                    </div>
+                )}
 
                 {!loading && (
-                    <div className="space-y-6">
-                        {/* 💰 FINANCEIRO */}
-                        <section className="mb-6">
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-                                <DollarSign className="h-4 w-4" /> Financeiro
-                            </h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                {/* Faturamento do Mês */}
-                                <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <DollarSign className="h-5 w-5 opacity-80" />
-                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">
-                                            {variacao}
-                                        </span>
-                                    </div>
-                                    <p className="text-2xl font-bold">{formatCurrency(metrics.faturamentoMes)}</p>
-                                    <p className="text-sm opacity-80">Faturamento</p>
-                                </Card>
+                    <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-500">
+                        {/* 📊 BIG NUMBERS (KPIs) */}
+                        <section>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                {/* Faturamento */}
+                                <KpiCard
+                                    title="Faturamento"
+                                    value={formatCurrency(metrics.faturamentoMes)}
+                                    icon={DollarSign}
+                                    colorClass="bg-primary/10 text-primary"
+                                    subtext="neste mês"
+                                />
 
-                                {/* Ticket Médio */}
-                                <Card>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <TrendingUp className="h-5 w-5 text-success-500" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">
-                                        {formatCurrency(metrics.ticketMedio)}
-                                    </p>
-                                    <p className="text-sm text-gray-500">Ticket médio</p>
-                                </Card>
-
-                                {/* Recebido */}
-                                {/* Lucro do Mês */}
-                                <Card className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <TrendingUp className="h-5 w-5 opacity-80" />
-                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">📈</span>
-                                    </div>
-                                    <p className="text-2xl font-bold">{formatCurrency((metrics as any).lucroMes || 0)}</p>
-                                    <p className="text-sm opacity-80">Lucro</p>
-                                </Card>
+                                {/* Lucro */}
+                                <KpiCard
+                                    title="Lucro Estimado"
+                                    value={formatCurrency((metrics as any).lucroMes || 0)}
+                                    icon={TrendingUp}
+                                    colorClass="bg-green-100 text-green-700"
+                                    subtext="margem aproximada"
+                                />
 
                                 {/* A Receber */}
-                                <Card
-                                    className="bg-gradient-to-br from-amber-500 to-amber-600 text-white cursor-pointer hover:opacity-95 transition-opacity"
+                                <KpiCard
+                                    title="A Receber"
+                                    value={formatCurrency(metrics.aReceber)}
+                                    icon={Clock}
+                                    colorClass="bg-amber-100 text-amber-700"
                                     onClick={() => navigate('/vendas?pagamento=nao_pago')}
-                                >
-                                    <div className="flex items-center justify-between mb-2">
-                                        <DollarSign className="h-5 w-5 opacity-80" />
-                                        <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">⏳</span>
-                                    </div>
-                                    <p className="text-2xl font-bold">{formatCurrency(metrics.aReceber)}</p>
-                                    <p className="text-sm opacity-80">A Receber</p>
-                                </Card>
+                                    subtext="pendente total"
+                                />
+
+                                {/* Ticket Médio */}
+                                <KpiCard
+                                    title="Ticket Médio"
+                                    value={formatCurrency(metrics.ticketMedio)}
+                                    icon={Shopping}
+                                    colorClass="bg-indigo-100 text-indigo-700"
+                                />
                             </div>
                         </section>
 
-                        {/* 📦 VENDAS E ENTREGAS */}
-                        <section className="mb-6">
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-                                <ShoppingCart className="h-4 w-4" /> Vendas & Entregas
-                            </h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                {/* Vendas do Mês */}
-                                <Card className="bg-gradient-to-br from-accent-500 to-accent-600 text-white">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <ShoppingCart className="h-5 w-5 opacity-80" />
-                                    </div>
-                                    <p className="text-2xl font-bold">{metrics.vendasMes}</p>
-                                    <p className="text-sm opacity-80">Vendas</p>
-                                </Card>
-
-                                {/* Produtos Vendidos */}
-                                <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-                                    <div className="flex items-center justify-between mb-2">
-                                        <Package className="h-5 w-5 opacity-80" />
-                                    </div>
-                                    <p className="text-2xl font-bold">{metrics.produtosVendidos?.total || 0} itens</p>
-                                    <div className="mt-2 pt-2 border-t border-white/20 text-xs opacity-90 space-y-0.5 font-medium">
-                                        <div className="flex justify-between">
-                                            <span>1kg:</span>
-                                            <span>{metrics.produtosVendidos?.pote1kg || 0} potes</span>
-                                        </div>
-                                        <div className="flex justify-between">
-                                            <span>4kg:</span>
-                                            <span>{metrics.produtosVendidos?.pote4kg || 0} potes</span>
-                                        </div>
-                                    </div>
-                                </Card>
-
-                                {/* Entregas Pendentes */}
-                                <Card
-                                    className="border-l-4 border-l-warning-500 cursor-pointer hover:bg-gray-50 transition-colors"
-                                    onClick={() => navigate('/vendas?status=pendente')}
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Package className="h-5 w-5 text-warning-500" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{metrics.entregasPendentes}</p>
-                                    <p className="text-sm text-gray-500">Entregas Pendentes</p>
-                                </Card>
-
-                                {/* Entregas Realizadas */}
-                                <Card
-                                    className="border-l-4 border-l-success-500 cursor-pointer hover:bg-gray-50 transition-colors"
-                                    onClick={() => navigate('/vendas?status=entregue')}
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Package className="h-5 w-5 text-success-500" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{metrics.entregasRealizadas}</p>
-                                    <p className="text-sm text-gray-500">Entregas Realizadas</p>
-                                </Card>
-                            </div>
-                        </section>
-
-                        {/* 🔔 ALERTAS & SMOKE DETECTORS */}
-                        <div className="grid grid-cols-1 gap-4 mb-6">
-                            {/* Alerta de Estoque (Smoke Detector) */}
-                            <EstoqueWidget />
-                        </div>
-
-                        {/* 👥 CLIENTES */}
-                        <section className="mb-6">
-                            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-                                <Users className="h-4 w-4" /> Clientes
-                            </h2>
-                            <div className="grid grid-cols-2 gap-3">
-                                <Card>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <Users className="h-5 w-5 text-primary-500" />
-                                    </div>
-                                    <p className="text-2xl font-bold text-gray-900">{clientesAtivos}</p>
-                                    <p className="text-sm text-gray-500">Clientes ativos</p>
-                                </Card>
-
-                                {/* Link Relatório Fábrica */}
-                                <Card
-                                    hover
-                                    onClick={() => navigate('/relatorio-fabrica')}
-                                    className="cursor-pointer"
-                                >
-                                    <div className="flex items-center gap-2 mb-2">
-                                        <ClipboardList className="h-5 w-5 text-accent-500" />
-                                    </div>
-                                    <p className="text-lg font-bold text-gray-900">Pedido Fábrica</p>
-                                    <p className="text-sm text-gray-500">Gerar relatório</p>
-                                </Card>
-                            </div>
-                        </section>
-
-                        {/* GRID DE ALERTAS (FINANCEIRO + ESTOQUE) */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            {/* Alertas Financeiros (Fiado) */}
-                            <AlertasFinanceiroWidget />
-
-                            {/* Alertas de Recompra */}
-                            <AlertasRecompraWidget
-                                contatos={recompraContatos}
-                                atrasados={atrasados}
-                                loading={loadingRecompra}
-                            />
-                        </div>
-
-                        {/* Top Indicadores */}
-                        <section>
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <Trophy className="h-5 w-5 text-accent-500" />
-                                    Top Indicadores
-                                </h2>
-                                <button
-                                    onClick={() => navigate('/indicacoes')}
-                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
-                                >
-                                    Ver todos <ChevronRight className="h-4 w-4" />
-                                </button>
-                            </div>
-
-                            {topIndicadores.length === 0 ? (
-                                <Card className="text-center py-8 text-gray-500">
-                                    <Share2 className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>Sem indicações ainda</p>
-                                </Card>
-                            ) : (
-                                <div className="space-y-2">
-                                    {topIndicadores.map((item, index) => (
-                                        <Card
-                                            key={item.indicador.id}
-                                            hover
-                                            onClick={() => navigate(`/contatos/${item.indicador.id}`)}
-                                            className="cursor-pointer"
-                                        >
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div
-                                                        className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${index === 0
-                                                            ? 'bg-yellow-100 text-yellow-700'
-                                                            : index === 1
-                                                                ? 'bg-gray-200 text-gray-700'
-                                                                : 'bg-orange-100 text-orange-700'
-                                                            }`}
-                                                    >
-                                                        {index + 1}º
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-gray-900">{item.indicador.nome}</p>
-                                                        <p className="text-xs text-gray-500">
-                                                            {item.indicacoesConvertidas} clientes convertidos
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <Badge variant="success">
-                                                    {formatCurrency(item.recompensaAcumulada)}
-                                                </Badge>
-                                            </div>
-                                        </Card>
-                                    ))}
+                        {/* 🚨 WIDGETS CRÍTICOS (COCKPIT) */}
+                        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            {/* Coluna Principal: Alertas */}
+                            <div className="lg:col-span-2 space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <AlertasFinanceiroWidget />
+                                    <AlertasRecompraWidget
+                                        contatos={recompraContatos}
+                                        atrasados={atrasados}
+                                        loading={loadingRecompra}
+                                    />
                                 </div>
-                            )}
-                        </section>
 
-                        {/* Últimas Vendas */}
-                        <section>
-                            <div className="flex items-center justify-between mb-3">
-                                <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                                    <ShoppingCart className="h-5 w-5 text-primary-500" />
-                                    Últimas Vendas
-                                </h2>
-                                <button
-                                    onClick={() => navigate('/vendas')}
-                                    className="text-sm text-primary-500 font-medium flex items-center gap-1"
-                                >
-                                    Ver todas <ChevronRight className="h-4 w-4" />
-                                </button>
+                                {/* Estoque Alert */}
+                                <EstoqueWidget />
                             </div>
 
-                            {ultimasVendas.length === 0 ? (
-                                <Card className="text-center py-8 text-gray-500">
-                                    <ShoppingCart className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>Nenhuma venda registrada</p>
+                            {/* Coluna Lateral: Resumo Operacional */}
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-2">
+                                    <Package className="h-4 w-4" /> Operacional
+                                </h3>
+
+                                <Card className="divide-y divide-gray-100">
+                                    <div
+                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                                        onClick={() => navigate('/vendas?status=pendente')}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-orange-100 p-2 rounded-lg">
+                                                <Package className="h-5 w-5 text-orange-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900">{metrics.entregasPendentes}</p>
+                                                <p className="text-xs text-gray-500">Entregas Pendentes</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-300" />
+                                    </div>
+                                    <div
+                                        className="p-4 flex items-center justify-between cursor-pointer hover:bg-gray-50 transition-colors"
+                                        onClick={() => navigate('/vendas?status=entregue')}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-green-100 p-2 rounded-lg">
+                                                <Package className="h-5 w-5 text-green-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900">{metrics.entregasRealizadas}</p>
+                                                <p className="text-xs text-gray-500">Entregas Realizadas</p>
+                                            </div>
+                                        </div>
+                                        <ChevronRight className="h-4 w-4 text-gray-300" />
+                                    </div>
+                                    <div className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-blue-100 p-2 rounded-lg">
+                                                <ShoppingCart className="h-5 w-5 text-blue-600" />
+                                            </div>
+                                            <div>
+                                                <p className="font-bold text-gray-900">{metrics.vendasMes}</p>
+                                                <p className="text-xs text-gray-500">Vendas no Mês</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </Card>
-                            ) : (
-                                <div className="space-y-2">
-                                    {ultimasVendas.map((venda) => (
-                                        <Card
-                                            key={venda.id}
-                                            hover
-                                            onClick={() => navigate(`/vendas/${venda.id}`)}
-                                            className="cursor-pointer"
-                                        >
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex-1 min-w-0 mr-4">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <div className="font-medium text-gray-900 truncate w-[130px] sm:w-[150px]">
+
+                                <Card
+                                    className="p-4 cursor-pointer hover:bg-gray-50 transition-colors border-dashed bg-gray-50/50"
+                                    onClick={() => navigate('/relatorio-fabrica')}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="bg-white p-2 rounded-lg border shadow-sm">
+                                            <ClipboardList className="h-5 w-5 text-gray-700" />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-gray-900">Relatório Fábrica</p>
+                                            <p className="text-xs text-gray-500">Separar carga para amanhã</p>
+                                        </div>
+                                    </div>
+                                </Card>
+                            </div>
+                        </section>
+
+                        {/* 👇 LISTAGENS SECUNDÁRIAS */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+                            {/* Últimas Vendas */}
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                                        <ShoppingCart className="h-4 w-4 text-primary" />
+                                        Últimas Vendas
+                                    </h2>
+                                    <Button
+                                        variant="link"
+                                        className="h-auto p-0 text-primary font-normal text-sm"
+                                        onClick={() => navigate('/vendas')}
+                                    >
+                                        Ver todas
+                                    </Button>
+                                </div>
+
+                                {ultimasVendas.length === 0 ? (
+                                    <Card className="p-8 text-center text-gray-400 bg-gray-50 border-dashed">
+                                        <p>Nenhuma venda recente</p>
+                                    </Card>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {ultimasVendas.map((venda) => (
+                                            <Card
+                                                key={venda.id}
+                                                className="cursor-pointer hover:bg-gray-50 transition-colors"
+                                                onClick={() => navigate(`/vendas/${venda.id}`)}
+                                            >
+                                                <CardContent className="p-4 flex items-center justify-between">
+                                                    <div className="flex flex-col gap-1 min-w-0">
+                                                        <span className="font-semibold text-gray-900 truncate">
                                                             {venda.contato?.nome || 'Cliente'}
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            {venda.status === 'cancelada' ? (
-                                                                <Badge variant="danger" className="w-36 justify-center py-1">
-                                                                    Cancelada
-                                                                </Badge>
-                                                            ) : (
-                                                                <>
-                                                                    <div title={VENDA_STATUS_LABELS[venda.status]} className="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-100 transition-colors">
-                                                                        <div className={`w-2.5 h-2.5 rounded-full ${venda.status === 'entregue' ? 'bg-success-500' :
-                                                                            'bg-warning-500'
-                                                                            }`} />
-                                                                    </div>
-                                                                    {venda.pago ? (
-                                                                        <Badge variant="success" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
-                                                                            <span>💰</span> Pago
-                                                                        </Badge>
-                                                                    ) : (
-                                                                        <Badge variant="warning" className="w-28 justify-center whitespace-nowrap flex items-center gap-1">
-                                                                            <span>⏳</span> Não pago
-                                                                        </Badge>
-                                                                    )}
-                                                                </>
+                                                        </span>
+                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                            <span>{formatRelativeDate(venda.criadoEm)}</span>
+                                                            {venda.status !== 'entregue' && (
+                                                                <Badge variant="outline" className="text-[10px] px-1 h-5">{VENDA_STATUS_LABELS[venda.status]}</Badge>
                                                             )}
                                                         </div>
                                                     </div>
-                                                    <p className="text-xs text-gray-500">
-                                                        {formatRelativeDate(venda.criado_em)}
-                                                        {venda.contato?.origem === 'indicacao' && (
-                                                            <span className="ml-1 text-accent-600">
-                                                                • 📣 {getNomeIndicador(venda.contato?.indicado_por_id ?? null)
-                                                                    ? `Indicado por: ${getNomeIndicador(venda.contato?.indicado_por_id ?? null)}`
-                                                                    : 'Indicação'}
-                                                            </span>
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className="font-bold text-gray-900">{formatCurrency(Number(venda.total))}</span>
+                                                        {venda.pago ? (
+                                                            <span className="text-[10px] text-green-600 font-bold bg-green-50 px-1.5 rounded">PAGO</span>
+                                                        ) : (
+                                                            <span className="text-[10px] text-amber-600 font-bold bg-amber-50 px-1.5 rounded">PENDENTE</span>
                                                         )}
-                                                    </p>
-                                                </div>
-                                                <p className="font-bold text-primary-600 flex-shrink-0">
-                                                    {formatCurrency(Number(venda.total))}
-                                                </p>
-                                            </div>
-                                        </Card>
-                                    ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+
+                            {/* Top Indicadores (Gamification Lite) */}
+                            <section>
+                                <div className="flex items-center justify-between mb-4">
+                                    <h2 className="text-base font-semibold text-gray-900 flex items-center gap-2">
+                                        <Trophy className="h-4 w-4 text-yellow-500" />
+                                        Campeões de Indicação
+                                    </h2>
+                                    <Button
+                                        variant="link"
+                                        className="h-auto p-0 text-primary font-normal text-sm"
+                                        onClick={() => navigate('/indicacoes')}
+                                    >
+                                        Ver Ranking
+                                    </Button>
                                 </div>
-                            )}
-                        </section>
+
+                                {topIndicadores.length === 0 ? (
+                                    <Card className="p-8 text-center text-gray-400 bg-gray-50 border-dashed">
+                                        <p>Nenhuma indicação ainda</p>
+                                    </Card>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {topIndicadores.map((item, index) => (
+                                            <Card
+                                                key={item.indicador.id}
+                                                className="cursor-pointer hover:bg-slate-50 transition-colors relative overflow-hidden"
+                                                onClick={() => navigate(`/contatos/${item.indicador.id}`)}
+                                            >
+                                                <div className={cn(
+                                                    "absolute left-0 top-0 bottom-0 w-1",
+                                                    index === 0 ? "bg-yellow-400" : index === 1 ? "bg-gray-300" : "bg-orange-300"
+                                                )} />
+                                                <CardContent className="p-4 flex items-center gap-4">
+                                                    <div className={cn(
+                                                        "w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm shadow-sm",
+                                                        index === 0 ? "bg-yellow-100 text-yellow-700" :
+                                                            index === 1 ? "bg-gray-100 text-gray-700" :
+                                                                "bg-orange-100 text-orange-700"
+                                                    )}>
+                                                        {index + 1}º
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold text-gray-900 truncate">{item.indicador.nome}</p>
+                                                        <p className="text-xs text-muted-foreground">{item.indicacoesConvertidas} conversões</p>
+                                                    </div>
+                                                    <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100 border-0">
+                                                        +{formatCurrency(item.recompensaAcumulada)}
+                                                    </Badge>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                )}
+                            </section>
+                        </div>
                     </div>
                 )}
             </PageContainer >
         </>
+    )
+}
+
+function Shopping({ className }: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={className}
+        >
+            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+            <path d="M3 6h18" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+    )
+}
+
+function Clock({ className }: { className?: string }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={className}
+        >
+            <circle cx="12" cy="12" r="10" />
+            <polyline points="12 6 12 12 16 14" />
+        </svg>
     )
 }

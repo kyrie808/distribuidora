@@ -1,0 +1,76 @@
+import type { VendaComItens } from './vendaService'
+import type {
+    DomainVenda,
+    DomainItemVenda,
+    DomainContato,
+    DomainPagamento,
+    DomainProduto
+} from '../types/domain'
+import type { PagamentoVenda } from '../types/database'
+
+export const toDomainContato = (dbContato: any): DomainContato => {
+    return {
+        id: dbContato.id,
+        nome: dbContato.nome,
+        telefone: dbContato.telefone,
+        origem: dbContato.origem,
+        status: dbContato.status,
+        indicadoPorId: dbContato.indicado_por_id,
+        indicador: dbContato.indicador ? {
+            id: dbContato.indicador.id,
+            nome: dbContato.indicador.nome
+        } : null
+    }
+}
+
+export const toDomainProduto = (dbProduto: any): DomainProduto => {
+    return {
+        id: dbProduto.id,
+        nome: dbProduto.nome,
+        codigo: dbProduto.codigo,
+        preco: Number(dbProduto.preco),
+        unidade: dbProduto.unidade
+    }
+}
+
+export const toDomainItemVenda = (dbItem: any): DomainItemVenda => {
+    return {
+        id: dbItem.id,
+        produtoId: dbItem.produto_id,
+        // Optional handling if product is joined
+        produto: dbItem.produto ? toDomainProduto(dbItem.produto) : undefined,
+        quantidade: Number(dbItem.quantidade),
+        precoUnitario: Number(dbItem.preco_unitario),
+        subtotal: Number(dbItem.subtotal)
+    }
+}
+
+export const toDomainPagamento = (dbPagamento: PagamentoVenda): DomainPagamento => {
+    return {
+        id: dbPagamento.id,
+        vendaId: dbPagamento.venda_id,
+        valor: Number(dbPagamento.valor),
+        data: dbPagamento.data,
+        metodo: dbPagamento.metodo as any,
+        status: (dbPagamento as any).status || 'pago',
+        observacao: dbPagamento.observacao
+    }
+}
+
+export const toDomainVenda = (dbVenda: VendaComItens): DomainVenda => {
+    return {
+        id: dbVenda.id,
+        contatoId: dbVenda.contato_id,
+        contato: dbVenda.contato ? toDomainContato(dbVenda.contato) : undefined,
+        data: dbVenda.data,
+        total: Number(dbVenda.total),
+        status: dbVenda.status as any,
+        pago: dbVenda.pago,
+        formaPagamento: dbVenda.forma_pagamento as any,
+        taxaEntrega: Number(dbVenda.taxa_entrega),
+        itens: (dbVenda.itens || []).map(toDomainItemVenda),
+        pagamentos: (dbVenda.pagamentos || []).map(toDomainPagamento),
+        criadoEm: dbVenda.criado_em,
+        valorPago: (dbVenda.pagamentos || []).reduce((acc, p) => acc + Number(p.valor), 0)
+    }
+}

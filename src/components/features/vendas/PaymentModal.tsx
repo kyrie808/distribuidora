@@ -6,7 +6,7 @@ import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { pagamentoSchema } from '../../../schemas/venda'
 import type { PagamentoFormData } from '../../../schemas/venda'
-import type { PagamentoVenda } from '../../../types/database'
+import type { DomainPagamento } from '../../../types/domain'
 
 interface PaymentModalProps {
     isOpen: boolean
@@ -15,8 +15,8 @@ interface PaymentModalProps {
     vendaId: string
     total: number
     valorPago: number
-    historico: PagamentoVenda[]
-    customerName?: string
+    historico: DomainPagamento[]
+    customerName: string
 }
 
 const PAYMENT_METHODS = [
@@ -89,7 +89,7 @@ export function PaymentModal({
     return (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-4 sm:p-6 fade-in">
             <div className="bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl animate-in slide-in-from-bottom-10 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
-                
+
                 {/* Header */}
                 <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex items-center justify-between shrink-0">
                     <div>
@@ -103,7 +103,7 @@ export function PaymentModal({
 
                 {/* Body (Scrollable) */}
                 <div className="p-4 overflow-y-auto flex-1 space-y-6">
-                    
+
                     {/* Summary Card */}
                     <div className="grid grid-cols-2 gap-3">
                         <div className="bg-zinc-50 dark:bg-zinc-800/50 p-3 rounded-lg border border-zinc-100 dark:border-zinc-800">
@@ -121,7 +121,7 @@ export function PaymentModal({
                     </div>
 
                     <form id="payment-form" onSubmit={handleSubmit(handleConfirm)} className="space-y-4">
-                        
+
                         {/* Valor Input */}
                         <div>
                             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">
@@ -150,11 +150,10 @@ export function PaymentModal({
                                         key={method.value}
                                         type="button"
                                         onClick={() => setValue('metodo', method.value as any)}
-                                        className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${
-                                            isSelected
-                                                ? 'bg-violet-50 border-violet-500 text-violet-700 dark:bg-violet-900/20 dark:border-violet-500/50 dark:text-violet-400'
-                                                : 'bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400'
-                                        }`}
+                                        className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${isSelected
+                                            ? 'bg-violet-50 border-violet-500 text-violet-700 dark:bg-violet-900/20 dark:border-violet-500/50 dark:text-violet-400'
+                                            : 'bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400'
+                                            }`}
                                     >
                                         <Icon className="w-5 h-5 mb-1" />
                                         <span className="text-[10px] font-medium">{method.label}</span>
@@ -165,23 +164,23 @@ export function PaymentModal({
 
                         {/* Data & Observacao */}
                         <div className="space-y-3">
-                             <div>
+                            <div>
                                 <label className="block text-xs font-medium text-zinc-500 mb-1">Data</label>
-                                <input 
+                                <input
                                     type="datetime-local"
                                     {...register('data')}
                                     className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm"
                                 />
-                             </div>
-                             <div>
+                            </div>
+                            <div>
                                 <label className="block text-xs font-medium text-zinc-500 mb-1">Observação (Opcional)</label>
-                                <textarea 
+                                <textarea
                                     {...register('observacao')}
                                     rows={2}
                                     placeholder="Ex: Enviado para conta Nubank..."
                                     className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm resize-none"
                                 />
-                             </div>
+                            </div>
                         </div>
                     </form>
 

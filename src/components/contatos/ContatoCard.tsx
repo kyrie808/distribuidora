@@ -14,10 +14,10 @@ import {
     CONTATO_TIPO_LABELS,
     SUBTIPOS_B2B_LABELS,
 } from '../../constants'
-import type { Contato } from '../../types/database'
+import type { DomainContato } from '../../types/domain'
 
 interface ContatoCardProps {
-    contato: Contato
+    contato: DomainContato
     onClick?: () => void
     nomeIndicador?: string | null
     nivelEmoji?: string
@@ -97,7 +97,7 @@ export function ContatoCard({ contato, onClick, nomeIndicador, nivelEmoji }: Con
 
                 {/* Meta info */}
                 <div className="text-xs text-gray-400 text-right flex-shrink-0">
-                    {formatRelativeDate(contato.criado_em)}
+                    {formatRelativeDate(contato.criadoEm)}
                 </div>
             </div>
         </Card>

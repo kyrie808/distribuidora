@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Button } from '../ui/Button'
 
 interface HeaderProps {
     title: string
@@ -11,22 +12,28 @@ export function Header({ title, showBack = false, rightAction }: HeaderProps) {
     const navigate = useNavigate()
 
     return (
-        <header className="sticky top-0 z-40 bg-primary-500 text-white px-4 py-4 safe-top">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    {showBack && (
-                        <button
-                            onClick={() => navigate(-1)}
-                            className="p-2 -ml-2 rounded-lg hover:bg-white/10 transition-colors"
-                        >
-                            <ArrowLeft className="h-5 w-5" />
-                        </button>
-                    )}
-                    <h1 className="text-xl font-semibold">{title}</h1>
-                </div>
-
-                {rightAction}
+        <header className="fixed top-0 left-0 right-0 z-40 bg-white border-b border-gray-100 px-4 h-16 flex items-center justify-between safe-top">
+            <div className="flex items-center gap-2">
+                {showBack && (
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="-ml-2 h-10 w-10 text-gray-600"
+                        onClick={() => navigate(-1)}
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                )}
+                <h1 className="text-lg font-semibold text-gray-900 truncate">
+                    {title}
+                </h1>
             </div>
+
+            {rightAction && (
+                <div className="flex items-center gap-2">
+                    {rightAction}
+                </div>
+            )}
         </header>
     )
 }

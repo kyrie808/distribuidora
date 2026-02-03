@@ -45,9 +45,10 @@ import { useIndicacoes } from '../hooks/useIndicacoes'
 
 function VendasHistorico({ contatoId }: { contatoId: string }) {
     const navigate = useNavigate()
-    const { vendas, loading, error, deleteVenda } = useVendas({
-        filtros: { contatoId, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' }
-    })
+    const { vendas: todasVendas, loading, error, deleteVenda } = useVendas()
+
+    // Filter locally since useVendas doesn't support filtering by contatoId yet
+    const vendas = todasVendas.filter(v => v.contatoId === contatoId)
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
     const [expandedVendaId, setExpandedVendaId] = useState<string | null>(null)
 
@@ -161,7 +162,7 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                             <div className="pt-2 mb-2 flex justify-between items-center text-xs text-gray-500">
                                 <span>Itens do Pedido</span>
                                 <div className="flex items-center gap-2">
-                                    <span>{venda.forma_pagamento ? venda.forma_pagamento.replace('_', ' ').toUpperCase() : '-'}</span>
+                                    <span>{venda.formaPagamento ? venda.formaPagamento.replace('_', ' ').toUpperCase() : '-'}</span>
                                     {venda.pago ? (
                                         <span className="flex items-center text-success-600 gap-1 ml-2 inline-flex">
                                             <CheckCircle className="h-3 w-3" /> Pago
@@ -185,10 +186,10 @@ function VendasHistorico({ contatoId }: { contatoId: string }) {
                                     </div>
                                 ))}
                             </div>
-                            {Number(venda.taxa_entrega) > 0 && (
+                            {Number(venda.taxaEntrega) > 0 && (
                                 <div className="flex justify-between text-sm mt-2 pt-2 border-t border-dashed border-gray-200">
                                     <span className="text-gray-600">Taxa de Entrega</span>
-                                    <span className="font-medium text-gray-900">{formatCurrency(Number(venda.taxa_entrega))}</span>
+                                    <span className="font-medium text-gray-900">{formatCurrency(Number(venda.taxaEntrega))}</span>
                                 </div>
                             )}
                         </div>
@@ -232,7 +233,8 @@ export function ContatoDetalhe() {
     const toast = useToast()
     const { contato, indicador, loading, error, refetch } = useContato(id)
     const { deleteContato } = useContatos({ realtime: false })
-    const { vendas: todasVendas } = useVendas({ filtros: { contatoId: id, status: 'todos', periodo: 'todos', forma_pagamento: 'todos' } })
+    const { vendas: vendasRaw } = useVendas()
+    const todasVendas = vendasRaw.filter(v => v.contatoId === id)
     const { getIndicadorById } = useIndicacoes()
 
     // Calcular nível do cliente (apenas vendas não canceladas)
@@ -411,7 +413,7 @@ export function ContatoDetalhe() {
                 {/* Info Cards */}
                 <div className="space-y-3 mb-4">
                     {/* Origem */}
-                    <Card padding="sm">
+                    <Card className="p-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-primary-50 rounded-full flex items-center justify-center">
                                 <Share2 className="h-5 w-5 text-primary-500" />
@@ -435,7 +437,7 @@ export function ContatoDetalhe() {
 
                     {/* Endereço */}
                     {(contato.endereco || contato.bairro) && (
-                        <Card padding="sm">
+                        <Card className="p-4">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-success-50 rounded-full flex items-center justify-center">
                                     <MapPin className="h-5 w-5 text-success-500" />
@@ -463,7 +465,7 @@ export function ContatoDetalhe() {
                     )}
 
                     {/* Data de cadastro */}
-                    <Card padding="sm">
+                    <Card className="p-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                                 <Calendar className="h-5 w-5 text-gray-500" />
@@ -471,9 +473,9 @@ export function ContatoDetalhe() {
                             <div>
                                 <p className="text-sm text-gray-500">Cadastrado em</p>
                                 <p className="font-medium text-gray-900">
-                                    {formatDate(contato.criado_em)}
+                                    {formatDate(contato.criadoEm)}
                                     <span className="text-gray-500 font-normal ml-1">
-                                        ({formatRelativeDate(contato.criado_em)})
+                                        ({formatRelativeDate(contato.criadoEm)})
                                     </span>
                                 </p>
                             </div>

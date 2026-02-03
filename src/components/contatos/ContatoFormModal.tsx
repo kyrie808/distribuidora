@@ -14,7 +14,7 @@ import {
     SUBTIPOS_B2B_LABELS,
     CONTATO_STATUS_LABELS,
 } from '../../constants'
-import type { Contato } from '../../types/database'
+import type { DomainContato } from '../../types/domain'
 
 // Extended form data to handle split address fields locally
 interface ExtendedFormData extends ContatoFormData {
@@ -29,8 +29,8 @@ interface ExtendedFormData extends ContatoFormData {
 interface ContatoFormModalProps {
     isOpen: boolean
     onClose: () => void
-    contato?: Contato | null
-    onSuccess?: (contato: Contato) => void
+    contato?: DomainContato | null
+    onSuccess?: (contato: DomainContato) => void
 }
 
 export function ContatoFormModal({
@@ -46,8 +46,8 @@ export function ContatoFormModal({
 
     // Autocomplete state
     const [indicadorSearch, setIndicadorSearch] = useState('')
-    const [indicadorResults, setIndicadorResults] = useState<Contato[]>([])
-    const [selectedIndicador, setSelectedIndicador] = useState<Contato | null>(null)
+    const [indicadorResults, setIndicadorResults] = useState<DomainContato[]>([])
+    const [selectedIndicador, setSelectedIndicador] = useState<DomainContato | null>(null)
     const [showIndicadorDropdown, setShowIndicadorDropdown] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -127,7 +127,7 @@ export function ContatoFormModal({
                 status: contato.status as 'lead' | 'cliente' | 'inativo',
                 origem: contato.origem as 'direto' | 'indicacao',
                 subtipo: contato.subtipo,
-                indicado_por_id: contato.indicado_por_id,
+                indicado_por_id: contato.indicadoPorId,
                 endereco: contato.endereco,
                 bairro: contato.bairro,
                 observacoes: contato.observacoes,
@@ -193,7 +193,7 @@ export function ContatoFormModal({
         return () => document.removeEventListener('mousedown', handleClickOutside)
     }, [])
 
-    const handleSelectIndicador = (indicador: Contato) => {
+    const handleSelectIndicador = (indicador: DomainContato) => {
         setSelectedIndicador(indicador)
         setValue('indicado_por_id', indicador.id)
         setIndicadorSearch('')
@@ -232,12 +232,20 @@ export function ContatoFormModal({
                 cep: formDataKeyed.cep?.replace(/\D/g, '') || null // Clean CEP before saving
             }
 
-            let result: Contato | null
+            let result: DomainContato | null
 
             if (isEditing && contato) {
-                result = await updateContato(contato.id, payload)
+                // Update expects Domain format (camelCase)
+                const updatePayload: Partial<DomainContato> = {
+                    ...payload,
+                    // Map snake_case form fields to camelCase domain fields
+                    indicadoPorId: payload.indicado_por_id
+                }
+                result = await updateContato(contato.id, updatePayload)
             } else {
-                result = await createContato(payload)
+                // Create expects DB format (snake_case) which mostly matches payload
+                // but need to ensure types align with ContatoInsert
+                result = await createContato(payload as any)
             }
 
             if (result) {

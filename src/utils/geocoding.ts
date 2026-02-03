@@ -3,28 +3,37 @@ export interface Coordinates {
     lng: number
 }
 
+export interface Coordinates {
+    lat: number
+    lng: number
+}
+
 export async function getCoordinates(address: string): Promise<Coordinates | null> {
     try {
-        // Use our own backend proxy (Nominatim) to avoid CORS and ensure valid headers
         const query = encodeURIComponent(address)
-        // Note: Vite proxy forwards /api to localhost:5000
-        const url = `/api/geocode?q=${query}`
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`
 
-        const response = await fetch(url)
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'MassasCRM/1.0 (contato@massascrm.com)' // Identificação requerida pelo Nominatim
+            }
+        })
+
         if (!response.ok) return null
 
         const data = await response.json()
 
-        if (data && data.lat && data.lng) {
+        if (data && data.length > 0) {
+            const result = data[0]
             return {
-                lat: data.lat,
-                lng: data.lng
+                lat: parseFloat(result.lat),
+                lng: parseFloat(result.lon)
             }
         }
 
         return null
     } catch (error) {
-        console.error('Erro no geocoding:', error)
+        console.error('Erro no geocoding (Nominatim):', error)
         return null
     }
 }

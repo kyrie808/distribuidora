@@ -14,15 +14,12 @@ import { useContatos } from '../hooks/useContatos'
 import { useProdutos } from '../hooks/useProdutos'
 import { useVendas } from '../hooks/useVendas'
 import { useToast } from '../components/ui/Toast'
-import { type VendaFormData, type ItemVendaFormData } from '../schemas/venda'
+import { type VendaFormData } from '../schemas/venda'
 import { formatCurrency, formatPhone } from '../utils/formatters'
 import { FORMA_PAGAMENTO_LABELS } from '../constants'
 import type { Contato, Produto } from '../types/database'
 
-// Cart item with product details
-interface CartItem extends ItemVendaFormData {
-    produto: Produto
-}
+import { useCartStore, type CartItem } from '../stores/useCartStore'
 
 export function NovaVenda() {
     const navigate = useNavigate()
@@ -36,13 +33,23 @@ export function NovaVenda() {
     const { produtos, loading: loadingProdutos } = useProdutos()
     const { createVenda, getVendaById, updateVenda } = useVendas({ realtime: false })
 
-    // State
+    // Store state
+    const {
+        items: cart,
+        cliente: selectedContato,
+        addItem,
+        removeItem,
+        updateQuantity,
+        setCliente: setSelectedContato,
+        setItems,
+        clearCart
+    } = useCartStore()
+
+    // Local State
     const [step, setStep] = useState<'cliente' | 'produtos' | 'pagamento'>('cliente')
-    const [selectedContato, setSelectedContato] = useState<Contato | null>(null)
     const [contatoSearch, setContatoSearch] = useState('')
     const [contatoResults, setContatoResults] = useState<Contato[]>([])
     const [showContatoDropdown, setShowContatoDropdown] = useState(false)
-    const [cart, setCart] = useState<CartItem[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [temEntrega, setTemEntrega] = useState(false)
     const [valorEntrega, setValorEntrega] = useState(0)
@@ -66,7 +73,7 @@ export function NovaVenda() {
                         ...item,
                         produto: item.produto! // Assuming produto is populated from fetch
                     })) as unknown as CartItem[]
-                    setCart(items)
+                    setItems(items)
 
                     // Populate delivery fee
                     if (Number(venda.taxa_entrega) > 0) {
@@ -165,48 +172,28 @@ export function NovaVenda() {
 
     // Add product to cart
     const handleAddToCart = (produto: Produto) => {
-        setCart((prev) => {
-            const existing = prev.find((item) => item.produto_id === produto.id)
-            if (existing) {
-                return prev.map((item) =>
-                    item.produto_id === produto.id
-                        ? {
-                            ...item,
-                            quantidade: item.quantidade + 1,
-                            subtotal: (item.quantidade + 1) * item.preco_unitario,
-                        }
-                        : item
-                )
-            }
-            return [
-                ...prev,
-                {
-                    produto_id: produto.id,
-                    produto,
-                    quantidade: 1,
-                    preco_unitario: Number(produto.preco),
-                    subtotal: Number(produto.preco),
-                },
-            ]
+        addItem({
+            produto_id: produto.id,
+            produto,
+            quantidade: 1,
+            preco_unitario: Number(produto.preco),
+            subtotal: Number(produto.preco),
         })
+        toast.success('Produto adicionado ao carrinho')
     }
 
     // Update quantity
     const handleUpdateQuantity = (produtoId: string, delta: number) => {
-        setCart((prev) =>
-            prev
-                .map((item) => {
-                    if (item.produto_id !== produtoId) return item
-                    const newQty = item.quantidade + delta
-                    if (newQty <= 0) return null
-                    return {
-                        ...item,
-                        quantidade: newQty,
-                        subtotal: newQty * item.preco_unitario,
-                    }
-                })
-                .filter(Boolean) as CartItem[]
-        )
+        const item = cart.find((i) => i.produto_id === produtoId)
+        if (!item) return
+
+        const newQty = item.quantidade + delta
+        if (newQty <= 0) {
+            removeItem(produtoId)
+            toast.success('Item removido')
+        } else {
+            updateQuantity(produtoId, newQty)
+        }
     }
 
     // Submit sale
@@ -242,6 +229,7 @@ export function NovaVenda() {
 
         if (result) {
             toast.success(isEditing ? 'Venda atualizada!' : 'Venda registrada!')
+            clearCart()
             navigate(`/vendas/${result.id}`)
         } else {
             toast.error(isEditing ? 'Erro ao atualizar venda' : 'Erro ao registrar venda')

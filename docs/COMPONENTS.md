@@ -2,140 +2,63 @@
 
 ## UI Base (`components/ui/`)
 
-| Componente | Props | Uso |
-|------------|-------|-----|
-| `Button` | `variant`, `size`, `isLoading`, `disabled`, `leftIcon`, `rightIcon` | Ações primárias e secundárias |
-| `Input` | `label`, `error`, `helperText`, `...inputProps` | Campos de texto |
-| `Select` | `label`, `error`, `options`, `placeholder` | Dropdowns |
-| `Card` | `hover`, `padding`, `className`, `onClick` | Containers com sombra |
-| `CardHeader` | `title`, `subtitle`, `action` | Cabeçalho de cards |
-| `CardContent` | `children` | Conteúdo de cards |
-| `Modal` | `isOpen`, `onClose`, `title`, `size` | Diálogos modais |
-| `ModalActions` | `children` | Botões do modal |
-| `Toast` | - | Notificações (via `useToast`) |
-| `ToastContainer` | - | Container de notificações |
-| `Badge` | `variant` | Labels coloridos |
-| `Spinner` | `size` | Loading spinner |
-| `LoadingScreen` | `message` | Tela de carregamento |
-| `EmptyState` | `icon`, `title`, `description`, `action` | Estado vazio de listas |
-| `FloatingDock` | `items`, `onItemClick`, `className` | Dock flutuante estilo macOS (Aceternity UI) |
+Biblioteca de componentes baseada em [Shadcn UI](https://ui.shadcn.com/), utilizando Tailwind CSS e Radix UI primitives.
 
-### Aceternity UI Components
+| Componente | Props Principais | Descrição |
+|------------|------------------|-----------|
+| `Button` | `variant`, `size`, `isLoading` | Botão interativo com suporte a estados de loading e variantes (default, destructive, outline, ghost). |
+| `Card` | `hover`, `padding`, `onClick` | Container padrão com borda, sombra e suporte a hover effect. Composto por `CardHeader`, `CardContent`, `CardFooter`. |
+| `Input` | `label`, `error`, `helperText` | Campo de entrada de texto com label e mensagem de erro integrados. |
+| `Select` | `label`, `error`, `options` | Componente de seleção nativo estilizado. |
+| `Badge` | `variant` | Etiquetas de status (default, secondary, destructive, outline, success, warning, gray). |
+| `Modal` | `isOpen`, `onClose`, `title` | Diálogo modal responsivo com overlay e animação. |
+| `Toast` | `type`, `message` | Notificações flutuantes (via hook `useToast`). |
+| `Spinner` | `size` | Indicador de carregamento circular. |
+| `EmptyState` | `title`, `description`, `icon` | Placeholder visual para listas vazias. |
+| `LoadingScreen`| `message` | Tela cheia de carregamento centralizado. |
 
-O projeto utiliza componentes inspirados na [Aceternity UI](https://ui.aceternity.com/components), uma biblioteca de componentes visuais modernos com animações sofisticadas.
-
-**Dependências necessárias:**
-```bash
-npm install framer-motion clsx tailwind-merge
-```
-
-**Utility `cn()` (`src/utils/cn.ts`):**
+### Exemplo de Uso (Card)
 ```tsx
-import { cn } from '@/utils/cn'
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui'
 
-// Merge inteligente de classes Tailwind
-<div className={cn("base-class", isActive && "active-class")} />
-```
-
-**FloatingDock (`src/components/ui/FloatingDock.tsx`):**
-```tsx
-import { FloatingDock } from '@/components/ui/FloatingDock'
-
-const items = [
-  { href: '/', icon: <Home />, title: 'Home' },
-  { href: '/add', icon: <Plus />, title: 'Adicionar', isCenter: true },
-]
-
-<FloatingDock items={items} onItemClick={(href) => navigate(href)} />
-```
-
-**Características do FloatingDock:**
-- Animação de hover estilo macOS dock
-- Spring physics via framer-motion
-- Glassmorphism backdrop-blur
-- Suporte a botão central destacado
-
-### Exemplo de uso:
-
-```tsx
-import { Button, Card, Input, Badge, Modal } from '@/components/ui'
-
-<Button variant="primary" isLoading={saving}>Salvar</Button>
-<Card hover onClick={handleClick}>...</Card>
-<Badge variant="success">Ativo</Badge>
+<Card hover onClick={handleClick}>
+  <CardHeader>
+    <CardTitle>Título do Card</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <p>Conteúdo aqui...</p>
+  </CardContent>
+</Card>
 ```
 
 ---
 
 ## Layout (`components/layout/`)
 
-| Componente | Props | Uso |
-|------------|-------|-----|
-| `Header` | `title`, `showBack`, `rightAction` | Cabeçalho de página |
-| `BottomNav` | - | Navegação principal (usa FloatingDock, 7 itens) |
-| `PageContainer` | `noPadding`, `className` | Container de página com padding |
-| `AppLayout` | - | Layout principal com Outlet + BottomNav |
+Componentes estruturais da aplicação.
 
-### Exemplo de uso:
-
-```tsx
-import { Header, PageContainer } from '@/components/layout'
-
-<Header title="Contatos" showBack rightAction={<FilterButton />} />
-<PageContainer>
-  {/* Conteúdo da página */}
-</PageContainer>
-```
+| Componente | Função |
+|------------|--------|
+| `AppLayout` | Wrapper principal que define a estrutura da página (Outlet + BottomNav). |
+| `Header` | Barra superior fixa com título e ações (voltar, filtros). |
+| `BottomNav` | Barra de navegação inferior fixa para mobile (Dashboard, Clientes, Nova Venda, Vendas, Menu). |
+| `PageContainer`| Container com padding padrão e ajuste para Header/BottomNav fixos. |
 
 ---
 
-## Features (`components/contatos/`)
+## Features (`components/features/`)
 
-| Componente | Props | Uso |
-|------------|-------|-----|
-| `ContatoCard` | `contato`, `onClick`, `nomeIndicador?` | Card na lista de contatos, exibe "Indicado por" |
-| `ClienteNome` | `contato`, `className` | Badge reutilizável para exibir nome + indicador |
-| `ContatoFormModal` | `isOpen`, `onClose`, `contato`, `onSuccess` | Modal de criação/edição |
+Componentes de negócio específicos.
 
-### Exemplo de uso:
+### Purchase Orders (`purchase-orders/`)
+- `PurchaseOrderForm`: Modal complexo para criação/edição de pedidos de compra.
+- `PurchaseOrderPaymentModal`: Modal para registrar pagamentos a fornecedores.
+- `ProductNicknamesModal`: Configuração de apelidos (siglas) para produtos.
 
-```tsx
-import { ContatoCard, ContatoFormModal } from '@/components/contatos'
+### Vendas (`vendas/`)
+- `PaymentModal`: Modal de checkout para vendas, suportando múltiplas formas de pagamento.
 
-<ContatoCard contato={contato} />
-<ContatoFormModal isOpen={showModal} onClose={() => setShowModal(false)} />
-```
-
----
-
-## Features Financeiras (`components/features/`)
-
-| Componente | Props | Uso |
-|------------|-------|-----|
-| `PaymentModal` | `isOpen`, `onClose`, `onSave`, `sale`, `remainingAmount` | Modal para registrar pagamento de venda |
-| `PurchaseOrderPaymentModal` | `isOpen`, `onClose`, `order` | Modal para pagamento de compra |
-| `PurchaseOrderForm` | `isOpen`, `onClose`, `initialData` | Modal de criação/edição de pedido |
-| `MonthPicker` | `currentDate`, `onDateChange` | Seletor de Mês/Ano para dashboard |
-
-
----
-
-## Dashboard Widgets (`components/dashboard/`)
-
-| Componente | Props | Uso |
-|------------|-------|-----|
-| `AlertasFinanceiroWidget` | - | Exibe contas a receber atrasadas/hoje com link p/ WhatsApp |
-| `AlertasRecompraWidget` | `contatos`, `atrasados`, `loading` | Exibe clientes que precisam de recompra |
-| `MonthPicker` | `currentDate`, `onDateChange` | Seletor de mês para filtro global |
-
----
-
-## Convenções
-
-### Criando novos componentes:
-
-1. Criar arquivo em `components/{categoria}/NomeComponente.tsx`
-2. Exportar via `index.ts` da pasta
-3. Props tipadas com interface
-4. Usar Tailwind para estilos
-5. Documentar aqui após criação
+### Dashboard (`dashboard/`)
+- `AlertasFinanceiroWidget`: Widget de contas a receber (fiado).
+- `AlertasRecompraWidget`: Widget de retensão de clientes (churn).
+- `EstoqueWidget`: Widget de monitoramento de instock/ruptura.
