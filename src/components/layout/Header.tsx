@@ -1,39 +1,75 @@
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Menu } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Button } from '../ui/Button'
+
+import { cn } from '@/lib/utils'
 
 interface HeaderProps {
     title: string
     showBack?: boolean
+    showMenu?: boolean // New prop to show Menu icon instead of Back
     rightAction?: React.ReactNode
+    centerTitle?: boolean
+    transparent?: boolean
+    className?: string
 }
 
-export function Header({ title, showBack = false, rightAction }: HeaderProps) {
+export function Header({
+    title,
+    showBack = false,
+    showMenu = false,
+    rightAction,
+    centerTitle = false,
+    transparent = false,
+    className
+}: HeaderProps) {
     const navigate = useNavigate()
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-40 bg-white dark:bg-[#102210] border-b border-gray-100 dark:border-gray-800 px-4 h-16 flex items-center justify-between safe-top">
-            <div className="flex items-center gap-2">
+        <header className={cn(
+            "sticky top-0 z-40 px-6 py-4 h-auto flex items-center justify-between transition-all duration-300",
+            transparent ? 'bg-transparent' : 'bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md',
+            !transparent && 'shadow-none',
+            className
+        )}>
+            {/* Left Action (Back or Menu) */}
+            <div className="flex items-center z-10">
                 {showBack && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="-ml-2 h-10 w-10 text-gray-600"
+                    <button
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
                         onClick={() => navigate(-1)}
                     >
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
+                        <ArrowLeft className="h-6 w-6" />
+                    </button>
                 )}
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+
+                {showMenu && !showBack && (
+                    <button
+                        className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
+                    >
+                        <Menu className="h-6 w-6" />
+                    </button>
+                )}
+
+                {/* Spacer if no left action, but typically we want the title to just align naturally if not centered */}
+            </div>
+
+            {/* Title */}
+            <div className={cn(
+                "flex-1 flex pointer-events-none px-4",
+                centerTitle ? 'justify-center items-center absolute inset-0' : 'justify-start'
+            )}>
+                <h1 className={cn(
+                    "text-lg font-bold tracking-tight text-gray-900 dark:text-white",
+                    centerTitle ? "text-center" : ""
+                )}>
                     {title}
                 </h1>
             </div>
 
-            {rightAction && (
-                <div className="flex items-center gap-2">
-                    {rightAction}
-                </div>
-            )}
+            {/* Right Action */}
+            <div className="flex items-center gap-2 z-10 shrink-0">
+                {rightAction}
+            </div>
         </header>
     )
 }

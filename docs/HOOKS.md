@@ -55,6 +55,12 @@ Ranking de performance de indicações.
 - **Path:** `src/hooks/useTopIndicadores.ts`
 - **Features:** Calcula stats de quantos clientes ativos cada indicador trouxe.
 
+### `useDashboardFilter`
+**Contexto Global** de filtro de data para o Dashboard.
+- **Path:** `src/hooks/useDashboardFilter.ts`
+- **Features:** Gerencia `startDate`, `endDate`, e funções para manipular o mês selecionado (`prevMonth`, `nextMonth`, `setMonth`).
+
+
 
 ## Hooks Utilitários
 

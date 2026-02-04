@@ -259,380 +259,383 @@ export function NovaVenda() {
     }
 
     return (
-        <>
-            <Header
-                title={
-                    step === 'cliente'
-                        ? (isEditing ? 'Editar - Selecionar Cliente' : 'Selecionar Cliente')
-                        : step === 'produtos'
-                            ? (isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Adicionar Produtos')
-                            : 'Pagamento'
-                }
-                showBack
-            />
-            <PageContainer>
-                {/* Step 1: Select Client */}
-                {step === 'cliente' && (
-                    <div className="space-y-4">
-                        {/* Search */}
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Buscar cliente por nome ou telefone..."
-                                value={contatoSearch}
-                                onChange={(e) => setContatoSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-lg"
-                                autoFocus
-                            />
-                        </div>
-
-                        {/* Search Results */}
-                        {showContatoDropdown && contatoResults.length > 0 && (
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                                {contatoResults.map((contato) => (
-                                    <button
-                                        key={contato.id}
-                                        onClick={() => handleSelectContato(contato)}
-                                        className="w-full px-4 py-4 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
-                                    >
-                                        <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                            <User className="h-5 w-5 text-primary-600" />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="font-medium text-gray-900">{contato.nome}</p>
-                                            <p className="text-sm text-gray-500">{formatPhone(contato.telefone)}</p>
-                                        </div>
-                                        <Badge variant={contato.status === 'cliente' ? 'success' : 'warning'}>
-                                            {contato.status === 'cliente' ? 'Cliente' : 'Lead'}
-                                        </Badge>
-                                    </button>
-                                ))}
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
+            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+                <Header
+                    title={
+                        step === 'cliente'
+                            ? (isEditing ? 'Editar - Selecionar Cliente' : 'Selecionar Cliente')
+                            : step === 'produtos'
+                                ? (isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Adicionar Produtos')
+                                : 'Pagamento'
+                    }
+                    showBack
+                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
+                />
+                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                    {/* Step 1: Select Client */}
+                    {step === 'cliente' && (
+                        <div className="space-y-4">
+                            {/* Search */}
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar cliente por nome ou telefone..."
+                                    value={contatoSearch}
+                                    onChange={(e) => setContatoSearch(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white text-lg"
+                                    autoFocus
+                                />
                             </div>
-                        )}
 
-                        {/* Quick Add Button */}
-                        <button
-                            onClick={() => setShowQuickAddModal(true)}
-                            className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
-                        >
-                            <Plus className="h-5 w-5" />
-                            <span>Cadastrar novo cliente</span>
-                        </button>
-
-                        {/* Recent Contacts */}
-                        {contatos.length > 0 && !contatoSearch && (
-                            <div>
-                                <h3 className="text-sm font-medium text-gray-500 mb-2">Clientes recentes</h3>
-                                <div className="space-y-2">
-                                    {contatos.slice(0, 20).map((contato) => (
+                            {/* Search Results */}
+                            {showContatoDropdown && contatoResults.length > 0 && (
+                                <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                                    {contatoResults.map((contato) => (
                                         <button
                                             key={contato.id}
                                             onClick={() => handleSelectContato(contato)}
-                                            className="w-full px-4 py-3 bg-white rounded-lg border border-gray-200 text-left hover:border-primary-300 transition-colors flex items-center gap-3"
+                                            className="w-full px-4 py-4 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0"
                                         >
-                                            <User className="h-5 w-5 text-gray-400" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-900 truncate">{contato.nome}</p>
+                                            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                                <User className="h-5 w-5 text-primary-600" />
                                             </div>
-                                            <span className="text-sm text-gray-500">{formatPhone(contato.telefone)}</span>
+                                            <div className="flex-1">
+                                                <p className="font-medium text-gray-900">{contato.nome}</p>
+                                                <p className="text-sm text-gray-500">{formatPhone(contato.telefone)}</p>
+                                            </div>
+                                            <Badge variant={contato.status === 'cliente' ? 'success' : 'warning'}>
+                                                {contato.status === 'cliente' ? 'Cliente' : 'Lead'}
+                                            </Badge>
                                         </button>
                                     ))}
                                 </div>
-                            </div>
-                        )}
-                    </div>
-                )}
+                            )}
 
-                {/* Step 2: Products */}
-                {step === 'produtos' && (
-                    <div className="pb-32">
-                        {/* Selected Client */}
-                        <Card className="mb-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <User className="h-5 w-5 text-primary-600" />
-                                </div>
-                                <div>
-                                    <p className="font-medium text-gray-900">{selectedContato?.nome}</p>
-                                    <p className="text-sm text-gray-500">{formatPhone(selectedContato?.telefone || '')}</p>
-                                </div>
-                            </div>
+                            {/* Quick Add Button */}
                             <button
-                                onClick={() => {
-                                    setSelectedContato(null)
-                                    setStep('cliente')
-                                }}
-                                className="text-sm text-primary-500"
+                                onClick={() => setShowQuickAddModal(true)}
+                                className="w-full py-4 border-2 border-dashed border-gray-300 rounded-xl text-gray-500 hover:border-primary-500 hover:text-primary-500 transition-colors flex items-center justify-center gap-2"
                             >
-                                Trocar
+                                <Plus className="h-5 w-5" />
+                                <span>Cadastrar novo cliente</span>
                             </button>
-                        </Card>
 
-                        {/* Products Grid */}
-                        {loadingProdutos ? (
-                            <LoadingScreen message="Carregando produtos..." />
-                        ) : (
-                            <div className="grid grid-cols-2 gap-3">
-                                {produtos.map((produto) => {
-                                    const qty = getCartQuantity(produto.id)
-                                    return (
-                                        <div
-                                            key={produto.id}
-                                            className={`bg-white rounded-xl p-4 border-2 transition-colors ${qty > 0 ? 'border-primary-500' : 'border-gray-200'
-                                                }`}
-                                        >
-                                            <p className="font-medium text-gray-900 mb-1 line-clamp-2">{produto.nome}</p>
-                                            <p className="text-lg font-bold text-primary-600 mb-3">
-                                                {formatCurrency(Number(produto.preco))}
-                                            </p>
+                            {/* Recent Contacts */}
+                            {contatos.length > 0 && !contatoSearch && (
+                                <div>
+                                    <h3 className="text-sm font-medium text-gray-500 mb-2">Clientes recentes</h3>
+                                    <div className="space-y-2">
+                                        {contatos.slice(0, 20).map((contato) => (
+                                            <button
+                                                key={contato.id}
+                                                onClick={() => handleSelectContato(contato)}
+                                                className="w-full px-4 py-3 bg-white rounded-lg border border-gray-200 text-left hover:border-primary-300 transition-colors flex items-center gap-3"
+                                            >
+                                                <User className="h-5 w-5 text-gray-400" />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-gray-900 truncate">{contato.nome}</p>
+                                                </div>
+                                                <span className="text-sm text-gray-500">{formatPhone(contato.telefone)}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
-                                            {qty > 0 ? (
-                                                <div className="flex items-center justify-between">
+                    {/* Step 2: Products */}
+                    {step === 'produtos' && (
+                        <div className="pb-32">
+                            {/* Selected Client */}
+                            <Card className="mb-4 flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <User className="h-5 w-5 text-primary-600" />
+                                    </div>
+                                    <div>
+                                        <p className="font-medium text-gray-900">{selectedContato?.nome}</p>
+                                        <p className="text-sm text-gray-500">{formatPhone(selectedContato?.telefone || '')}</p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setSelectedContato(null)
+                                        setStep('cliente')
+                                    }}
+                                    className="text-sm text-primary-500"
+                                >
+                                    Trocar
+                                </button>
+                            </Card>
+
+                            {/* Products Grid */}
+                            {loadingProdutos ? (
+                                <LoadingScreen message="Carregando produtos..." />
+                            ) : (
+                                <div className="grid grid-cols-2 gap-3">
+                                    {produtos.map((produto) => {
+                                        const qty = getCartQuantity(produto.id)
+                                        return (
+                                            <div
+                                                key={produto.id}
+                                                className={`bg-white rounded-xl p-4 border-2 transition-colors ${qty > 0 ? 'border-primary-500' : 'border-gray-200'
+                                                    }`}
+                                            >
+                                                <p className="font-medium text-gray-900 mb-1 line-clamp-2">{produto.nome}</p>
+                                                <p className="text-lg font-bold text-primary-600 mb-3">
+                                                    {formatCurrency(Number(produto.preco))}
+                                                </p>
+
+                                                {qty > 0 ? (
+                                                    <div className="flex items-center justify-between">
+                                                        <button
+                                                            onClick={() => handleUpdateQuantity(produto.id, -1)}
+                                                            className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
+                                                        >
+                                                            <Minus className="h-4 w-4" />
+                                                        </button>
+                                                        <span className="text-xl font-bold">{qty}</span>
+                                                        <button
+                                                            onClick={() => handleUpdateQuantity(produto.id, 1)}
+                                                            className="w-10 h-10 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600"
+                                                        >
+                                                            <Plus className="h-4 w-4" />
+                                                        </button>
+                                                    </div>
+                                                ) : (
                                                     <button
-                                                        onClick={() => handleUpdateQuantity(produto.id, -1)}
-                                                        className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200"
+                                                        onClick={() => handleAddToCart(produto)}
+                                                        className="w-full py-2 bg-primary-50 text-primary-600 rounded-lg font-medium hover:bg-primary-100 transition-colors"
+                                                    >
+                                                        Adicionar
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )
+                                    })}
+                                </div>
+                            )}
+
+                            {/* Cart Summary Fixed Bottom */}
+                            {cart.length > 0 && (
+                                <div className="fixed bottom-20 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg safe-bottom">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <div>
+                                            <span className="text-gray-500">{cartItemsCount} item(s)</span>
+                                            <p className="text-2xl font-bold text-gray-900">{formatCurrency(cartTotal)}</p>
+                                        </div>
+                                        <Button
+                                            size="lg"
+                                            onClick={() => setStep('pagamento')}
+                                            leftIcon={<ShoppingCart className="h-5 w-5" />}
+                                        >
+                                            Continuar
+                                        </Button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Step 3: Payment */}
+                    {step === 'pagamento' && (
+                        <div className="space-y-4">
+                            {/* Cart Items */}
+                            <Card>
+                                <h3 className="font-medium text-gray-900 mb-3">Resumo do Pedido</h3>
+                                <div className="space-y-2">
+                                    {cart.map((item) => (
+                                        <div key={item.produto_id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                                            <div className="flex-1">
+                                                <p className="font-medium text-gray-900">{item.produto.nome}</p>
+                                                <p className="text-sm text-gray-500">
+                                                    {item.quantidade}x {formatCurrency(item.preco_unitario)}
+                                                </p>
+                                            </div>
+                                            <p className="font-medium">{formatCurrency(item.subtotal)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                {temEntrega && (
+                                    <div className="flex items-center justify-between py-2 border-b border-gray-100">
+                                        <span className="text-gray-900">Taxa de Entrega</span>
+                                        <span className="font-medium">{formatCurrency(valorEntrega)}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-3">
+                                    <span className="font-bold text-gray-900">Total</span>
+                                    <span className="text-2xl font-bold text-primary-600">{formatCurrency(cartTotal + (temEntrega ? valorEntrega : 0))}</span>
+                                </div>
+                            </Card>
+
+                            {/* Delivery Fee Toggle */}
+                            <Card>
+                                <div className="flex items-center justify-between mb-4">
+                                    <span className="font-medium text-gray-900">Cobrar Taxa de Entrega</span>
+                                    <button
+                                        role="switch"
+                                        aria-checked={temEntrega}
+                                        onClick={() => setTemEntrega(!temEntrega)}
+                                        className={`${temEntrega ? 'bg-primary-600' : 'bg-gray-200'
+                                            } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2`}
+                                    >
+                                        <span
+                                            aria-hidden="true"
+                                            className={`${temEntrega ? 'translate-x-5' : 'translate-x-0'
+                                                } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                        />
+                                    </button>
+                                </div>
+
+                                {temEntrega && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Valor da Entrega
+                                        </label>
+                                        <div className="relative">
+                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={valorEntrega || ''}
+                                                onChange={(e) => setValorEntrega(Number(e.target.value))}
+                                                placeholder="0,00"
+                                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+                            </Card>
+
+                            {/* Payment Methods */}
+                            <Card>
+                                <h3 className="font-medium text-gray-900 mb-3">Forma de Pagamento</h3>
+
+                                {paymentMethodDetails ? (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <h4 className="text-lg font-semibold capitalize">{FORMA_PAGAMENTO_LABELS[paymentMethodDetails]}</h4>
+                                            <button onClick={() => setPaymentMethodDetails(null)} className="text-sm text-primary-500">Alterar</button>
+                                        </div>
+
+                                        {paymentMethodDetails === 'cartao' && (
+                                            <div className="space-y-2">
+                                                <label className="block text-sm font-medium text-gray-700">Quantidade de Parcelas</label>
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => setParcelas(Math.max(1, parcelas - 1))}
+                                                        className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
                                                     >
                                                         <Minus className="h-4 w-4" />
                                                     </button>
-                                                    <span className="text-xl font-bold">{qty}</span>
+                                                    <span className="text-xl font-bold w-12 text-center">{parcelas}x</span>
                                                     <button
-                                                        onClick={() => handleUpdateQuantity(produto.id, 1)}
-                                                        className="w-10 h-10 bg-primary-500 text-white rounded-full flex items-center justify-center hover:bg-primary-600"
+                                                        onClick={() => setParcelas(Math.min(12, parcelas + 1))}
+                                                        className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
                                                     >
                                                         <Plus className="h-4 w-4" />
                                                     </button>
                                                 </div>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleAddToCart(produto)}
-                                                    className="w-full py-2 bg-primary-50 text-primary-600 rounded-lg font-medium hover:bg-primary-100 transition-colors"
-                                                >
-                                                    Adicionar
-                                                </button>
-                                            )}
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        )}
-
-                        {/* Cart Summary Fixed Bottom */}
-                        {cart.length > 0 && (
-                            <div className="fixed bottom-20 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-lg safe-bottom">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div>
-                                        <span className="text-gray-500">{cartItemsCount} item(s)</span>
-                                        <p className="text-2xl font-bold text-gray-900">{formatCurrency(cartTotal)}</p>
-                                    </div>
-                                    <Button
-                                        size="lg"
-                                        onClick={() => setStep('pagamento')}
-                                        leftIcon={<ShoppingCart className="h-5 w-5" />}
-                                    >
-                                        Continuar
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Step 3: Payment */}
-                {step === 'pagamento' && (
-                    <div className="space-y-4">
-                        {/* Cart Items */}
-                        <Card>
-                            <h3 className="font-medium text-gray-900 mb-3">Resumo do Pedido</h3>
-                            <div className="space-y-2">
-                                {cart.map((item) => (
-                                    <div key={item.produto_id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
-                                        <div className="flex-1">
-                                            <p className="font-medium text-gray-900">{item.produto.nome}</p>
-                                            <p className="text-sm text-gray-500">
-                                                {item.quantidade}x {formatCurrency(item.preco_unitario)}
-                                            </p>
-                                        </div>
-                                        <p className="font-medium">{formatCurrency(item.subtotal)}</p>
-                                    </div>
-                                ))}
-                            </div>
-                            {temEntrega && (
-                                <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                                    <span className="text-gray-900">Taxa de Entrega</span>
-                                    <span className="font-medium">{formatCurrency(valorEntrega)}</span>
-                                </div>
-                            )}
-                            <div className="flex items-center justify-between pt-3 border-t border-gray-200 mt-3">
-                                <span className="font-bold text-gray-900">Total</span>
-                                <span className="text-2xl font-bold text-primary-600">{formatCurrency(cartTotal + (temEntrega ? valorEntrega : 0))}</span>
-                            </div>
-                        </Card>
-
-                        {/* Delivery Fee Toggle */}
-                        <Card>
-                            <div className="flex items-center justify-between mb-4">
-                                <span className="font-medium text-gray-900">Cobrar Taxa de Entrega</span>
-                                <button
-                                    role="switch"
-                                    aria-checked={temEntrega}
-                                    onClick={() => setTemEntrega(!temEntrega)}
-                                    className={`${temEntrega ? 'bg-primary-600' : 'bg-gray-200'
-                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-600 focus:ring-offset-2`}
-                                >
-                                    <span
-                                        aria-hidden="true"
-                                        className={`${temEntrega ? 'translate-x-5' : 'translate-x-0'
-                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                    />
-                                </button>
-                            </div>
-
-                            {temEntrega && (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Valor da Entrega
-                                    </label>
-                                    <div className="relative">
-                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">R$</span>
-                                        <input
-                                            type="number"
-                                            min="0"
-                                            step="0.01"
-                                            value={valorEntrega || ''}
-                                            onChange={(e) => setValorEntrega(Number(e.target.value))}
-                                            placeholder="0,00"
-                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                                        />
-                                    </div>
-                                </div>
-                            )}
-                        </Card>
-
-                        {/* Payment Methods */}
-                        <Card>
-                            <h3 className="font-medium text-gray-900 mb-3">Forma de Pagamento</h3>
-
-                            {paymentMethodDetails ? (
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <h4 className="text-lg font-semibold capitalize">{FORMA_PAGAMENTO_LABELS[paymentMethodDetails]}</h4>
-                                        <button onClick={() => setPaymentMethodDetails(null)} className="text-sm text-primary-500">Alterar</button>
-                                    </div>
-
-                                    {paymentMethodDetails === 'cartao' && (
-                                        <div className="space-y-2">
-                                            <label className="block text-sm font-medium text-gray-700">Quantidade de Parcelas</label>
-                                            <div className="flex items-center gap-3">
-                                                <button
-                                                    onClick={() => setParcelas(Math.max(1, parcelas - 1))}
-                                                    className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
-                                                >
-                                                    <Minus className="h-4 w-4" />
-                                                </button>
-                                                <span className="text-xl font-bold w-12 text-center">{parcelas}x</span>
-                                                <button
-                                                    onClick={() => setParcelas(Math.min(12, parcelas + 1))}
-                                                    className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded-lg hover:bg-gray-200"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                </button>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {paymentMethodDetails === 'fiado' && (
-                                        <Input
-                                            type="date"
-                                            label="Data Prevista de Pagamento"
-                                            value={dataPrevista}
-                                            onChange={(e) => setDataPrevista(e.target.value)}
-                                        />
-                                    )}
+                                        {paymentMethodDetails === 'fiado' && (
+                                            <Input
+                                                type="date"
+                                                label="Data Prevista de Pagamento"
+                                                value={dataPrevista}
+                                                onChange={(e) => setDataPrevista(e.target.value)}
+                                            />
+                                        )}
 
-                                    <Button
-                                        onClick={() => {
-                                            if (paymentMethodDetails) {
-                                                handleSubmitVenda(paymentMethodDetails)
-                                            }
-                                        }}
-                                        className="w-full"
-                                        isLoading={isSubmitting}
-                                    >
-                                        Confirmar Venda {paymentMethodDetails === 'cartao' && parcelas > 1 ? `(${parcelas}x)` : ''}
-                                    </Button>
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-2 gap-3">
-                                    {Object.entries(FORMA_PAGAMENTO_LABELS).map(([key, label]) => (
-                                        <button
-                                            key={key}
+                                        <Button
                                             onClick={() => {
-                                                if (key === 'cartao' || key === 'fiado') {
-                                                    setPaymentMethodDetails(key)
-                                                    if (key === 'fiado') {
-                                                        const d = new Date()
-                                                        d.setDate(d.getDate() + 30)
-                                                        setDataPrevista(d.toISOString().split('T')[0])
-                                                    }
-                                                } else {
-                                                    handleSubmitVenda(key)
+                                                if (paymentMethodDetails) {
+                                                    handleSubmitVenda(paymentMethodDetails)
                                                 }
                                             }}
-                                            disabled={isSubmitting}
-                                            className="py-4 px-4 bg-gray-50 hover:bg-primary-50 border-2 border-gray-200 hover:border-primary-500 rounded-xl font-medium text-gray-900 transition-colors disabled:opacity-50"
+                                            className="w-full"
+                                            isLoading={isSubmitting}
                                         >
-                                            {label}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </Card>
+                                            Confirmar Venda {paymentMethodDetails === 'cartao' && parcelas > 1 ? `(${parcelas}x)` : ''}
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {Object.entries(FORMA_PAGAMENTO_LABELS).map(([key, label]) => (
+                                            <button
+                                                key={key}
+                                                onClick={() => {
+                                                    if (key === 'cartao' || key === 'fiado') {
+                                                        setPaymentMethodDetails(key)
+                                                        if (key === 'fiado') {
+                                                            const d = new Date()
+                                                            d.setDate(d.getDate() + 30)
+                                                            setDataPrevista(d.toISOString().split('T')[0])
+                                                        }
+                                                    } else {
+                                                        handleSubmitVenda(key)
+                                                    }
+                                                }}
+                                                disabled={isSubmitting}
+                                                className="py-4 px-4 bg-gray-50 hover:bg-primary-50 border-2 border-gray-200 hover:border-primary-500 rounded-xl font-medium text-gray-900 transition-colors disabled:opacity-50"
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </Card>
 
-                        {/* Back button */}
-                        <Button
-                            variant="accent"
-                            className="w-full"
-                            leftIcon={<ShoppingCart className="h-4 w-4" />}
-                            onClick={() => setStep('produtos')}
-                        >
-                            Voltar para produtos
-                        </Button>
-                    </div >
-                )}
+                            {/* Back button */}
+                            <Button
+                                variant="accent"
+                                className="w-full"
+                                leftIcon={<ShoppingCart className="h-4 w-4" />}
+                                onClick={() => setStep('produtos')}
+                            >
+                                Voltar para produtos
+                            </Button>
+                        </div >
+                    )}
 
-                {/* Quick Add Contact Modal */}
-                <Modal
-                    isOpen={showQuickAddModal}
-                    onClose={() => setShowQuickAddModal(false)}
-                    title="Cadastro Rápido"
-                    size="sm"
-                >
-                    <div className="space-y-4">
-                        <Input
-                            label="Nome"
-                            placeholder="Nome do cliente"
-                            value={quickAddName}
-                            onChange={(e) => setQuickAddName(e.target.value)}
-                            autoFocus
-                        />
-                        <Input
-                            label="Telefone"
-                            placeholder="(11) 99999-9999"
-                            value={quickAddPhone}
-                            onChange={(e) => setQuickAddPhone(e.target.value)}
-                        />
-                    </div>
-                    <ModalActions>
-                        <Button variant="secondary" onClick={() => setShowQuickAddModal(false)}>
-                            Cancelar
-                        </Button>
-                        <Button onClick={handleQuickAddContato} isLoading={isCreatingContato}>
-                            Cadastrar
-                        </Button>
-                    </ModalActions>
-                </Modal>
-            </PageContainer >
-        </>
+                    {/* Quick Add Contact Modal */}
+                    <Modal
+                        isOpen={showQuickAddModal}
+                        onClose={() => setShowQuickAddModal(false)}
+                        title="Cadastro Rápido"
+                        size="sm"
+                    >
+                        <div className="space-y-4">
+                            <Input
+                                label="Nome"
+                                placeholder="Nome do cliente"
+                                value={quickAddName}
+                                onChange={(e) => setQuickAddName(e.target.value)}
+                                autoFocus
+                            />
+                            <Input
+                                label="Telefone"
+                                placeholder="(11) 99999-9999"
+                                value={quickAddPhone}
+                                onChange={(e) => setQuickAddPhone(e.target.value)}
+                            />
+                        </div>
+                        <ModalActions>
+                            <Button variant="secondary" onClick={() => setShowQuickAddModal(false)}>
+                                Cancelar
+                            </Button>
+                            <Button onClick={handleQuickAddContato} isLoading={isCreatingContato}>
+                                Cadastrar
+                            </Button>
+                        </ModalActions>
+                    </Modal>
+                </PageContainer >
+            </div>
+        </div>
     )
 }

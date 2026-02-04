@@ -1,20 +1,8 @@
-import { Phone, MapPin, User, Building2 } from 'lucide-react'
-
-
-// ...
-
-
+import { User, Store, Calendar, MessageCircle, Phone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { Card } from '../ui/Card'
-import { Badge } from '../ui/Badge'
-import { formatPhone, formatRelativeDate } from '../../utils/formatters'
-import {
-    CONTATO_STATUS_LABELS,
-    CONTATO_STATUS_COLORS,
-    CONTATO_TIPO_LABELS,
-    SUBTIPOS_B2B_LABELS,
-} from '../../constants'
+import { formatRelativeDate } from '../../utils/formatters'
 import type { DomainContato } from '../../types/domain'
+import { cn } from '@/lib/utils'
 
 interface ContatoCardProps {
     contato: DomainContato
@@ -23,7 +11,7 @@ interface ContatoCardProps {
     nivelEmoji?: string
 }
 
-export function ContatoCard({ contato, onClick, nomeIndicador, nivelEmoji }: ContatoCardProps) {
+export function ContatoCard({ contato, onClick }: ContatoCardProps) {
     const navigate = useNavigate()
 
     const handleClick = () => {
@@ -34,72 +22,104 @@ export function ContatoCard({ contato, onClick, nomeIndicador, nivelEmoji }: Con
         }
     }
 
-    const statusColor = CONTATO_STATUS_COLORS[contato.status] as 'success' | 'warning' | 'gray'
-    const TipoIcon = contato.tipo === 'B2B' ? Building2 : User
+    const handleWhatsappClick = (e: React.MouseEvent) => {
+        e.stopPropagation()
+        const phone = contato.telefone.replace(/\D/g, '')
+        window.open(`https://wa.me/55${phone}`, '_blank')
+    }
+
+
+
+    // Status Colors/Styles
+    const statusConfig = {
+        cliente: {
+            badge: "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20",
+            dot: "bg-emerald-500",
+            label: "Cliente"
+        },
+        lead: {
+            badge: "bg-orange-100 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400 border-orange-200 dark:border-orange-500/20",
+            dot: "bg-orange-500",
+            label: "Lead"
+        },
+        inativo: {
+            badge: "bg-zinc-100 text-zinc-700 dark:bg-zinc-500/10 dark:text-zinc-400 border-zinc-200 dark:border-zinc-500/20",
+            dot: "bg-zinc-500",
+            label: "Inativo"
+        }
+    }
+
+    const currentStatus = statusConfig[contato.status as keyof typeof statusConfig] || statusConfig.cliente
+    const relativeDate = formatRelativeDate(contato.criadoEm)
+    const TipoIcon = contato.tipo === 'B2B' ? Store : User
 
     return (
-        <Card hover onClick={handleClick} className="cursor-pointer">
-            <div className="flex items-start justify-between">
-                <div className="flex items-start gap-3 flex-1 min-w-0">
-                    {/* Avatar */}
-                    <div className={`
-            flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
-            ${contato.tipo === 'B2B' ? 'bg-accent-100 text-accent-600' : 'bg-primary-100 text-primary-600'}
-          `}>
-                        <TipoIcon className="h-5 w-5" />
+        <div
+            onClick={handleClick}
+            className="group relative flex flex-col gap-4 p-4 rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:bg-gray-50 dark:hover:bg-zinc-800/80 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md"
+        >
+            {/* Left Accent Border (Status Color) */}
+            <div className={cn("absolute left-0 top-4 bottom-4 w-1 rounded-r-full opacity-80", currentStatus.dot)} />
+
+            {/* Header: Name & Status Badge */}
+            <div className="flex items-start justify-between pl-3">
+                <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
+                            {contato.nome}
+                        </h3>
                     </div>
 
-                    {/* Info */}
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="font-semibold text-gray-900 truncate w-[140px] sm:w-[150px]" title={contato.nome}>
-                                {contato.nome}
-                            </div>
-                            <Badge variant={statusColor} className="flex-shrink-0 self-start mt-0.5">
-                                {CONTATO_STATUS_LABELS[contato.status]}
-                            </Badge>
-                            {nivelEmoji && (
-                                <span className="text-sm" title="Nível do cliente">{nivelEmoji}</span>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-1 text-sm text-gray-500 mb-1">
-                            <Phone className="h-3.5 w-3.5" />
-                            <span>{formatPhone(contato.telefone)}</span>
-                        </div>
-
-                        {contato.bairro && (
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                                <MapPin className="h-3.5 w-3.5" />
-                                <span className="truncate">{contato.bairro}</span>
-                            </div>
-                        )}
-
-                        <div className="flex items-center gap-2 mt-2 text-xs text-gray-400">
-                            <span>{CONTATO_TIPO_LABELS[contato.tipo]}</span>
-                            {contato.tipo === 'B2B' && contato.subtipo && (
-                                <>
-                                    <span>•</span>
-                                    <span>{SUBTIPOS_B2B_LABELS[contato.subtipo] || contato.subtipo}</span>
-                                </>
-                            )}
-                            {contato.origem === 'indicacao' && (
-                                <>
-                                    <span>•</span>
-                                    <span className="text-accent-600">
-                                        📣 {nomeIndicador ? `Indicado por: ${nomeIndicador}` : 'Indicação'}
-                                    </span>
-                                </>
-                            )}
-                        </div>
+                    {/* Phone Number */}
+                    <div className="flex items-center gap-1.5 text-gray-500 dark:text-gray-400">
+                        <Phone className="size-3.5" />
+                        <span className="text-sm font-medium">{contato.telefone}</span>
                     </div>
                 </div>
 
-                {/* Meta info */}
-                <div className="text-xs text-gray-400 text-right flex-shrink-0">
-                    {formatRelativeDate(contato.criadoEm)}
+                {/* Status Pill Badge */}
+                <span className={cn(
+                    "px-2.5 py-0.5 rounded-full text-[10px] font-bold border capitalize tracking-wide",
+                    currentStatus.badge
+                )}>
+                    {currentStatus.label}
+                </span>
+            </div>
+
+            {/* Main Details Badges (Human/Date/Type) */}
+            <div className="flex items-center gap-2 pl-3 flex-wrap">
+                {/* Person Type Badge */}
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+                    <TipoIcon className="size-3.5 text-slate-600 dark:text-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                        {contato.tipo}
+                    </span>
+                </div>
+
+                {/* Date Badge */}
+                <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700">
+                    <Calendar className="size-3.5 text-slate-600 dark:text-slate-400" />
+                    <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                        {relativeDate.toUpperCase()}
+                    </span>
                 </div>
             </div>
-        </Card>
+
+            {/* Action Footer */}
+            <div className="flex items-center gap-3 pl-3 mt-1 pt-3 border-t border-gray-100 dark:border-zinc-800">
+                <button
+                    className="flex-1 h-9 rounded-lg bg-gray-900 dark:bg-zinc-700 hover:bg-gray-800 dark:hover:bg-zinc-600 text-white text-xs font-medium flex items-center justify-center gap-2 transition-colors shadow-sm"
+                >
+                    Ver Detalhes
+                </button>
+
+                <button
+                    onClick={handleWhatsappClick}
+                    className="size-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 flex items-center justify-center transition-colors"
+                >
+                    <MessageCircle className="size-4" />
+                </button>
+            </div>
+        </div>
     )
 }

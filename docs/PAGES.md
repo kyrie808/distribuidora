@@ -29,6 +29,13 @@ O Dashboard foi refatorado para ser **modular e altamente responsivo**:
 - `AlertasFinanceiroWidget`: Monitora pagamentos pendentes ("Fiado").
 - `AlertasRecompraWidget`: Monitora ciclo de vida do cliente.
 - `EstoqueWidget`: Monitora níveis de estoque.
+- `LogisticsWidget`: Monitora status de entregas e pendências.
+- `TopIndicadoresWidget`: Ranking de performance de indicadores (Glassmorphism + Gold/Silver/Bronze).
+
+### Lógica de Dados (Dashboard)
+- **Financeiro (Cash Basis)**: Métricas de Faturamento e Lucro consideram apenas vendas com `pago = true`. O filtro de data aplica-se à `data` da venda.
+- **Operacional**: Métricas de Entregas e Vendas consideram a data de entrega/realização.
+- **Filtro Global**: O `MonthPicker` controla o período visualizado. Hooks utilizam este contexto para filtrar queries no Supabase.
 
 ### Nova Venda (PDV)
 Focado em velocidade. Layout otimizado para mobile com input facilitado e feedback rápido.

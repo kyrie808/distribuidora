@@ -427,64 +427,66 @@ export function Estoque() {
     }
 
     return (
-        <>
-            <Header title="🧊 Geladeira" showBack />
-            <div className="flex flex-col h-[calc(100vh-4rem)]">
-                {/* Cena 3D - Dois terços superiores */}
-                <div className="h-[65vh] bg-gradient-to-b from-blue-50 to-gray-100 relative">
-                    <Canvas
-                        shadows
-                        camera={{ position: [0, 0, 22], fov: 45 }}
-                    >
-                        <GeladeiraScene produtos={produtosMassa} />
-                    </Canvas>
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
+            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+                <Header title="🧊 Geladeira" showBack className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none" />
+                <div className="flex flex-col h-[calc(100vh-4rem)]">
+                    {/* Cena 3D - Dois terços superiores */}
+                    <div className="h-[65vh] bg-gradient-to-b from-blue-50 to-gray-100 relative">
+                        <Canvas
+                            shadows
+                            camera={{ position: [0, 0, 22], fov: 45 }}
+                        >
+                            <GeladeiraScene produtos={produtosMassa} />
+                        </Canvas>
 
-                    {/* Legenda flutuante */}
-                    <div className="absolute bottom-3 left-3 right-3 flex justify-center gap-4 text-xs">
-                        <div className="flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
-                            <div className="w-3 h-3 rounded-full bg-accent-500" />
-                            <span className="font-medium">1kg: {total1kg}</span>
-                        </div>
-                        <div className="flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
-                            <div className="w-3 h-3 rounded-full bg-primary-500" />
-                            <span className="font-medium">4kg: {total4kg}</span>
-                        </div>
-                    </div>
-
-                    {/* DEBUG: Capacidade das zonas */}
-                    <div className="absolute top-3 left-3 bg-black/75 text-white px-3 py-2 rounded text-xs font-mono">
-                        <div>Z1: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
-                        <div>Z2: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
-                    </div>
-                </div>
-
-                {/* Controles - Metade inferior */}
-                <div className="flex-1 overflow-y-auto">
-                    <PageContainer className="py-4">
-                        <h2 className="text-sm font-medium text-gray-500 mb-3">Controle de Estoque</h2>
-
-                        {produtosMassa.length === 0 ? (
-                            <Card className="text-center py-8 text-gray-500">
-                                <Box className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                <p>Nenhum produto de massa cadastrado</p>
-                                <p className="text-xs mt-1">Cadastre produtos com "1kg" ou "4kg" no nome</p>
-                            </Card>
-                        ) : (
-                            <div className="space-y-3">
-                                {produtosMassa.map(produto => (
-                                    <EstoqueCard
-                                        key={produto.id}
-                                        produto={produto}
-                                        onIncrement={() => handleUpdateEstoque(produto, 1)}
-                                        onDecrement={() => handleUpdateEstoque(produto, -1)}
-                                        isUpdating={updatingId === produto.id}
-                                    />
-                                ))}
+                        {/* Legenda flutuante */}
+                        <div className="absolute bottom-3 left-3 right-3 flex justify-center gap-4 text-xs">
+                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
+                                <div className="w-3 h-3 rounded-full bg-accent-500" />
+                                <span className="font-medium">1kg: {total1kg}</span>
                             </div>
-                        )}
-                    </PageContainer>
+                            <div className="flex items-center gap-2 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full shadow-sm">
+                                <div className="w-3 h-3 rounded-full bg-primary-500" />
+                                <span className="font-medium">4kg: {total4kg}</span>
+                            </div>
+                        </div>
+
+                        {/* DEBUG: Capacidade das zonas */}
+                        <div className="absolute top-3 left-3 bg-black/75 text-white px-3 py-2 rounded text-xs font-mono">
+                            <div>Z1: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
+                            <div>Z2: {Math.floor(10 / ((0.12 * 2) + 1.08))}×{Math.floor(6.4 / ((0.12 * 2) + 1.08))} = {Math.floor(10 / ((0.12 * 2) + 1.08)) * Math.floor(6.4 / ((0.12 * 2) + 1.08))}</div>
+                        </div>
+                    </div>
+
+                    {/* Controles - Metade inferior */}
+                    <div className="flex-1 overflow-y-auto">
+                        <PageContainer className="py-4 pt-0">
+                            <h2 className="text-sm font-medium text-gray-500 mb-3">Controle de Estoque</h2>
+
+                            {produtosMassa.length === 0 ? (
+                                <Card className="text-center py-8 text-gray-500">
+                                    <Box className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p>Nenhum produto de massa cadastrado</p>
+                                    <p className="text-xs mt-1">Cadastre produtos com "1kg" ou "4kg" no nome</p>
+                                </Card>
+                            ) : (
+                                <div className="space-y-3">
+                                    {produtosMassa.map(produto => (
+                                        <EstoqueCard
+                                            key={produto.id}
+                                            produto={produto}
+                                            onIncrement={() => handleUpdateEstoque(produto, 1)}
+                                            onDecrement={() => handleUpdateEstoque(produto, -1)}
+                                            isUpdating={updatingId === produto.id}
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                        </PageContainer>
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }

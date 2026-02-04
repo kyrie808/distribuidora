@@ -38,9 +38,13 @@ Componentes de negócio específicos.
 - `ContatoFormModal`: Modal de criação/edição. Gerencia autocomplete de indicação e busca de CEP.
 
 ### Dashboard (`components/dashboard/`)
-- `AlertasFinanceiroWidget`: Painel de "Fiado" e cobranças.
+- `AlertasFinanceiroWidget`: Painel de "Fiado" e cobranças (Regime de Caixa).
 - `AlertasRecompraWidget`: Monitor de churn/recompra.
 - `EstoqueWidget`: Indicadores de nível de estoque.
+- `TopIndicadoresWidget`: Ranking visual com medalhas para os top indicadores.
+- `UltimasVendasWidget`: Lista truncada das vendas mais recentes no período selecionado.
+- `LogisticsWidget`: Resumo de status de entregas (Pendentes vs Entregues).
+- `DashboardCarousel`: Wrapper para widgets secundários (Alertas) em layout mobile.
 
 ### Vendas (`components/vendas/`) e Outros
 (Componentes sendo migrados gradualmente para pastas de features)

@@ -38,6 +38,23 @@ O Dashboard financeiro agora reflete estritamente o **Regime de Caixa** e filtro
 
 ---
 
+## 2026-02-03: Regime de Caixa para Dashboard Financeiro
+
+### Decisão
+Adotar estritamente o **Regime de Caixa** para todas as métricas financeiras (Faturamento, Lucro) no Dashboard.
+
+### Motivação
+- Discrepância entre vendas realizadas (competência) e dinheiro em caixa.
+- Necessidade de visão real do fluxo de caixa ("O que entrou").
+- Vendas antigas marcadas como pagas no mês atual devem refletir no caixa do mês (se aplicável) ou, na decisão atual, filtramos pela `data` da venda mas exigimos `pago=true`. *Nota: A implementação atual filtra por data da venda + pago=true. Para fluxo de caixa puro (data do pagamento), seria necessário um campo `data_pagamento`.*
+
+### Implementação
+- Filtro: `pago = true`.
+- Data: `data` da venda dentro do range selecionado.
+- Lucro: `(Venda.total - Venda.custo)` apenas para vendas pagas.
+
+---
+
 ## 2026-02-03: Sistema de Tema Controlado pelo Usuário
 
 ### Decisão

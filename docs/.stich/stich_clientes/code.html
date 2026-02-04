@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MassasCRM - Command Stack</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Noto+Sans:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "primary-light": "#b983f4",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#191022",
+                        "glass-surface": "rgba(255, 255, 255, 0.05)",
+                        "glass-border": "rgba(255, 255, 255, 0.1)",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                    boxShadow: {
+                        'neon': '0 0 10px rgba(127, 19, 236, 0.5), 0 0 20px rgba(127, 19, 236, 0.3)',
+                        'neon-sm': '0 0 5px rgba(127, 19, 236, 0.5)',
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .glass-card {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display antialiased selection:bg-primary selection:text-white">
+<!-- Background Ambient Glows -->
+<div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+<div class="absolute top-[-10%] left-[-20%] w-[70vw] h-[70vw] bg-primary/20 rounded-full blur-[100px] opacity-40 mix-blend-screen"></div>
+<div class="absolute bottom-[-10%] right-[-20%] w-[80vw] h-[80vw] bg-blue-600/10 rounded-full blur-[120px] opacity-30 mix-blend-screen"></div>
+<div class="absolute top-[40%] left-[20%] w-[40vw] h-[40vw] bg-fuchsia-600/10 rounded-full blur-[80px] opacity-20"></div>
+</div>
+<!-- Main Content Container -->
+<div class="relative z-10 flex min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-black/20">
+<!-- Top App Bar -->
+<header class="sticky top-0 z-50 transition-all duration-300 bg-background-dark/80 backdrop-blur-md border-b border-white/5">
+<div class="flex items-center px-4 py-3 justify-between">
+<button class="text-white/80 hover:text-white flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[28px]">menu_open</span>
+</button>
+<h2 class="text-white text-lg font-bold leading-tight tracking-wide flex-1 text-center uppercase">Command Stack</h2>
+<div class="flex items-center justify-end gap-2">
+<button class="flex size-10 shrink-0 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">search</span>
+</button>
+<button class="relative flex size-10 shrink-0 items-center justify-center rounded-full text-white/80 hover:text-white hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-[24px]">notifications</span>
+<span class="absolute top-2 right-2 size-2 bg-red-500 rounded-full shadow-neon-sm"></span>
+</button>
+</div>
+</div>
+</header>
+<!-- Filter Stories (Carousel) -->
+<div class="pt-6 pb-2 pl-4">
+<div class="flex w-full overflow-x-auto hide-scrollbar gap-4 pr-4 pb-4">
+<!-- Story Item: Hot Leads -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="size-[72px] rounded-full p-[2px] bg-gradient-to-tr from-[#FF4D4D] via-[#F9CB28] to-[#FF4D4D] shadow-neon-sm">
+<div class="size-full rounded-full bg-background-dark flex items-center justify-center border-2 border-transparent">
+<div class="size-full rounded-full bg-gradient-to-br from-[#FF4D4D]/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-[#FF4D4D] text-[32px]">local_fire_department</span>
+</div>
+</div>
+</div>
+<span class="text-xs font-medium text-white/90 tracking-wide">Hot Leads</span>
+</div>
+<!-- Story Item: Inactives -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="size-[72px] rounded-full p-[2px] bg-gradient-to-tr from-cyan-400 to-blue-600">
+<div class="size-full rounded-full bg-background-dark flex items-center justify-center border-2 border-transparent">
+<div class="size-full rounded-full bg-gradient-to-br from-cyan-400/20 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-cyan-400 text-[32px]">history_toggle_off</span>
+</div>
+</div>
+</div>
+<span class="text-xs font-medium text-white/90 tracking-wide">Inactives</span>
+</div>
+<!-- Story Item: VIPs -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group">
+<div class="size-[72px] rounded-full p-[2px] bg-gradient-to-tr from-primary via-fuchsia-500 to-primary shadow-neon">
+<div class="size-full rounded-full bg-background-dark flex items-center justify-center border-2 border-transparent">
+<div class="size-full rounded-full bg-gradient-to-br from-primary/30 to-transparent flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-light text-[32px]">diamond</span>
+</div>
+</div>
+</div>
+<span class="text-xs font-medium text-white/90 tracking-wide">VIPs</span>
+</div>
+<!-- Story Item: New -->
+<div class="flex flex-col items-center gap-2 min-w-[72px] cursor-pointer group opacity-60 hover:opacity-100 transition-opacity">
+<div class="size-[72px] rounded-full p-[2px] border border-dashed border-white/30">
+<div class="size-full rounded-full bg-white/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-white/50 text-[32px]">add</span>
+</div>
+</div>
+<span class="text-xs font-medium text-white/50 tracking-wide">Filter</span>
+</div>
+</div>
+</div>
+<!-- Scrollable Content Stack -->
+<main class="flex-1 px-4 flex flex-col gap-5 pb-20">
+<!-- Section Header -->
+<div class="flex items-center justify-between pt-2">
+<h3 class="text-white text-xl font-bold tracking-tight">Priority Stack</h3>
+<span class="text-xs font-mono text-primary-light bg-primary/10 px-2 py-1 rounded border border-primary/20">12 ACTIVE</span>
+</div>
+<!-- Card 1: High Priority -->
+<div class="relative glass-card rounded-2xl overflow-hidden group active:scale-[0.98] transition-transform duration-200">
+<!-- Neon Status Bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary shadow-[0_0_15px_#7f13ec] z-10"></div>
+<div class="flex p-4 gap-4">
+<div class="flex-1 flex flex-col justify-between z-10">
+<div class="mb-2">
+<div class="flex items-center gap-2 mb-1">
+<h4 class="text-white text-lg font-bold leading-tight">Galaxy Bistro</h4>
+<span class="size-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]"></span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-400 text-xs font-medium uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 
+                                    Ordered 2h ago
+                                </p>
+<p class="text-white font-mono text-sm font-semibold">$4,520.00 <span class="text-white/40 font-normal">/ mo</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-3">
+<button class="flex-1 h-9 bg-primary/20 hover:bg-primary/30 border border-primary/30 rounded-lg flex items-center justify-center gap-2 text-primary-light text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+                                Actions
+                            </button>
+<button class="size-9 rounded-lg bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 border border-white/10">
+<span class="material-symbols-outlined text-[18px]">chat</span>
+</button>
+</div>
+</div>
+<!-- Card Image -->
+<div class="w-24 shrink-0 rounded-xl overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+<div class="w-full h-full bg-center bg-cover" data-alt="Dark moody interior of a high end futuristic bistro with neon purple lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCcui2NHq1KrbnHUWuj9H6Br1ja8yZ_kuo1onwoDvHJ_IECoVAcRb77dTOhkeaXpJGyZ5OQfr-Unx-FiNKH2CONrylNJ2CbJ5VOz37Ykw0nhU4H4WW38s9V_g5v1oZqmBhHIRhHX23-jRZMtQ6qzv63LbRoGkrqsLnomSV46mF8JOc7Iq_3LUtpU9Jo86YM5BR2szONs79r-HadsWlmfOBhDhT1C0KdoQSftQVMhfoiatFyfJi2R5GmQFVect7hce8Ktehe1dANdJvW');"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Medium Priority -->
+<div class="relative glass-card rounded-2xl overflow-hidden group active:scale-[0.98] transition-transform duration-200">
+<!-- Neon Status Bar (Different Color for visual variety if needed, but keeping primary for consistency per prompt) -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-cyan-500 shadow-[0_0_15px_#06b6d4] z-10"></div>
+<div class="flex p-4 gap-4">
+<div class="flex-1 flex flex-col justify-between z-10">
+<div class="mb-2">
+<div class="flex items-center gap-2 mb-1">
+<h4 class="text-white text-lg font-bold leading-tight">Orbital Eats</h4>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-400 text-xs font-medium uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">calendar_month</span> 
+                                    Last: 3 days ago
+                                </p>
+<p class="text-white font-mono text-sm font-semibold">$1,280.00 <span class="text-white/40 font-normal">/ mo</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-3">
+<button class="flex-1 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-2 text-white/90 text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px]">more_horiz</span>
+                                Details
+                            </button>
+</div>
+</div>
+<div class="w-24 shrink-0 rounded-xl overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+<div class="w-full h-full bg-center bg-cover" data-alt="Modern food packaging on a table with cyberpunk aesthetic lighting" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBlrqgL_iQZ-hcYjD1QYFe4Pzc2Ysc9g0ijOgmvccvVFE4Gijss0LHRntk4n1dd9c6facwrw-OiqeH8bbdelUWjahnxUBOKMhJpw57AqVmG4N2KV8pabWhK0aVjARSy_KhywGK0ojOpPOpIR64p8C24rnrp6TYupu7PG1H3u-Pg-6glGiild_2cuN8RH-R47YElttrkxUs-ojn8uJa7O1qIJ5TEdCZI9E8ibKGIBx8PqUnx_r2iHUmEekTr7cbkuItSHFsM4LuRF6Mk');"></div>
+</div>
+</div>
+</div>
+<!-- Card 3: Warning/Inactive -->
+<div class="relative glass-card rounded-2xl overflow-hidden group active:scale-[0.98] transition-transform duration-200 opacity-90">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-rose-500 shadow-[0_0_10px_#f43f5e] z-10"></div>
+<div class="flex p-4 gap-4">
+<div class="flex-1 flex flex-col justify-between z-10">
+<div class="mb-2">
+<div class="flex items-center gap-2 mb-1">
+<h4 class="text-white text-lg font-bold leading-tight">Nebula Foods</h4>
+<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 uppercase">At Risk</span>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-rose-300/80 text-xs font-medium uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">warning</span> 
+                                    Invoice Overdue
+                                </p>
+<p class="text-white font-mono text-sm font-semibold">$8,900.00 <span class="text-white/40 font-normal">pending</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-3">
+<button class="flex-1 h-9 bg-rose-500/20 hover:bg-rose-500/30 border border-rose-500/30 rounded-lg flex items-center justify-center gap-2 text-rose-200 text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px]">mail</span>
+                                Remind
+                            </button>
+</div>
+</div>
+<div class="w-24 shrink-0 rounded-xl overflow-hidden relative grayscale-[50%]">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+<div class="w-full h-full bg-center bg-cover" data-alt="Abstract dark warehouse interior with boxes" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC9WICOKAoPtB1M93Hzd20b5QJiL514lYYWICQ0GV3uu49PFdVkNaZsD_MXVUPuHDSdqiQB6WbYx9JmbIhMroY8Es7A0weuuIl936dtl9Ax2pMnPKc0FMX3cra84auNIz-9Zt7-uTiCaGyfk_-0XPQ7FLqKbzbdESSwdMXmvDam36pN7M57Sn003r1FOJOs3WaT9ihxWEJBPxbJJkuTOxECaBzwA3t0h-d89dtJe_mhL1Dj-_3lZa4jUTyDeLHjWGFEjb2gdfmMDiHP');"></div>
+</div>
+</div>
+</div>
+<!-- Card 4: Standard -->
+<div class="relative glass-card rounded-2xl overflow-hidden group active:scale-[0.98] transition-transform duration-200">
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-primary shadow-[0_0_15px_#7f13ec] z-10"></div>
+<div class="flex p-4 gap-4">
+<div class="flex-1 flex flex-col justify-between z-10">
+<div class="mb-2">
+<div class="flex items-center gap-2 mb-1">
+<h4 class="text-white text-lg font-bold leading-tight">Void Kitchen</h4>
+</div>
+<div class="flex flex-col gap-1">
+<p class="text-gray-400 text-xs font-medium uppercase tracking-wider flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 
+                                    Last: 12h ago
+                                </p>
+<p class="text-white font-mono text-sm font-semibold">$3,150.00 <span class="text-white/40 font-normal">/ mo</span></p>
+</div>
+</div>
+<div class="flex items-center gap-3 mt-3">
+<button class="flex-1 h-9 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center gap-2 text-white/90 text-sm font-semibold transition-all">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+                                Quick View
+                            </button>
+</div>
+</div>
+<div class="w-24 shrink-0 rounded-xl overflow-hidden relative">
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+<div class="w-full h-full bg-center bg-cover" data-alt="Modern dark kitchen setup with professional chefs" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuARBYDciNcULzU8BIxIfS6lPASvPelMrx00LUCn48Rn8pMlec1Ey3JkF6IjkheU28ZNZ5ytIwJpkFx_3vl4v8RMJ4UWd6xDLmaZPN_CZM7UQLqaNEfsM9eVsIiVSVuDtUxEhtZgpF9cWGw4N8BX1OdyVLD5jOmuNjX99mYoAnEaaiNlYAt5ZV1ygr4iUOJGviobWVoyP7loNwr9YGnQk8stkQqzwvweVg8oOOp300jjkdWPlcFZ7YVIPFCa0dnRAtrE3FOk-tFiv9EY');"></div>
+</div>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (Optional for "Command" feel) -->
+<div class="fixed bottom-6 right-6 z-50">
+<button class="size-14 rounded-full bg-primary text-white shadow-neon flex items-center justify-center hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[32px]">add</span>
+</button>
+</div>
+<!-- Bottom Navigation Hint -->
+<div class="fixed bottom-0 left-0 w-full h-20 bg-gradient-to-t from-background-dark to-transparent pointer-events-none z-40"></div>
+</div>
+</body></html>

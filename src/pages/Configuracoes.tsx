@@ -229,249 +229,252 @@ export function Configuracoes() {
         mensagemRecompra !== config.mensagemRecompra
 
     return (
-        <>
-            <Header
-                title="Configurações"
-                showBack
-            />
-            <PageContainer>
-                {loading && <LoadingScreen message="Carregando configurações..." />}
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
+            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+                <Header
+                    title="Configurações"
+                    showBack
+                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
+                />
+                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                    {loading && <LoadingScreen message="Carregando configurações..." />}
 
-                {!loading && (
-                    <div className="space-y-6">
-                        {/* Ciclos de Recompra */}
-                        <Card>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <Clock className="h-5 w-5 text-primary-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">Ciclos de Recompra</h3>
-                                    <p className="text-sm text-gray-500">Dias até alerta de recompra</p>
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Pessoa Física (B2C)
-                                    </label>
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={90}
-                                            value={cicloB2C}
-                                            onChange={(e) => setCicloB2C(Number(e.target.value))}
-                                            className="input w-20 text-center"
-                                        />
-                                        <span className="text-sm text-gray-500">dias</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Pessoa Jurídica (B2B)
-                                    </label>
-                                    <div className="flex items-center gap-2">
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={90}
-                                            value={cicloB2B}
-                                            onChange={(e) => setCicloB2B(Number(e.target.value))}
-                                            className="input w-20 text-center"
-                                        />
-                                        <span className="text-sm text-gray-500">dias</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-
-                        {/* Recompensa por Indicação */}
-                        <Card>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-success-100 rounded-full flex items-center justify-center">
-                                    <DollarSign className="h-5 w-5 text-success-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">Recompensa por Indicação</h3>
-                                    <p className="text-sm text-gray-500">Valor por indicação convertida</p>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <span className="text-gray-500">R$</span>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    step={0.5}
-                                    value={recompensaValor}
-                                    onChange={(e) => setRecompensaValor(Number(e.target.value))}
-                                    className="input w-24 text-center"
-                                />
-                                <span className="text-sm text-gray-500">por cliente convertido</span>
-                            </div>
-
-                            <div className="mt-3 flex items-start gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
-                                <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
-                                <p>
-                                    Indicação só conta como convertida quando o indicado faz sua primeira compra.
-                                </p>
-                            </div>
-                        </Card>
-
-                        {/* Template de Mensagem */}
-                        <Card>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center">
-                                    <MessageSquare className="h-5 w-5 text-accent-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">Mensagem de Recompra</h3>
-                                    <p className="text-sm text-gray-500">Template para WhatsApp</p>
-                                </div>
-                            </div>
-
-                            <textarea
-                                value={mensagemRecompra}
-                                onChange={(e) => setMensagemRecompra(e.target.value)}
-                                rows={4}
-                                className="input resize-none"
-                                placeholder="Olá {{nome}}! Faz {{dias}} dias..."
-                            />
-
-                            <div className="mt-3 flex flex-wrap gap-2">
-                                <span className="text-xs text-gray-500">Variáveis:</span>
-                                <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{nome}}'}</code>
-                                <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{dias}}'}</code>
-                            </div>
-                        </Card>
-
-
-
-                        {/* Locais de Partida */}
-                        <Card>
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                    <MapPin className="h-5 w-5 text-primary-600" />
-                                </div>
-                                <div>
-                                    <h3 className="font-semibold text-gray-900">Locais de Partida</h3>
-                                    <p className="text-sm text-gray-500">Pontos iniciais para rotas</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-4">
-                                {locais.map(local => (
-                                    <div key={local.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                        <div>
-                                            <p className="font-medium text-gray-900">{local.nome}</p>
-                                            <p className="text-xs text-gray-500">{local.endereco}</p>
-                                            <p className="text-[10px] text-gray-400 mt-1">
-                                                Lat: {local.lat.toFixed(4)}, Lng: {local.lng.toFixed(4)}
-                                            </p>
-                                        </div>
-                                        <button
-                                            onClick={() => handleRemoveLocal(local.id)}
-                                            className="text-red-500 hover:text-red-700 p-2"
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                ))}
-
-                                <div className="grid gap-2 border-t pt-4">
-                                    <h4 className="text-sm font-medium">Novo Local</h4>
-                                    <Input
-                                        placeholder="Nome (Ex: Sede)"
-                                        value={novoLocalNome}
-                                        onChange={e => setNovoLocalNome(e.target.value)}
-                                    />
-                                    <div className="flex gap-2">
-                                        <Input
-                                            placeholder="Endereço completo ou CEP"
-                                            value={novoLocalEndereco}
-                                            onChange={handleEnderecoChange}
-                                            className="flex-1"
-                                        />
-                                        <Button
-                                            onClick={handleAddLocal}
-                                            disabled={addingLocal}
-                                            isLoading={addingLocal}
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
-
-                        {/* Links de navegação */}
-                        <Card
-                            hover
-                            onClick={() => navigate('/produtos')}
-                            className="cursor-pointer"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                        <Package className="h-5 w-5 text-indigo-600" />
+                    {!loading && (
+                        <div className="space-y-6">
+                            {/* Ciclos de Recompra */}
+                            <Card>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <Clock className="h-5 w-5 text-primary-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900">Gerenciar Produtos</h3>
-                                        <p className="text-sm text-gray-500">Adicionar, editar e desativar produtos</p>
+                                        <h3 className="font-semibold text-gray-900">Ciclos de Recompra</h3>
+                                        <p className="text-sm text-gray-500">Dias até alerta de recompra</p>
                                     </div>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-gray-400" />
-                            </div>
-                        </Card>
 
-                        <Card
-                            hover
-                            onClick={() => navigate('/relatorio-fabrica')}
-                            className="cursor-pointer"
-                        >
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Pessoa Física (B2C)
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={90}
+                                                value={cicloB2C}
+                                                onChange={(e) => setCicloB2C(Number(e.target.value))}
+                                                className="input w-20 text-center"
+                                            />
+                                            <span className="text-sm text-gray-500">dias</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Pessoa Jurídica (B2B)
+                                        </label>
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="number"
+                                                min={1}
+                                                max={90}
+                                                value={cicloB2B}
+                                                onChange={(e) => setCicloB2B(Number(e.target.value))}
+                                                className="input w-20 text-center"
+                                            />
+                                            <span className="text-sm text-gray-500">dias</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            {/* Recompensa por Indicação */}
+                            <Card>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-success-100 rounded-full flex items-center justify-center">
+                                        <DollarSign className="h-5 w-5 text-success-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Recompensa por Indicação</h3>
+                                        <p className="text-sm text-gray-500">Valor por indicação convertida</p>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <span className="text-gray-500">R$</span>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        step={0.5}
+                                        value={recompensaValor}
+                                        onChange={(e) => setRecompensaValor(Number(e.target.value))}
+                                        className="input w-24 text-center"
+                                    />
+                                    <span className="text-sm text-gray-500">por cliente convertido</span>
+                                </div>
+
+                                <div className="mt-3 flex items-start gap-2 text-xs text-gray-500 bg-gray-50 p-2 rounded-lg">
+                                    <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                                    <p>
+                                        Indicação só conta como convertida quando o indicado faz sua primeira compra.
+                                    </p>
+                                </div>
+                            </Card>
+
+                            {/* Template de Mensagem */}
+                            <Card>
+                                <div className="flex items-center gap-3 mb-4">
                                     <div className="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center">
                                         <MessageSquare className="h-5 w-5 text-accent-600" />
                                     </div>
                                     <div>
-                                        <h3 className="font-semibold text-gray-900">Relatório para Fábrica</h3>
-                                        <p className="text-sm text-gray-500">Gerar pedido por período</p>
+                                        <h3 className="font-semibold text-gray-900">Mensagem de Recompra</h3>
+                                        <p className="text-sm text-gray-500">Template para WhatsApp</p>
                                     </div>
                                 </div>
-                                <ChevronRight className="h-5 w-5 text-gray-400" />
+
+                                <textarea
+                                    value={mensagemRecompra}
+                                    onChange={(e) => setMensagemRecompra(e.target.value)}
+                                    rows={4}
+                                    className="input resize-none"
+                                    placeholder="Olá {{nome}}! Faz {{dias}} dias..."
+                                />
+
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                    <span className="text-xs text-gray-500">Variáveis:</span>
+                                    <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{nome}}'}</code>
+                                    <code className="text-xs bg-gray-100 px-2 py-0.5 rounded">{'{{dias}}'}</code>
+                                </div>
+                            </Card>
+
+
+
+                            {/* Locais de Partida */}
+                            <Card>
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                        <MapPin className="h-5 w-5 text-primary-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-semibold text-gray-900">Locais de Partida</h3>
+                                        <p className="text-sm text-gray-500">Pontos iniciais para rotas</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    {locais.map(local => (
+                                        <div key={local.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p className="font-medium text-gray-900">{local.nome}</p>
+                                                <p className="text-xs text-gray-500">{local.endereco}</p>
+                                                <p className="text-[10px] text-gray-400 mt-1">
+                                                    Lat: {local.lat.toFixed(4)}, Lng: {local.lng.toFixed(4)}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => handleRemoveLocal(local.id)}
+                                                className="text-red-500 hover:text-red-700 p-2"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    <div className="grid gap-2 border-t pt-4">
+                                        <h4 className="text-sm font-medium">Novo Local</h4>
+                                        <Input
+                                            placeholder="Nome (Ex: Sede)"
+                                            value={novoLocalNome}
+                                            onChange={e => setNovoLocalNome(e.target.value)}
+                                        />
+                                        <div className="flex gap-2">
+                                            <Input
+                                                placeholder="Endereço completo ou CEP"
+                                                value={novoLocalEndereco}
+                                                onChange={handleEnderecoChange}
+                                                className="flex-1"
+                                            />
+                                            <Button
+                                                onClick={handleAddLocal}
+                                                disabled={addingLocal}
+                                                isLoading={addingLocal}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+
+                            {/* Links de navegação */}
+                            <Card
+                                hover
+                                onClick={() => navigate('/produtos')}
+                                className="cursor-pointer"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                                            <Package className="h-5 w-5 text-indigo-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">Gerenciar Produtos</h3>
+                                            <p className="text-sm text-gray-500">Adicionar, editar e desativar produtos</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                                </div>
+                            </Card>
+
+                            <Card
+                                hover
+                                onClick={() => navigate('/relatorio-fabrica')}
+                                className="cursor-pointer"
+                            >
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-accent-100 rounded-full flex items-center justify-center">
+                                            <MessageSquare className="h-5 w-5 text-accent-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">Relatório para Fábrica</h3>
+                                            <p className="text-sm text-gray-500">Gerar pedido por período</p>
+                                        </div>
+                                    </div>
+                                    <ChevronRight className="h-5 w-5 text-gray-400" />
+                                </div>
+                            </Card>
+
+                            {/* Actions */}
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="secondary"
+                                    className="flex-1"
+                                    leftIcon={<RefreshCw className="h-4 w-4" />}
+                                    onClick={handleReset}
+                                    disabled={!hasChanges || saving}
+                                >
+                                    Descartar
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    className="flex-1"
+                                    leftIcon={<Save className="h-4 w-4" />}
+                                    onClick={handleSave}
+                                    isLoading={saving}
+                                    disabled={!hasChanges}
+                                >
+                                    Salvar
+                                </Button>
                             </div>
-                        </Card>
 
-                        {/* Actions */}
-                        <div className="flex gap-3">
-                            <Button
-                                variant="secondary"
-                                className="flex-1"
-                                leftIcon={<RefreshCw className="h-4 w-4" />}
-                                onClick={handleReset}
-                                disabled={!hasChanges || saving}
-                            >
-                                Descartar
-                            </Button>
-                            <Button
-                                variant="primary"
-                                className="flex-1"
-                                leftIcon={<Save className="h-4 w-4" />}
-                                onClick={handleSave}
-                                isLoading={saving}
-                                disabled={!hasChanges}
-                            >
-                                Salvar
-                            </Button>
+                            {/* App Info */}
                         </div>
-
-                        {/* App Info */}
-                    </div>
-                )}
-            </PageContainer>
-        </>
+                    )}
+                </PageContainer>
+            </div>
+        </div>
     )
 }

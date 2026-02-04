@@ -5,6 +5,7 @@ import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Header } from '../components/layout/Header'
+import { PageContainer } from '../components/layout/PageContainer'
 import { Check, MapPin, Navigation, Truck } from 'lucide-react'
 import { useCep } from '../hooks/useCep'
 import { useToast } from '../components/ui/Toast'
@@ -277,174 +278,180 @@ export function Entregas() {
     }, {})
 
     return (
-        <div className="space-y-6 pb-20">
-            <Header
-                title="Rota Inteligente"
-            // subtitle="Otimize suas entregas com IA" // Header doesn't have subtitle prop based on usage in Vendas.tsx
-            />
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
+            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+                <Header
+                    title="Rota Inteligente"
+                    // subtitle="Otimize suas entregas com IA" // Header doesn't have subtitle prop based on usage in Vendas.tsx
+                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
+                    showBack
+                />
 
-            {loadingSales ? (
-                <div className="text-center py-10 text-gray-400">Carregando entregas...</div>
-            ) : pendentes.length === 0 ? (
-                <div className="text-center py-10 text-gray-400">Nenhuma entrega pendente encontrada.</div>
-            ) : (
-                <div className="grid gap-6 md:grid-cols-2 p-4">
-                    {/* Configuração de Rota */}
-                    <div className="md:col-span-2">
-                        <Card className="p-4 bg-[#1a1f2e] border-gray-800">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="p-2 bg-purple-500/10 rounded-lg">
-                                    <MapPin className="h-5 w-5 text-purple-400" />
-                                </div>
-                                <h3 className="text-gray-200 font-medium">Ponto de Partida (Sede/Depósito)</h3>
-                            </div>
-
-                            <div className="space-y-3">
-                                <select
-                                    value={locais.some(l => l.endereco === origin) ? origin : 'outro'}
-                                    onChange={(e) => {
-                                        const val = e.target.value
-                                        if (val === 'outro') {
-                                            if (locais.some(l => l.endereco === origin)) {
-                                                setOrigin('')
-                                            }
-                                        } else {
-                                            setOrigin(val)
-                                            localStorage.setItem('routeOrigin', val)
-                                        }
-                                    }}
-                                    className="w-full bg-black/20 border border-gray-700 rounded-lg p-3 text-gray-200 focus:outline-none focus:border-purple-500 transition-colors"
-                                >
-                                    <option value="" disabled>Selecione um local...</option>
-                                    {locais.map(local => (
-                                        <option key={local.id} value={local.endereco}>
-                                            {local.nome}
-                                        </option>
-                                    ))}
-                                    <option value="outro">Outro...</option>
-                                </select>
-
-                                {(origin === '' || !locais.some(l => l.endereco === origin)) && (
-                                    <div className="animate-fadeIn">
-                                        <Input
-                                            placeholder="Digite o endereço de partida..."
-                                            value={origin}
-                                            onChange={handleOriginChange}
-                                            className="w-full"
-                                            autoFocus
-                                        />
-                                        <p className="text-xs text-gray-500 mt-1">
-                                            Defina o endereço inicial para a otimização. Ele será salvo automaticamente.
-                                        </p>
+                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                    {loadingSales ? (
+                        <div className="text-center py-10 text-gray-400">Carregando entregas...</div>
+                    ) : pendentes.length === 0 ? (
+                        <div className="text-center py-10 text-gray-400">Nenhuma entrega pendente encontrada.</div>
+                    ) : (
+                        <div className="grid gap-6 md:grid-cols-2">
+                            {/* Configuração de Rota */}
+                            <div className="md:col-span-2">
+                                <Card className="p-4 bg-[#1a1f2e] border-gray-800">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="p-2 bg-purple-500/10 rounded-lg">
+                                            <MapPin className="h-5 w-5 text-purple-400" />
+                                        </div>
+                                        <h3 className="text-gray-200 font-medium">Ponto de Partida (Sede/Depósito)</h3>
                                     </div>
-                                )}
+
+                                    <div className="space-y-3">
+                                        <select
+                                            value={locais.some(l => l.endereco === origin) ? origin : 'outro'}
+                                            onChange={(e) => {
+                                                const val = e.target.value
+                                                if (val === 'outro') {
+                                                    if (locais.some(l => l.endereco === origin)) {
+                                                        setOrigin('')
+                                                    }
+                                                } else {
+                                                    setOrigin(val)
+                                                    localStorage.setItem('routeOrigin', val)
+                                                }
+                                            }}
+                                            className="w-full bg-black/20 border border-gray-700 rounded-lg p-3 text-gray-200 focus:outline-none focus:border-purple-500 transition-colors"
+                                        >
+                                            <option value="" disabled>Selecione um local...</option>
+                                            {locais.map(local => (
+                                                <option key={local.id} value={local.endereco}>
+                                                    {local.nome}
+                                                </option>
+                                            ))}
+                                            <option value="outro">Outro...</option>
+                                        </select>
+
+                                        {(origin === '' || !locais.some(l => l.endereco === origin)) && (
+                                            <div className="animate-fadeIn">
+                                                <Input
+                                                    placeholder="Digite o endereço de partida..."
+                                                    value={origin}
+                                                    onChange={handleOriginChange}
+                                                    className="w-full"
+                                                    autoFocus
+                                                />
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    Defina o endereço inicial para a otimização. Ele será salvo automaticamente.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Card>
                             </div>
-                        </Card>
-                    </div>
 
-                    {/* Lista de Seleção */}
-                    <Card className="p-4 space-y-4">
-                        <div className="flex justify-between items-center">
-                            <h3 className="font-semibold text-lg">Entregas Pendentes ({pendentes.length})</h3>
-                            <span className="text-sm text-gray-400">{selectedIds.length} selecionados</span>
-                        </div>
+                            {/* Lista de Seleção */}
+                            <Card className="p-4 space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h3 className="font-semibold text-lg">Entregas Pendentes ({pendentes.length})</h3>
+                                    <span className="text-sm text-gray-400">{selectedIds.length} selecionados</span>
+                                </div>
 
-                        <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
-                            {Object.entries(groupedPendentes).map(([bairro, items]) => (
-                                <div key={bairro} className="space-y-2">
-                                    <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider sticky top-0 bg-[#1a1f2e] py-1 z-10">
-                                        {bairro}
-                                    </h4>
-                                    {items.map((item: any) => (
-                                        <div
-                                            key={item.id}
-                                            onClick={() => toggleSelection(item.id)}
-                                            className={`
+                                <div className="space-y-6 max-h-[400px] overflow-y-auto pr-2">
+                                    {Object.entries(groupedPendentes).map(([bairro, items]) => (
+                                        <div key={bairro} className="space-y-2">
+                                            <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider sticky top-0 bg-[#1a1f2e] py-1 z-10">
+                                                {bairro}
+                                            </h4>
+                                            {items.map((item: any) => (
+                                                <div
+                                                    key={item.id}
+                                                    onClick={() => toggleSelection(item.id)}
+                                                    className={`
                                                 flex items-start gap-3 p-3 rounded-lg cursor-pointer border transition-colors
                                                 ${selectedIds.includes(item.id)
-                                                    ? 'bg-primary/10 border-primary/50'
-                                                    : 'bg-white/5 border-white/10 hover:bg-white/10'}
+                                                            ? 'bg-primary/10 border-primary/50'
+                                                            : 'bg-white/5 border-white/10 hover:bg-white/10'}
                                             `}
-                                        >
-                                            <div className={`
+                                                >
+                                                    <div className={`
                                                 w-5 h-5 rounded border flex items-center justify-center mt-0.5
                                                 ${selectedIds.includes(item.id)
-                                                    ? 'bg-primary border-primary'
-                                                    : 'border-gray-500'}
+                                                            ? 'bg-primary border-primary'
+                                                            : 'border-gray-500'}
                                             `}>
-                                                {selectedIds.includes(item.id) && <Check className="w-3 h-3 text-white" />}
-                                            </div>
-                                            <div>
-                                                <p className="font-medium text-sm">{item.cliente_nome}</p>
-                                                <p className="text-xs text-gray-400 truncate max-w-[200px]">{item.endereco}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ))}
-                        </div>
-
-                        <Button
-                            className="w-full"
-                            onClick={handleOptimize}
-                            disabled={loading || selectedIds.length === 0}
-                        >
-                            {loading ? (
-                                <span className="flex items-center gap-2">
-                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                    Calculando Melhor Rota...
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-2">
-                                    <Truck className="w-4 h-4" />
-                                    Gerar Rota Otimizada ⚡
-                                </span>
-                            )}
-                        </Button>
-                    </Card>
-
-                    {/* Resultado da Otimização */}
-                    <Card className="p-4 space-y-4 relative overflow-hidden">
-                        {!optimizedRoute ? (
-                            <div className="h-full flex flex-col items-center justify-center text-center text-gray-500 min-h-[200px] p-6">
-                                <MapPin className="w-12 h-12 mb-3 opacity-20" />
-                                <p>Selecione as entregas e clique em gerar para ver a rota otimizada aqui.</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="flex justify-between items-center">
-                                    <h3 className="font-semibold text-lg text-emerald-400">Rota Gerada</h3>
-                                </div>
-
-                                <div className="space-y-3 relative">
-                                    {/* Linha conectora vertical */}
-                                    <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-700/50 -z-10" />
-
-                                    {optimizedRoute.map((stop, index) => (
-                                        <div key={stop.id} className="flex items-start gap-4">
-                                            <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center shrink-0 z-10 font-bold text-emerald-500">
-                                                {index + 1}
-                                            </div>
-                                            <div className="bg-white/5 p-3 rounded-lg flex-1 border border-white/5">
-                                                <p className="font-medium">{stop.cliente}</p>
-                                                <p className="text-sm text-gray-400">{stop.endereco}</p>
-                                            </div>
+                                                        {selectedIds.includes(item.id) && <Check className="w-3 h-3 text-white" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="font-medium text-sm">{item.cliente_nome}</p>
+                                                        <p className="text-xs text-gray-400 truncate max-w-[200px]">{item.endereco}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     ))}
                                 </div>
 
                                 <Button
-                                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                                    onClick={openGoogleMaps}
+                                    className="w-full"
+                                    onClick={handleOptimize}
+                                    disabled={loading || selectedIds.length === 0}
                                 >
-                                    <Navigation className="w-4 h-4 mr-2" />
-                                    Iniciar Navegação 🗺️
+                                    {loading ? (
+                                        <span className="flex items-center gap-2">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Calculando Melhor Rota...
+                                        </span>
+                                    ) : (
+                                        <span className="flex items-center gap-2">
+                                            <Truck className="w-4 h-4" />
+                                            Gerar Rota Otimizada ⚡
+                                        </span>
+                                    )}
                                 </Button>
-                            </>
-                        )}
-                    </Card>
-                </div>
-            )}
+                            </Card>
+
+                            {/* Resultado da Otimização */}
+                            <Card className="p-4 space-y-4 relative overflow-hidden">
+                                {!optimizedRoute ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-center text-gray-500 min-h-[200px] p-6">
+                                        <MapPin className="w-12 h-12 mb-3 opacity-20" />
+                                        <p>Selecione as entregas e clique em gerar para ver a rota otimizada aqui.</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="flex justify-between items-center">
+                                            <h3 className="font-semibold text-lg text-emerald-400">Rota Gerada</h3>
+                                        </div>
+
+                                        <div className="space-y-3 relative">
+                                            {/* Linha conectora vertical */}
+                                            <div className="absolute left-[19px] top-4 bottom-4 w-0.5 bg-gray-700/50 -z-10" />
+
+                                            {optimizedRoute.map((stop, index) => (
+                                                <div key={stop.id} className="flex items-start gap-4">
+                                                    <div className="w-10 h-10 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center shrink-0 z-10 font-bold text-emerald-500">
+                                                        {index + 1}
+                                                    </div>
+                                                    <div className="bg-white/5 p-3 rounded-lg flex-1 border border-white/5">
+                                                        <p className="font-medium">{stop.cliente}</p>
+                                                        <p className="text-sm text-gray-400">{stop.endereco}</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <Button
+                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+                                            onClick={openGoogleMaps}
+                                        >
+                                            <Navigation className="w-4 h-4 mr-2" />
+                                            Iniciar Navegação 🗺️
+                                        </Button>
+                                    </>
+                                )}
+                            </Card>
+                        </div>
+                    )}
+                </PageContainer>
+            </div>
         </div>
     )
 }

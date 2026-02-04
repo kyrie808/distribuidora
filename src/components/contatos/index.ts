@@ -1,3 +1,4 @@
-export { ContatoFormModal } from './ContatoFormModal'
-export { ContatoCard } from './ContatoCard'
-export { ClienteNome } from './ClienteNome'
+export * from './ContatoCard'
+export * from './ContatoFormModal'
+export * from './ContactStoryFilter'
+export * from './ClienteNome'
