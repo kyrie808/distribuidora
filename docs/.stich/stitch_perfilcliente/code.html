@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>MassasCRM Liquid Profile View</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#7f13ec",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#120a1a",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .liquid-glow {
+            background: radial-gradient(circle at 50% -20%, rgba(127, 19, 236, 0.15), transparent 70%);
+        }
+        .receipt-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 4px solid #7f13ec;
+            position: relative;
+        }
+        .receipt-card::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 5%;
+            width: 90%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 0 0 10px 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-white min-h-screen pb-24">
+<!-- Top Navigation -->
+<div class="sticky top-0 z-50 flex items-center bg-background-dark/80 backdrop-blur-md p-4 pb-2 justify-between">
+<div class="text-white flex size-12 shrink-0 items-center justify-start cursor-pointer">
+<span class="material-symbols-outlined">arrow_back_ios</span>
+</div>
+<h2 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Customer Profile</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 bg-transparent text-white gap-2 text-base font-bold">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Liquid Background Glow -->
+<div class="fixed inset-0 liquid-glow pointer-events-none"></div>
+<!-- Profile Header Section -->
+<div class="relative flex p-4 mt-4 @container">
+<div class="flex w-full flex-col gap-6 items-center">
+<div class="flex gap-4 flex-col items-center">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 border-4 border-primary/30" data-alt="Professional logo of Acme Food Distro" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD0HqNP0SyfsRyKYS6lqBTc1A4esU8VbzuxhWb5rBksfkGn_skrT2nft3_InKZ2TUbIco1gymSV7XmNndNgeS7GlMuwtpwreD86MEb-oABl3xMkTuGLvJlnfHPA0DOM59lNCFzfP5ssV8HMcKOPpggaYxvBS6kATjB7RoNPiThD9YrAK4hGAeKPgVjpoUiC6bsiuf-5PGYWvEYDMYocV4izHYbfdMOe7THN5t3ladlLhuF--iVMd2IBOl7d6B3ajGNpAY4-AJS0fnjl");'>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary p-1.5 rounded-full border-2 border-background-dark">
+<span class="material-symbols-outlined text-white text-xs">verified</span>
+</div>
+</div>
+<div class="flex flex-col items-center justify-center">
+<p class="text-white text-2xl font-bold leading-tight tracking-tight text-center">Acme Food Distro</p>
+<div class="flex items-center gap-2 mt-1">
+<span class="text-[#ad92c9] text-sm font-medium">Elite Tier Member</span>
+<span class="w-1 h-1 bg-[#ad92c9] rounded-full"></span>
+<span class="text-[#ad92c9] text-sm">Since 2021</span>
+</div>
+</div>
+</div>
+<!-- Gamification Badges -->
+<div class="flex gap-3 px-3 flex-wrap justify-center">
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-primary/20 border border-primary/30 px-4">
+<span class="material-symbols-outlined text-primary text-lg">workspace_premium</span>
+<p class="text-white text-sm font-medium">VIP Status</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white/5 border border-white/10 px-4">
+<span class="material-symbols-outlined text-green-400 text-lg">trending_up</span>
+<p class="text-white text-sm font-medium">High Volume</p>
+</div>
+<div class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full bg-white/5 border border-white/10 px-4">
+<span class="material-symbols-outlined text-blue-400 text-lg">local_shipping</span>
+<p class="text-white text-sm font-medium">Fast Pay</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Expandable Info Panels (Glass Effect) -->
+<div class="px-4 mt-4 space-y-3">
+<div class="glass-panel rounded-xl p-4 flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-white/5 rounded-lg text-primary">
+<span class="material-symbols-outlined">location_on</span>
+</div>
+<div>
+<p class="text-xs text-white/50 uppercase tracking-wider font-bold">Primary Address</p>
+<p class="text-sm text-white">742 Evergreen Terrace, Springfield</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/30">chevron_right</span>
+</div>
+<div class="glass-panel rounded-xl p-4 flex items-center justify-between cursor-pointer">
+<div class="flex items-center gap-3">
+<div class="p-2 bg-white/5 rounded-lg text-primary">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div>
+<p class="text-xs text-white/50 uppercase tracking-wider font-bold">Internal Observations</p>
+<p class="text-sm text-white">Requires eco-friendly packaging only.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-white/30">expand_more</span>
+</div>
+</div>
+<!-- Loyalty Timeline -->
+<div class="mt-8">
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em] px-6 mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+            Loyalty Journey
+        </h3>
+<div class="grid grid-cols-[48px_1fr] gap-x-2 px-6">
+<!-- Item 1 -->
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary/30 border border-primary/50 text-primary">
+<span class="material-symbols-outlined text-lg">check_circle</span>
+</div>
+<div class="w-[2px] bg-gradient-to-b from-primary/50 to-[#4d3267] h-12"></div>
+</div>
+<div class="flex flex-1 flex-col pb-6">
+<p class="text-white text-base font-semibold">Silver Tier Reached</p>
+<p class="text-[#ad92c9] text-sm">Oct 2023 • Milestone Achieved</p>
+</div>
+<!-- Item 2 -->
+<div class="flex flex-col items-center gap-1">
+<div class="flex items-center justify-center size-8 rounded-full bg-primary text-white shadow-[0_0_15px_rgba(127,19,236,0.5)]">
+<span class="material-symbols-outlined text-lg">card_giftcard</span>
+</div>
+<div class="w-[2px] bg-[#4d3267] h-12"></div>
+</div>
+<div class="flex flex-1 flex-col pb-6">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-white text-base font-semibold">Next Reward: 5% Discount</p>
+<p class="text-[#ad92c9] text-sm">Current Progress: 82%</p>
+</div>
+</div>
+<div class="w-full bg-white/10 h-1.5 rounded-full mt-3 overflow-hidden">
+<div class="bg-primary h-full w-[82%]"></div>
+</div>
+</div>
+<!-- Item 3 -->
+<div class="flex flex-col items-center">
+<div class="flex items-center justify-center size-8 rounded-full bg-white/5 border border-white/10 text-white/40">
+<span class="material-symbols-outlined text-lg">military_tech</span>
+</div>
+</div>
+<div class="flex flex-1 flex-col">
+<p class="text-white/60 text-base font-semibold">Gold Tier Goal</p>
+<p class="text-[#ad92c9]/60 text-sm">Target: $50,000 Volume</p>
+</div>
+</div>
+</div>
+<!-- Historical Stack (Receipts) -->
+<div class="mt-8 px-6">
+<div class="flex justify-between items-end mb-4">
+<h3 class="text-white text-lg font-bold leading-tight tracking-[-0.015em]">Sales History</h3>
+<span class="text-primary text-sm font-bold">View All</span>
+</div>
+<div class="space-y-4">
+<!-- Receipt 1 -->
+<div class="receipt-card p-4 rounded-r-lg">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs text-white/50 font-mono">#INV-99281</span>
+<span class="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Paid</span>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="text-lg font-bold">$1,240.00</p>
+<p class="text-xs text-white/60">Premium Pasta Mix &amp; 4 Others</p>
+</div>
+<div class="text-right">
+<p class="text-xs text-white/40">12 May 2024</p>
+<span class="material-symbols-outlined text-white/20">receipt_long</span>
+</div>
+</div>
+</div>
+<!-- Receipt 2 -->
+<div class="receipt-card p-4 rounded-r-lg opacity-80 scale-[0.98]">
+<div class="flex justify-between items-start mb-2">
+<span class="text-xs text-white/50 font-mono">#INV-98542</span>
+<span class="bg-green-500/20 text-green-400 text-[10px] font-bold px-2 py-0.5 rounded uppercase">Paid</span>
+</div>
+<div class="flex justify-between items-center">
+<div>
+<p class="text-lg font-bold">$890.50</p>
+<p class="text-xs text-white/60">Wholesale Olive Oil Bulk</p>
+</div>
+<div class="text-right">
+<p class="text-xs text-white/40">01 May 2024</p>
+<span class="material-symbols-outlined text-white/20">receipt_long</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Floating Action Button (FAB) + Quick Tasks -->
+<div class="fixed bottom-8 right-6 z-[60] flex flex-col items-end gap-3">
+<!-- Expanded Quick Menu (Simulated state) -->
+<div class="flex flex-col items-end gap-3 mb-2 opacity-0 pointer-events-none transform translate-y-4 transition-all duration-300">
+<!-- These would appear when FAB is clicked -->
+</div>
+<!-- Main FAB -->
+<button class="size-16 bg-primary rounded-full shadow-[0_8px_30px_rgba(127,19,236,0.4)] flex items-center justify-center text-white transition-transform active:scale-90">
+<span class="material-symbols-outlined text-3xl">bolt</span>
+</button>
+</div>
+<!-- Bottom Tab Bar (iOS Style) -->
+<div class="fixed bottom-0 w-full bg-background-dark/90 backdrop-blur-xl border-t border-white/5 px-8 pt-3 pb-8 flex justify-between items-center">
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Home</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-primary">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">receipt</span>
+<span class="text-[10px] font-medium">Orders</span>
+</div>
+<div class="flex flex-col items-center gap-1 text-white/40">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</div>
+</div>
+</body></html>

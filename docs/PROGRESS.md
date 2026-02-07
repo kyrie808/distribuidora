@@ -7,6 +7,51 @@
 
 ## Entregas Recentes
 
+### 2026-02-07 - Migração de PaymentModal para PaymentSidebar
+- **Consistência UX Aprimorada:**
+  - Substituído modal centralizado por sidebar integrado, seguindo o padrão do `CheckoutSidebar`.
+  - Layout desktop: sidebar fixa de 96 (w-96) na lateral direita.
+  - Layout mobile: drawer deslizante de baixo para cima com backdrop.
+- **Melhorias na Experiência:**
+  - Formulário de pagamento com datetime-local corrigido para exibir picker nativo.
+  - Histórico de pagamentos visível durante o registro de novo pagamento.
+  - Botão "voltar" para fechar o sidebar sem sair da página de vendas.
+
+### 2026-02-07 - Sistema Avançado de Filtros de Vendas
+- **Filtros de Duas Categorias (Dual-Row):**
+  - Linha de **Entrega** (ícone Truck): Todas, Entregues, Pendentes, Canceladas.
+  - Linha de **Pagamento** (ícone Dollar): Ver todas, Quitados, Parciais, Pendentes.
+  - Contadores em tempo real para cada categoria, exibidos nas badges.
+- **UX & Persistência:**
+  - Filtros sincronizados com a URL via `useSearchParams`.
+  - Scroll horizontal suave em mobile para navegação completa.
+  - Cores semânticas (success, warning, danger) para feedback visual imediato.
+
+### 2026-02-07 - Refatoração do Módulo "Nova Venda" (UX Flow)
+- **Fluxo de Checkout Integrado (Sidebar Style):**
+  - Eliminação do `CheckoutModal` centralizado em favor do `CheckoutSidebar`.
+  - Transição fluida entre Carrinho e Checkout dentro do mesmo painel lateral (Desktop e Mobile).
+  - Suporte total a métodos de pagamento (Pix, Dinheiro com troco, Cartão com parcelas, Fiado com vencimento).
+  - **Melhorias de UX & Layout:**
+    - Resolução de conflitos de z-index com o `BottomNav`.
+    - Implementação de multi-view na sidebar (Cart <-> Checkout).
+    - Botões de ação otimizados para evitar cortes em telas menores.
+
+### 2026-02-04 - Padronização de Layout & Contatos V2
+- **Standardização Global de Layout ("Tactical Dark"):**
+  - Implementação de um wrapper de layout unificado em **todas** as páginas (`src/pages/*`).
+  - Container centralizado (`max-w-7xl`) com sombra suave e background consistente (`bg-background-light`/`dark`).
+  - **Header V2:**
+    - Refatoração para `sticky` positioning (respeitando o container central).
+    - Design "Glassmorphism" padronizado (`backdrop-blur-md`).
+    - Remoção de CSS overrides manuais em páginas individuais.
+  - **PageContainer V2:** Background transparente e padding ajustado (`pt-0 pb-32`) para fluxo contínuo.
+- **Página de Contatos V2:**
+  - **Story Filters:** Novo componente de filtragem estilo "Instagram Stories" (Todos, Clientes, Leads, VIPs, Inativos).
+  - **UX Refinada:** Filtros reordenados por prioridade (Clientes > Leads).
+  - Design imersivo com elementos de fundo (blobs de luz).
+  - Card de Contato unificado com design "Apple-like".
+
 ### 2026-02-03 - Correção de Integridade de Dados & Regime de Caixa
 - **Mudança de Lógica Financeira (Critical):**
   - **Faturamento:** Alterado para **Regime de Caixa** (Apenas vendas com `pago=true`).
@@ -47,6 +92,11 @@
     - `src/types/domain.ts`: Definições puras das entidades de negócio (camelCase).
     - `src/services/mappers.ts`: Transformação segura de DTOs (snake_case) para Domain Objects.
     - `src/services/vendaService.ts`: Centralização da lógica de acesso a dados.
+- [x] **Refatoração Modal Contato (UX & Mobile)**: Redesign completo do modal de edição de contato.
+  - Layout "Wide" (4XL) com duas colunas para desktop.
+  - Estilo "Tactical Dark" com inputs translúcidos e ícones.
+  - Correção de Z-Index mobile usando React Portal.
+  - Scrollbar invisível para estética limpa.
 - **Refatoração Contatos:**
     - Implementação de `contatoService.ts`.
     - Eliminação de `api/` (Python Backend) e migração de Geocoding para TypeScript.

@@ -1,50 +1,47 @@
-# Componentes
+# Documentação de Componentes
 
-## UI Base (`components/ui/`)
+## UI Base (`src/components/ui/`)
+Componentes atômicos e reutilizáveis, baseados em Tailwind CSS.
 
-Biblioteca de componentes baseada em [Shadcn UI](https://ui.shadcn.com/), utilizando Tailwind CSS e Radix UI primitives.
+- **Modal.tsx**:
+  - Implementado com **React Portal** (`createPortal`) para renderizar no `document.body` e evitar conflitos de Z-Index/Stacking Context.
+  - Suporte a tamanhos responsivos: `sm`, `md`, `lg`, `xl`, `2xl`... até `5xl` e `full`.
+  - Utilitários CSS para ocultar scrollbar mantendo funcionalidade (`[&::-webkit-scrollbar]:hidden`).
+  - Backdrop blur e animações de entrada (`animate-in fade-in zoom-in-95`).
 
-| Componente | Props Principais | Descrição |
-|------------|------------------|-----------|
-| `Button` | `variant`, `size`, `isLoading` | Botão interativo com suporte a estados de loading e variantes. |
-| `Card` | `hover`, `onClick`, `className` | Container padrão. **Nota:** Remover prop `padding` (deprecated), usar classes tailwind. |
-| `Input` | `label`, `error`, `helperText` | Campo de entrada de texto com label e erro integrados. |
-| `Select` | `label`, `error`, `options` | Componente de seleção nativo estilizado. |
-| `Badge` | `variant` | Etiquetas de status (success, warning, gray, etc). |
-| `Modal` | `isOpen`, `onClose`, `title` | Diálogo modal responsivo. |
-| `Toast` | `type`, `message` | Notificações flutuantes. |
-| `Spinner` | `size` | Indicador de carregamento. |
-| `EmptyState` | `title`, `description`, `icon` | Placeholder visual para listas vazias. |
-| `LoadingScreen`| `message` | Tela cheia de carregamento. |
-| `ThemeToggle`| | Botão sun/moon com animação transform. |
+- **Button.tsx**:
+  - Variantes: `default` (Solid), `outline` (Borda), `ghost` (Transparente).
+  - Suporte a `isLoading` com spinner automático.
+- **Card**: Container padrão com bordas arredondadas e sombra suave.
 
-## Layout (`components/layout/`)
+## Layout (`src/components/layout/`)
+Estrutura das páginas.
 
-Componentes estruturais da aplicação.
+- **Header**: Barra de navegação superior (Sticky).
+  - Props V2: `title`, `showBack`, `centerTitle` (boolean), `rightAction` (ReactNode), `transparent` (boolean).
+  - Comportamento: Sticky, glassmorphism, ajusta-se automaticamente ao tema dark/light.
+- **PageContainer**: Wrapper de conteúdo com padding responsivo.
+  - Comportamento: Background transparente, padding inferior para evitar sobreposição com BottomNav (mobile).
 
-| Componente | Função |
-|------------|--------|
-| `AppLayout` | Wrapper principal (Outlet + BottomNav). |
-| `Header` | Barra superior fixa. |
-| `BottomNav` | Navegação inferior mobile (Links: Dashboard, Vendas, Nova Venda, Clientes, Menu). |
-| `PageContainer`| Wrapper de conteúdo com espaçamentos padrão. |
+## Features (`src/components/features/`)
+Componentes específicos de domínio.
 
-## Features (`components/features/` & subpastas)
+### Dashboard
+- **KpiCard**: Cartão de métrica com título, valor, tendência e mini-gráfico opcional.
+- **LogisticsWidget**: Widget operacional para status de entregas.
+- **AlertasFinanceiroWidget**: Lista de clientes com pagamentos pendentes ("Fiado").
+- **UltimasVendasWidget**: Lista compacta das vendas mais recentes.
 
-Componentes de negócio específicos.
+### Contatos
+- **ContatoCard**: Card rico com informações do cliente, badges dinâmicas e ações rápidas.
+  - Badges: "Novo" (criado < 7 dias), "Lead", "Cliente", "Inativo".
 
-### Contatos (`components/contatos/`)
-- `ContatoCard`: Card de resumo do cliente. Usa `DomainContato` types.
-- `ContatoFormModal`: Modal de criação/edição. Gerencia autocomplete de indicação e busca de CEP.
-
-### Dashboard (`components/dashboard/`)
-- `AlertasFinanceiroWidget`: Painel de "Fiado" e cobranças (Regime de Caixa).
-- `AlertasRecompraWidget`: Monitor de churn/recompra.
-- `EstoqueWidget`: Indicadores de nível de estoque.
-- `TopIndicadoresWidget`: Ranking visual com medalhas para os top indicadores.
-- `UltimasVendasWidget`: Lista truncada das vendas mais recentes no período selecionado.
-- `LogisticsWidget`: Resumo de status de entregas (Pendentes vs Entregues).
-- `DashboardCarousel`: Wrapper para widgets secundários (Alertas) em layout mobile.
-
-### Vendas (`components/vendas/`) e Outros
-(Componentes sendo migrados gradualmente para pastas de features)
+### Vendas
+- **CartSidebar**: Sidebar vertical para Desktop e Mobile (Drawer) que exibe o resumo dos itens, total e ações de limpeza/checkout.
+- **CheckoutSidebar**: Painel vertical que substitui o carrinho para finalizar a venda.
+  - Suporte a Pix, Dinheiro, Cartão e Fiado.
+  - Calculadora de troco integrada.
+  - Seleção de parcelas e datas de vencimento.
+  - Cálculo de taxa de entrega em tempo real.
+- **ClientSelector**: Componente de busca e seleção de clientes com feedback visual e link para cadastro.
+- **ProductList**: Grid de produtos filtrável com botões rápidos de adição ao carrinho e controle de quantidade.

@@ -51,19 +51,29 @@
     --ring: 118 86% 50%;
 
     --radius: 1rem;
+
+    /* Semantic Colors (Light) */
+    --success: 118 86% 50%;
+    /* #13ec13 (Neon Green - Primary Match) */
+    --success-foreground: 120 28% 14%;
+    /* Dark text for contrast on Neon */
+
+    --warning: 45 93% 47%;
+    /* #eab308 */
+    --warning-foreground: 0 0% 100%;
   }
 
   .dark {
     /* Tactical Dark Theme */
-    --background: 120 36% 10%;
-    /* #102210 */
+    --background: 156 20% 5%;
+    /* #0a0f0d */
     --foreground: 0 0% 98%;
 
-    --card: 120 28% 14%;
-    /* #1a2e1a */
+    --card: 150 19% 13%;
+    /* #1a2620 */
     --card-foreground: 0 0% 98%;
 
-    --popover: 120 28% 14%;
+    --popover: 150 19% 13%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 118 86% 50%;
@@ -84,6 +94,14 @@
     --border: 120 28% 14%;
     --input: 120 28% 14%;
     --ring: 118 86% 50%;
+
+    /* Semantic Colors (Dark - Neon) */
+    --success: 118 86% 50%;
+    /* Matches Primary */
+    --success-foreground: 120 28% 14%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 120 36% 10%;
   }
 
   html {

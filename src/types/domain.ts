@@ -6,6 +6,7 @@ export interface DomainContato {
     id: string
     nome: string
     telefone: string
+    email?: string | null
     tipo: 'B2C' | 'B2B'
     subtipo?: string | null
     status: 'lead' | 'cliente' | 'inativo'

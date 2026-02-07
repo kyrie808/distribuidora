@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Search, X, Check, Loader2 } from 'lucide-react'
-import { Modal, ModalActions, Button, Input, Select } from '../ui'
+import { Search, X, Check, Loader2, User, Target, MapPin } from 'lucide-react'
+import { Modal, ModalActions, Button, Input } from '../ui'
 import { contatoSchema, type ContatoFormData } from '../../schemas/contato'
 import { useContatos } from '../../hooks/useContatos'
 import { useToast } from '../ui/Toast'
@@ -266,209 +266,254 @@ export function ContatoFormModal({
             isOpen={isOpen}
             onClose={onClose}
             title={isEditing ? 'Editar Contato' : 'Novo Contato'}
-            size="lg"
+            size="4xl"
         >
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                {/* Nome e Telefone */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Input
-                        label="Nome *"
-                        placeholder="Nome completo"
-                        error={errors.nome?.message}
-                        {...register('nome')}
-                    />
-                    <Input
-                        label="Telefone *"
-                        placeholder="(11) 99999-9999"
-                        error={errors.telefone?.message}
-                        {...register('telefone')}
-                    />
-                </div>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
-                {/* Tipo e Subtipo */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select
-                        label="Tipo *"
-                        options={Object.entries(CONTATO_TIPO_LABELS).map(([value, label]) => ({
-                            value,
-                            label,
-                        }))}
-                        error={errors.tipo?.message}
-                        {...register('tipo')}
-                    />
-                    {tipoValue === 'B2B' && (
-                        <Select
-                            label="Subtipo"
-                            placeholder="Selecione..."
-                            options={Object.entries(SUBTIPOS_B2B_LABELS).map(([value, label]) => ({
-                                value,
-                                label,
-                            }))}
-                            {...register('subtipo')}
-                        />
-                    )}
-                </div>
-
-                {/* Status e Origem */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Select
-                        label="Status"
-                        options={Object.entries(CONTATO_STATUS_LABELS).map(([value, label]) => ({
-                            value,
-                            label,
-                        }))}
-                        {...register('status')}
-                    />
-                    <Select
-                        label="Origem"
-                        options={Object.entries(CONTATO_ORIGEM_LABELS).map(([value, label]) => ({
-                            value,
-                            label,
-                        }))}
-                        {...register('origem')}
-                    />
-                </div>
-
-                {/* Indicado por (autocomplete) */}
-                {origemValue === 'indicacao' && (
-                    <div className="relative" ref={dropdownRef}>
-                        <label className="label">Indicado por</label>
-                        {selectedIndicador ? (
-                            <div className="flex items-center justify-between p-3 bg-primary-50 border border-primary-200 rounded-lg">
-                                <div>
-                                    <p className="font-medium text-gray-900">{selectedIndicador.nome}</p>
-                                    <p className="text-sm text-gray-500">
-                                        {formatPhone(selectedIndicador.telefone)}
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={handleClearIndicador}
-                                    className="p-1 hover:bg-primary-100 rounded"
-                                >
-                                    <X className="h-4 w-4 text-gray-500" />
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="relative">
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <input
-                                        type="text"
-                                        value={indicadorSearch}
-                                        onChange={(e) => setIndicadorSearch(e.target.value)}
-                                        placeholder="Buscar contato..."
-                                        className="input pl-10"
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* LEFT COLUMN - Identity & Classification */}
+                    <div className="space-y-6">
+                        {/* ID Card Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <User className="w-4 h-4" /> Identidade
+                            </h3>
+                            <div className="grid grid-cols-1 gap-4">
+                                <Input
+                                    label="NOME COMPLETO *"
+                                    placeholder="Ex: João da Silva"
+                                    error={errors.nome?.message}
+                                    className="bg-muted/50 border-white/10 focus:border-primary/50 text-lg"
+                                    {...register('nome')}
+                                />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <Input
+                                        label="TELEFONE *"
+                                        placeholder="(11) 99999-9999"
+                                        error={errors.telefone?.message}
+                                        className="bg-muted/50 border-white/10"
+                                        {...register('telefone')}
                                     />
                                 </div>
-                                {showIndicadorDropdown && indicadorResults.length > 0 && (
-                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto">
-                                        {indicadorResults.map((c) => (
-                                            <button
-                                                key={c.id}
-                                                type="button"
-                                                onClick={() => handleSelectIndicador(c)}
-                                                className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center justify-between"
-                                            >
-                                                <div>
-                                                    <p className="font-medium text-gray-900">{c.nome}</p>
-                                                    <p className="text-sm text-gray-500">{formatPhone(c.telefone)}</p>
-                                                </div>
-                                                <Check className="h-4 w-4 text-primary-500 opacity-0 group-hover:opacity-100" />
-                                            </button>
+                            </div>
+                        </div>
+
+                        {/* Classification Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <Target className="w-4 h-4" /> Classificação
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30 rounded-xl border border-white/5">
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tipo</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        {...register('tipo')}
+                                    >
+                                        {Object.entries(CONTATO_TIPO_LABELS).map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
                                         ))}
+                                    </select>
+                                    {errors.tipo && <p className="text-xs text-destructive">{errors.tipo.message}</p>}
+                                </div>
+
+                                {tipoValue === 'B2B' && (
+                                    <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
+                                        <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Subtipo</label>
+                                        <select
+                                            className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                            {...register('subtipo')}
+                                        >
+                                            <option value="">Selecione...</option>
+                                            {Object.entries(SUBTIPOS_B2B_LABELS).map(([value, label]) => (
+                                                <option key={value} value={value}>{label}</option>
+                                            ))}
+                                        </select>
                                     </div>
                                 )}
-                            </>
-                        )}
-                    </div>
-                )}
 
-                {/* Seção de Endereço Inteligente */}
-                <div className="space-y-4 pt-4 border-t border-gray-100">
-                    <h3 className="font-medium text-gray-900">Endereço</h3>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        {...register('status')}
+                                    >
+                                        {Object.entries(CONTATO_STATUS_LABELS).map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                    {/* Linha 1: CEP */}
-                    <div className="max-w-[150px] relative">
-                        <Input
-                            label="CEP"
-                            placeholder="00000-000"
-                            maxLength={9}
-                            {...register('cep')}
-                        />
-                        {loadingCep && (
-                            <div className="absolute right-3 top-[38px]">
-                                <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Origem</label>
+                                    <select
+                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        {...register('origem')}
+                                    >
+                                        {Object.entries(CONTATO_ORIGEM_LABELS).map(([value, label]) => (
+                                            <option key={value} value={value}>{label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Indicado por (Conditional) */}
+                        {origemValue === 'indicacao' && (
+                            <div className="relative space-y-2 animate-in fade-in slide-in-from-top-2" ref={dropdownRef}>
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Indicado Por</label>
+                                {selectedIndicador ? (
+                                    <div className="flex items-center justify-between p-3 bg-primary/10 border border-primary/20 rounded-lg">
+                                        <div>
+                                            <p className="font-medium text-foreground">{selectedIndicador.nome}</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {formatPhone(selectedIndicador.telefone)}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleClearIndicador}
+                                            className="p-1 hover:bg-primary/20 rounded text-primary hover:text-primary-foreground transition-colors"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <input
+                                                type="text"
+                                                value={indicadorSearch}
+                                                onChange={(e) => setIndicadorSearch(e.target.value)}
+                                                placeholder="Buscar quem indicou..."
+                                                className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 pl-10 pr-3 py-2 text-sm focus:border-primary/50 focus:outline-none text-foreground placeholder:text-muted-foreground"
+                                            />
+                                        </div>
+                                        {showIndicadorDropdown && indicadorResults.length > 0 && (
+                                            <div className="absolute z-50 w-full mt-1 bg-popover border border-border rounded-lg shadow-xl max-h-48 overflow-auto text-popover-foreground">
+                                                {indicadorResults.map((c) => (
+                                                    <button
+                                                        key={c.id}
+                                                        type="button"
+                                                        onClick={() => handleSelectIndicador(c)}
+                                                        className="w-full px-4 py-3 text-left hover:bg-accent hover:text-accent-foreground flex items-center justify-between transition-colors"
+                                                    >
+                                                        <div>
+                                                            <p className="font-medium">{c.nome}</p>
+                                                            <p className="text-xs opacity-70">{formatPhone(c.telefone)}</p>
+                                                        </div>
+                                                        <Check className="h-4 w-4 text-primary opacity-0 group-hover:opacity-100" />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         )}
                     </div>
 
-                    {/* Linha 2: Logradouro e Número */}
-                    <div className="grid grid-cols-[1fr_100px] gap-4">
-                        <Input
-                            label="Logradouro"
-                            placeholder="Rua, Avenida, etc."
-                            {...register('logradouro')}
-                        />
-                        <Input
-                            label="Número"
-                            placeholder="123"
-                            {...register('numero')}
-                        />
-                    </div>
+                    {/* RIGHT COLUMN - Address & Notes */}
+                    <div className="space-y-6">
 
-                    {/* Linha 3: Complemento e Bairro */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Input
-                            label="Complemento"
-                            placeholder="Apto 101, Casa A"
-                            {...register('complemento')}
-                        />
-                        <Input
-                            label="Bairro"
-                            placeholder="Bairro"
-                            {...register('bairro')}
-                        />
-                    </div>
 
-                    {/* Linha 4: Cidade e UF */}
-                    <div className="grid grid-cols-[1fr_80px] gap-4">
-                        <Input
-                            label="Cidade"
-                            placeholder="Cidade"
-                            readOnly
-                            className="bg-gray-50"
-                            {...register('cidade')}
-                        />
-                        <Input
-                            label="UF"
-                            placeholder="UF"
-                            readOnly
-                            className="bg-gray-50"
-                            {...register('uf')}
-                        />
-                    </div>
-                </div>
+                        {/* Address Section */}
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                <MapPin className="w-4 h-4" /> Endereço
+                            </h3>
 
-                {/* Observações */}
-                <div>
-                    <label className="label">Observações</label>
-                    <textarea
-                        className="input min-h-[80px] resize-none"
-                        placeholder="Anotações sobre o contato..."
-                        {...register('observacoes')}
-                    />
+                            <div className="bg-muted/30 border border-white/5 rounded-xl p-4 space-y-4">
+                                <div className="flex gap-4">
+                                    <div className="w-[140px] relative">
+                                        <Input
+                                            label="CEP"
+                                            placeholder="00000-000"
+                                            maxLength={9}
+                                            className="bg-background/50 border-white/10 font-mono"
+                                            {...register('cep')}
+                                        />
+                                        {loadingCep && (
+                                            <div className="absolute right-3 top-[38px]">
+                                                <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1">
+                                        <Input
+                                            label="LOGRADOURO"
+                                            placeholder="Rua, Av..."
+                                            className="bg-background/50 border-white/10"
+                                            {...register('logradouro')}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-[100px_1fr] gap-4">
+                                    <Input
+                                        label="NÚMERO"
+                                        placeholder="123"
+                                        className="bg-background/50 border-white/10"
+                                        {...register('numero')}
+                                    />
+                                    <Input
+                                        label="COMPLEMENTO"
+                                        placeholder="Apto, Bloco..."
+                                        className="bg-background/50 border-white/10"
+                                        {...register('complemento')}
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <Input
+                                        label="BAIRRO"
+                                        placeholder="Bairro"
+                                        className="bg-background/50 border-white/10"
+                                        {...register('bairro')}
+                                    />
+                                    <div className="grid grid-cols-[1fr_60px] gap-2">
+                                        <Input
+                                            label="CIDADE"
+                                            readOnly
+                                            className="bg-muted text-muted-foreground border-none opacity-70"
+                                            {...register('cidade')}
+                                        />
+                                        <Input
+                                            label="UF"
+                                            readOnly
+                                            className="bg-muted text-muted-foreground border-none opacity-70 text-center px-0"
+                                            {...register('uf')}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Notes Section */}
+                        <div className="space-y-2">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                Observações
+                            </label>
+                            <textarea
+                                className="flex min-h-[120px] w-full rounded-md border border-white/10 bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                                placeholder="Anotações internas sobre o cliente..."
+                                {...register('observacoes')}
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <ModalActions>
-                    <Button type="button" variant="secondary" onClick={onClose}>
+                    <Button type="button" variant="ghost" onClick={onClose} className="hover:bg-white/5">
                         Cancelar
                     </Button>
-                    <Button type="submit" isLoading={isSubmitting}>
-                        {isEditing ? 'Salvar' : 'Criar Contato'}
+                    <Button type="submit" isLoading={isSubmitting} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8">
+                        {isEditing ? 'Salvar Alterações' : 'Criar Contato'}
                     </Button>
                 </ModalActions>
             </form>
         </Modal>
     )
 }
+

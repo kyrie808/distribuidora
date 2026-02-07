@@ -1,48 +1,53 @@
-# Páginas e Rotas (`src/pages/`)
+# Documentação das Páginas
 
-A aplicação utiliza `react-router-dom` para navegação.
+## Estrutura Global
+Todas as páginas em `src/pages/` agora seguem um padrão estrito de layout:
+```tsx
+<div className="bg-background-light dark:bg-background-dark ... min-h-screen flex justify-center">
+    <div className="relative ... max-w-7xl ...">
+        <Header sticky ... />
+        <PageContainer>
+            {/* Conteúdo */}
+        </PageContainer>
+    </div>
+</div>
+```
+Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que o conteúdo centralizado nunca exceda `max-w-7xl` em telas grandes.
 
-## Estrutura de Rotas
+## Dashboard (`/`)
+- **Layout**: Grid híbrido (1 col mobile / 4 col desktop).
+- **Funcionalidade**: Visão geral do negócio (Faturamento Pago, Lucro Real, Entregas, Alertas de Recompra).
+- **Interação**: Filtro global de Mês (`MonthPicker`) que afeta todos os widgets.
 
-| Rota | Componente | Descrição |
-|------|------------|-----------|
-| `/` | `Dashboard` | Visão geral do negócio (KPIs, Gráficos, Alertas). Widgets modulares para Financeiro, Estoque e Recompra. |
-| `/nova-venda` | `NovaVenda` | PDV móvel para lançamento rápido de vendas. Fluxo otimizado para lançar e voltar. |
-| `/vendas` | `Vendas` | Histórico de vendas. Permite ver detalhes, filtrar por data e registrar pagamentos. |
-| `/clientes` | `Contatos` | Gestão de clientes (CRM). Listagem, criação e histórico de compras individual. |
-| `/produtos` | `Produtos` | Catálogo de produtos. Gestão de preços, custos e estoque. |
-| `/menu` | `Menu` | Hub de navegação para funcionalidades secundárias acessível via BottomNav. |
-| `/pedidos-compra`| `PedidosCompra` | Gestão de compras com fornecedores (Purchase Orders). |
-| `/recompra` | `Recompra` | CRM ativo: Lista de clientes inativos (churn) para contato. |
-| `/entregas` | `Entregas` | Gestão logística simples. |
-| `/configuracoes` | `Configuracoes` | Parâmetros do sistema (taxas, metas, etc). |
-| `/relatorio-fabrica`| `RelatorioFabrica`| Relatório específico para produção baseada em demanda. |
-| `/indicacoes` | `Indicacoes` | Programa de indicação de clientes (Referral). |
+## Contatos (`/contatos`)
+- **Layout**: Lista vertical com Header fixo e "Story Filters" no topo.
+- **Filtros**:
+  1. Todos
+  2. Clientes (Status = cliente)
+  3. Leads (Status = lead)
+  4. VIPs (Status = cliente + Tipo = B2B)
+  5. Inativos (Status = inativo)
+- **Ações**: Busca textual em tempo real (Nome/Telefone), Adicionar Novo Contato (FAB e Modal).
 
-## Detalhes de Implementação
+## Detalhe do Contato (`/contatos/:id`)
+- **Header**: Dados principais (Nome, Fantasia, Status). Ação de "Editar" abre `ContatoFormModal`.
+- **Abas**:
+    - _Visão Geral_: Dashboard simplificado do cliente (Vendas, Saldo).
+    - _Dados_: Exibição read-only dos dados cadastrais completos.
+    - _Pedidos_: Histórico de compras.
+- **Edição**: Utiliza o novo modal `4xl` via Portal para edição sem sair da página.
 
-### Dashboard
-O Dashboard foi refatorado para ser **modular e altamente responsivo**:
-- **Mobile**: Grid de 2 colunas (ou pilha vertical) para navegação rápida com uma mão.
-- **Desktop**: Grid de 4 colunas que aproveita a largura da tela (`max-w-7xl`), expandindo Widgets de Alertas lado a lado.
-- Atua como container para:
-- `AlertasFinanceiroWidget`: Monitora pagamentos pendentes ("Fiado").
-- `AlertasRecompraWidget`: Monitora ciclo de vida do cliente.
-- `EstoqueWidget`: Monitora níveis de estoque.
-- `LogisticsWidget`: Monitora status de entregas e pendências.
-- `TopIndicadoresWidget`: Ranking de performance de indicadores (Glassmorphism + Gold/Silver/Bronze).
+## Vendas (`/vendas`)
+- **Layout**: Lista de vendas com filtros rápidos (badges).
+- **Funcionalidade**: Listagem, busca por nome/ID, Modal de Recebimento de Pagamento, Modal de Exclusão.
+- **Header**: Sticky com título centralizado.
 
-### Lógica de Dados (Dashboard)
-- **Financeiro (Cash Basis)**: Métricas de Faturamento e Lucro consideram apenas vendas com `pago = true`. O filtro de data aplica-se à `data` da venda.
-- **Operacional**: Métricas de Entregas e Vendas consideram a data de entrega/realização.
-- **Filtro Global**: O `MonthPicker` controla o período visualizado. Hooks utilizam este contexto para filtrar queries no Supabase.
+## Nova Venda (`/nova-venda`)
+- **Fluxo**: Wizard simplificado para criação rápida de pedidos.
+- **Seleção de cliente**: via `Combobox`.
+- **Adição de itens**: com cálculo automático.
+- **Finalização**: com formas de pagamento múltiplas.
+- **Integração**: Busca proativa de produtos e tabela de preços.
 
-### Nova Venda (PDV)
-Focado em velocidade. Layout otimizado para mobile com input facilitado e feedback rápido.
-
-### Layout
-Todas as rotas autenticadas são envolvidas pelo `AppLayout` (`src/components/layout/AppLayout.tsx`), que fornece:
-- **Header**: Fixo no topo.
-- **BottomNav**: Fixa no rodapé (apenas mobile/tablet).
-- **Sidebar**: (Planejado para Desktop, atualmente adaptativo).
-- **ToastContainer**: Para notificações globais.
+## Outras Páginas
+- `Produtos.tsx`, `Estoque.tsx`, `Entregas.tsx`: Padronizadas com o novo Header e PageContainer.

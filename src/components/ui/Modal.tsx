@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 interface ModalProps {
@@ -6,7 +7,7 @@ interface ModalProps {
     onClose: () => void
     title: string
     children: ReactNode
-    size?: 'sm' | 'md' | 'lg' | 'full'
+    size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | 'full'
     showCloseButton?: boolean
 }
 
@@ -14,6 +15,11 @@ const sizeClasses = {
     sm: 'max-w-sm mx-4',
     md: 'max-w-md mx-4',
     lg: 'max-w-lg mx-4',
+    xl: 'max-w-xl mx-4',
+    '2xl': 'max-w-2xl mx-4',
+    '3xl': 'max-w-3xl mx-4',
+    '4xl': 'max-w-4xl mx-4',
+    '5xl': 'max-w-5xl mx-4',
     full: 'max-w-full mx-4',
 }
 
@@ -51,8 +57,8 @@ export function Modal({
 
     if (!isOpen) return null
 
-    return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center">
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
             {/* Backdrop */}
             <div
                 className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -62,21 +68,22 @@ export function Modal({
             {/* Modal */}
             <div
                 className={`
-          relative bg-white rounded-xl shadow-xl w-full
+          relative bg-white/95 dark:bg-card/90 backdrop-blur-md border border-border/50 rounded-xl shadow-2xl w-full
           ${sizeClasses[size]}
-          max-h-[90vh] overflow-auto
-          animate-in fade-in zoom-in-95 duration-200
+          max-h-[85vh] overflow-y-auto
+          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+          animate-in fade-in zoom-in-95 duration-300
         `}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-gray-200">
-                    <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+                <div className="flex items-center justify-between p-4 border-b border-border">
+                    <h2 className="text-lg font-semibold text-foreground">{title}</h2>
                     {showCloseButton && (
                         <button
                             onClick={onClose}
-                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
                         >
-                            <X className="h-5 w-5 text-gray-500" />
+                            <X className="h-5 w-5" />
                         </button>
                     )}
                 </div>
@@ -86,7 +93,8 @@ export function Modal({
                     {children}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }
 
