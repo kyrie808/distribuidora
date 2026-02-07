@@ -83,12 +83,20 @@ export function Contatos() {
                     transparent
                     className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
                     rightAction={
-                        <button
-                            onClick={() => setShowSearch(!showSearch)}
-                            className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-accent hover:text-accent-foreground text-foreground ${showSearch ? 'bg-accent text-accent-foreground' : ''}`}
-                        >
-                            {showSearch ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-primary hover:text-primary-foreground text-foreground"
+                            >
+                                <Plus className="h-6 w-6" />
+                            </button>
+                            <button
+                                onClick={() => setShowSearch(!showSearch)}
+                                className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-accent hover:text-accent-foreground text-foreground ${showSearch ? 'bg-accent text-accent-foreground' : ''}`}
+                            >
+                                {showSearch ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
+                            </button>
+                        </div>
                     }
                 />
 
@@ -176,16 +184,6 @@ export function Contatos() {
                             />
                         )
                     )}
-
-                    {/* FAB (Stich Style) */}
-                    <div className="fixed bottom-24 right-6 z-40">
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="h-14 w-14 rounded-full bg-violet-600 text-white shadow-[0_0_20px_rgba(124,58,237,0.5)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300"
-                        >
-                            <Plus className="h-7 w-7" />
-                        </button>
-                    </div>
 
                     <ContatoFormModal
                         isOpen={isModalOpen}
