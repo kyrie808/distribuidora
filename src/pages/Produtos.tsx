@@ -4,8 +4,7 @@ import {
     Package,
     Plus,
     AlertTriangle,
-    X,
-    TrendingUp
+    X
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -313,9 +312,13 @@ export function Produtos() {
                                             key={produto.id}
                                             className={cn(
                                                 "transition-all cursor-pointer hover:shadow-md border-l-4",
-                                                !produto.ativo ? "opacity-60 border-l-gray-300 bg-gray-50" :
-                                                    isNoStock ? "border-l-destructive" :
-                                                        isLowStock ? "border-l-warning" : "border-l-success"
+                                                !produto.ativo
+                                                    ? "opacity-60 border-l-gray-300 bg-gray-50 dark:bg-gray-800/50"
+                                                    : isNoStock
+                                                        ? "border-l-semantic-red bg-semantic-red/5 dark:bg-semantic-red/10"
+                                                        : isLowStock
+                                                            ? "border-l-semantic-yellow bg-semantic-yellow/5 dark:bg-semantic-yellow/10"
+                                                            : "border-l-semantic-green hover:bg-semantic-green/5 dark:hover:bg-semantic-green/10"
                                             )}
                                             onClick={() => handleOpenEdit(produto)}
                                             hover
@@ -330,35 +333,35 @@ export function Produtos() {
                                             <div className="p-4 flex items-center justify-between">
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-bold text-gray-900 truncate">
+                                                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">
                                                             {produto.nome}
                                                         </h3>
                                                         {!produto.ativo && <Badge variant="gray">Inativo</Badge>}
                                                         {produto.apelido && (
-                                                            <span className="text-xs text-muted-foreground bg-gray-100 px-1.5 py-0.5 rounded">
+                                                            <span className="text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">
                                                                 {produto.apelido}
                                                             </span>
                                                         )}
                                                     </div>
 
-                                                    <div className="text-sm text-gray-500 font-mono mb-2">
+                                                    <div className="text-sm text-gray-500 dark:text-gray-400 font-mono mb-2">
                                                         #{produto.codigo}
                                                     </div>
 
-                                                    <div className="flex items-center gap-4 text-sm">
+                                                    <div className="flex items-center gap-6 text-sm">
                                                         <div>
-                                                            <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
                                                                 Preço
                                                             </span>
-                                                            <span className="font-semibold text-gray-900">
+                                                            <span className="font-semibold text-gray-900 dark:text-gray-100">
                                                                 {formatCurrency(produto.preco)}
                                                             </span>
                                                         </div>
                                                         <div>
-                                                            <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
                                                                 Custo
                                                             </span>
-                                                            <span className="text-gray-600">
+                                                            <span className="text-gray-600 dark:text-gray-400">
                                                                 {formatCurrency(produto.custo)}
                                                             </span>
                                                         </div>
@@ -367,23 +370,29 @@ export function Produtos() {
 
                                                 <div className="flex flex-col items-end gap-2 ml-4">
                                                     <div className="text-right">
-                                                        <span className="text-xs text-gray-400 block uppercase font-bold tracking-wider">
+                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
                                                             Estoque
                                                         </span>
                                                         <div className={cn(
                                                             "text-xl font-bold font-mono",
-                                                            isNoStock ? "text-destructive" :
-                                                                isLowStock ? "text-warning-600" : "text-success-600"
+                                                            isNoStock ? "text-semantic-red" :
+                                                                isLowStock ? "text-semantic-yellow" : "text-semantic-green"
                                                         )}>
                                                             {produto.estoqueAtual}
-                                                            <span className="text-xs text-gray-400 ml-1 font-sans">
+                                                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-1 font-sans font-normal">
                                                                 {produto.unidade}
                                                             </span>
                                                         </div>
                                                     </div>
 
                                                     {isLowStock && (
-                                                        <Badge variant={isNoStock ? "destructive" : "warning"}>
+                                                        <Badge
+                                                            className={cn(
+                                                                isNoStock
+                                                                    ? "bg-semantic-red text-white hover:bg-semantic-red/90 border-transparent"
+                                                                    : "bg-semantic-yellow text-yellow-900 hover:bg-semantic-yellow/90 border-transparent"
+                                                            )}
+                                                        >
                                                             {isNoStock ? "Esgotado" : "Baixo"}
                                                         </Badge>
                                                     )}
@@ -475,10 +484,10 @@ export function Produtos() {
 
                             {/* Margem Preview */}
                             {newPreco && newCusto && (
-                                <div className={`p-3 rounded-lg ${newMargem < 0 ? 'bg-danger-50' : 'bg-success-50'}`}>
+                                <div className={`p - 3 rounded - lg ${newMargem < 0 ? 'bg-danger-50' : 'bg-success-50'} `}>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-gray-700">Margem de Lucro:</span>
-                                        <span className={`font-bold ${newMargem < 0 ? 'text-danger-600' : 'text-success-600'}`}>
+                                        <span className={`font - bold ${newMargem < 0 ? 'text-danger-600' : 'text-success-600'} `}>
                                             {newMargem.toFixed(1)}%
                                         </span>
                                     </div>
@@ -562,10 +571,10 @@ export function Produtos() {
                                 />
 
                                 {/* Margem Preview */}
-                                <div className={`p-3 rounded-lg ${editMargem < 0 ? 'bg-danger-50' : 'bg-success-50'}`}>
+                                <div className={`p - 3 rounded - lg ${editMargem < 0 ? 'bg-danger-50' : 'bg-success-50'} `}>
                                     <div className="flex items-center justify-between">
                                         <span className="text-sm font-medium text-gray-700">Margem de Lucro:</span>
-                                        <span className={`font-bold ${editMargem < 0 ? 'text-danger-600' : 'text-success-600'}`}>
+                                        <span className={`font - bold ${editMargem < 0 ? 'text-danger-600' : 'text-success-600'} `}>
                                             {editMargem.toFixed(1)}%
                                         </span>
                                     </div>
@@ -583,10 +592,10 @@ export function Produtos() {
                                     <button
                                         type="button"
                                         onClick={() => setEditAtivo(!editAtivo)}
-                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editAtivo ? 'bg-success-500' : 'bg-gray-300'}`}
+                                        className={`relative inline - flex h - 6 w - 11 items - center rounded - full transition - colors ${editAtivo ? 'bg-success-500' : 'bg-gray-300'} `}
                                     >
                                         <span
-                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editAtivo ? 'translate-x-6' : 'translate-x-1'}`}
+                                            className={`inline - block h - 4 w - 4 transform rounded - full bg - white transition - transform ${editAtivo ? 'translate-x-6' : 'translate-x-1'} `}
                                         />
                                     </button>
                                 </div>
