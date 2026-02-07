@@ -16,6 +16,7 @@ interface KpiCardProps {
     iconColor?: string
     className?: string
     variant?: 'default' | 'compact'
+    onClick?: () => void
 }
 
 export function KpiCard({
@@ -30,7 +31,8 @@ export function KpiCard({
     trendColor = "green",
     iconColor,
     className,
-    variant = 'default'
+    variant = 'default',
+    onClick
 }: KpiCardProps) {
 
     // Helper logic moved to SmartProgressBar, but we might still need some for the 'default' big card if we want to reuse it there too
@@ -57,7 +59,10 @@ export function KpiCard({
     const isCompact = variant === 'compact'
 
     return (
-        <Card className={cn("shadow-sm bg-white dark:bg-surface-dark border-gray-100 dark:border-gray-800 rounded-xl", className)}>
+        <Card
+            className={cn("shadow-sm bg-white dark:bg-surface-dark border-gray-100 dark:border-gray-800 rounded-xl", className)}
+            onClick={onClick}
+        >
             <CardContent className="p-5">
                 {isCompact ? (
                     // Compact Layout

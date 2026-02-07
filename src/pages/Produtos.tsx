@@ -4,11 +4,13 @@ import {
     Package,
     Plus,
     AlertTriangle,
-    X
+    X,
+    TrendingUp
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Button, Badge, LoadingScreen, Modal, ModalActions, Input } from '../components/ui'
+import { KpiCard } from '../components/dashboard/KpiCard'
 import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
@@ -233,6 +235,7 @@ export function Produtos() {
                 <Header
                     title="Produtos"
                     showBack
+                    centerTitle
                     className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
                     rightAction={
                         <button
@@ -243,7 +246,7 @@ export function Produtos() {
                         </button>
                     }
                 />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-16 bg-transparent px-4">
                     {loading && <LoadingScreen message="Carregando produtos..." />}
 
                     {!loading && (
@@ -270,17 +273,32 @@ export function Produtos() {
                             {/* Stats */}
                             {!filterBaixoEstoque && (
                                 <div className="grid grid-cols-2 gap-3">
-                                    <Card className="text-center">
-                                        <p className="text-2xl font-bold text-gray-900">{produtosAtivos}</p>
-                                        <p className="text-sm text-gray-500">Ativos</p>
-                                    </Card>
-                                    <Card
-                                        className="text-center cursor-pointer hover:bg-red-50 transition-colors border-l-4 border-l-transparent hover:border-l-warning-500"
+                                    <KpiCard
+                                        title="Ativos"
+                                        value={produtosAtivos.toString()}
+                                        progress={100}
+                                        trend="Total"
+                                        trendDirection="up"
+                                        icon={Package}
+                                        progressColor="bg-primary"
+                                        trendColor="green"
+                                        iconColor="text-primary"
+                                        variant="compact"
+                                    />
+                                    <KpiCard
+                                        title="Baixo Estoque"
+                                        value={produtosBaixoEstoqueCount.toString()}
+                                        progress={produtosAtivos > 0 ? (produtosBaixoEstoqueCount / produtosAtivos) * 100 : 0}
+                                        trend={produtosBaixoEstoqueCount > 0 ? 'Crítico' : 'OK'}
+                                        trendDirection={produtosBaixoEstoqueCount > 0 ? 'down' : 'up'}
+                                        icon={AlertTriangle}
+                                        progressColor={produtosBaixoEstoqueCount > 0 ? 'bg-warning' : 'bg-semantic-green'}
+                                        trendColor={produtosBaixoEstoqueCount > 0 ? 'red' : 'green'}
+                                        iconColor={produtosBaixoEstoqueCount > 0 ? 'text-warning' : 'text-semantic-green'}
+                                        variant="compact"
                                         onClick={() => setSearchParams({ filtro: 'baixo_estoque' })}
-                                    >
-                                        <p className="text-2xl font-bold text-warning-600">{produtosBaixoEstoqueCount}</p>
-                                        <p className="text-sm text-gray-500">Baixo Estoque</p>
-                                    </Card>
+                                        className="cursor-pointer"
+                                    />
                                 </div>
                             )}
 
