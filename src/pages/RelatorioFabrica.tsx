@@ -1,26 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
     Calendar,
     Package,
     Send,
     RefreshCw,
     ClipboardList,
+    AlertTriangle,
+    BarChart3,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Card, Button, LoadingScreen, Input } from '../components/ui'
+import { KpiCard } from '../components/dashboard/KpiCard'
 import { useRelatorioFabrica, getDefaultDates } from '../hooks/useRelatorioFabrica'
 import { useToast } from '../components/ui/Toast'
-import { format, parseISO } from 'date-fns'
+import { format, parseISO, differenceInDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-
-function formatDateBR(dateStr: string): string {
-    try {
-        return format(parseISO(dateStr), 'dd/MM/yyyy', { locale: ptBR })
-    } catch {
-        return dateStr
-    }
-}
 
 function formatDateShort(dateStr: string): string {
     try {
@@ -75,120 +70,202 @@ export function RelatorioFabrica() {
         window.open(url, '_blank')
     }
 
+    // KPI calculations
+    const totalSKUs = useMemo(() => relatorio?.produtos.length || 0, [relatorio])
+    const totalUnidades = useMemo(() => relatorio?.total || 0, [relatorio])
+    const diasPeriodo = useMemo(() => {
+        if (!relatorio) return 0
+        try {
+            return differenceInDays(parseISO(relatorio.dataFim), parseISO(relatorio.dataInicio)) + 1
+        } catch {
+            return 0
+        }
+    }, [relatorio])
+
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
             <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
                 <Header
                     title="Relatório Fábrica"
                     showBack
+                    centerTitle
                     className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
                 />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-16 bg-transparent px-4">
+                    {/* KPI Metrics */}
+                    {!loading && relatorio && relatorio.produtos.length > 0 && (
+                        <div className="grid grid-cols-3 gap-3 mb-4">
+                            <KpiCard
+                                title="Produtos"
+                                value={totalSKUs.toString()}
+                                progress={100}
+                                trend="SKUs"
+                                trendDirection="up"
+                                icon={Package}
+                                progressColor="bg-violet-500"
+                                trendColor="green"
+                                iconColor="text-violet-600"
+                                variant="compact"
+                            />
+                            <KpiCard
+                                title="Total"
+                                value={totalUnidades.toString()}
+                                progress={100}
+                                trend="Unid."
+                                trendDirection="up"
+                                icon={BarChart3}
+                                progressColor="bg-emerald-500"
+                                trendColor="green"
+                                iconColor="text-emerald-600"
+                                variant="compact"
+                            />
+                            <KpiCard
+                                title="Período"
+                                value={diasPeriodo.toString()}
+                                progress={diasPeriodo > 7 ? 100 : (diasPeriodo / 7) * 100}
+                                trend={diasPeriodo === 1 ? '1 dia' : `${diasPeriodo} dias`}
+                                trendDirection={diasPeriodo >= 7 ? 'up' : 'down'}
+                                icon={Calendar}
+                                progressColor={diasPeriodo >= 7 ? 'bg-primary' : 'bg-accent'}
+                                trendColor={diasPeriodo >= 7 ? 'green' : 'yellow'}
+                                iconColor={diasPeriodo >= 7 ? 'text-primary' : 'text-accent'}
+                                variant="compact"
+                            />
+                        </div>
+                    )}
+
                     {/* Seletor de Período */}
-                    <Card className="mb-4">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                                <Calendar className="h-5 w-5 text-primary-600" />
+                    <Card className="mb-6">
+                        <div className="p-6">
+                            <div className="flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center">
+                                    <Calendar className="h-6 w-6 text-primary" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Filtro de Período</h3>
+                                    <p className="text-sm text-gray-500 dark:text-gray-400">Defina o intervalo do relatório</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-900">Selecione o Período</h3>
-                                <p className="text-sm text-gray-500">Vendas realizadas no período</p>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <Input
+                                    label="Data Início"
+                                    type="date"
+                                    value={dataInicio}
+                                    onChange={(e) => setDataInicio(e.target.value)}
+                                />
+                                <Input
+                                    label="Data Fim"
+                                    type="date"
+                                    value={dataFim}
+                                    onChange={(e) => setDataFim(e.target.value)}
+                                />
                             </div>
-                        </div>
 
-                        <div className="grid grid-cols-2 gap-3 mb-4">
-                            <Input
-                                label="Data Início"
-                                type="date"
-                                value={dataInicio}
-                                onChange={(e) => setDataInicio(e.target.value)}
-                            />
-                            <Input
-                                label="Data Fim"
-                                type="date"
-                                value={dataFim}
-                                onChange={(e) => setDataFim(e.target.value)}
-                            />
+                            <Button
+                                className="w-full font-bold h-12 shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 text-white transition-all active:scale-[0.98]"
+                                leftIcon={<RefreshCw className="h-4 w-4" />}
+                                onClick={handleGerar}
+                                isLoading={loading}
+                            >
+                                Gerar Atualização
+                            </Button>
                         </div>
-
-                        <Button
-                            variant="primary"
-                            className="w-full"
-                            leftIcon={<RefreshCw className="h-4 w-4" />}
-                            onClick={handleGerar}
-                            isLoading={loading}
-                        >
-                            Gerar Relatório
-                        </Button>
                     </Card>
 
                     {/* Loading */}
-                    {loading && <LoadingScreen message="Gerando relatório..." />}
+                    {loading && <LoadingScreen message="Processando dados..." />}
 
                     {/* Error */}
                     {error && (
-                        <Card className="bg-danger-50 text-danger-600 mb-4">
-                            <p>{error}</p>
+                        <Card className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 mb-6 border-red-100 dark:border-red-900/20">
+                            <div className="flex items-center gap-3">
+                                <AlertTriangle className="h-5 w-5 shrink-0" />
+                                <p className="font-medium text-sm">{error}</p>
+                            </div>
                         </Card>
                     )}
 
                     {/* Resultado */}
                     {!loading && relatorio && (
-                        <div className="space-y-3">
+                        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
                             {relatorio.produtos.length === 0 ? (
-                                <Card className="text-center py-8 text-gray-500">
-                                    <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                                    <p>Nenhuma venda no período selecionado</p>
-                                </Card>
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Package className="h-8 w-8 text-gray-400" />
+                                    </div>
+                                    <h3 className="text-gray-900 dark:text-gray-100 font-semibold mb-1">Nada encontrado</h3>
+                                    <p className="text-gray-500 text-sm">Nenhuma venda neste período</p>
+                                </div>
                             ) : (
                                 <>
-                                    {/* Cards por Produto */}
-                                    {relatorio.produtos.map((produto) => (
-                                        <Card key={produto.produtoId}>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                                                    <Package className="h-5 w-5 text-indigo-600" />
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-gray-900">{produto.nome}</p>
-                                                    <p className="text-sm text-gray-500">Código: {produto.codigo}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-2xl font-bold text-primary-600">{produto.quantidade}</p>
-                                                    <p className="text-xs text-gray-500">unidades</p>
-                                                </div>
-                                            </div>
-                                        </Card>
-                                    ))}
+                                    {/* Resumo Header */}
+                                    <div className="flex items-center justify-between px-1">
+                                        <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Produtos Vendidos</h2>
+                                        <span className="text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-full">
+                                            {relatorio.produtos.length} itens
+                                        </span>
+                                    </div>
 
-                                    {/* Card de Resumo */}
-                                    <Card className="bg-gradient-to-br from-primary-500 to-primary-600 text-white">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                                                <ClipboardList className="h-5 w-5" />
+                                    {/* Cards por Produto */}
+                                    <div className="space-y-3">
+                                        {relatorio.produtos.map((produto) => (
+                                            <Card key={produto.produtoId} className="transition-all hover:shadow-md border-l-4 border-l-primary hover:bg-primary/5 dark:hover:bg-primary/10">
+                                                <div className="p-4 flex items-center gap-4">
+                                                    <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center shrink-0">
+                                                        <Package className="h-6 w-6 text-muted-foreground" />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">{produto.nome}</h3>
+                                                        <div className="text-sm text-gray-500 dark:text-gray-400 font-mono">#{produto.codigo}</div>
+                                                    </div>
+                                                    <div className="text-right shrink-0 bg-muted px-3 py-2 rounded-lg">
+                                                        <p className="text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight">{produto.quantidade}</p>
+                                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 uppercase font-bold tracking-wide">unid</p>
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    </div>
+
+                                    {/* Card de Resumo Total */}
+                                    <div className="mt-8 relative overflow-hidden rounded-2xl shadow-xl shadow-indigo-500/20">
+                                        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-violet-700"></div>
+                                        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+                                        <div className="relative p-6 text-white">
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-2 opacity-90">
+                                                    <ClipboardList className="h-5 w-5" />
+                                                    <span className="text-sm font-semibold tracking-wide">RESUMO TOTAL</span>
+                                                </div>
+                                                <div className="text-xs bg-white/20 px-2 py-1 rounded backdrop-blur-sm">
+                                                    {formatDateShort(relatorio.dataInicio)} - {formatDateShort(relatorio.dataFim)}
+                                                </div>
                                             </div>
-                                            <div className="flex-1">
-                                                <p className="font-semibold">RESUMO DO PEDIDO</p>
-                                                <p className="text-sm opacity-80">
-                                                    Período: {formatDateBR(relatorio.dataInicio)} - {formatDateBR(relatorio.dataFim)}
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="text-3xl font-bold">{relatorio.total}</p>
-                                                <p className="text-sm opacity-80">unidades</p>
+
+                                            <div className="flex items-end justify-between mt-4">
+                                                <div>
+                                                    <p className="text-indigo-100 text-sm mb-1">Total de Peças</p>
+                                                    <p className="text-4xl font-extrabold tracking-tight">{relatorio.total}</p>
+                                                </div>
+                                                <div className="mb-1">
+                                                    <p className="text-xs text-indigo-200">unidades produzidas</p>
+                                                </div>
                                             </div>
                                         </div>
-                                    </Card>
+                                    </div>
 
                                     {/* Botão Enviar WhatsApp */}
                                     <Button
-                                        variant="accent"
-                                        className="w-full"
+                                        variant="success"
+                                        className="w-full font-bold h-12 mt-4 border-b-4 border-primary/80 active:border-b-0 active:translate-y-1 transition-all"
                                         leftIcon={<Send className="h-4 w-4" />}
                                         onClick={handleEnviarWhatsApp}
                                     >
-                                        📤 Enviar via WhatsApp
+                                        Enviar Relatório no WhatsApp
                                     </Button>
+
+                                    <div className="h-6"></div>
                                 </>
                             )}
                         </div>
