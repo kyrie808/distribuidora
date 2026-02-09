@@ -67,6 +67,7 @@ export function ContatoCard({ contato, onClick }: ContatoCardProps) {
                     <div className="flex items-center gap-2">
                         <h3 className="text-base font-bold text-gray-900 dark:text-gray-100 line-clamp-1">
                             {contato.nome}
+                            {contato.apelido && <span className="text-muted-foreground font-medium text-sm ml-2">● ({contato.apelido})</span>}
                         </h3>
                     </div>
 

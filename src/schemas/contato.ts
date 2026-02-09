@@ -7,6 +7,7 @@ export const contatoSchema = z.object({
         .string()
         .min(2, 'Nome deve ter pelo menos 2 caracteres')
         .max(100, 'Nome deve ter no máximo 100 caracteres'),
+    apelido: z.string().optional().nullable(),
     telefone: z
         .string()
         .min(1, 'Telefone é obrigatório')

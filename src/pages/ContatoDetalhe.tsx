@@ -283,7 +283,7 @@ export function ContatoDetalhe() {
                         </div>
 
                         <h1 className="text-2xl font-bold text-center text-foreground tracking-tight mb-1">
-                            {contato.nome}
+                            {contato.nome} {contato.apelido && <span className="text-muted-foreground font-medium text-lg ml-2">● ({contato.apelido})</span>}
                         </h1>
 
                         <div className="flex items-center gap-2 mb-6">

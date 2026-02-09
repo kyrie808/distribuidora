@@ -5,6 +5,7 @@ export type PagamentoStatus = 'pendente' | 'pago'
 export interface DomainContato {
     id: string
     nome: string
+    apelido?: string | null
     telefone: string
     email?: string | null
     tipo: 'B2C' | 'B2B'

@@ -14,6 +14,7 @@ export class ContatoService {
         return {
             id: row.id,
             nome: row.nome,
+            apelido: row.apelido,
             telefone: row.telefone,
             tipo: row.tipo as 'B2C' | 'B2B',
             subtipo: row.subtipo,
@@ -38,6 +39,7 @@ export class ContatoService {
     private toPersistence(domain: Partial<DomainContato>): ContatoUpdate {
         const update: ContatoUpdate = {}
         if (domain.nome !== undefined) update.nome = domain.nome
+        if (domain.apelido !== undefined) update.apelido = domain.apelido
         if (domain.telefone !== undefined) update.telefone = domain.telefone
         // Type casting needed as domain usage matches DB strings but types are strict/loose
         if (domain.tipo !== undefined) update.tipo = domain.tipo as any

@@ -64,6 +64,7 @@ export function ContatoFormModal({
         resolver: zodResolver(contatoSchema),
         defaultValues: {
             nome: '',
+            apelido: '',
             telefone: '',
             tipo: 'B2C',
             status: 'lead',
@@ -122,6 +123,7 @@ export function ContatoFormModal({
 
             reset({
                 nome: contato.nome,
+                apelido: contato.apelido || '',
                 telefone: contato.telefone,
                 tipo: contato.tipo as 'B2C' | 'B2B',
                 status: contato.status as 'lead' | 'cliente' | 'inativo',
@@ -142,6 +144,7 @@ export function ContatoFormModal({
         } else if (isOpen) {
             reset({
                 nome: '',
+                apelido: '',
                 telefone: '',
                 tipo: 'B2C',
                 status: 'lead',
@@ -285,6 +288,13 @@ export function ContatoFormModal({
                                     error={errors.nome?.message}
                                     className="bg-muted/50 border-white/10 focus:border-primary/50 text-lg"
                                     {...register('nome')}
+                                />
+                                <Input
+                                    label="APELIDO"
+                                    placeholder="Ex: Do Zezinho"
+                                    error={errors.apelido?.message}
+                                    className="bg-muted/50 border-white/10"
+                                    {...register('apelido')}
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Input

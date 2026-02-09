@@ -53,6 +53,7 @@ export type Database = {
           subtipo: string | null
           telefone: string
           tipo: string
+          apelido: string | null
           ultimo_contato: string | null
         }
         Insert: {
@@ -72,6 +73,7 @@ export type Database = {
           subtipo?: string | null
           telefone: string
           tipo: string
+          apelido?: string | null
           ultimo_contato?: string | null
         }
         Update: {
@@ -91,6 +93,7 @@ export type Database = {
           subtipo?: string | null
           telefone?: string
           tipo?: string
+          apelido?: string | null
           ultimo_contato?: string | null
         }
         Relationships: [
