@@ -44,11 +44,16 @@ export function isValidPhone(phone: string): boolean {
  * Formatar data para exibição
  * Força timezone America/Sao_Paulo
  */
+/**
+ * Formatar data para exibição
+ * Força timezone America/Sao_Paulo
+ */
 export function formatDate(date: string | Date): string {
     let d = date
     if (typeof date === 'string') {
         // Se for string de data simples (YYYY-MM-DD), garantir interpretação correta
         if (date.length === 10 && date.includes('-')) {
+            // Adiciona T12:00:00 para garantir que fique no dia correto independentemente do offset
             d = new Date(`${date}T12:00:00`)
         } else {
             d = new Date(date)
@@ -78,10 +83,20 @@ export function formatDateTime(date: string | Date): string {
  * Compara apenas a data (sem hora) para evitar problemas de timezone
  */
 export function formatRelativeDate(date: string | Date): string {
-    const d = typeof date === 'string' ? new Date(date) : date
+    let d: Date
+
+    // Tratamento específico para strings YYYY-MM-DD para evitar shift de timezone (UTC -> Local)
+    if (typeof date === 'string' && date.length === 10 && date.includes('-')) {
+        // Criar data ao meio-dia para evitar problemas de fronteira de dia
+        d = new Date(`${date}T12:00:00`)
+    } else {
+        d = typeof date === 'string' ? new Date(date) : date
+    }
+
     const now = new Date()
 
     // Normalizar para comparar apenas a data (ignorar hora)
+    // Usar 'America/Sao_Paulo' para o 'now' também seria ideal, mas system time geralmente é o esperado pelo browser
     const dateOnly = new Date(d.getFullYear(), d.getMonth(), d.getDate())
     const todayOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 

@@ -16,8 +16,10 @@ import { Modal, ModalActions } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
 import { PaymentSidebar } from '../components/features/vendas/PaymentSidebar'
 
+
 import { useVendas } from '../hooks/useVendas'
 import { useScrollPersistence } from '../hooks/useScrollPersistence'
+import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
 import type { PagamentoFormData } from '../schemas/venda'
@@ -28,6 +30,9 @@ type PagamentoFilter = 'todos' | 'pago' | 'parcial' | 'pendente'
 export function Vendas() {
     const navigate = useNavigate()
     const [searchParams, setSearchParams] = useSearchParams()
+
+    // Global Filter - Logic Only
+    const { startDate, endDate } = useDashboardFilter()
 
     // Derived state from URL
     const statusFilter = (searchParams.get('status') as StatusFilter) || 'todos'
@@ -48,7 +53,8 @@ export function Vendas() {
         })
     }
 
-    const { vendas, loading, deleteVenda, refetch, addPagamento } = useVendas()
+    // Pass filters to hook
+    const { vendas, loading, deleteVenda, refetch, addPagamento } = useVendas({ startDate, endDate })
 
     // Persistence
     useScrollPersistence('vendas-scroll', loading)
@@ -104,9 +110,11 @@ export function Vendas() {
 
             // Pagamento
             if (pagamentoFilter !== 'todos') {
-                const isPaid = venda.valorPago >= venda.total
-                const isPartial = venda.valorPago > 0 && venda.valorPago < venda.total
-                const isPending = venda.valorPago === 0
+                // Fix: Consider both the 'pago' flag AND the actual paid amount.
+                // Sometimes a sale is manually marked as paid (pago=true) without a specific payment record (valorPago=0).
+                const isPaid = venda.pago || venda.valorPago >= venda.total
+                const isPartial = !isPaid && venda.valorPago > 0 && venda.valorPago < venda.total
+                const isPending = !isPaid && venda.valorPago === 0
 
                 if (pagamentoFilter === 'pago' && !isPaid) return false
                 if (pagamentoFilter === 'parcial' && !isPartial) return false
@@ -139,9 +147,9 @@ export function Vendas() {
     const paymentCounts = useMemo(() => {
         return {
             todos: vendas.length,
-            pago: vendas.filter(v => v.valorPago >= v.total).length,
-            parcial: vendas.filter(v => v.valorPago > 0 && v.valorPago < v.total).length,
-            pendente: vendas.filter(v => v.valorPago === 0).length
+            pago: vendas.filter(v => v.pago || v.valorPago >= v.total).length,
+            parcial: vendas.filter(v => !v.pago && v.valorPago > 0 && v.valorPago < v.total).length,
+            pendente: vendas.filter(v => !v.pago && v.valorPago === 0).length
         }
     }, [vendas])
 
@@ -160,6 +168,9 @@ export function Vendas() {
                 <div className="flex-1 flex flex-col pb-24">
                     <Header title="Vendas" showBack centerTitle />
                     <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+
+
+
                         {/* Search & Stats */}
                         <div className="mb-6 space-y-4">
                             <div className="relative">
@@ -221,9 +232,9 @@ export function Vendas() {
                                         <Badge
                                             variant={pagamentoFilter === 'todos' ? 'primary' : 'gray'}
                                             onClick={() => setPagamentoFilter('todos')}
-                                            className="cursor-pointer whitespace-nowrap px-3 py-1.5"
+                                            className="cursor-pointer whitespace-nowrap px-3 py-1.5 flex items-center gap-2"
                                         >
-                                            Ver todas
+                                            <span className="opacity-70">{paymentCounts.todos}</span> Ver todas
                                         </Badge>
                                         <Badge
                                             variant={pagamentoFilter === 'pago' ? 'success' : 'gray'}

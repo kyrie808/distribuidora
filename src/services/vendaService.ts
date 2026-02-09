@@ -61,15 +61,18 @@ export const vendaService = {
             .order('criado_em', { ascending: false })
 
         if (startDate) {
-            // Use YYYY-MM-DD format for 'date' column to avoid timezone offset issues (like T03:00:00Z)
-            const startStr = startDate.toISOString().split('T')[0]
+            // Use local YYYY-MM-DD format to match 'data' column (which is date only)
+            // avoiding UTC conversion issues that shift the day back
+            const offset = startDate.getTimezoneOffset()
+            const localDate = new Date(startDate.getTime() - (offset * 60 * 1000))
+            const startStr = localDate.toISOString().split('T')[0]
             query = query.gte('data', startStr)
         }
         if (endDate) {
-            // Adjust end date to avoid timezone spillover (e.g., Feb 1st 03:00 UTC for Jan 31st BRT)
-            // Subtracting 12 hours ensures we are safely within the target day in UTC
-            const safeEndDate = new Date(endDate.getTime() - 12 * 60 * 60 * 1000)
-            const endStr = safeEndDate.toISOString().split('T')[0]
+            // Adjust end date to ensure we cover the full day in local time
+            const offset = endDate.getTimezoneOffset()
+            const localDate = new Date(endDate.getTime() - (offset * 60 * 1000))
+            const endStr = localDate.toISOString().split('T')[0]
             query = query.lte('data', endStr)
         }
 
@@ -250,9 +253,12 @@ export const vendaService = {
             .reduce((acc, v) => acc + v.total, 0)
 
         // Calculate daily revenue specifically from the current set
-        // Note: If the filter excludes today, this will be 0, which is expected behavior
+        // Fix: Parse YYYY-MM-DD as local noon to ensure reliable 'isToday' check
         const faturamentoDia = vendas
-            .filter(v => isToday(new Date(v.data)) && v.pago)
+            .filter(v => {
+                const vendaDate = new Date(`${v.data}T12:00:00`)
+                return isToday(vendaDate) && v.pago
+            })
             .reduce((acc, v) => acc + v.total, 0)
 
         const faturamentoMes = faturamentoTotal // Matches Vercel logic

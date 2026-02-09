@@ -7,7 +7,16 @@ import type { Contato, Venda } from '../types/database'
  */
 export function getDiasDesdUltimaCompra(ultimaCompra: Date | string | null): number {
     if (!ultimaCompra) return Infinity
-    const data = typeof ultimaCompra === 'string' ? new Date(ultimaCompra) : ultimaCompra
+    let data: Date
+    if (typeof ultimaCompra === 'string') {
+        if (ultimaCompra.length === 10 && ultimaCompra.includes('-')) {
+            data = new Date(`${ultimaCompra}T12:00:00`)
+        } else {
+            data = new Date(ultimaCompra)
+        }
+    } else {
+        data = ultimaCompra
+    }
     return differenceInDays(new Date(), data)
 }
 
@@ -84,7 +93,7 @@ export function filtrarVendasPorPeriodo(
     fim: Date
 ): Venda[] {
     return vendas.filter(v => {
-        const data = new Date(v.data)
+        const data = new Date(`${v.data}T12:00:00`)
         return data >= inicio && data <= fim
     })
 }

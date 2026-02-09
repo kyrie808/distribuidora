@@ -67,7 +67,7 @@ export function Dashboard() {
     }, [])
 
     // Derive selected month string from global filter
-    const selectedMonth = startDate.toLocaleString('pt-BR', { month: 'short' }).replace('.', '').replace(/^./, str => str.toUpperCase())
+    const selectedMonth = startDate.toLocaleString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '').replace(/^./, str => str.toUpperCase())
 
     const handleMonthSelect = (month: string) => {
         // Map Portuguese months back to indices
@@ -234,8 +234,9 @@ export function Dashboard() {
                                     progressColor="bg-semantic-yellow"
                                     trendColor="yellow"
                                     icon={TrendingDown} // Or Clock/AlertCircle
-                                    className="col-span-1"
+                                    className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                                     variant="compact"
+                                    onClick={() => navigate('/vendas?pagamento=pendente')}
                                 />
                             </div>
 
