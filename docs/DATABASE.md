@@ -23,6 +23,7 @@ Catálogo de produtos vendidos ou comprados.
 Pessoas e empresas (Clientes e Fornecedores).
 - `id` (uuid, pk)
 - `nome` (text)
+- `apelido` (text, nullable)
 - `tipo` (text) - 'B2C' | 'B2B'
 - `subtipo` (text, nullable)
 - `status` (text) - 'lead' | 'cliente' | 'inativo' | 'fornecedor'

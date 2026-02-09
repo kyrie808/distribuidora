@@ -35,6 +35,10 @@ Componentes específicos de domínio.
 ### Contatos
 - **ContatoCard**: Card rico com informações do cliente, badges dinâmicas e ações rápidas.
   - Badges: "Novo" (criado < 7 dias), "Lead", "Cliente", "Inativo".
+  - **Atualização:** Agora exibe o "Apelido" ao lado do nome, se disponível.
+
+- **ContatoFormModal**: Modal de cadastro/edição.
+  - **Novidade:** Campo "Apelido" incluído abaixo do nome.
 
 ### Vendas
 - **CartSidebar**: Sidebar vertical para Desktop e Mobile (Drawer) que exibe o resumo dos itens, total e ações de limpeza/checkout.

@@ -30,7 +30,7 @@ Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que 
 - **Ações**: Busca textual em tempo real (Nome/Telefone), Adicionar Novo Contato (FAB e Modal).
 
 ## Detalhe do Contato (`/contatos/:id`)
-- **Header**: Dados principais (Nome, Fantasia, Status). Ação de "Editar" abre `ContatoFormModal`.
+- **Header**: Dados principais (Nome, Apelido, Status). Ação de "Editar" abre `ContatoFormModal`.
 - **Abas**:
     - _Visão Geral_: Dashboard simplificado do cliente (Vendas, Saldo).
     - _Dados_: Exibição read-only dos dados cadastrais completos.

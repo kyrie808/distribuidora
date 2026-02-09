@@ -7,6 +7,14 @@
 
 ## Entregas Recentes
 
+### 2026-02-09 - Funcionalidade de Apelido (Nickname)
+- **Database:** Adição da coluna `apelido` na tabela `contatos`.
+- **UI/UX:**
+  - Campo "Apelido" adicionado ao formulário de criação/edição.
+  - Exibição no cabeçalho do perfil: `Nome ● (Apelido)`.
+  - Exibição no Card de Listagem: Nome seguido do apelido.
+- **Backend:** Atualização de tipos e schemas Zod para suportar o novo campo opcional.
+
 ### 2026-02-07 - Migração de PaymentModal para PaymentSidebar
 - **Consistência UX Aprimorada:**
   - Substituído modal centralizado por sidebar integrado, seguindo o padrão do `CheckoutSidebar`.
