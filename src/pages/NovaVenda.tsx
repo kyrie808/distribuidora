@@ -196,7 +196,6 @@ export function NovaVenda() {
                             <CartSidebar
                                 items={cart}
                                 total={cartTotal}
-                                onRemove={removeItem}
                                 onUpdateQuantity={handleUpdateQuantity}
                                 onCheckout={handleCheckout}
                                 onClear={clearCart}
@@ -237,7 +236,6 @@ export function NovaVenda() {
                                 <CartSidebar
                                     items={cart}
                                     total={cartTotal}
-                                    onRemove={removeItem}
                                     onUpdateQuantity={handleUpdateQuantity}
                                     onCheckout={handleCheckout}
                                     onClear={clearCart}

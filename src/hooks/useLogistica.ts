@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
-import { startOfDay, endOfDay, isToday } from 'date-fns'
+import { startOfDay, endOfDay } from 'date-fns'
 
 interface LogisticsMetrics {
     entregasPendentesTotal: number
