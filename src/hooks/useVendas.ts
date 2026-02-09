@@ -50,9 +50,21 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
         setLoading(true)
         setError(null)
         try {
-            const data = await vendaService.getVendas(startDate, endDate)
+            const [data, totalAReceber] = await Promise.all([
+                vendaService.getVendas(startDate, endDate),
+                vendaService.getTotalAReceber()
+            ])
+
             setVendas(data)
-            setMetrics(vendaService.calculateKPIs(data))
+
+            // Calculate standard metrics from filtered data
+            const calculatedMetrics = vendaService.calculateKPIs(data)
+
+            // Override 'aReceber' with the total from all time
+            setMetrics({
+                ...calculatedMetrics,
+                aReceber: totalAReceber
+            })
         } catch (err) {
             console.error('Erro ao buscar vendas:', err)
             setError('Erro ao carregar vendas')

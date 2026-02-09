@@ -227,6 +227,21 @@ export const vendaService = {
         return true
     },
 
+    async getTotalAReceber(): Promise<number> {
+        const { data, error } = await supabase
+            .from('vendas')
+            .select('total')
+            .eq('pago', false)
+            .neq('status', 'cancelada')
+
+        if (error) {
+            console.error('Error fetching total a receber:', error)
+            return 0
+        }
+
+        return (data || []).reduce((acc, venda) => acc + (venda.total || 0), 0)
+    },
+
     calculateKPIs(vendas: DomainVenda[]): VendasMetrics {
         const totalVendas = vendas.length
         // Faturamento (Cash Basis - Only Paid)
