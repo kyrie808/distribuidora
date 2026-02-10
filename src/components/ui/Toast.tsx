@@ -1,5 +1,6 @@
 import { create } from 'zustand'
-import { CheckCircle, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -29,7 +30,7 @@ export const useToastStore = create<ToastStore>((set) => ({
             set((state) => ({
                 toasts: state.toasts.filter((t) => t.id !== id),
             }))
-        }, toast.duration || 3000)
+        }, toast.duration || 2500)
     },
     removeToast: (id) =>
         set((state) => ({
@@ -54,17 +55,17 @@ export function useToast() {
 }
 
 const icons = {
-    success: CheckCircle,
+    success: CheckCircle2,
     error: AlertCircle,
     info: Info,
     warning: AlertTriangle,
 }
 
-const colors = {
-    success: 'bg-success-50 text-success-600 border-success-200',
-    error: 'bg-danger-50 text-danger-600 border-danger-200',
-    info: 'bg-primary-50 text-primary-600 border-primary-200',
-    warning: 'bg-warning-50 text-warning-600 border-warning-200',
+const styles = {
+    success: 'border-emerald-500/20 text-emerald-600 dark:text-emerald-400',
+    error: 'border-red-500/20 text-red-600 dark:text-red-400',
+    info: 'border-blue-500/20 text-blue-600 dark:text-blue-400',
+    warning: 'border-amber-500/20 text-amber-600 dark:text-amber-400',
 }
 
 function ToastItem({ toast }: { toast: Toast }) {
@@ -73,19 +74,20 @@ function ToastItem({ toast }: { toast: Toast }) {
 
     return (
         <div
-            className={`
-        flex items-center gap-3 p-4 rounded-lg border shadow-lg
-        animate-in slide-in-from-right duration-300
-        ${colors[toast.type]}
-      `}
+            className={cn(
+                "pointer-events-auto flex items-center gap-3 py-2.5 px-4 pr-3 rounded-full border shadow-xl bg-white dark:bg-gray-800 animate-in slide-in-from-top-full duration-300",
+                styles[toast.type]
+            )}
         >
-            <Icon className="h-5 w-5 flex-shrink-0" />
-            <p className="flex-1 text-sm font-medium">{toast.message}</p>
+            <Icon className="h-4 w-4 flex-shrink-0" />
+            <p className="flex-1 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                {toast.message}
+            </p>
             <button
                 onClick={() => removeToast(toast.id)}
-                className="p-1 rounded hover:bg-black/10 transition-colors"
+                className="p-0.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ml-1 text-gray-400 hover:text-gray-600"
             >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
             </button>
         </div>
     )
@@ -97,7 +99,7 @@ export function ToastContainer() {
     if (toasts.length === 0) return null
 
     return (
-        <div className="fixed bottom-24 right-4 z-[999] flex flex-col gap-2 max-w-sm">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 w-full pointer-events-none px-4">
             {toasts.map((toast) => (
                 <ToastItem key={toast.id} toast={toast} />
             ))}
