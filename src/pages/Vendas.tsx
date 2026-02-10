@@ -404,14 +404,12 @@ export function Vendas() {
                                                     <Button
                                                         size="sm"
                                                         variant={venda.status === 'entregue' ? 'secondary' : 'outline'}
-                                                        disabled={venda.pago && venda.status === 'entregue'}
                                                         onClick={(e) => handleEntregar(e, venda)}
                                                         className={cn(
                                                             "h-9 px-4 transition-colors",
                                                             venda.status === 'pendente'
                                                                 ? "border-violet-200 text-violet-700 hover:bg-violet-50 dark:border-violet-500/30 dark:text-violet-300 dark:hover:bg-violet-500/10"
-                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent",
-                                                            (venda.pago && venda.status === 'entregue') && "opacity-50 cursor-not-allowed"
+                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent"
                                                         )}
                                                     >
                                                         {venda.status === 'entregue' ? 'Entregue' : 'Entregar'}

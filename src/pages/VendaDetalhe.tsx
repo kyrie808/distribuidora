@@ -143,13 +143,11 @@ export function VendaDetalhe() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                disabled={venda.pago && venda.status === 'entregue'}
                                 className={cn(
                                     "rounded-full h-10 w-10 p-0 transition-colors",
                                     venda.status === 'pendente'
                                         ? "text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-500/10"
-                                        : "text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-800",
-                                    (venda.pago && venda.status === 'entregue') && "opacity-50 cursor-not-allowed"
+                                        : "text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-800"
                                 )}
                                 onClick={handleEntregar}
                             >
