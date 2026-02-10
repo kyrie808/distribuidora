@@ -137,35 +137,7 @@ export function VendaDetalhe() {
             <Header
                 title={`PEDIDO #${venda.id.slice(0, 6)}`}
                 showBack
-                rightAction={
-                    <div className="flex items-center gap-2">
-                        {(venda.status === 'pendente' || venda.status === 'entregue') && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className={cn(
-                                    "rounded-full h-10 w-10 p-0 transition-colors",
-                                    venda.status === 'pendente'
-                                        ? "text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-500/10"
-                                        : "text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-800"
-                                )}
-                                onClick={handleEntregar}
-                            >
-                                <Truck className="h-6 w-6" />
-                            </Button>
-                        )}
-                        {!venda.pago && venda.status !== 'cancelada' && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="rounded-full h-10 w-10 p-0 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10 transition-colors"
-                                onClick={() => setShowPaymentModal(true)}
-                            >
-                                <DollarSign className="h-6 w-6" />
-                            </Button>
-                        )}
-                    </div>
-                }
+
                 className="bg-secondary/80 dark:bg-background/80 backdrop-blur-md border-b border-gray-100 dark:border-border"
             />
 
@@ -319,6 +291,31 @@ export function VendaDetalhe() {
 
                 {/* ACTION BUTTONS (Inline) */}
                 <div className="mt-8 mb-6 flex flex-col gap-3">
+                    {/* Main Action Buttons */}
+                    <div className="flex gap-3">
+                        {(venda.status === 'pendente' || venda.status === 'entregue') && (
+                            <Button
+                                className="flex-1"
+                                variant={venda.status === 'entregue' ? "secondary" : "primary"}
+                                onClick={handleEntregar}
+                            >
+                                <Truck className="h-4 w-4 mr-2" />
+                                {venda.status === 'entregue' ? 'Voltar para Pendente' : 'Entregar'}
+                            </Button>
+                        )}
+
+                        {!venda.pago && venda.status !== 'cancelada' && (
+                            <Button
+                                className="flex-1"
+                                variant="primary"
+                                onClick={() => setShowPaymentModal(true)}
+                            >
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Quitar
+                            </Button>
+                        )}
+                    </div>
+
                     <div className="flex gap-3">
                         <Button
                             variant="outline"

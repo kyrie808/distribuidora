@@ -14,15 +14,15 @@ import { Card, CardHeader, CardContent, CardFooter, Badge, EmptyState, LoadingSc
 import { cn } from '@/lib/utils'
 import { Modal, ModalActions } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
-import { PaymentSidebar } from '../components/features/vendas/PaymentSidebar'
+
 
 
 import { useVendas } from '../hooks/useVendas'
 import { useScrollPersistence } from '../hooks/useScrollPersistence'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { formatCurrency, formatDate } from '../utils/formatters'
-import { VENDA_STATUS_LABELS, FORMA_PAGAMENTO_LABELS } from '../constants'
-import type { PagamentoFormData } from '../schemas/venda'
+import { FORMA_PAGAMENTO_LABELS } from '../constants'
+
 
 type StatusFilter = 'todos' | 'pendente' | 'entregue' | 'cancelada'
 type PagamentoFilter = 'todos' | 'pago' | 'parcial' | 'pendente'
@@ -74,7 +74,7 @@ export function Vendas() {
     }
 
     // Pass filters to hook
-    const { vendas, loading, deleteVenda, refetch, addPagamento, updateVendaStatus } = useVendas({ startDate, endDate })
+    const { vendas, loading, deleteVenda } = useVendas({ startDate, endDate })
 
     // Persistence
     useScrollPersistence('vendas-scroll', loading)
@@ -84,13 +84,7 @@ export function Vendas() {
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    // Revert Delivery Modal State
-    const [showRevertModal, setShowRevertModal] = useState(false)
-    const [vendaToRevert, setVendaToRevert] = useState<string | null>(null)
 
-    // Payment Sidebar (similar to cart in NovaVenda)
-    const [isPaymentOpen, setIsPaymentOpen] = useState(false)
-    const [selectedVendaId, setSelectedVendaId] = useState<string | null>(null)
 
     const handleDelete = async () => {
         if (!vendaToDelete) return
@@ -103,53 +97,7 @@ export function Vendas() {
         setIsDeleting(false)
     }
 
-    const handleEntregar = async (e: React.MouseEvent, venda: { id: string, status: string }) => {
-        e.stopPropagation()
 
-        if (venda.status === 'entregue') {
-            setVendaToRevert(venda.id)
-            setShowRevertModal(true)
-            return
-        }
-
-        const success = await updateVendaStatus(venda.id, 'entregue')
-        if (success) {
-            await refetch()
-        }
-    }
-
-    const handleRevertDelivery = async () => {
-        if (!vendaToRevert) return
-        const success = await updateVendaStatus(vendaToRevert, 'pendente')
-        if (success) {
-            await refetch()
-            setShowRevertModal(false)
-            setVendaToRevert(null)
-        }
-    }
-
-    const handlePaymentClick = (e: React.MouseEvent, vendaId: string) => {
-        e.stopPropagation()
-        setSelectedVendaId(vendaId)
-        setIsPaymentOpen(true)
-    }
-
-    const handlePaymentConfirm = async (data: PagamentoFormData): Promise<boolean> => {
-        if (!selectedVendaId) return false
-        const success = await addPagamento(selectedVendaId, data)
-        if (success) {
-            await refetch()
-            setIsPaymentOpen(false)
-            setSelectedVendaId(null)
-            return true
-        }
-        return false
-    }
-
-    const handlePaymentBack = () => {
-        setIsPaymentOpen(false)
-        setSelectedVendaId(null)
-    }
 
     // Filter logic
     const filteredVendas = useMemo(() => {
@@ -209,7 +157,7 @@ export function Vendas() {
     }, [vendas])
 
 
-    const selectedVenda = vendas.find(v => v.id === selectedVendaId)
+
 
     if (loading) return <LoadingScreen message="Carregando vendas..." />
 
@@ -217,7 +165,7 @@ export function Vendas() {
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
             <div className={cn(
                 "relative flex h-auto min-h-screen w-full overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark",
-                isPaymentOpen ? "md:flex-row" : "flex-col"
+                "relative flex h-auto min-h-screen w-full overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark flex-col"
             )}>
                 {/* Main content */}
                 <div className="flex-1 flex flex-col pb-24">
@@ -333,103 +281,88 @@ export function Vendas() {
                                 {filteredVendas.map((venda) => (
                                     <Card
                                         key={venda.id}
-                                        className="active:scale-[0.98] transition-transform overflow-hidden cursor-pointer hover:shadow-md border-l-4 border-l-transparent hover:border-l-primary"
+                                        className="group active:scale-[0.99] transition-all duration-200 overflow-hidden cursor-pointer hover:shadow-lg border-l-4 border-l-transparent hover:border-l-primary"
                                         onClick={() => navigate(`/vendas/${venda.id}`)}
                                     >
-                                        <CardHeader className="pb-2 p-4">
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <h3 className="font-bold text-lg text-gray-900 leading-tight">
+                                        <CardHeader className="pb-2 p-5">
+                                            <div className="flex justify-between items-start gap-4">
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold text-xl text-gray-900 leading-tight truncate">
                                                         {venda.contato?.nome || 'Cliente Não Identificado'}
                                                     </h3>
-                                                    <span className="text-xs text-muted-foreground font-mono">
+                                                    <span className="text-xs text-muted-foreground font-mono mt-1 block">
                                                         #{venda.id.slice(0, 8)}
                                                     </span>
                                                 </div>
-                                                <Badge variant={
-                                                    venda.status === 'entregue' ? 'success' :
-                                                        venda.status === 'cancelada' ? 'danger' : 'warning'
-                                                }>
-                                                    {VENDA_STATUS_LABELS[venda.status]}
-                                                </Badge>
+
+                                                {/* Status Chips - Icon + Text */}
+                                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                                                    {/* Delivery Status */}
+                                                    <div className={cn(
+                                                        "px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 border shadow-sm",
+                                                        venda.status === 'entregue'
+                                                            ? "bg-success/10 text-success-foreground border-success/20 dark:bg-success/20 dark:text-success dark:border-success/30"
+                                                            : "bg-warning/10 text-yellow-700 border-warning/20 dark:bg-warning/20 dark:text-warning dark:border-warning/30"
+                                                    )}>
+                                                        <Truck className="h-3.5 w-3.5" />
+                                                        <span>{venda.status === 'entregue' ? 'Entregue' : 'Entrega Pendente'}</span>
+                                                    </div>
+
+                                                    {/* Payment Status */}
+                                                    <div className={cn(
+                                                        "px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 border shadow-sm",
+                                                        (venda.pago || venda.valorPago >= venda.total)
+                                                            ? "bg-success/10 text-success-foreground border-success/20 dark:bg-success/20 dark:text-success dark:border-success/30"
+                                                            : "bg-warning/10 text-yellow-700 border-warning/20 dark:bg-warning/20 dark:text-warning dark:border-warning/30"
+                                                    )}>
+                                                        <DollarSign className="h-3.5 w-3.5" />
+                                                        <span>{(venda.pago || venda.valorPago >= venda.total) ? 'Pago' : 'Pagamento Pendente'}</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </CardHeader>
 
-                                        <CardContent className="pb-2 p-4 pt-0">
-                                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                                        <CardContent className="pb-4 p-5 pt-0">
+                                            <div className="flex items-center gap-4 text-sm text-gray-500">
                                                 <div className="flex items-center gap-1.5">
-                                                    <Calendar className="h-3.5 w-3.5" />
+                                                    <Calendar className="h-4 w-4" />
                                                     <span>{formatDate(venda.data)}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1.5">
-                                                    <DollarSign className="h-3.5 w-3.5" />
+                                                    <DollarSign className="h-4 w-4" />
                                                     <span>{FORMA_PAGAMENTO_LABELS[venda.formaPagamento] || venda.formaPagamento}</span>
                                                 </div>
                                             </div>
-                                            <div className="mt-2 text-sm text-gray-500">
+                                            <div className="mt-2 text-sm text-gray-400">
                                                 {venda.itens.length} {venda.itens.length === 1 ? 'item' : 'itens'}
                                             </div>
                                         </CardContent>
 
-                                        <CardFooter className="pt-0 p-4 bg-gray-50/50 flex items-center justify-between border-t border-gray-100 mt-2">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                        <CardFooter className="pt-0 p-5 bg-gray-50/30 flex items-center justify-between border-t border-gray-100">
+                                            {/* Trash Button - Discreet */}
+                                            {venda.status !== 'cancelada' ? (
+                                                <Button
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="h-9 w-9 text-gray-300 hover:text-danger-500 hover:bg-danger-50 -ml-2 transition-colors"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        setVendaToDelete(venda.id)
+                                                        setShowDeleteModal(true)
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-5 w-5" />
+                                                </Button>
+                                            ) : <div />}
+
+                                            {/* Total - Highlighted */}
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] uppercase font-bold text-gray-400 tracking-wider mb-0.5">
                                                     Total
                                                 </span>
-                                                <span className={cn(
-                                                    "text-xl font-bold",
-                                                    venda.pago ? "text-success-600" : "text-warning-600"
-                                                )}>
+                                                <span className="text-2xl font-bold font-mono tracking-tight text-primary">
                                                     {formatCurrency(venda.total)}
                                                 </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-3">
-                                                {venda.pago ? (
-                                                    <div className="flex items-center gap-1 text-success-600 text-sm font-medium">
-                                                        <Badge variant="success">Pago</Badge>
-                                                    </div>
-                                                ) : (
-                                                    <Button
-                                                        size="sm"
-                                                        variant="warning"
-                                                        onClick={(e) => handlePaymentClick(e, venda.id)}
-                                                        className="h-9 px-4"
-                                                    >
-                                                        Receber
-                                                    </Button>
-                                                )}
-
-                                                {(venda.status === 'pendente' || venda.status === 'entregue') && (
-                                                    <Button
-                                                        size="sm"
-                                                        variant={venda.status === 'entregue' ? 'secondary' : 'outline'}
-                                                        onClick={(e) => handleEntregar(e, venda)}
-                                                        className={cn(
-                                                            "h-9 px-4 transition-colors",
-                                                            venda.status === 'pendente'
-                                                                ? "border-violet-200 text-violet-700 hover:bg-violet-50 dark:border-violet-500/30 dark:text-violet-300 dark:hover:bg-violet-500/10"
-                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent"
-                                                        )}
-                                                    >
-                                                        {venda.status === 'entregue' ? 'Entregue' : 'Entregar'}
-                                                    </Button>
-                                                )}
-
-                                                {venda.status !== 'cancelada' && (
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 text-gray-400 hover:text-danger-500 hover:bg-danger-50"
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            setVendaToDelete(venda.id)
-                                                            setShowDeleteModal(true)
-                                                        }}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </Button>
-                                                )}
                                             </div>
                                         </CardFooter>
                                     </Card>
@@ -461,65 +394,9 @@ export function Vendas() {
                             </ModalActions>
                         </Modal>
 
-                        {/* Revert Delivery Modal */}
-                        <Modal
-                            isOpen={showRevertModal}
-                            onClose={() => setShowRevertModal(false)}
-                            title="Reverter Entrega"
-                            size="sm"
-                        >
-                            <p className="text-gray-600 mb-4 dark:text-gray-300">
-                                Deseja desfazer a entrega e marcar esta venda como <strong>Pendente</strong> novamente?
-                            </p>
-                            <ModalActions>
-                                <Button variant="secondary" onClick={() => setShowRevertModal(false)}>
-                                    Cancelar
-                                </Button>
-                                <Button variant="primary" onClick={handleRevertDelivery}>
-                                    Confirmar
-                                </Button>
-                            </ModalActions>
-                        </Modal>
+
                     </PageContainer>
                 </div>
-
-                {/* Desktop Payment Sidebar */}
-                {isPaymentOpen && selectedVenda && (
-                    <aside className="hidden md:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-screen sticky top-0">
-                        <PaymentSidebar
-                            onBack={handlePaymentBack}
-                            onConfirm={handlePaymentConfirm}
-                            vendaId={selectedVenda.id}
-                            total={selectedVenda.total}
-                            valorPago={selectedVenda.valorPago || 0}
-                            historico={selectedVenda.pagamentos || []}
-                            customerName={selectedVenda.contato?.nome || 'Cliente'}
-                        />
-                    </aside>
-                )}
-
-                {/* Mobile Payment Drawer */}
-                {isPaymentOpen && selectedVenda && (
-                    <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
-                        {/* Backdrop */}
-                        <div
-                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                            onClick={handlePaymentBack}
-                        />
-                        {/* Drawer */}
-                        <div className="relative w-[85vw] max-w-sm bg-white dark:bg-gray-800 h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
-                            <PaymentSidebar
-                                onBack={handlePaymentBack}
-                                onConfirm={handlePaymentConfirm}
-                                vendaId={selectedVenda.id}
-                                total={selectedVenda.total}
-                                valorPago={selectedVenda.valorPago || 0}
-                                historico={selectedVenda.pagamentos || []}
-                                customerName={selectedVenda.contato?.nome || 'Cliente'}
-                            />
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     )
