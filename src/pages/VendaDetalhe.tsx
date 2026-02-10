@@ -7,7 +7,9 @@ import {
     Printer,
     CheckCheck,
     MessageCircle,
-    Hourglass
+
+    Hourglass,
+    Truck
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Header } from '@/components/layout/Header'
@@ -27,10 +29,11 @@ export function VendaDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { venda, loading, error, refetch } = useVenda(id)
-    const { deleteVenda, addPagamento } = useVendas({ realtime: false })
+    const { deleteVenda, addPagamento, updateVendaStatus } = useVendas({ realtime: false })
 
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showPaymentModal, setShowPaymentModal] = useState(false)
+    const [showRevertModal, setShowRevertModal] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
     // Handlers
@@ -58,6 +61,35 @@ export function VendaDetalhe() {
         } else {
             toast.error('Erro ao registrar pagamento')
             return false
+        }
+    }
+
+    const handleEntregar = async () => {
+        if (!venda) return
+
+        if (venda.status === 'entregue') {
+            setShowRevertModal(true)
+            return
+        }
+
+        const success = await updateVendaStatus(venda.id, 'entregue')
+        if (success) {
+            await refetch()
+            toast.success('Venda marcada como entregue!')
+        } else {
+            toast.error('Erro ao atualizar status')
+        }
+    }
+
+    const handleRevertDelivery = async () => {
+        if (!venda) return
+        const success = await updateVendaStatus(venda.id, 'pendente')
+        if (success) {
+            await refetch()
+            setShowRevertModal(false)
+            toast.success('Entrega revertida para pendente')
+        } else {
+            toast.error('Erro ao reverter status')
         }
     }
 
@@ -106,16 +138,35 @@ export function VendaDetalhe() {
                 title={`PEDIDO #${venda.id.slice(0, 6)}`}
                 showBack
                 rightAction={
-                    !venda.pago && venda.status !== 'cancelada' && (
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="rounded-full h-10 w-10 p-0 text-primary hover:bg-primary/10 dark:hover:bg-primary/10 transition-colors"
-                            onClick={() => setShowPaymentModal(true)}
-                        >
-                            <DollarSign className="h-6 w-6" />
-                        </Button>
-                    )
+                    <div className="flex items-center gap-2">
+                        {(venda.status === 'pendente' || venda.status === 'entregue') && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                disabled={venda.pago && venda.status === 'entregue'}
+                                className={cn(
+                                    "rounded-full h-10 w-10 p-0 transition-colors",
+                                    venda.status === 'pendente'
+                                        ? "text-violet-600 hover:bg-violet-50 dark:text-violet-400 dark:hover:bg-violet-500/10"
+                                        : "text-gray-400 hover:bg-gray-100 dark:text-gray-500 dark:hover:bg-gray-800",
+                                    (venda.pago && venda.status === 'entregue') && "opacity-50 cursor-not-allowed"
+                                )}
+                                onClick={handleEntregar}
+                            >
+                                <Truck className="h-6 w-6" />
+                            </Button>
+                        )}
+                        {!venda.pago && venda.status !== 'cancelada' && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                className="rounded-full h-10 w-10 p-0 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-500/10 transition-colors"
+                                onClick={() => setShowPaymentModal(true)}
+                            >
+                                <DollarSign className="h-6 w-6" />
+                            </Button>
+                        )}
+                    </div>
                 }
                 className="bg-secondary/80 dark:bg-background/80 backdrop-blur-md border-b border-gray-100 dark:border-border"
             />
@@ -280,6 +331,9 @@ export function VendaDetalhe() {
                             Compartilhar
                         </Button>
 
+                        {/* Action Buttons */}
+
+
                         {venda.status !== 'cancelada' ? (
                             <Button
                                 variant="outline"
@@ -343,6 +397,7 @@ export function VendaDetalhe() {
                 </>
             )}
 
+            {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
@@ -351,12 +406,41 @@ export function VendaDetalhe() {
             >
                 <p className="text-gray-600 mb-4 dark:text-gray-300">
                     Tem certeza que deseja excluir esta venda?
+                    <br />
+                    <span className="text-sm text-gray-500">
+                        Esta ação não pode ser desfeita.
+                    </span>
                 </p>
                 <ModalActions>
-                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>Cancelar</Button>
-                    <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>Excluir</Button>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
+                        Excluir
+                    </Button>
                 </ModalActions>
             </Modal>
+
+            {/* Revert Delivery Modal */}
+            <Modal
+                isOpen={showRevertModal}
+                onClose={() => setShowRevertModal(false)}
+                title="Reverter Entrega"
+                size="sm"
+            >
+                <p className="text-gray-600 mb-4 dark:text-gray-300">
+                    Deseja desfazer a entrega e marcar esta venda como <strong>Pendente</strong> novamente?
+                </p>
+                <ModalActions>
+                    <Button variant="secondary" onClick={() => setShowRevertModal(false)}>
+                        Cancelar
+                    </Button>
+                    <Button variant="primary" onClick={handleRevertDelivery}>
+                        Confirmar
+                    </Button>
+                </ModalActions>
+            </Modal>
+
         </div>
     )
 }

@@ -34,27 +34,47 @@ export function Vendas() {
     // Global Filter - Logic Only
     const { startDate, endDate } = useDashboardFilter()
 
-    // Derived state from URL
-    const statusFilter = (searchParams.get('status') as StatusFilter) || 'todos'
-    const pagamentoFilter = (searchParams.get('pagamento') as PagamentoFilter) || 'todos'
+    // Derived state from URL (can be null if not selected)
+    const statusFilter = searchParams.get('status') as StatusFilter | null
+    const pagamentoFilter = searchParams.get('pagamento') as PagamentoFilter | null
 
-    // Helpers to update URL
+    // Helpers to update URL with toggle logic
     const setStatusFilter = (val: StatusFilter) => {
-        setSearchParams(prev => {
-            prev.set('status', val)
-            return prev
-        })
+        const newParams = new URLSearchParams(searchParams)
+        const currentStatus = newParams.get('status')
+
+        // Toggle Logic: If clicking the active filter, remove it
+        if (val === currentStatus) {
+            newParams.delete('status')
+        } else {
+            newParams.set('status', val)
+        }
+
+        // Mutual Exclusivity: Clear other filter
+        newParams.delete('pagamento')
+
+        setSearchParams(newParams)
     }
 
     const setPagamentoFilter = (val: PagamentoFilter) => {
-        setSearchParams(prev => {
-            prev.set('pagamento', val)
-            return prev
-        })
+        const newParams = new URLSearchParams(searchParams)
+        const currentPayment = newParams.get('pagamento')
+
+        // Toggle Logic: If active, remove it
+        if (val === currentPayment) {
+            newParams.delete('pagamento')
+        } else {
+            newParams.set('pagamento', val)
+        }
+
+        // Mutual Exclusivity
+        newParams.delete('status')
+
+        setSearchParams(newParams)
     }
 
     // Pass filters to hook
-    const { vendas, loading, deleteVenda, refetch, addPagamento } = useVendas({ startDate, endDate })
+    const { vendas, loading, deleteVenda, refetch, addPagamento, updateVendaStatus } = useVendas({ startDate, endDate })
 
     // Persistence
     useScrollPersistence('vendas-scroll', loading)
@@ -63,6 +83,10 @@ export function Vendas() {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+
+    // Revert Delivery Modal State
+    const [showRevertModal, setShowRevertModal] = useState(false)
+    const [vendaToRevert, setVendaToRevert] = useState<string | null>(null)
 
     // Payment Sidebar (similar to cart in NovaVenda)
     const [isPaymentOpen, setIsPaymentOpen] = useState(false)
@@ -77,6 +101,31 @@ export function Vendas() {
             setVendaToDelete(null)
         }
         setIsDeleting(false)
+    }
+
+    const handleEntregar = async (e: React.MouseEvent, venda: { id: string, status: string }) => {
+        e.stopPropagation()
+
+        if (venda.status === 'entregue') {
+            setVendaToRevert(venda.id)
+            setShowRevertModal(true)
+            return
+        }
+
+        const success = await updateVendaStatus(venda.id, 'entregue')
+        if (success) {
+            await refetch()
+        }
+    }
+
+    const handleRevertDelivery = async () => {
+        if (!vendaToRevert) return
+        const success = await updateVendaStatus(vendaToRevert, 'pendente')
+        if (success) {
+            await refetch()
+            setShowRevertModal(false)
+            setVendaToRevert(null)
+        }
     }
 
     const handlePaymentClick = (e: React.MouseEvent, vendaId: string) => {
@@ -104,12 +153,17 @@ export function Vendas() {
 
     // Filter logic
     const filteredVendas = useMemo(() => {
+        // If NO filter is selected, return empty list (User Requirement)
+        if (!statusFilter && !pagamentoFilter && !searchTerm) {
+            return []
+        }
+
         return vendas.filter(venda => {
             // Status
-            if (statusFilter !== 'todos' && venda.status !== statusFilter) return false
+            if (statusFilter && statusFilter !== 'todos' && venda.status !== statusFilter) return false
 
             // Pagamento
-            if (pagamentoFilter !== 'todos') {
+            if (pagamentoFilter && pagamentoFilter !== 'todos') {
                 // Fix: Consider both the 'pago' flag AND the actual paid amount.
                 // Sometimes a sale is manually marked as paid (pago=true) without a specific payment record (valorPago=0).
                 const isPaid = venda.pago || venda.valorPago >= venda.total
@@ -121,7 +175,8 @@ export function Vendas() {
                 if (pagamentoFilter === 'pendente' && !isPending) return false
             }
 
-            // Search
+            // Search (override empty filter rule if searching?)
+            // The check above `!statusFilter && !pagamentoFilter && !searchTerm` handles this.
             if (searchTerm) {
                 const term = searchTerm.toLowerCase()
                 const cliente = venda.contato?.nome?.toLowerCase() || ''
@@ -188,7 +243,7 @@ export function Vendas() {
                             <div className="space-y-3 pb-2">
                                 {/* Delivery Filters */}
                                 <div className="flex items-center gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500">
+                                    <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400">
                                         <Truck className="h-4 w-4" />
                                     </div>
                                     <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
@@ -225,7 +280,7 @@ export function Vendas() {
 
                                 {/* Payment Filters */}
                                 <div className="flex items-center gap-3">
-                                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500">
+                                    <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                         <DollarSign className="h-4 w-4" />
                                     </div>
                                     <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
@@ -345,6 +400,24 @@ export function Vendas() {
                                                     </Button>
                                                 )}
 
+                                                {(venda.status === 'pendente' || venda.status === 'entregue') && (
+                                                    <Button
+                                                        size="sm"
+                                                        variant={venda.status === 'entregue' ? 'secondary' : 'outline'}
+                                                        disabled={venda.pago && venda.status === 'entregue'}
+                                                        onClick={(e) => handleEntregar(e, venda)}
+                                                        className={cn(
+                                                            "h-9 px-4 transition-colors",
+                                                            venda.status === 'pendente'
+                                                                ? "border-violet-200 text-violet-700 hover:bg-violet-50 dark:border-violet-500/30 dark:text-violet-300 dark:hover:bg-violet-500/10"
+                                                                : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400 border-transparent",
+                                                            (venda.pago && venda.status === 'entregue') && "opacity-50 cursor-not-allowed"
+                                                        )}
+                                                    >
+                                                        {venda.status === 'entregue' ? 'Entregue' : 'Entregar'}
+                                                    </Button>
+                                                )}
+
                                                 {venda.status !== 'cancelada' && (
                                                     <Button
                                                         size="icon"
@@ -386,6 +459,26 @@ export function Vendas() {
                                 </Button>
                                 <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
                                     Excluir
+                                </Button>
+                            </ModalActions>
+                        </Modal>
+
+                        {/* Revert Delivery Modal */}
+                        <Modal
+                            isOpen={showRevertModal}
+                            onClose={() => setShowRevertModal(false)}
+                            title="Reverter Entrega"
+                            size="sm"
+                        >
+                            <p className="text-gray-600 mb-4 dark:text-gray-300">
+                                Deseja desfazer a entrega e marcar esta venda como <strong>Pendente</strong> novamente?
+                            </p>
+                            <ModalActions>
+                                <Button variant="secondary" onClick={() => setShowRevertModal(false)}>
+                                    Cancelar
+                                </Button>
+                                <Button variant="primary" onClick={handleRevertDelivery}>
+                                    Confirmar
                                 </Button>
                             </ModalActions>
                         </Modal>
