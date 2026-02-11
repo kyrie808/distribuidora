@@ -311,7 +311,10 @@ export function VendaDetalhe() {
                 </div>
 
                 {/* CLIENT INFO CARD */}
-                <div className={`${glassPanel} rounded-xl p-5 flex items-center justify-between shadow-sm mb-6`}>
+                <div
+                    onClick={() => venda.contato && navigate(`/contatos/${venda.contato.id}`)}
+                    className={`${glassPanel} rounded-xl p-5 flex items-center justify-between shadow-sm mb-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/10 transition-colors`}
+                >
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-white/10 flex items-center justify-center border border-gray-200 dark:border-border overflow-hidden">
                             <User className="h-6 w-6 text-gray-600 dark:text-white dark:opacity-80" />

@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { useProdutos } from '../hooks/useProdutos'
 import { useCartStore } from '../stores/useCartStore'
 import { useToast } from '../components/ui/Toast'
 import { useVendas } from '../hooks/useVendas'
+import { useContatos } from '../hooks/useContatos'
 import type { DomainProduto } from '../types/domain'
 
 import { ClientSelector } from '../components/features/vendas/NovaVenda/ClientSelector'
@@ -17,11 +18,14 @@ import type { VendaFormData } from '../schemas/venda'
 export function NovaVenda() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
+    const location = useLocation()
+    const stateContatoId = location.state?.contatoId
     const isEditing = Boolean(id)
     const toast = useToast()
 
     const { produtos, loading: loadingProdutos } = useProdutos()
     const { getVendaById, createVenda } = useVendas({ realtime: false })
+    const { getContatoById } = useContatos({ realtime: false })
 
     // Store
     const {
@@ -72,6 +76,22 @@ export function NovaVenda() {
             loadVenda()
         }
     }, [id])
+
+    // Load pre-selected client from navigation state
+    useEffect(() => {
+        if (stateContatoId && !id) {
+            const loadContato = async () => {
+                // If already selected, skip
+                if (selectedContato?.id === stateContatoId) return
+
+                const contato = await getContatoById(stateContatoId)
+                if (contato) {
+                    setSelectedContato(contato)
+                }
+            }
+            loadContato()
+        }
+    }, [stateContatoId, id, getContatoById, selectedContato, setSelectedContato])
 
     // Calculations
     const cartTotal = useMemo(
