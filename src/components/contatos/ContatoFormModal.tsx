@@ -287,24 +287,21 @@ export function ContatoFormModal({
                             <div className="grid grid-cols-1 gap-4">
                                 <Input
                                     label="NOME COMPLETO *"
-                                    placeholder="Ex: João da Silva"
                                     error={errors.nome?.message}
-                                    className="bg-muted/50 border-white/10 focus:border-primary/50 text-lg"
+                                    className="bg-muted/50 border-black/20 focus-visible:ring-0 focus-visible:ring-offset-0 text-lg"
                                     {...register('nome')}
                                 />
                                 <Input
                                     label="APELIDO"
-                                    placeholder="Ex: Do Zezinho"
                                     error={errors.apelido?.message}
-                                    className="bg-muted/50 border-white/10"
+                                    className="bg-muted/50 border-black/20 focus-visible:ring-0 focus-visible:ring-offset-0"
                                     {...register('apelido')}
                                 />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <Input
                                         label="TELEFONE *"
-                                        placeholder="(11) 99999-9999"
                                         error={errors.telefone?.message}
-                                        className="bg-muted/50 border-white/10"
+                                        className="bg-muted/50 border-black/20 focus-visible:ring-0 focus-visible:ring-offset-0"
                                         {...register('telefone')}
                                     />
                                 </div>
@@ -320,7 +317,7 @@ export function ContatoFormModal({
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Tipo</label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        className="flex h-10 w-full rounded-md border border-black/20 bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-0"
                                         {...register('tipo')}
                                     >
                                         {Object.entries(CONTATO_TIPO_LABELS).map(([value, label]) => (
@@ -334,7 +331,7 @@ export function ContatoFormModal({
                                     <div className="space-y-1 animate-in fade-in slide-in-from-left-2">
                                         <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Subtipo</label>
                                         <select
-                                            className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                            className="flex h-10 w-full rounded-md border border-black/20 bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-0"
                                             {...register('subtipo')}
                                         >
                                             <option value="">Selecione...</option>
@@ -348,7 +345,7 @@ export function ContatoFormModal({
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Status</label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        className="flex h-10 w-full rounded-md border border-black/20 bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-0"
                                         {...register('status')}
                                     >
                                         {Object.entries(CONTATO_STATUS_LABELS).map(([value, label]) => (
@@ -360,7 +357,7 @@ export function ContatoFormModal({
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Origem</label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 px-3 py-2 text-sm focus:border-primary/50 focus:outline-none"
+                                        className="flex h-10 w-full rounded-md border border-black/20 bg-background/50 px-3 py-2 text-sm focus:outline-none focus:ring-0"
                                         {...register('origem')}
                                     >
                                         {Object.entries(CONTATO_ORIGEM_LABELS).map(([value, label]) => (
@@ -399,8 +396,7 @@ export function ContatoFormModal({
                                                 type="text"
                                                 value={indicadorSearch}
                                                 onChange={(e) => setIndicadorSearch(e.target.value)}
-                                                placeholder="Buscar quem indicou..."
-                                                className="flex h-10 w-full rounded-md border border-white/10 bg-background/50 pl-10 pr-3 py-2 text-sm focus:border-primary/50 focus:outline-none text-foreground placeholder:text-muted-foreground"
+                                                className="flex h-10 w-full rounded-md border border-black/20 bg-background/50 pl-10 pr-3 py-2 text-sm focus:outline-none focus:ring-0 text-foreground placeholder:text-muted-foreground"
                                             />
                                         </div>
                                         {showIndicadorDropdown && indicadorResults.length > 0 && (
@@ -442,9 +438,8 @@ export function ContatoFormModal({
                                     <div className="w-[140px] relative">
                                         <Input
                                             label="CEP"
-                                            placeholder="00000-000"
                                             maxLength={9}
-                                            className="bg-background/50 border-white/10 font-mono"
+                                            className="bg-background/50 border-black/20 font-mono focus-visible:ring-0 focus-visible:ring-offset-0"
                                             {...register('cep')}
                                         />
                                         {loadingCep && (
@@ -456,8 +451,8 @@ export function ContatoFormModal({
                                     <div className="flex-1">
                                         <Input
                                             label="LOGRADOURO"
-                                            placeholder="Rua, Av..."
-                                            className="bg-background/50 border-white/10"
+                                            readOnly
+                                            className="bg-muted text-muted-foreground border-none opacity-70"
                                             {...register('logradouro')}
                                         />
                                     </div>
@@ -466,14 +461,12 @@ export function ContatoFormModal({
                                 <div className="grid grid-cols-[100px_1fr] gap-4">
                                     <Input
                                         label="NÚMERO"
-                                        placeholder="123"
-                                        className="bg-background/50 border-white/10"
+                                        className="bg-background/50 border-black/20 focus-visible:ring-0 focus-visible:ring-offset-0"
                                         {...register('numero')}
                                     />
                                     <Input
                                         label="COMPLEMENTO"
-                                        placeholder="Apto, Bloco..."
-                                        className="bg-background/50 border-white/10"
+                                        className="bg-background/50 border-black/20 focus-visible:ring-0 focus-visible:ring-offset-0"
                                         {...register('complemento')}
                                     />
                                 </div>
@@ -481,8 +474,8 @@ export function ContatoFormModal({
                                 <div className="grid grid-cols-2 gap-4">
                                     <Input
                                         label="BAIRRO"
-                                        placeholder="Bairro"
-                                        className="bg-background/50 border-white/10"
+                                        readOnly
+                                        className="bg-muted text-muted-foreground border-none opacity-70"
                                         {...register('bairro')}
                                     />
                                     <div className="grid grid-cols-[1fr_60px] gap-2">
@@ -509,8 +502,7 @@ export function ContatoFormModal({
                                 Observações
                             </label>
                             <textarea
-                                className="flex min-h-[120px] w-full rounded-md border border-white/10 bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 resize-none"
-                                placeholder="Anotações internas sobre o cliente..."
+                                className="flex min-h-[120px] w-full rounded-md border border-black/20 bg-muted/30 px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
                                 {...register('observacoes')}
                             />
                         </div>
