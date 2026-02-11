@@ -16,16 +16,6 @@ import {
 } from '../../constants'
 import type { DomainContato } from '../../types/domain'
 
-// Extended form data to handle split address fields locally
-interface ExtendedFormData extends ContatoFormData {
-    logradouro?: string
-    numero?: string
-    complemento?: string
-    cidade?: string
-    uf?: string
-    cep_input?: string // Local field for the mask
-}
-
 interface ContatoFormModalProps {
     isOpen: boolean
     onClose: () => void
@@ -60,7 +50,7 @@ export function ContatoFormModal({
         setFocus,
         getValues,
         formState: { errors, isSubmitting },
-    } = useForm<ExtendedFormData>({
+    } = useForm<ContatoFormData>({
         resolver: zodResolver(contatoSchema),
         defaultValues: {
             nome: '',
@@ -135,11 +125,11 @@ export function ContatoFormModal({
                 observacoes: contato.observacoes,
                 cep: contato.cep || '',
                 // Populate logradouro with full address as fallback/legacy handling
-                logradouro: contato.endereco || '',
-                numero: '',
-                complemento: '',
-                cidade: '', // We don't have city/uf stored separately yet for legacy
-                uf: '',
+                logradouro: contato.logradouro || contato.endereco || '',
+                numero: contato.numero || '',
+                complemento: contato.complemento || '',
+                cidade: contato.cidade || '',
+                uf: contato.uf || '',
             })
         } else if (isOpen) {
             reset({
@@ -209,30 +199,42 @@ export function ContatoFormModal({
         setIndicadorSearch('')
     }
 
-    const onSubmit = async (data: ExtendedFormData) => {
+    const onSubmit = async (data: ContatoFormData) => {
         try {
             // Get raw values to ensure we have fields that might be stripped by Zod if schema is stale
             const rawValues = getValues()
             // Merge raw values over data for specific address fields to ensure we have them
             const formDataKeyed = { ...data, ...rawValues }
 
-            // Construct the final address string
-            // Logic: use manual inputs if provided, otherwise fallback to existing data
-            let enderecoFinal = formDataKeyed.endereco
-
-            // Only reconstruct if we have the specific fields
-            if (formDataKeyed.logradouro) {
-                enderecoFinal = `${formDataKeyed.logradouro}, ${formDataKeyed.numero || 'S/N'}${formDataKeyed.complemento ? ' - ' + formDataKeyed.complemento : ''}`
-                if (formDataKeyed.cidade && formDataKeyed.uf) {
-                    enderecoFinal += ` - ${formDataKeyed.cidade}/${formDataKeyed.uf}`
-                }
+            // Clean payload to match database schema
+            const cleanPayload = {
+                nome: formDataKeyed.nome,
+                apelido: formDataKeyed.apelido,
+                telefone: formDataKeyed.telefone,
+                tipo: formDataKeyed.tipo,
+                subtipo: formDataKeyed.subtipo,
+                status: formDataKeyed.status,
+                origem: formDataKeyed.origem,
+                indicado_por_id: formDataKeyed.indicado_por_id,
+                endereco: formDataKeyed.endereco, // Legacy field, can keep as backup or calculated
+                bairro: formDataKeyed.bairro,
+                observacoes: formDataKeyed.observacoes,
+                cep: formDataKeyed.cep?.replace(/\D/g, '') || null,
+                // New structured fields
+                logradouro: formDataKeyed.logradouro,
+                numero: formDataKeyed.numero,
+                complemento: formDataKeyed.complemento,
+                cidade: formDataKeyed.cidade,
+                uf: formDataKeyed.uf,
             }
 
-            const payload: ContatoFormData = {
-                ...formDataKeyed, // Use the full set
-                endereco: enderecoFinal,
-                bairro: formDataKeyed.bairro, // Ensure bairro is passed explicitly
-                cep: formDataKeyed.cep?.replace(/\D/g, '') || null // Clean CEP before saving
+            // Construct legacy address string if not present but we have parts
+            if (!cleanPayload.endereco && cleanPayload.logradouro) {
+                let end = `${cleanPayload.logradouro}, ${cleanPayload.numero || 'S/N'}${cleanPayload.complemento ? ' - ' + cleanPayload.complemento : ''}`
+                if (cleanPayload.cidade && cleanPayload.uf) {
+                    end += ` - ${cleanPayload.cidade}/${cleanPayload.uf}`
+                }
+                cleanPayload.endereco = end
             }
 
             let result: DomainContato | null
@@ -240,15 +242,16 @@ export function ContatoFormModal({
             if (isEditing && contato) {
                 // Update expects Domain format (camelCase)
                 const updatePayload: Partial<DomainContato> = {
-                    ...payload,
+                    ...cleanPayload,
                     // Map snake_case form fields to camelCase domain fields
-                    indicadoPorId: payload.indicado_por_id
+                    indicadoPorId: cleanPayload.indicado_por_id
                 }
                 result = await updateContato(contato.id, updatePayload)
             } else {
-                // Create expects DB format (snake_case) which mostly matches payload
-                // but need to ensure types align with ContatoInsert
-                result = await createContato(payload as any)
+                // Create expects DB format (snake_case)
+                // We cast to any because the hook might still be expecting strictly the old type, 
+                // but the service handles the new fields.
+                result = await createContato(cleanPayload as any)
             }
 
             if (result) {

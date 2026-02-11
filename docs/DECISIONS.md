@@ -1,5 +1,12 @@
 # Registro de Decisões de Arquitetura (ADR)
 
+## 2026-02-09: UX Acessível e Design System
+**Contexto:** Usuários idosos relataram dificuldade em identificar status apenas por ícones ("Semáforo"). Modais e Toasts escondiam botões importantes.
+**Decisão:**
+1. **Chips Explícitos:** Substituição de ícones soltos por Chips (Ícone + Texto). Uso exclusivo de cores ativas (Neon/Amber) para status pendentes.
+2. **Toast Redesign:** Movemos para Top-Center (Pill Shape) para liberar a área inferior (FAB).
+3. **Ações Footer:** Botões grandes e explícitos no rodapé da VendaDetalhe.
+
 ## 2026-02-04: Padronização de Layout Global e Header Sticky
 **Contexto:** O sistema possuía inconsistências visuais entre páginas (Headers fixos vs scrolls vazando, larguras diferentes em Desktop). O tema "Tactical Dark" exige consistência absoluta.
 **Decisão:**

@@ -3,6 +3,11 @@
 ## UI Base (`src/components/ui/`)
 Componentes atômicos e reutilizáveis, baseados em Tailwind CSS.
 
+- **Toast.tsx** (v2):
+  - **Visual:** Estilo "Pill" (redondo/compacto), High Contrast.
+  - **Posição:** Top Center (fixo), evita conflito com FAB.
+  - **UX:** Duração: 2.5s, animação slide-in-top.
+
 - **Modal.tsx**:
   - Implementado com **React Portal** (`createPortal`) para renderizar no `document.body` e evitar conflitos de Z-Index/Stacking Context.
   - Suporte a tamanhos responsivos: `sm`, `md`, `lg`, `xl`, `2xl`... até `5xl` e `full`.

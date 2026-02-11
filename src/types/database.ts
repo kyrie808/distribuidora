@@ -55,6 +55,11 @@ export type Database = {
           tipo: string
           apelido: string | null
           ultimo_contato: string | null
+          logradouro: string | null
+          numero: string | null
+          complemento: string | null
+          cidade: string | null
+          uf: string | null
         }
         Insert: {
           atualizado_em?: string
@@ -75,6 +80,11 @@ export type Database = {
           tipo: string
           apelido?: string | null
           ultimo_contato?: string | null
+          logradouro?: string | null
+          numero?: string | null
+          complemento?: string | null
+          cidade?: string | null
+          uf?: string | null
         }
         Update: {
           atualizado_em?: string
@@ -95,6 +105,11 @@ export type Database = {
           tipo?: string
           apelido?: string | null
           ultimo_contato?: string | null
+          logradouro?: string | null
+          numero?: string | null
+          complemento?: string | null
+          cidade?: string | null
+          uf?: string | null
         }
         Relationships: [
           {

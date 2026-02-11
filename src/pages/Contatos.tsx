@@ -19,7 +19,7 @@ export function Contatos() {
         window.scrollTo(0, 0)
     }, [])
 
-    const { contatos, loading, error, getNomeIndicador } = useContatos()
+    const { contatos, loading, error, getNomeIndicador, refetch } = useContatos()
 
     // Calculate dynamic counts for stories
     const stats = useMemo(() => {
@@ -188,6 +188,7 @@ export function Contatos() {
                     <ContatoFormModal
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
+                        onSuccess={() => refetch()}
                     />
                 </PageContainer>
             </div>

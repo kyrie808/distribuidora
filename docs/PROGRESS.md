@@ -7,6 +7,20 @@
 
 ## Entregas Recentes
 
+### 2026-02-09 - Redesign de UX & Acessibilidade nos Pedidos
+- **Refatoração Visual (Design System):**
+  - **Status Chips:** Substituição do sistema "semáforo" (ícones soltos) por **Chips Explícitos** (Ícone + Texto).
+  - **Acessibilidade:** Cores de alto contraste (Verde Neon/Amber) e remoção de indicadores cinza (inativos).
+  - **VendaDetalhe:** Remoção de ícones do header para limpeza visual.
+- **Novas Ações de Venda:**
+  - Botões de ação direta no rodapé: **"Entregar"** (Toggle) e **"Quitar"**.
+  - Melhor hierarquia visual e facilidade de toque para usuários idosos.
+- **Toast Notifications V2:**
+  - Redesign completo para estilo "Pill" (Compacto e Arredondado).
+  - Posicionamento **Top-Center** para evitar conflito com botões de rodapé.
+  - Fundo sólido e sombras para legibilidade em qualquer fundo.
+
+
 ### 2026-02-09 - Funcionalidade de Apelido (Nickname)
 - **Database:** Adição da coluna `apelido` na tabela `contatos`.
 - **UI/UX:**

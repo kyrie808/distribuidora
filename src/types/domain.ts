@@ -18,6 +18,12 @@ export interface DomainContato {
         nome: string
     } | null
     endereco?: string | null
+    // Address breakdown
+    logradouro?: string | null
+    numero?: string | null
+    complemento?: string | null
+    cidade?: string | null
+    uf?: string | null
     cep?: string | null
     bairro?: string | null
     lat?: number | null

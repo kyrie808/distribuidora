@@ -29,6 +29,12 @@ export class ContatoService {
             observacoes: row.observacoes,
             criadoEm: row.criado_em,
             atualizadoEm: row.atualizado_em || row.criado_em,
+            // New address fields
+            logradouro: row.logradouro,
+            numero: row.numero,
+            complemento: row.complemento,
+            cidade: row.cidade,
+            uf: row.uf,
             indicador: 'indicador' in row && row.indicador ? {
                 id: row.indicador.id,
                 nome: row.indicador.nome
@@ -53,6 +59,13 @@ export class ContatoService {
         if (domain.lat !== undefined) update.latitude = domain.lat
         if (domain.lng !== undefined) update.longitude = domain.lng
         if (domain.observacoes !== undefined) update.observacoes = domain.observacoes
+
+        // New address fields
+        if (domain.logradouro !== undefined) update.logradouro = domain.logradouro
+        if (domain.numero !== undefined) update.numero = domain.numero
+        if (domain.complemento !== undefined) update.complemento = domain.complemento
+        if (domain.cidade !== undefined) update.cidade = domain.cidade
+        if (domain.uf !== undefined) update.uf = domain.uf
 
         return update
     }

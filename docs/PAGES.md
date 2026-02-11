@@ -42,6 +42,15 @@ Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que 
 - **Funcionalidade**: Listagem, busca por nome/ID, Modal de Recebimento de Pagamento, Modal de Exclusão.
 - **Header**: Sticky com título centralizado.
 
+
+## Detalhe da Venda (`/vendas/:id`)
+- **Visual:** Estilo "Recibo" digital.
+- **Header:** Limpo (sem ícones), apenas navegação.
+- **Ações (Rodapé):**
+  - **Entregar:** Toggle Inteligente (muda label e cor).
+  - **Quitar:** Abre Modal de Pagamento.
+  - **Secundárias:** Compartilhar, Cancelar.
+
 ## Nova Venda (`/nova-venda`)
 - **Fluxo**: Wizard simplificado para criação rápida de pedidos.
 - **Seleção de cliente**: via `Combobox`.

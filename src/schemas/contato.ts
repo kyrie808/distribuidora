@@ -22,12 +22,13 @@ export const contatoSchema = z.object({
     cep: z.string().optional().nullable(),
     bairro: z.string().optional().nullable(),
     observacoes: z.string().optional().nullable(),
-    // Campos de UI (não salvos diretamente no banco, mas usados para compor o endereço)
-    logradouro: z.string().optional(),
-    numero: z.string().optional(),
-    complemento: z.string().optional(),
-    cidade: z.string().optional(),
-    uf: z.string().optional(),
+
+    // Address Breakdown
+    logradouro: z.string().optional().nullable(),
+    numero: z.string().optional().nullable(),
+    complemento: z.string().optional().nullable(),
+    cidade: z.string().optional().nullable(),
+    uf: z.string().optional().nullable(),
 })
 
 export type ContatoFormData = z.infer<typeof contatoSchema>
