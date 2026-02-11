@@ -10,6 +10,7 @@ interface UseVendasOptions {
     realtime?: boolean
     startDate?: Date
     endDate?: Date
+    includePending?: boolean
 }
 
 interface UseVendasReturn {
@@ -28,7 +29,7 @@ interface UseVendasReturn {
     deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
-export function useVendas({ realtime = true, startDate, endDate }: UseVendasOptions = {}): UseVendasReturn {
+export function useVendas({ realtime = true, startDate, endDate, includePending = false }: UseVendasOptions = {}): UseVendasReturn {
     const [vendas, setVendas] = useState<DomainVenda[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -52,7 +53,7 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
         setError(null)
         try {
             const [data, totalAReceber] = await Promise.all([
-                vendaService.getVendas(startDate, endDate),
+                vendaService.getVendas(startDate, endDate, includePending),
                 vendaService.getTotalAReceber()
             ])
 
@@ -72,7 +73,7 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
         } finally {
             setLoading(false)
         }
-    }, [startDate, endDate])
+    }, [startDate, endDate, includePending])
 
     useEffect(() => {
         fetchVendas()

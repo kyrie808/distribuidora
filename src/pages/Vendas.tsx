@@ -74,7 +74,13 @@ export function Vendas() {
     }
 
     // Pass filters to hook
-    const { vendas, loading, deleteVenda } = useVendas({ startDate, endDate })
+    // We always include pending items from all time to support the "Pendentes" badge/filter
+    // The service handles the OR logic: (Date Range) OR (Status=Pending) OR (Payment=Pending)
+    const { vendas, loading, deleteVenda } = useVendas({
+        startDate,
+        endDate,
+        includePending: true
+    })
 
     // Persistence
     useScrollPersistence('vendas-scroll', loading)
@@ -136,25 +142,55 @@ export function Vendas() {
         })
     }, [vendas, statusFilter, pagamentoFilter, searchTerm])
 
+    // Helper to check if a sale is within the selected date range
+    // We need this because 'vendas' now includes ALL pending items, even outside the range.
+    // For non-pending badges (like "Entregues"), we only want to count those in the range.
+    const isInDateRange = (dateStr: string) => {
+        if (!startDate || !endDate) return true
+
+        // Parse date from string "YYYY-MM-DD"
+        // Adjust for timezone to avoid "off by one" errors when comparing 
+        // (Similar logic to service but in client)
+        const d = new Date(dateStr + 'T12:00:00') // Noon to be safe
+        const start = new Date(startDate)
+        start.setHours(0, 0, 0, 0)
+        const end = new Date(endDate)
+        end.setHours(23, 59, 59, 999)
+
+        return d >= start && d <= end
+    }
+
     // Counters for Delivery Row
     const deliveryCounts = useMemo(() => {
         return {
-            todos: vendas.length,
-            entregue: vendas.filter(v => v.status === 'entregue').length,
+            // Todos: Should reflect "Vendas do Mês" usually. 
+            // If we include all pending, 'todos' might look huge. 
+            // Standard convention: "Todas" badge usually respects the global date filter.
+            todos: vendas.filter(v => isInDateRange(v.data)).length,
+
+            entregue: vendas.filter(v => v.status === 'entregue' && isInDateRange(v.data)).length,
+
+            // Pendente: User requested ALL TIME pending
             pendente: vendas.filter(v => v.status === 'pendente').length,
-            cancelada: vendas.filter(v => v.status === 'cancelada').length
+
+            cancelada: vendas.filter(v => v.status === 'cancelada' && isInDateRange(v.data)).length
         }
-    }, [vendas])
+    }, [vendas, startDate, endDate])
 
     // Counters for Payment Row
     const paymentCounts = useMemo(() => {
         return {
-            todos: vendas.length,
-            pago: vendas.filter(v => v.pago || v.valorPago >= v.total).length,
-            parcial: vendas.filter(v => !v.pago && v.valorPago > 0 && v.valorPago < v.total).length,
+            // Todos: Respects date filter
+            todos: vendas.filter(v => isInDateRange(v.data)).length,
+
+            pago: vendas.filter(v => (v.pago || v.valorPago >= v.total) && isInDateRange(v.data)).length,
+
+            parcial: vendas.filter(v => !v.pago && v.valorPago > 0 && v.valorPago < v.total && isInDateRange(v.data)).length,
+
+            // Pendente: User requested ALL TIME pending
             pendente: vendas.filter(v => !v.pago && v.valorPago === 0).length
         }
-    }, [vendas])
+    }, [vendas, startDate, endDate])
 
 
 

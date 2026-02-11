@@ -49,7 +49,7 @@ export interface VendasMetrics {
 }
 
 export const vendaService = {
-    async getVendas(startDate?: Date, endDate?: Date): Promise<DomainVenda[]> {
+    async getVendas(startDate?: Date, endDate?: Date, includePending = false): Promise<DomainVenda[]> {
         let query = supabase
             .from('vendas')
             .select(`
@@ -60,20 +60,51 @@ export const vendaService = {
             `)
             .order('criado_em', { ascending: false })
 
-        if (startDate) {
-            // Use local YYYY-MM-DD format to match 'data' column (which is date only)
-            // avoiding UTC conversion issues that shift the day back
-            const offset = startDate.getTimezoneOffset()
-            const localDate = new Date(startDate.getTime() - (offset * 60 * 1000))
-            const startStr = localDate.toISOString().split('T')[0]
-            query = query.gte('data', startStr)
-        }
-        if (endDate) {
-            // Adjust end date to ensure we cover the full day in local time
-            const offset = endDate.getTimezoneOffset()
-            const localDate = new Date(endDate.getTime() - (offset * 60 * 1000))
-            const endStr = localDate.toISOString().split('T')[0]
-            query = query.lte('data', endStr)
+        // Logic:
+        // If includePending is TRUE:
+        //   Query = (data >= start AND data <= end) OR (status = 'pendente') OR (pago = false and valorPago < total)
+        // If includePending is FALSE:
+        //   Query = (data >= start AND data <= end) (Standard filtering)
+
+        if (includePending && (startDate || endDate)) {
+            const conditions: string[] = []
+
+            // Date Range Condition
+            if (startDate && endDate) {
+                const offset = startDate.getTimezoneOffset()
+
+                const localStart = new Date(startDate.getTime() - (offset * 60 * 1000))
+                const startStr = localStart.toISOString().split('T')[0]
+
+                const localEnd = new Date(endDate.getTime() - (offset * 60 * 1000))
+                const endStr = localEnd.toISOString().split('T')[0]
+
+                conditions.push(`and(data.gte.${startStr},data.lte.${endStr})`)
+            }
+
+            // Pending Status Condition
+            conditions.push(`status.eq.pendente`)
+
+            // Pending Payment Condition (pago = false)
+            conditions.push(`pago.eq.false`)
+
+            // Combine with OR
+            query = query.or(conditions.join(','))
+
+        } else {
+            // Standard behavior (Strict Date Filtering)
+            if (startDate) {
+                const offset = startDate.getTimezoneOffset()
+                const localDate = new Date(startDate.getTime() - (offset * 60 * 1000))
+                const startStr = localDate.toISOString().split('T')[0]
+                query = query.gte('data', startStr)
+            }
+            if (endDate) {
+                const offset = endDate.getTimezoneOffset()
+                const localDate = new Date(endDate.getTime() - (offset * 60 * 1000))
+                const endStr = localDate.toISOString().split('T')[0]
+                query = query.lte('data', endStr)
+            }
         }
 
         const { data, error } = await query
