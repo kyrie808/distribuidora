@@ -230,7 +230,7 @@ export function Vendas() {
                                     <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-500/10 text-violet-600 dark:text-violet-400">
                                         <Truck className="h-4 w-4" />
                                     </div>
-                                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 flex-1 w-full min-w-0 pr-4 -mr-4">
                                         <Badge
                                             variant={statusFilter === 'todos' ? 'primary' : 'gray'}
                                             onClick={() => setStatusFilter('todos')}
@@ -267,7 +267,7 @@ export function Vendas() {
                                     <div className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                                         <DollarSign className="h-4 w-4" />
                                     </div>
-                                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                                    <div className="flex gap-2 overflow-x-auto no-scrollbar py-1 flex-1 w-full min-w-0 pr-4 -mr-4">
                                         <Badge
                                             variant={pagamentoFilter === 'todos' ? 'primary' : 'gray'}
                                             onClick={() => setPagamentoFilter('todos')}
