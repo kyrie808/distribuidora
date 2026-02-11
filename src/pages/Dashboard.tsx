@@ -21,6 +21,7 @@ import { useRecompra } from '../hooks/useRecompra'
 import { useAlertasFinanceiros } from '../hooks/useAlertasFinanceiros'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { useLogistica } from '../hooks/useLogistica'
+import { useDashboardMetrics } from '../hooks/useDashboardMetrics' // NEW HOOK
 import { formatCurrency } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -85,19 +86,27 @@ export function Dashboard() {
     }
 
 
-    // Fetch data
-    const { metrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
+    // OPTIMIZED FETCHING
+    // We keep existing hooks for widgets that need list data, but use useDashboardMetrics for top-level KPIs
+    const targetMonth = startDate.getMonth() + 1
+    const targetYear = startDate.getFullYear()
+    const { data: dashboardMetrics, isLoading: loadingMetrics, refetch: refetchMetrics } = useDashboardMetrics(targetMonth, targetYear)
+
+    // Existing hooks (Refactored to React Query internally)
+    // We still need them for the widgets below the fold
+    const { metrics: vendaMetrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
     const { metrics: logisticsMetrics, loading: loadingLogistica, refetch: refetchLogistica } = useLogistica() // Global Operational Data
     const { contatos: recompraContatos, refetch: refetchRecompra } = useRecompra()
     const { contatos: allContacts, loading: loadingContatos, refetch: refetchContatos } = useContatos()
     const { alertas: alertasFinanceiros, loading: loadingFinanceiro, refetch: refetchFinanceiro } = useAlertasFinanceiros()
 
-    const loading = loadingVendas || loadingFinanceiro || loadingLogistica || loadingContatos
+    const loading = loadingMetrics || loadingVendas || loadingFinanceiro || loadingLogistica || loadingContatos
 
     // Pull to refresh action
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true)
         await Promise.all([
+            refetchMetrics(),
             refetchVendas(),
             refetchRecompra(),
             refetchFinanceiro(),
@@ -105,14 +114,24 @@ export function Dashboard() {
             refetchContatos()
         ])
         setIsRefreshing(false)
-    }, [refetchVendas, refetchRecompra, refetchFinanceiro, refetchLogistica, refetchContatos])
+    }, [refetchMetrics, refetchVendas, refetchRecompra, refetchFinanceiro, refetchLogistica, refetchContatos])
 
-    // Calculations for KPIs
+    // Calculations for KPIs (Prefer Dashboard Metrics if avail, fallback to basic calc)
     const revenueTarget = 165000 // From HTML: $165k
-    const revenueProgress = Math.min((metrics.faturamentoMes / revenueTarget) * 100, 100)
 
+    // Use the SQL View data if available, otherwise fallback to potentially empty client-side calc
+    const faturamentoMes = dashboardMetrics?.financial.faturamento_mes_atual ?? vendaMetrics.faturamentoMes
+    const lucroMes = dashboardMetrics?.financial.lucro_mes_atual ?? vendaMetrics.lucroMes
+    const ticketMedio = dashboardMetrics?.financial.ticket_medio_mes_atual ?? vendaMetrics.ticketMedio
+    const aReceber = dashboardMetrics?.operational.total_a_receber ?? vendaMetrics.aReceber
+    const totalVendasCount = dashboardMetrics?.financial.vendas_mes_atual ?? vendaMetrics.totalVendas
 
+    const revenueProgress = Math.min((faturamentoMes / revenueTarget) * 100, 100)
 
+    // Calculate Trend based on previous month from view
+    const prevRevenue = dashboardMetrics?.financial.faturamento_mes_anterior ?? 0
+    const trendValue = prevRevenue > 0 ? ((faturamentoMes - prevRevenue) / prevRevenue) * 100 : 0
+    const trendLabel = `${trendValue.toFixed(1)}%`
 
 
     // War Zone Data Extraction
@@ -183,13 +202,13 @@ export function Dashboard() {
                                 {/* Faturamento - Neon Green */}
                                 <KpiCard
                                     title="Faturamento"
-                                    value={formatCurrency(metrics.faturamentoMes)}
+                                    value={formatCurrency(faturamentoMes)}
                                     progress={revenueProgress}
-                                    trend="12%"
-                                    trendDirection="up"
+                                    trend={trendLabel}
+                                    trendDirection={trendValue >= 0 ? "up" : "down"}
                                     targetLabel="Meta: 165k"
                                     progressColor="bg-primary"
-                                    trendColor="green"
+                                    trendColor={trendValue >= 0 ? "green" : "red"}
                                     icon={TrendingUp}
                                     className="col-span-2 md:col-span-1"
                                     variant="default"
@@ -198,7 +217,7 @@ export function Dashboard() {
                                 {/* Ticket Médio - Blue/Info */}
                                 <KpiCard
                                     title="Ticket Médio"
-                                    value={formatCurrency(metrics.ticketMedio)}
+                                    value={formatCurrency(ticketMedio)}
                                     // Simulated progress/trend for Ticket Médio if not available
                                     progress={75}
                                     trend="R$ 5,00"
@@ -213,10 +232,10 @@ export function Dashboard() {
                                 {/* Lucro - Semantic Green */}
                                 <KpiCard
                                     title="Lucro"
-                                    value={formatCurrency(metrics.lucroMes)}
-                                    progress={metrics.totalVendas > 0 ? (metrics.lucroMes / metrics.totalVendas) * 100 : 0}
-                                    trend={`${metrics.totalVendas > 0 ? ((metrics.lucroMes / metrics.totalVendas) * 100).toFixed(1) : '0'}%`}
-                                    trendDirection={(metrics.totalVendas > 0 ? (metrics.lucroMes / metrics.totalVendas) * 100 : 0) > 20 ? "up" : "down"}
+                                    value={formatCurrency(lucroMes)}
+                                    progress={totalVendasCount > 0 ? (lucroMes / faturamentoMes) * 100 : 0} // Approx margin
+                                    trend={`${totalVendasCount > 0 ? ((lucroMes / faturamentoMes) * 100).toFixed(1) : '0'}%`}
+                                    trendDirection={(totalVendasCount > 0 ? (lucroMes / faturamentoMes) * 100 : 0) > 20 ? "up" : "down"}
                                     progressColor="bg-semantic-green"
                                     trendColor="green"
                                     icon={TrendingUp} // Or DollarSign if available
@@ -227,7 +246,7 @@ export function Dashboard() {
                                 {/* A Receber - Semantic Yellow */}
                                 <KpiCard
                                     title="A Receber"
-                                    value={formatCurrency(metrics.aReceber)}
+                                    value={formatCurrency(aReceber)}
                                     progress={50} // Arbitrary or calculated based on total credit
                                     trend="Pendente"
                                     trendDirection="neutral"
@@ -253,9 +272,9 @@ export function Dashboard() {
                                 {/* Vendas - Neon Green/Primary */}
                                 <KpiCard
                                     title="Vendas"
-                                    value={metrics.totalVendas.toString()}
+                                    value={totalVendasCount.toString()}
                                     progress={70} // Simulated or calc based on target
-                                    trend="24" // Simulated trend
+                                    trend="Total" // Simulated trend
                                     trendDirection="up"
                                     progressColor="bg-primary"
                                     trendColor="green"
@@ -267,7 +286,7 @@ export function Dashboard() {
                                 {/* Itens Vendidos - Blue/Info */}
                                 <KpiCard
                                     title="Itens"
-                                    value={metrics.produtosVendidos.total.toString()}
+                                    value={vendaMetrics.produtosVendidos.total.toString()}
                                     progress={65}
                                     trend="Vol"
                                     trendDirection="neutral"
@@ -281,8 +300,8 @@ export function Dashboard() {
                                 {/* Entregas Pendentes - Yellow/Warning */}
                                 <KpiCard
                                     title="Pendentes"
-                                    value={metrics.entregasPendentes.toString()}
-                                    progress={metrics.entregasPendentes > 0 ? 50 : 0}
+                                    value={dashboardMetrics?.operational.entregas_pendentes_total.toString() ?? vendaMetrics.entregasPendentes.toString()}
+                                    progress={50}
                                     trend="Total"
                                     trendDirection="neutral"
                                     progressColor="bg-semantic-yellow"
@@ -295,9 +314,9 @@ export function Dashboard() {
                                 {/* Entregas Realizadas - Green/Success */}
                                 <KpiCard
                                     title="Entregues"
-                                    value={metrics.entregasRealizadas.toString()}
+                                    value={dashboardMetrics?.operational.entregas_hoje_realizadas.toString() ?? vendaMetrics.entregasRealizadas.toString()}
                                     progress={100}
-                                    trend="No Período"
+                                    trend="Hoje"
                                     trendDirection="up"
                                     progressColor="bg-semantic-green"
                                     trendColor="green"
@@ -320,7 +339,7 @@ export function Dashboard() {
                                 {/* Clientes Ativos - Purple */}
                                 <KpiCard
                                     title="Clientes ativos"
-                                    value={allContacts.filter(c => c.status === 'cliente').length.toString()}
+                                    value={dashboardMetrics?.operational.clientes_ativos.toString() ?? allContacts.filter(c => c.status === 'cliente').length.toString()}
                                     progress={100}
                                     trend="Total"
                                     trendDirection="neutral"

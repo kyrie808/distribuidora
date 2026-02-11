@@ -14,6 +14,160 @@ export type Database = {
   }
   public: {
     Tables: {
+      cat_imagens_produto: {
+        Row: {
+          criado_em: string | null
+          id: string
+          ordem: number | null
+          principal: boolean | null
+          produto_id: string | null
+          texto_alternativo: string | null
+          url: string
+        }
+        Insert: {
+          criado_em?: string | null
+          id?: string
+          ordem?: number | null
+          principal?: boolean | null
+          produto_id?: string | null
+          texto_alternativo?: string | null
+          url: string
+        }
+        Update: {
+          criado_em?: string | null
+          id?: string
+          ordem?: number | null
+          principal?: boolean | null
+          produto_id?: string | null
+          texto_alternativo?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_catalogo_produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cat_itens_pedido: {
+        Row: {
+          id: string
+          nome_produto: string
+          pedido_id: string | null
+          preco_unitario_centavos: number
+          produto_id: string | null
+          quantidade: number
+          total_centavos: number
+        }
+        Insert: {
+          id?: string
+          nome_produto: string
+          pedido_id?: string | null
+          preco_unitario_centavos: number
+          produto_id?: string | null
+          quantidade: number
+          total_centavos: number
+        }
+        Update: {
+          id?: string
+          nome_produto?: string
+          pedido_id?: string | null
+          preco_unitario_centavos?: number
+          produto_id?: string | null
+          quantidade?: number
+          total_centavos?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_itens_pedido_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "cat_pedidos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_itens_pedido_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_itens_pedido_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_catalogo_produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cat_pedidos: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          endereco_entrega: string | null
+          frete_centavos: number | null
+          id: string
+          indicado_por: string | null
+          metodo_entrega: string | null
+          metodo_pagamento: string | null
+          nome_cliente: string
+          numero_pedido: number
+          observacoes: string | null
+          status: string | null
+          status_pagamento: string | null
+          subtotal_centavos: number
+          telefone_cliente: string
+          total_centavos: number
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          endereco_entrega?: string | null
+          frete_centavos?: number | null
+          id?: string
+          indicado_por?: string | null
+          metodo_entrega?: string | null
+          metodo_pagamento?: string | null
+          nome_cliente: string
+          numero_pedido?: number
+          observacoes?: string | null
+          status?: string | null
+          status_pagamento?: string | null
+          subtotal_centavos: number
+          telefone_cliente: string
+          total_centavos: number
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          endereco_entrega?: string | null
+          frete_centavos?: number | null
+          id?: string
+          indicado_por?: string | null
+          metodo_entrega?: string | null
+          metodo_pagamento?: string | null
+          nome_cliente?: string
+          numero_pedido?: number
+          observacoes?: string | null
+          status?: string | null
+          status_pagamento?: string | null
+          subtotal_centavos?: number
+          telefone_cliente?: string
+          total_centavos?: number
+        }
+        Relationships: []
+      }
       configuracoes: {
         Row: {
           atualizado_em: string
@@ -37,79 +191,79 @@ export type Database = {
       }
       contatos: {
         Row: {
+          apelido: string | null
           atualizado_em: string
           bairro: string | null
           cep: string | null
+          cidade: string | null
+          complemento: string | null
           criado_em: string
           endereco: string | null
           id: string
           indicado_por_id: string | null
           latitude: number | null
+          logradouro: string | null
           longitude: number | null
           nome: string
+          numero: string | null
           observacoes: string | null
           origem: string
           status: string
           subtipo: string | null
           telefone: string
           tipo: string
-          apelido: string | null
-          ultimo_contato: string | null
-          logradouro: string | null
-          numero: string | null
-          complemento: string | null
-          cidade: string | null
           uf: string | null
+          ultimo_contato: string | null
         }
         Insert: {
+          apelido?: string | null
           atualizado_em?: string
           bairro?: string | null
           cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           criado_em?: string
           endereco?: string | null
           id?: string
           indicado_por_id?: string | null
           latitude?: number | null
+          logradouro?: string | null
           longitude?: number | null
           nome: string
+          numero?: string | null
           observacoes?: string | null
           origem?: string
           status?: string
           subtipo?: string | null
           telefone: string
           tipo: string
-          apelido?: string | null
-          ultimo_contato?: string | null
-          logradouro?: string | null
-          numero?: string | null
-          complemento?: string | null
-          cidade?: string | null
           uf?: string | null
+          ultimo_contato?: string | null
         }
         Update: {
+          apelido?: string | null
           atualizado_em?: string
           bairro?: string | null
           cep?: string | null
+          cidade?: string | null
+          complemento?: string | null
           criado_em?: string
           endereco?: string | null
           id?: string
           indicado_por_id?: string | null
           latitude?: number | null
+          logradouro?: string | null
           longitude?: number | null
           nome?: string
+          numero?: string | null
           observacoes?: string | null
           origem?: string
           status?: string
           subtipo?: string | null
           telefone?: string
           tipo?: string
-          apelido?: string | null
-          ultimo_contato?: string | null
-          logradouro?: string | null
-          numero?: string | null
-          complemento?: string | null
-          cidade?: string | null
           uf?: string | null
+          ultimo_contato?: string | null
         }
         Relationships: [
           {
@@ -123,7 +277,7 @@ export type Database = {
       }
       itens_venda: {
         Row: {
-          custo_unitario: number
+          custo_unitario: number | null
           id: string
           preco_unitario: number
           produto_id: string
@@ -132,7 +286,7 @@ export type Database = {
           venda_id: string
         }
         Insert: {
-          custo_unitario: number
+          custo_unitario?: number | null
           id?: string
           preco_unitario: number
           produto_id: string
@@ -141,7 +295,7 @@ export type Database = {
           venda_id: string
         }
         Update: {
-          custo_unitario?: number
+          custo_unitario?: number | null
           id?: string
           preco_unitario?: number
           produto_id?: string
@@ -155,6 +309,13 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_catalogo_produtos"
             referencedColumns: ["id"]
           },
           {
@@ -180,7 +341,7 @@ export type Database = {
           criado_em?: string
           data?: string
           id?: string
-          metodo: string
+          metodo?: string
           observacao?: string | null
           valor: number
           venda_id: string
@@ -209,43 +370,58 @@ export type Database = {
           apelido: string | null
           ativo: boolean
           atualizado_em: string
+          categoria: string | null
           codigo: string
           criado_em: string
           custo: number
-          estoque_atual: number
+          descricao: string | null
+          destaque: boolean | null
+          estoque_atual: number | null
+          estoque_minimo: number | null
           id: string
           nome: string
+          peso_kg: number | null
           preco: number
+          slug: string | null
           unidade: string
-          estoque_minimo: number
         }
         Insert: {
           apelido?: string | null
           ativo?: boolean
           atualizado_em?: string
+          categoria?: string | null
           codigo: string
           criado_em?: string
           custo: number
-          estoque_atual?: number
+          descricao?: string | null
+          destaque?: boolean | null
+          estoque_atual?: number | null
+          estoque_minimo?: number | null
           id?: string
           nome: string
+          peso_kg?: number | null
           preco: number
+          slug?: string | null
           unidade?: string
-          estoque_minimo?: number
         }
         Update: {
           apelido?: string | null
           ativo?: boolean
           atualizado_em?: string
+          categoria?: string | null
           codigo?: string
           criado_em?: string
           custo?: number
-          estoque_atual?: number
+          descricao?: string | null
+          destaque?: boolean | null
+          estoque_atual?: number | null
+          estoque_minimo?: number | null
           id?: string
           nome?: string
+          peso_kg?: number | null
           preco?: number
+          slug?: string | null
           unidade?: string
-          estoque_minimo?: number
         }
         Relationships: []
       }
@@ -255,7 +431,7 @@ export type Database = {
           product_id: string
           purchase_order_id: string
           quantity: number
-          total_cost: number
+          total_cost: number | null
           unit_cost: number
         }
         Insert: {
@@ -263,7 +439,7 @@ export type Database = {
           product_id: string
           purchase_order_id: string
           quantity: number
-          total_cost: number
+          total_cost?: number | null
           unit_cost: number
         }
         Update: {
@@ -271,7 +447,7 @@ export type Database = {
           product_id?: string
           purchase_order_id?: string
           quantity?: number
-          total_cost?: number
+          total_cost?: number | null
           unit_cost?: number
         }
         Relationships: [
@@ -280,6 +456,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "vw_catalogo_produtos"
             referencedColumns: ["id"]
           },
           {
@@ -331,8 +514,8 @@ export type Database = {
       }
       purchase_orders: {
         Row: {
-          amount_paid: number
-          created_at: string
+          amount_paid: number | null
+          created_at: string | null
           data_recebimento: string | null
           id: string
           notes: string | null
@@ -341,24 +524,11 @@ export type Database = {
           status: Database["public"]["Enums"]["purchase_order_status"]
           supplier_id: string | null
           total_amount: number
-          updated_at: string
+          updated_at: string | null
         }
         Insert: {
-          amount_paid?: number
-          created_at?: string
-          data_recebimento?: string | null
-          id?: string
-          notes?: string | null
-          order_date: string
-          payment_status?: Database["public"]["Enums"]["purchase_order_payment_status"]
-          status?: Database["public"]["Enums"]["purchase_order_status"]
-          supplier_id?: string | null
-          total_amount: number
-          updated_at?: string
-        }
-        Update: {
-          amount_paid?: number
-          created_at?: string
+          amount_paid?: number | null
+          created_at?: string | null
           data_recebimento?: string | null
           id?: string
           notes?: string | null
@@ -367,72 +537,77 @@ export type Database = {
           status?: Database["public"]["Enums"]["purchase_order_status"]
           supplier_id?: string | null
           total_amount?: number
-          updated_at?: string
+          updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "purchase_orders_supplier_id_fkey"
-            columns: ["supplier_id"]
-            isOneToOne: false
-            referencedRelation: "contatos"
-            referencedColumns: ["id"]
-          },
-        ]
+        Update: {
+          amount_paid?: number | null
+          created_at?: string | null
+          data_recebimento?: string | null
+          id?: string
+          notes?: string | null
+          order_date?: string
+          payment_status?: Database["public"]["Enums"]["purchase_order_payment_status"]
+          status?: Database["public"]["Enums"]["purchase_order_status"]
+          supplier_id?: string | null
+          total_amount?: number
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       vendas: {
         Row: {
           atualizado_em: string
           contato_id: string
           criado_em: string
-          custo_total: number
+          custo_total: number | null
           data: string
           data_entrega: string | null
           data_prevista_pagamento: string | null
           forma_pagamento: string
           id: string
           observacoes: string | null
-          pago: boolean
+          pago: boolean | null
           parcelas: number | null
           status: string
-          taxa_entrega: number
+          taxa_entrega: number | null
           total: number
-          valor_pago: number
+          valor_pago: number | null
         }
         Insert: {
           atualizado_em?: string
           contato_id: string
           criado_em?: string
-          custo_total?: number
+          custo_total?: number | null
           data?: string
           data_entrega?: string | null
           data_prevista_pagamento?: string | null
           forma_pagamento: string
           id?: string
           observacoes?: string | null
-          pago?: boolean
+          pago?: boolean | null
           parcelas?: number | null
           status?: string
-          taxa_entrega?: number
+          taxa_entrega?: number | null
           total: number
-          valor_pago?: number
+          valor_pago?: number | null
         }
         Update: {
           atualizado_em?: string
           contato_id?: string
           criado_em?: string
-          custo_total?: number
+          custo_total?: number | null
           data?: string
           data_entrega?: string | null
           data_prevista_pagamento?: string | null
           forma_pagamento?: string
           id?: string
           observacoes?: string | null
-          pago?: boolean
+          pago?: boolean | null
           parcelas?: number | null
           status?: string
-          taxa_entrega?: number
+          taxa_entrega?: number | null
           total?: number
-          valor_pago?: number
+          valor_pago?: number | null
         }
         Relationships: [
           {
@@ -446,10 +621,117 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      crm_view_monthly_sales: {
+        Row: {
+          ano: number | null
+          custo_total: number | null
+          faturamento: number | null
+          lucro: number | null
+          mes: number | null
+          ticket_medio: number | null
+          total_vendas: number | null
+        }
+        Relationships: []
+      }
+      crm_view_operational_snapshot: {
+        Row: {
+          clientes_ativos: number | null
+          entregas_hoje_pendentes: number | null
+          entregas_hoje_realizadas: number | null
+          entregas_pendentes_total: number | null
+          total_a_receber: number | null
+        }
+        Relationships: []
+      }
+      vw_admin_dashboard: {
+        Row: {
+          faturamento_hoje_cents: number | null
+          faturamento_mes_cents: number | null
+          pedidos_pendentes: number | null
+          produtos_ativos: number | null
+          produtos_estoque_baixo: number | null
+          produtos_inativos: number | null
+          ultimos_pedidos: Json | null
+        }
+        Relationships: []
+      }
+      vw_catalogo_produtos: {
+        Row: {
+          category: string | null
+          description: string | null
+          id: string | null
+          images: Json | null
+          is_active: boolean | null
+          is_featured: boolean | null
+          name: string | null
+          price_cents: number | null
+          price_formatted: number | null
+          primary_image_url: string | null
+          slug: string | null
+          stock_min_alert: number | null
+          stock_quantity: number | null
+          stock_status: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          category?: string | null
+          description?: never
+          id?: string | null
+          images?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string | null
+          price_cents?: never
+          price_formatted?: number | null
+          primary_image_url?: never
+          slug?: string | null
+          stock_min_alert?: number | null
+          stock_quantity?: number | null
+          stock_status?: never
+          weight_kg?: number | null
+        }
+        Update: {
+          category?: string | null
+          description?: never
+          id?: string | null
+          images?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          name?: string | null
+          price_cents?: never
+          price_formatted?: number | null
+          primary_image_url?: never
+          slug?: string | null
+          stock_min_alert?: number | null
+          stock_quantity?: number | null
+          stock_status?: never
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
+      vw_marketing_pedidos: {
+        Row: {
+          data_venda: string | null
+          entregas_count: number | null
+          faturamento_cents: number | null
+          faturamento_direto_cents: number | null
+          faturamento_online_cents: number | null
+          mes_iso: string | null
+          pedidos_diretos: number | null
+          pedidos_online: number | null
+          retiradas_count: number | null
+          semana_iso: string | null
+          ticket_medio_cents: number | null
+          total_pedidos: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      receive_purchase_order: {
+        Args: { p_order_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       purchase_order_payment_status: "paid" | "partial" | "unpaid"
@@ -461,29 +743,33 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
-type DatabaseWithoutInternals = Omit<Database, '__InternalSupabase'>
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
-  PublicTableNameOrOptions extends
-  | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+  DefaultSchemaTableNameOrOptions extends
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
   | { schema: keyof DatabaseWithoutInternals },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? keyof (DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Views"])
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? (DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
   ? R
   : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-    PublicSchema["Views"])
-  ? (PublicSchema["Tables"] &
-    PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
       Row: infer R
     }
   ? R
@@ -491,20 +777,24 @@ export type Tables<
   : never
 
 export type TablesInsert<
-  PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
   | { schema: keyof DatabaseWithoutInternals },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? keyof DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Insert: infer I
   }
   ? I
   : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
     Insert: infer I
   }
   ? I
@@ -512,20 +802,24 @@ export type TablesInsert<
   : never
 
 export type TablesUpdate<
-  PublicTableNameOrOptions extends
-  | keyof PublicSchema["Tables"]
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
   | { schema: keyof DatabaseWithoutInternals },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? keyof DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"]
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
   : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
     Update: infer U
   }
   ? U
   : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-  ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
     Update: infer U
   }
   ? U
@@ -533,31 +827,37 @@ export type TablesUpdate<
   : never
 
 export type Enums<
-  PublicEnumNameOrOptions extends
-  | keyof PublicSchema["Enums"]
+  DefaultSchemaEnumNameOrOptions extends
+  | keyof DefaultSchema["Enums"]
   | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? keyof DatabaseWithoutInternals[PublicEnumNameOrOptions["schema"]]["Enums"]
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
   : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
-  ? DatabaseWithoutInternals[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-  ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
   : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof PublicSchema["CompositeTypes"]
+  | keyof DefaultSchema["CompositeTypes"]
   | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
   ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
   : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof DatabaseWithoutInternals }
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-  ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
   : never
 
 export const Constants = {
@@ -599,9 +899,6 @@ export type PurchaseOrderItem = {
   unit_cost: number
   total_cost: number
 }
-
-// Old definition removed
-
 
 // Convenience types
 export type Contato = Database['public']['Tables']['contatos']['Row']

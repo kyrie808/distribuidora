@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { contatoService } from '../services/contatoService'
 import type { DomainContato } from '../types/domain'
 import type { ContatoInsert } from '../types/database'
@@ -9,7 +10,7 @@ export type { DomainContato }
 
 interface UseContatosOptions {
     filtros?: ContatoFiltros
-    realtime?: boolean
+    realtime?: boolean // Kept for compatibility
 }
 
 interface UseContatosReturn {
@@ -26,96 +27,96 @@ interface UseContatosReturn {
 }
 
 export function useContatos(options: UseContatosOptions = {}): UseContatosReturn {
-    const { filtros } = options // Removed realtime temporarily as we moved to Service pattern without subscription yet
-    const [contatos, setContatos] = useState<DomainContato[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { filtros } = options
+    const queryClient = useQueryClient()
+    const queryKey = ['contatos', filtros]
 
-    // Fetch contatos with filters
-    const fetchContatos = useCallback(async () => {
-        setLoading(true)
-        setError(null)
+    // Main Query
+    const { data: contatos, isLoading: loading, error, refetch } = useQuery({
+        queryKey,
+        queryFn: () => contatoService.func(
+            filtros?.busca,
+            filtros?.tipo,
+            filtros?.status
+        ),
+        staleTime: 1000 * 60 * 15, // 15 minutes (Contacts don't change often)
+    })
 
-        try {
-            const data = await contatoService.func(
-                filtros?.busca,
-                filtros?.tipo,
-                filtros?.status
-            )
-            setContatos(data)
-        } catch (err) {
-            console.error('Erro ao carregar contatos:', err)
-            setError('Erro ao carregar contatos')
-        } finally {
-            setLoading(false)
+    // Mutations
+    const createMutation = useMutation({
+        mutationFn: contatoService.create,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['contatos'] })
         }
-    }, [filtros?.busca, filtros?.tipo, filtros?.status])
+    })
 
-    // Initial fetch
-    useEffect(() => {
-        fetchContatos()
-    }, [fetchContatos])
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: Partial<DomainContato> }) =>
+            contatoService.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['contatos'] })
+            queryClient.invalidateQueries({ queryKey: ['venda'] }) // Might affect sales details
+        }
+    })
 
-    const getContatoById = async (id: string): Promise<DomainContato | null> => {
+    const deleteMutation = useMutation({
+        mutationFn: contatoService.delete,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['contatos'] })
+        }
+    })
+
+    // Actions
+    const createContato = useCallback(async (data: ContatoInsert) => {
         try {
-            return await contatoService.getById(id)
-        } catch (err) {
-            setError('Erro ao buscar contato')
+            return await createMutation.mutateAsync(data)
+        } catch (e) {
+            console.error(e)
             return null
         }
-    }
+    }, [createMutation])
 
-    const searchContatos = async (query: string): Promise<DomainContato[]> => {
+    const updateContato = useCallback(async (id: string, data: Partial<DomainContato>) => {
+        try {
+            return await updateMutation.mutateAsync({ id, data })
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }, [updateMutation])
+
+    const deleteContato = useCallback(async (id: string) => {
+        try {
+            await deleteMutation.mutateAsync(id)
+            return true
+        } catch (e) {
+            console.error(e)
+            return false
+        }
+    }, [deleteMutation])
+
+    const getContatoById = useCallback(async (id: string) => {
+        return contatoService.getById(id)
+    }, [])
+
+    const searchContatos = useCallback(async (query: string) => {
         try {
             return await contatoService.func(query)
         } catch (err) {
             console.error('Erro na busca:', err)
             return []
         }
-    }
-
-    const createContato = async (data: ContatoInsert): Promise<DomainContato | null> => {
-        try {
-            const newContato = await contatoService.create(data)
-            await fetchContatos()
-            return newContato
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Erro ao criar contato')
-            return null
-        }
-    }
-
-    const updateContato = async (id: string, data: Partial<DomainContato>): Promise<DomainContato | null> => {
-        try {
-            const updated = await contatoService.update(id, data)
-            await fetchContatos()
-            return updated
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Erro ao atualizar contato')
-            return null
-        }
-    }
-
-    const deleteContato = async (id: string): Promise<boolean> => {
-        try {
-            await contatoService.delete(id)
-            setContatos(prev => prev.filter(c => c.id !== id))
-            return true
-        } catch (err) {
-            setError('Erro ao deletar contato')
-            return false
-        }
-    }
+    }, [])
 
     const getNomeIndicador = (contato: DomainContato): string | null => {
         return contato.indicador?.nome || null
     }
 
     return {
-        contatos,
+        contatos: contatos || [],
         loading,
-        error,
-        refetch: fetchContatos,
+        error: error ? (error as Error).message : null,
+        refetch: async () => { await refetch() },
         createContato,
         updateContato,
         deleteContato,
@@ -126,38 +127,18 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
 }
 
 export function useContato(id: string | undefined) {
-    const [contato, setContato] = useState<DomainContato | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-
-    const fetchContato = useCallback(async () => {
-        if (!id) {
-            setLoading(false)
-            return
-        }
-        setLoading(true)
-        setError(null)
-
-        try {
-            const data = await contatoService.getById(id)
-            setContato(data)
-        } catch (err) {
-            console.error('Erro ao carregar contato:', err)
-            setError('Erro ao carregar contato')
-        } finally {
-            setLoading(false)
-        }
-    }, [id])
-
-    useEffect(() => {
-        fetchContato()
-    }, [fetchContato])
+    const { data: contato, isLoading: loading, error, refetch } = useQuery({
+        queryKey: ['contato', id],
+        queryFn: () => id ? contatoService.getById(id) : null,
+        enabled: !!id,
+        staleTime: 1000 * 60 * 5,
+    })
 
     return {
-        contato,
+        contato: contato || null,
         indicador: contato?.indicador,
         loading,
-        error,
-        refetch: fetchContato
+        error: error ? (error as Error).message : null,
+        refetch: async () => { await refetch() }
     }
 }

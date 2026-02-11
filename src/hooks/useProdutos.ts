@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { produtoService } from '../services/produtoService'
 import type { DomainProduto } from '../types/domain'
 import type { ProdutoInsert } from '../types/database'
@@ -23,90 +24,103 @@ interface UseProdutosReturn {
 
 export function useProdutos(options: UseProdutosOptions = {}): UseProdutosReturn {
     const { includeInactive = false } = options
-    const [produtos, setProdutos] = useState<DomainProduto[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const queryClient = useQueryClient()
+    const queryKey = ['produtos', includeInactive]
 
-    const fetchProdutos = useCallback(async () => {
-        setLoading(true)
-        setError(null)
+    // Main Query
+    const { data: produtos, isLoading: loading, error, refetch } = useQuery({
+        queryKey,
+        queryFn: () => produtoService.getAll(includeInactive),
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    })
 
-        try {
-            const data = await produtoService.getAll(includeInactive)
-            setProdutos(data)
-        } catch (err) {
-            console.error('Erro ao carregar produtos:', err)
-            setError('Erro ao carregar produtos')
-        } finally {
-            setLoading(false)
+    // Mutations
+    const createMutation = useMutation({
+        mutationFn: produtoService.create.bind(produtoService),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
-    }, [includeInactive])
+    })
 
-    useEffect(() => {
-        fetchProdutos()
-    }, [fetchProdutos])
-
-    const getProdutoById = useCallback(
-        (id: string) => produtos.find((p) => p.id === id),
-        [produtos]
-    )
-
-    const createProduto = async (data: ProdutoInsert): Promise<DomainProduto | null> => {
-        try {
-            const newProduto = await produtoService.create(data)
-            // No need to full refetch if we just append, but safer to refetch to ensure order
-            await fetchProdutos()
-            return newProduto
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Erro ao criar produto')
-            return null
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string, data: Partial<DomainProduto> }) =>
+            produtoService.update(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
-    }
+    })
 
-    const updateProduto = async (id: string, data: Partial<DomainProduto>): Promise<DomainProduto | null> => {
-        try {
-            const updated = await produtoService.update(id, data)
-            // Optimistic update for UI responsiveness
-            setProdutos(prev => prev.map(p => p.id === id ? updated : p))
-            return updated
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Erro ao atualizar produto')
-            await fetchProdutos() // Revert on error
-            return null
-        }
-    }
+    const updateEstoqueMutation = useMutation({
+        mutationFn: ({ id, quantidade }: { id: string, quantidade: number }) =>
+            produtoService.updateEstoque(id, quantidade),
+        // Optimistic Update
+        onMutate: async ({ id, quantidade }) => {
+            // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
+            await queryClient.cancelQueries({ queryKey: ['produtos'] })
 
-    const updateEstoque = async (id: string, quantidade: number): Promise<DomainProduto | null> => {
-        // Snapshot for rollback
-        const previousProdutos = [...produtos]
+            // Snapshot the previous value
+            const previousProdutos = queryClient.getQueryData<DomainProduto[]>(['produtos'])
 
-        try {
-            // Optimistic update: atualiza estado local imediatamente
-            setProdutos(prevProdutos =>
-                prevProdutos.map(p =>
-                    p.id === id ? { ...p, estoqueAtual: quantidade } : p
+            // Optimistically update to the new value
+            if (previousProdutos) {
+                queryClient.setQueryData<DomainProduto[]>(['produtos'], old =>
+                    old ? old.map(p => p.id === id ? { ...p, estoqueAtual: quantidade } : p) : []
                 )
-            )
+            }
 
-            const updated = await produtoService.updateEstoque(id, quantidade)
-            // Confirm update with server data
-            setProdutos(prev => prev.map(p => p.id === id ? updated : p))
+            return { previousProdutos }
+        },
+        onError: (_err, _newTodo, context) => {
+            // Rollback on error
+            if (context?.previousProdutos) {
+                queryClient.setQueryData(['produtos'], context.previousProdutos)
+            }
+        },
+        onSettled: () => {
+            // Always refetch after error or success to ensure sync
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
 
-            return updated
-        } catch (err) {
-            console.error('Erro no updateEstoque:', err)
-            setError('Erro ao atualizar estoque')
-            // Rollback
-            setProdutos(previousProdutos)
+
+    // Wrapper functions to maintain API compatibility
+    const getProdutoById = useCallback((id: string) => {
+        return produtos?.find((p) => p.id === id)
+    }, [produtos])
+
+    const createProduto = useCallback(async (data: ProdutoInsert) => {
+        try {
+            return await createMutation.mutateAsync(data)
+        } catch (e) {
+            console.error(e)
             return null
         }
-    }
+    }, [createMutation])
+
+    const updateProduto = useCallback(async (id: string, data: Partial<DomainProduto>) => {
+        try {
+            return await updateMutation.mutateAsync({ id, data })
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }, [updateMutation])
+
+    const updateEstoque = useCallback(async (id: string, quantidade: number) => {
+        try {
+            return await updateEstoqueMutation.mutateAsync({ id, quantidade })
+        } catch (e) {
+            console.error(e)
+            return null
+        }
+    }, [updateEstoqueMutation])
+
 
     return {
-        produtos,
+        produtos: produtos || [],
         loading,
-        error,
-        refetch: fetchProdutos,
+        error: error ? (error as Error).message : null,
+        refetch: async () => { await refetch() },
         getProdutoById,
         createProduto,
         updateProduto,

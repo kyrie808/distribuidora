@@ -1,13 +1,13 @@
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '../lib/supabase'
-import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useCallback } from 'react'
 import { vendaService, type VendasMetrics, type VendaComItens } from '../services/vendaService'
+import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
 import type { DomainVenda } from '../types/domain'
 
 export type { VendaComItens }
 
 interface UseVendasOptions {
-    realtime?: boolean
+    realtime?: boolean // Kept for interface compatibility, but React Query handles freshness
     startDate?: Date
     endDate?: Date
     includePending?: boolean
@@ -29,11 +29,106 @@ interface UseVendasReturn {
     deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
-export function useVendas({ realtime = true, startDate, endDate, includePending = false }: UseVendasOptions = {}): UseVendasReturn {
-    const [vendas, setVendas] = useState<DomainVenda[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
-    const [metrics, setMetrics] = useState<VendasMetrics>({
+export function useVendas({ startDate, endDate, includePending = false }: UseVendasOptions = {}): UseVendasReturn {
+    const queryClient = useQueryClient()
+    const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending]
+
+    // Main Query
+    const { data, isLoading, error, refetch } = useQuery({
+        queryKey,
+        queryFn: async () => {
+            const [vendasData, totalAReceber] = await Promise.all([
+                vendaService.getVendas(startDate, endDate, includePending),
+                vendaService.getTotalAReceber()
+            ])
+
+            // Calculate standard metrics
+            const calculatedMetrics = vendaService.calculateKPIs(vendasData)
+
+            // Override 'aReceber' with the total from all time
+            return {
+                vendas: vendasData,
+                metrics: {
+                    ...calculatedMetrics,
+                    aReceber: totalAReceber
+                }
+            }
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    })
+
+    // Mutations
+    const createVendaMutation = useMutation({
+        mutationFn: (data: VendaFormData) => vendaService.createVenda(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const updateVendaMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: VendaFormData }) => vendaService.updateVenda(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const updateStatusMutation = useMutation({
+        mutationFn: ({ id, status }: { id: string; status: 'pendente' | 'entregue' | 'cancelada' }) =>
+            vendaService.updateVendaStatus(id, status),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const updatePagoMutation = useMutation({
+        mutationFn: ({ id, pago }: { id: string; pago: boolean }) =>
+            vendaService.updateVendaPago(id, pago),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const deleteVendaMutation = useMutation({
+        mutationFn: (id: string) => vendaService.deleteVenda(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const addPagamentoMutation = useMutation({
+        mutationFn: async ({ vendaId, data }: { vendaId: string; data: PagamentoFormData }) => {
+            const result = await vendaService.addPagamento(vendaId, data)
+            // Update venda status to paid if fully paid could be handled here or inside service
+            return result
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    const deletePagamentoMutation = useMutation({
+        mutationFn: (vendaId: string) => vendaService.deleteUltimoPagamento(vendaId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] })
+        }
+    })
+
+    // Default metrics if loading or error
+    const metrics = data?.metrics || {
         faturamentoTotal: 0,
         faturamentoDia: 0,
         faturamentoMes: 0,
@@ -46,202 +141,93 @@ export function useVendas({ realtime = true, startDate, endDate, includePending 
         entregasPendentes: 0,
         entregasRealizadas: 0,
         lucroMes: 0,
-    })
-
-    const fetchVendas = useCallback(async () => {
-        setLoading(true)
-        setError(null)
-        try {
-            const [data, totalAReceber] = await Promise.all([
-                vendaService.getVendas(startDate, endDate, includePending),
-                vendaService.getTotalAReceber()
-            ])
-
-            setVendas(data)
-
-            // Calculate standard metrics from filtered data
-            const calculatedMetrics = vendaService.calculateKPIs(data)
-
-            // Override 'aReceber' with the total from all time
-            setMetrics({
-                ...calculatedMetrics,
-                aReceber: totalAReceber
-            })
-        } catch (err) {
-            console.error('Erro ao buscar vendas:', err)
-            setError('Erro ao carregar vendas')
-        } finally {
-            setLoading(false)
-        }
-    }, [startDate, endDate, includePending])
-
-    useEffect(() => {
-        fetchVendas()
-    }, [fetchVendas])
-
-    // Realtime subscription
-    useEffect(() => {
-        if (!realtime) return
-
-        const channel = supabase
-            .channel('vendas-db-changes')
-            .on(
-                'postgres_changes',
-                {
-                    event: '*',
-                    schema: 'public',
-                    table: 'vendas',
-                },
-                () => {
-                    fetchVendas()
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [realtime, fetchVendas])
-
-    const createVenda = async (data: VendaFormData) => {
-        try {
-            const newVenda = await vendaService.createVenda(data)
-            await fetchVendas()
-            return newVenda
-        } catch (err) {
-            console.error(err)
-            return null
-        }
     }
 
-    const updateVenda = async (id: string, data: VendaFormData) => {
+    // Handlers matching the interface
+    const createVenda = useCallback(async (formData: VendaFormData) => {
         try {
-            const updated = await vendaService.updateVenda(id, data)
-            await fetchVendas()
-            return updated
-        } catch (err) {
-            console.error(err)
-            return null
-        }
-    }
+            return await createVendaMutation.mutateAsync(formData)
+        } catch (e) { console.error(e); return null }
+    }, [createVendaMutation])
 
-    const updateVendaStatus = async (id: string, status: 'pendente' | 'entregue' | 'cancelada') => {
+    const updateVenda = useCallback(async (id: string, formData: VendaFormData) => {
         try {
-            await vendaService.updateVendaStatus(id, status)
-            await fetchVendas()
+            return await updateVendaMutation.mutateAsync({ id, data: formData })
+        } catch (e) { console.error(e); return null }
+    }, [updateVendaMutation])
+
+    const updateVendaStatus = useCallback(async (id: string, status: 'pendente' | 'entregue' | 'cancelada') => {
+        try {
+            await updateStatusMutation.mutateAsync({ id, status })
             return true
-        } catch (err) {
-            console.error(err)
-            return false
-        }
-    }
+        } catch (e) { console.error(e); return false }
+    }, [updateStatusMutation])
 
-    const updateVendaPago = async (id: string, pago: boolean) => {
+    const updateVendaPago = useCallback(async (id: string, pago: boolean) => {
         try {
-            await vendaService.updateVendaPago(id, pago)
-            await fetchVendas()
+            await updatePagoMutation.mutateAsync({ id, pago })
             return true
-        } catch (err) {
-            console.error(err)
-            return false
-        }
-    }
+        } catch (e) { console.error(e); return false }
+    }, [updatePagoMutation])
 
-    const deleteVenda = async (id: string) => {
+    const deleteVenda = useCallback(async (id: string) => {
         try {
-            await vendaService.deleteVenda(id)
-            await fetchVendas()
+            await deleteVendaMutation.mutateAsync(id)
             return true
-        } catch (err) {
-            console.error(err)
-            return false
-        }
-    }
+        } catch (e) { console.error(e); return false }
+    }, [deleteVendaMutation])
 
-    const getVendaById = async (id: string) => {
+    const addPagamento = useCallback(async (vendaId: string, formData: PagamentoFormData) => {
         try {
-            return await vendaService.getVendaById(id)
-        } catch (err) {
-            console.error(err)
-            return null
-        }
-    }
-
-    const addPagamento = async (vendaId: string, data: PagamentoFormData) => {
-        try {
-            await vendaService.addPagamento(vendaId, data)
-
-            // Update venda status to paid if fully paid (logic omitted for brevity, simple update)
-            await updateVendaPago(vendaId, true)
-
-            await fetchVendas()
+            await addPagamentoMutation.mutateAsync({ vendaId, data: formData })
             return true
-        } catch (err) {
-            console.error(err)
-            return false
-        }
-    }
+        } catch (e) { console.error(e); return false }
+    }, [addPagamentoMutation])
 
-    const deleteUltimoPagamento = async (vendaId: string) => {
+    const deleteUltimoPagamento = useCallback(async (vendaId: string) => {
         try {
-            const success = await vendaService.deleteUltimoPagamento(vendaId)
-            if (success) {
-                await fetchVendas()
-                return true
-            }
-            return false
-        } catch (err) {
-            console.error(err)
-            return false
-        }
-    }
+            await deletePagamentoMutation.mutateAsync(vendaId)
+            return true
+        } catch (e) { console.error(e); return false }
+    }, [deletePagamentoMutation])
+
+    // Direct service call for getById (no cache needed usually for detail view if coming from list)
+    // But since we have useVenda (singular), we can leave this as is.
+    const getVendaById = useCallback(async (id: string) => {
+        return vendaService.getVendaById(id)
+    }, [])
+
 
     return {
-        vendas,
-        loading,
-        error,
+        vendas: data?.vendas || [],
+        loading: isLoading,
+        error: error ? (error as Error).message : null,
         metrics,
-        refetch: fetchVendas,
+        refetch: async () => { await refetch() },
         createVenda,
+        updateVenda,
         updateVendaStatus,
         updateVendaPago,
-        updateVenda,
         deleteVenda,
         getVendaById,
         addPagamento,
-        deleteUltimoPagamento,
+        deleteUltimoPagamento
     }
 }
 
 // Hook for single venda detail
 export function useVenda(id: string | undefined) {
-    const [venda, setVenda] = useState<DomainVenda | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+    const { data: venda, isLoading: loading, error, refetch } = useQuery({
+        queryKey: ['venda', id],
+        queryFn: () => id ? vendaService.getVendaById(id) : null,
+        enabled: !!id,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    })
 
-    const fetchVenda = useCallback(async () => {
-        if (!id) {
-            setLoading(false)
-            return
-        }
-
-        setLoading(true)
-        setError(null)
-
-        try {
-            // Defer to service
-            const data = await vendaService.getVendaById(id)
-            setVenda(data)
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Erro ao carregar venda')
-        } finally {
-            setLoading(false)
-        }
-    }, [id])
-
-    useEffect(() => {
-        fetchVenda()
-    }, [fetchVenda])
-
-    return { venda, loading, error, refetch: fetchVenda }
+    return {
+        venda: venda || null,
+        loading,
+        error: error ? (error as Error).message : null,
+        refetch: async () => { await refetch() }
+    }
 }
