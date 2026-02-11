@@ -86,7 +86,7 @@ export function Contatos() {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setIsModalOpen(true)}
-                                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-primary hover:text-primary-foreground text-foreground"
+                                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                             >
                                 <Plus className="h-6 w-6" />
                             </button>
