@@ -9,7 +9,8 @@ import {
     MessageCircle,
 
     Hourglass,
-    Truck
+    Truck,
+    RotateCcw
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Header } from '@/components/layout/Header'
@@ -29,12 +30,13 @@ export function VendaDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { venda, loading, error, refetch } = useVenda(id)
-    const { deleteVenda, addPagamento, updateVendaStatus } = useVendas({ realtime: false })
+    const { deleteVenda, addPagamento, updateVendaStatus, deleteUltimoPagamento } = useVendas({ realtime: false })
 
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [showRevertModal, setShowRevertModal] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [loadingAction, setLoadingAction] = useState(false)
 
     // Handlers
     const handleDelete = async () => {
@@ -91,6 +93,21 @@ export function VendaDetalhe() {
         } else {
             toast.error('Erro ao reverter status')
         }
+    }
+
+    const handleDesfazerPagamento = async () => {
+        if (!venda) return
+        if (!confirm('Deseja realmente desfazer o último pagamento?')) return
+
+        setLoadingAction(true)
+        const success = await deleteUltimoPagamento(venda.id)
+        if (success) {
+            await refetch()
+            toast.success('Pagamento desfeito com sucesso!')
+        } else {
+            toast.error('Erro ao desfazer pagamento')
+        }
+        setLoadingAction(false)
     }
 
     const handleShare = async () => {
@@ -256,6 +273,43 @@ export function VendaDetalhe() {
                     <div className="absolute -bottom-4 left-4 right-4 h-4 bg-black/10 dark:bg-black/40 blur-lg rounded-[100%] z-[-1]"></div>
                 </div>
 
+                {/* Main Action Buttons (Moved) */}
+                <div className="flex gap-3 mb-6">
+                    {(venda.status === 'pendente' || venda.status === 'entregue') && (
+                        <Button
+                            className="flex-1"
+                            variant={venda.status === 'entregue' ? "secondary" : "primary"}
+                            onClick={handleEntregar}
+                        >
+                            <Truck className="h-4 w-4 mr-2" />
+                            {venda.status === 'entregue' ? 'Voltar para Pendente' : 'Entregar'}
+                        </Button>
+                    )}
+
+                    {!venda.pago && venda.status !== 'cancelada' && (
+                        <Button
+                            className="flex-1"
+                            variant="primary"
+                            onClick={() => setShowPaymentModal(true)}
+                        >
+                            <DollarSign className="h-4 w-4 mr-2" />
+                            Quitar
+                        </Button>
+                    )}
+
+                    {venda.pago && venda.status !== 'cancelada' && (
+                        <Button
+                            className="flex-1 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border-transparent"
+                            variant="outline"
+                            onClick={handleDesfazerPagamento}
+                            disabled={loadingAction}
+                        >
+                            <RotateCcw className="h-4 w-4 mr-2" />
+                            Desfazer Pagamento
+                        </Button>
+                    )}
+                </div>
+
                 {/* CLIENT INFO CARD */}
                 <div className={`${glassPanel} rounded-xl p-5 flex items-center justify-between shadow-sm mb-6`}>
                     <div className="flex items-center gap-4">
@@ -291,30 +345,7 @@ export function VendaDetalhe() {
 
                 {/* ACTION BUTTONS (Inline) */}
                 <div className="mt-8 mb-6 flex flex-col gap-3">
-                    {/* Main Action Buttons */}
-                    <div className="flex gap-3">
-                        {(venda.status === 'pendente' || venda.status === 'entregue') && (
-                            <Button
-                                className="flex-1"
-                                variant={venda.status === 'entregue' ? "secondary" : "primary"}
-                                onClick={handleEntregar}
-                            >
-                                <Truck className="h-4 w-4 mr-2" />
-                                {venda.status === 'entregue' ? 'Voltar para Pendente' : 'Entregar'}
-                            </Button>
-                        )}
-
-                        {!venda.pago && venda.status !== 'cancelada' && (
-                            <Button
-                                className="flex-1"
-                                variant="primary"
-                                onClick={() => setShowPaymentModal(true)}
-                            >
-                                <DollarSign className="h-4 w-4 mr-2" />
-                                Quitar
-                            </Button>
-                        )}
-                    </div>
+                    {/* Main Action Buttons Moved Up */}
 
                     <div className="flex gap-3">
                         <Button

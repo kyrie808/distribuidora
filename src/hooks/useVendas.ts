@@ -25,6 +25,7 @@ interface UseVendasReturn {
     updateVenda: (id: string, data: VendaFormData) => Promise<DomainVenda | null>
     getVendaById: (id: string) => Promise<DomainVenda | null>
     addPagamento: (vendaId: string, data: PagamentoFormData) => Promise<boolean>
+    deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
 export function useVendas({ realtime = true, startDate, endDate }: UseVendasOptions = {}): UseVendasReturn {
@@ -180,6 +181,20 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
         }
     }
 
+    const deleteUltimoPagamento = async (vendaId: string) => {
+        try {
+            const success = await vendaService.deleteUltimoPagamento(vendaId)
+            if (success) {
+                await fetchVendas()
+                return true
+            }
+            return false
+        } catch (err) {
+            console.error(err)
+            return false
+        }
+    }
+
     return {
         vendas,
         loading,
@@ -193,6 +208,7 @@ export function useVendas({ realtime = true, startDate, endDate }: UseVendasOpti
         deleteVenda,
         getVendaById,
         addPagamento,
+        deleteUltimoPagamento,
     }
 }
 

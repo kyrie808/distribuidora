@@ -4,7 +4,6 @@ import {
     MapPin,
     Edit,
     Trash2,
-    Eye,
     User,
     Building2,
     BadgeCheck,
@@ -64,7 +63,8 @@ interface ReceiptCardProps {
 function ReceiptCard({ venda, onEdit, onView, onDelete }: ReceiptCardProps) {
     return (
         <div
-            className="group relative bg-white/5 border-l-[4px] border-l-primary hover:border-l-primary-400 p-4 rounded-r-xl transition-all hover:bg-white/10 mb-3 shadow-sm border-y border-r border-white/5"
+            onClick={(e) => onView && onView(venda.id, e)}
+            className="group relative bg-white/5 border-l-[4px] border-l-primary hover:border-l-primary-400 p-4 rounded-r-xl transition-all hover:bg-white/10 mb-3 shadow-sm border-y border-r border-white/5 cursor-pointer"
         >
             <div className="flex justify-between items-start mb-2">
                 <span className="text-[10px] text-gray-500 font-mono tracking-widest">#{venda.id.slice(0, 8).toUpperCase()}</span>
@@ -97,15 +97,7 @@ function ReceiptCard({ venda, onEdit, onView, onDelete }: ReceiptCardProps) {
                 <div className="flex flex-col items-end gap-2 pl-2">
                     <p className="text-sm font-bold text-gray-400 font-mono mb-1">{formatDate(venda.data)}</p>
                     <div className="flex items-center gap-1">
-                        <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-primary hover:text-primary-400 hover:bg-primary/10 rounded-lg"
-                            onClick={(e) => onView && onView(venda.id, e)}
-                            title="Ver Detalhes"
-                        >
-                            <Eye className="h-4 w-4" />
-                        </Button>
+
                         {venda.status !== 'cancelada' && (
                             <Button
                                 size="icon"
