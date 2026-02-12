@@ -84,7 +84,7 @@ export class ContatoService {
             .order('criado_em', { ascending: false })
 
         if (query) {
-            builder = builder.or(`nome.ilike.%${query}%,telefone.ilike.%${query}%`)
+            builder = builder.or(`nome.ilike.%${query}%,telefone.ilike.%${query}%,apelido.ilike.%${query}%`)
         }
         if (tipo && tipo !== 'todos') {
             builder = builder.eq('tipo', tipo)

@@ -60,6 +60,7 @@ export function Contatos() {
             const search = searchTerm.toLowerCase()
             result = result.filter((contato) =>
                 contato.nome.toLowerCase().includes(search) ||
+                (contato.apelido && contato.apelido.toLowerCase().includes(search)) ||
                 contato.telefone.includes(search)
             )
         }
@@ -110,7 +111,7 @@ export function Contatos() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                             <input
                                 type="text"
-                                placeholder="Buscar cliente ou telefone..."
+                                placeholder="Buscar por nome, apelido ou telefone..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-10 pr-4 py-3 bg-secondary/50 dark:bg-secondary/20 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md"
