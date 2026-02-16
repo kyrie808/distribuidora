@@ -143,7 +143,7 @@ export const vendaService = {
                 contato_id: data.contato_id,
                 data: data.data,
                 status: 'pendente',
-                total: data.itens.reduce((acc, item) => acc + item.subtotal, 0),
+                total: data.itens.reduce((acc, item) => acc + item.subtotal, 0) + (data.taxa_entrega || 0),
                 pago: false,
                 forma_pagamento: data.forma_pagamento,
                 taxa_entrega: data.taxa_entrega || 0,

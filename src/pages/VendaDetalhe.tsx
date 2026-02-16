@@ -260,6 +260,16 @@ export function VendaDetalhe() {
                                 <span className="text-gray-500 dark:text-gray-400">Desconto</span>
                                 <span className="font-mono text-green-600 dark:text-primary">- {formatCurrency(0)}</span>
                             </div>
+
+                            {/* Subtotal (Calculated) */}
+                            <div className="flex justify-between items-center text-sm font-bold mt-2 pt-2 border-t border-gray-100 dark:border-white/5">
+                                <span className="text-gray-900 dark:text-gray-100">Subtotal</span>
+                                <span className="font-mono text-gray-900 dark:text-primary">
+                                    {formatCurrency(
+                                        venda.itens.reduce((acc, item) => acc + item.subtotal, 0) + (venda.taxaEntrega || 0)
+                                    )}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
@@ -387,31 +397,14 @@ export function VendaDetalhe() {
 
                 </div>
 
-            </main>
+            </main >
 
             {/* Payment Sidebar - Desktop & Mobile */}
-            {showPaymentModal && venda && (
-                <>
-                    {/* Desktop Sidebar */}
-                    <aside className="hidden md:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-screen sticky top-0">
-                        <PaymentSidebar
-                            onBack={() => setShowPaymentModal(false)}
-                            onConfirm={handlePaymentConfirm}
-                            vendaId={venda.id}
-                            total={venda.total}
-                            valorPago={venda.valorPago || 0}
-                            historico={venda.pagamentos}
-                            customerName={venda.contato?.nome || 'Cliente'}
-                        />
-                    </aside>
-
-                    {/* Mobile Drawer */}
-                    <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
-                        <div
-                            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                            onClick={() => setShowPaymentModal(false)}
-                        />
-                        <div className="relative w-[85vw] max-w-sm bg-white dark:bg-gray-800 h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
+            {
+                showPaymentModal && venda && (
+                    <>
+                        {/* Desktop Sidebar */}
+                        <aside className="hidden md:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-screen sticky top-0">
                             <PaymentSidebar
                                 onBack={() => setShowPaymentModal(false)}
                                 onConfirm={handlePaymentConfirm}
@@ -421,10 +414,29 @@ export function VendaDetalhe() {
                                 historico={venda.pagamentos}
                                 customerName={venda.contato?.nome || 'Cliente'}
                             />
+                        </aside>
+
+                        {/* Mobile Drawer */}
+                        <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
+                            <div
+                                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                                onClick={() => setShowPaymentModal(false)}
+                            />
+                            <div className="relative w-[85vw] max-w-sm bg-white dark:bg-gray-800 h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
+                                <PaymentSidebar
+                                    onBack={() => setShowPaymentModal(false)}
+                                    onConfirm={handlePaymentConfirm}
+                                    vendaId={venda.id}
+                                    total={venda.total}
+                                    valorPago={venda.valorPago || 0}
+                                    historico={venda.pagamentos}
+                                    customerName={venda.contato?.nome || 'Cliente'}
+                                />
+                            </div>
                         </div>
-                    </div>
-                </>
-            )}
+                    </>
+                )
+            }
 
             {/* Delete Confirmation Modal */}
             <Modal
@@ -470,6 +482,6 @@ export function VendaDetalhe() {
                 </ModalActions>
             </Modal>
 
-        </div>
+        </div >
     )
 }
