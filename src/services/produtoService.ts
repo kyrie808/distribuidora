@@ -18,8 +18,8 @@ export class ProdutoService {
             apelido: row.apelido,
             ativo: row.ativo,
             custo: row.custo,
-            estoqueAtual: row.estoque_atual,
-            estoqueMinimo: row.estoque_minimo,
+            estoqueAtual: row.estoque_atual ?? 0,
+            estoqueMinimo: row.estoque_minimo ?? 0,
             criadoEm: row.criado_em,
             atualizadoEm: row.atualizado_em
         }
