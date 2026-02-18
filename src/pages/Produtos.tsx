@@ -651,23 +651,32 @@ export function Produtos() {
                                                     disabled={uploadingImage}
                                                     onChange={async (e) => {
                                                         const file = e.target.files?.[0]
-                                                        if (!file) return
+                                                        if (!file) {
+                                                            console.log('DEBUG: Nenhum arquivo selecionado')
+                                                            return
+                                                        }
+
+                                                        console.log('DEBUG: Arquivo selecionado:', file.name, file.size, file.type)
+
+                                                        // Immediate local preview
+                                                        const localUrl = URL.createObjectURL(file)
+                                                        setEditImagemUrl(localUrl)
 
                                                         try {
                                                             setUploadingImage(true)
-                                                            // Standardize file name/path if needed or just use service
+                                                            console.log('DEBUG: Iniciando upload...')
                                                             const url = await produtoService.uploadImage(file)
+                                                            console.log('DEBUG: Upload concluído, URL:', url)
 
-                                                            // Update local preview state
+                                                            // Update with real URL and save reference
                                                             setEditImagemUrl(url)
-
-                                                            // Save reference immediately (as per plan/decision)
-                                                            // Note: editingProduto.id is available here
+                                                            console.log('DEBUG: Salvando referência no banco...')
                                                             await produtoService.addImageReference(editingProduto.id, url)
+                                                            console.log('DEBUG: Referência salva com sucesso!')
 
                                                             toast.success('Imagem atualizada com sucesso!')
                                                         } catch (error) {
-                                                            console.error(error)
+                                                            console.error('DEBUG: Erro no processo:', error)
                                                             toast.error('Erro ao fazer upload da imagem')
                                                         } finally {
                                                             setUploadingImage(false)

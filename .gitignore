@@ -26,3 +26,6 @@ dist-ssr
 .env
 .env
 venv/
+
+# OpenCode config with sensitive credentials
+opencode.json
