@@ -46,6 +46,7 @@ export interface DomainProduto {
     estoqueMinimo: number
     criadoEm: string
     atualizadoEm: string
+    imagemUrl?: string
 }
 
 export interface DomainItemVenda {

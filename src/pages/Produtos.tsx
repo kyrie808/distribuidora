@@ -12,6 +12,7 @@ import { Card, Button, Badge, LoadingScreen, Modal, ModalActions, Input } from '
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
+import { produtoService } from '../services/produtoService'
 import { useToast } from '../components/ui/Toast'
 import { formatCurrency } from '../utils/formatters'
 import type { ProdutoInsert } from '../types/database'
@@ -66,7 +67,9 @@ export function Produtos() {
     const [editCusto, setEditCusto] = useState('')
     const [editEstoqueMinimo, setEditEstoqueMinimo] = useState('')
     const [editAtivo, setEditAtivo] = useState(true)
+    const [editImagemUrl, setEditImagemUrl] = useState<string | undefined>(undefined)
     const [updating, setUpdating] = useState(false)
+    const [uploadingImage, setUploadingImage] = useState(false)
 
     // Stats
     const produtosAtivos = produtos.filter(p => p.ativo).length
@@ -86,6 +89,7 @@ export function Produtos() {
         setEditCusto(String(produto.custo))
         setEditEstoqueMinimo(String(produto.estoqueMinimo || 10))
         setEditAtivo(produto.ativo)
+        setEditImagemUrl(produto.imagemUrl)
     }
 
     // Close edit modal
@@ -98,6 +102,8 @@ export function Produtos() {
         setEditCusto('')
         setEditEstoqueMinimo('')
         setEditAtivo(true)
+        setEditImagemUrl(undefined)
+        setUploadingImage(false)
     }
 
     // Open create modal
@@ -330,72 +336,89 @@ export function Produtos() {
                                                 }
                                             }}
                                         >
-                                            <div className="p-4 flex items-center justify-between">
-                                                <div className="flex-1 min-w-0">
-                                                    <div className="flex items-center gap-2 mb-1">
-                                                        <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">
-                                                            {produto.nome}
-                                                        </h3>
-                                                        {!produto.ativo && <Badge variant="gray">Inativo</Badge>}
-                                                        {produto.apelido && (
-                                                            <span className="text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">
-                                                                {produto.apelido}
-                                                            </span>
-                                                        )}
-                                                    </div>
-
-                                                    <div className="text-sm text-gray-500 dark:text-gray-400 font-mono mb-2">
-                                                        #{produto.codigo}
-                                                    </div>
-
-                                                    <div className="flex items-center gap-6 text-sm">
-                                                        <div>
-                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
-                                                                Preço
-                                                            </span>
-                                                            <span className="font-semibold text-gray-900 dark:text-gray-100">
-                                                                {formatCurrency(produto.preco)}
-                                                            </span>
+                                            <div className="p-4 flex items-center gap-4">
+                                                {/* Image Thumbnail */}
+                                                <div className="h-16 w-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-200 dark:border-gray-600">
+                                                    {produto.imagemUrl ? (
+                                                        <img
+                                                            src={produto.imagemUrl}
+                                                            alt={produto.nome}
+                                                            className="h-full w-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center text-gray-400">
+                                                            <Package className="h-8 w-8" />
                                                         </div>
-                                                        <div>
-                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
-                                                                Custo
-                                                            </span>
-                                                            <span className="text-gray-600 dark:text-gray-400">
-                                                                {formatCurrency(produto.custo)}
-                                                            </span>
-                                                        </div>
-                                                    </div>
+                                                    )}
                                                 </div>
 
-                                                <div className="flex flex-col items-end gap-2 ml-4">
-                                                    <div className="text-right">
-                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
-                                                            Estoque
-                                                        </span>
-                                                        <div className={cn(
-                                                            "text-xl font-bold font-mono",
-                                                            isNoStock ? "text-semantic-red" :
-                                                                isLowStock ? "text-semantic-yellow" : "text-semantic-green"
-                                                        )}>
-                                                            {produto.estoqueAtual}
-                                                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-1 font-sans font-normal">
-                                                                {produto.unidade}
-                                                            </span>
+                                                <div className="flex-1 min-w-0 flex items-center justify-between">
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <h3 className="font-bold text-gray-900 dark:text-gray-100 truncate">
+                                                                {produto.nome}
+                                                            </h3>
+                                                            {!produto.ativo && <Badge variant="gray">Inativo</Badge>}
+                                                            {produto.apelido && (
+                                                                <span className="text-xs text-muted-foreground bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded border border-gray-200 dark:border-gray-700">
+                                                                    {produto.apelido}
+                                                                </span>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="text-sm text-gray-500 dark:text-gray-400 font-mono mb-2">
+                                                            #{produto.codigo}
+                                                        </div>
+
+                                                        <div className="flex items-center gap-6 text-sm">
+                                                            <div>
+                                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
+                                                                    Preço
+                                                                </span>
+                                                                <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                                                    {formatCurrency(produto.preco)}
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
+                                                                    Custo
+                                                                </span>
+                                                                <span className="text-gray-600 dark:text-gray-400">
+                                                                    {formatCurrency(produto.custo)}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     </div>
 
-                                                    {isLowStock && (
-                                                        <Badge
-                                                            className={cn(
-                                                                isNoStock
-                                                                    ? "bg-semantic-red text-white hover:bg-semantic-red/90 border-transparent"
-                                                                    : "bg-semantic-yellow text-yellow-900 hover:bg-semantic-yellow/90 border-transparent"
-                                                            )}
-                                                        >
-                                                            {isNoStock ? "Esgotado" : "Baixo"}
-                                                        </Badge>
-                                                    )}
+                                                    <div className="flex flex-col items-end gap-2 ml-4">
+                                                        <div className="text-right">
+                                                            <span className="text-[10px] text-gray-400 dark:text-gray-500 block uppercase font-bold tracking-wider mb-0.5">
+                                                                Estoque
+                                                            </span>
+                                                            <div className={cn(
+                                                                "text-xl font-bold font-mono",
+                                                                isNoStock ? "text-semantic-red" :
+                                                                    isLowStock ? "text-semantic-yellow" : "text-semantic-green"
+                                                            )}>
+                                                                {produto.estoqueAtual}
+                                                                <span className="text-xs text-gray-400 dark:text-gray-500 ml-1 font-sans font-normal">
+                                                                    {produto.unidade}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {isLowStock && (
+                                                            <Badge
+                                                                className={cn(
+                                                                    isNoStock
+                                                                        ? "bg-semantic-red text-white hover:bg-semantic-red/90 border-transparent"
+                                                                        : "bg-semantic-yellow text-yellow-900 hover:bg-semantic-yellow/90 border-transparent"
+                                                                )}
+                                                            >
+                                                                {isNoStock ? "Esgotado" : "Baixo"}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </Card>
@@ -592,12 +615,76 @@ export function Produtos() {
                                     <button
                                         type="button"
                                         onClick={() => setEditAtivo(!editAtivo)}
-                                        className={`relative inline - flex h - 6 w - 11 items - center rounded - full transition - colors ${editAtivo ? 'bg-success-500' : 'bg-gray-300'} `}
+                                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${editAtivo ? 'bg-success-500' : 'bg-gray-300'}`}
                                     >
                                         <span
-                                            className={`inline - block h - 4 w - 4 transform rounded - full bg - white transition - transform ${editAtivo ? 'translate-x-6' : 'translate-x-1'} `}
+                                            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${editAtivo ? 'translate-x-6' : 'translate-x-1'}`}
                                         />
                                     </button>
+                                </div>
+
+                                {/* Image Upload */}
+                                <div className="space-y-2">
+                                    <span className="block text-sm font-medium text-gray-700">Imagem do Produto</span>
+
+                                    <div className="flex items-center gap-4">
+                                        {/* Preview */}
+                                        <div className="relative h-24 w-24 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden flex items-center justify-center">
+                                            {editImagemUrl ? (
+                                                <img
+                                                    src={editImagemUrl}
+                                                    alt="Preview"
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            ) : (
+                                                <Package className="h-8 w-8 text-gray-400" />
+                                            )}
+                                        </div>
+
+                                        {/* Upload Button */}
+                                        <div className="flex-1">
+                                            <label className="block w-full">
+                                                <span className="sr-only">Escolher imagem</span>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    disabled={uploadingImage}
+                                                    onChange={async (e) => {
+                                                        const file = e.target.files?.[0]
+                                                        if (!file) return
+
+                                                        try {
+                                                            setUploadingImage(true)
+                                                            // Standardize file name/path if needed or just use service
+                                                            const url = await produtoService.uploadImage(file)
+
+                                                            // Update local preview state
+                                                            setEditImagemUrl(url)
+
+                                                            // Save reference immediately (as per plan/decision)
+                                                            // Note: editingProduto.id is available here
+                                                            await produtoService.addImageReference(editingProduto.id, url)
+
+                                                            toast.success('Imagem atualizada com sucesso!')
+                                                        } catch (error) {
+                                                            console.error(error)
+                                                            toast.error('Erro ao fazer upload da imagem')
+                                                        } finally {
+                                                            setUploadingImage(false)
+                                                        }
+                                                    }}
+                                                    className="block w-full text-sm text-gray-500
+                                                        file:mr-4 file:py-2 file:px-4
+                                                        file:rounded-full file:border-0
+                                                        file:text-sm file:font-semibold
+                                                        file:bg-primary-50 file:text-primary-700
+                                                        hover:file:bg-primary-100
+                                                        cursor-pointer disabled:opacity-50"
+                                                />
+                                            </label>
+                                            {uploadingImage && <p className="text-xs text-primary-600 mt-1">Enviando...</p>}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}

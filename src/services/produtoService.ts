@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase'
 import type {
-    Produto,
     ProdutoInsert,
     ProdutoUpdate
 } from '../types/database'
@@ -8,7 +7,7 @@ import type { DomainProduto } from '../types/domain'
 
 export class ProdutoService {
     /* MAPPERS */
-    private toDomain(row: Produto): DomainProduto {
+    private toDomain(row: any): DomainProduto {
         return {
             id: row.id,
             nome: row.nome,
@@ -21,7 +20,8 @@ export class ProdutoService {
             estoqueAtual: row.estoque_atual ?? 0,
             estoqueMinimo: row.estoque_minimo ?? 0,
             criadoEm: row.criado_em,
-            atualizadoEm: row.atualizado_em
+            atualizadoEm: row.atualizado_em,
+            imagemUrl: row.sis_imagens_produto?.[0]?.url
         }
     }
 
@@ -44,7 +44,7 @@ export class ProdutoService {
     async getAll(includeInactive: boolean = false): Promise<DomainProduto[]> {
         let query = supabase
             .from('produtos')
-            .select('*')
+            .select('*, sis_imagens_produto(url)')
             .order('nome')
 
         if (!includeInactive) {
@@ -64,7 +64,7 @@ export class ProdutoService {
     async getById(id: string): Promise<DomainProduto | null> {
         const { data, error } = await supabase
             .from('produtos')
-            .select('*')
+            .select('*, sis_imagens_produto(url)')
             .eq('id', id)
             .single()
 
@@ -98,7 +98,7 @@ export class ProdutoService {
             .from('produtos')
             .update(persistenceData)
             .eq('id', id)
-            .select()
+            .select('*, sis_imagens_produto(url)')
             .single()
 
         if (error) {
@@ -123,6 +123,58 @@ export class ProdutoService {
         }
 
         return this.toDomain(updated)
+    }
+
+    /* IMAGENS */
+    async uploadImage(file: File): Promise<string> {
+        const fileExt = file.name.split('.').pop()
+        const fileName = `internal/${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
+        const filePath = `${fileName}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(filePath, file)
+
+        if (uploadError) {
+            throw uploadError
+        }
+
+        const { data } = supabase.storage
+            .from('products')
+            .getPublicUrl(filePath)
+
+        return data.publicUrl
+    }
+
+    async addImageReference(produtoId: string, url: string): Promise<void> {
+        // Primeiro remove imagens anteriores (opcional, assumindo 1 imagem por produto por enquanto no CRM)
+        // Mas o schema é 1:N. Vamos adicionar e se quiser substituir, a UI/Lógica que decida.
+        // O user pediu "carregar uma imagem e aparecer a prévia". 
+        // Vamos manter simples: Deleta anteriores e insere nova para manter 1:1 "principal".
+
+        const { error: deleteError } = await supabase
+            .from('sis_imagens_produto')
+            .delete()
+            .eq('produto_id', produtoId)
+
+        if (deleteError) {
+            console.error('Erro ao limpar imagens antigas:', deleteError)
+            // Não impede o fluxo, apenas loga
+        }
+
+        const { error } = await supabase
+            .from('sis_imagens_produto')
+            .insert({
+                produto_id: produtoId,
+                url,
+                ordem: 0,
+                tipo: 'internal',
+                ativo: true
+            })
+
+        if (error) {
+            throw error
+        }
     }
 }
 

@@ -59,6 +59,44 @@ export type Database = {
           },
         ]
       }
+      sis_imagens_produto: {
+        Row: {
+          ativo: boolean | null
+          criado_em: string | null
+          id: string
+          ordem: number | null
+          produto_id: string | null
+          tipo: string | null
+          url: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          ordem?: number | null
+          produto_id?: string | null
+          tipo?: string | null
+          url: string
+        }
+        Update: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          ordem?: number | null
+          produto_id?: string | null
+          tipo?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cat_itens_pedido: {
         Row: {
           id: string

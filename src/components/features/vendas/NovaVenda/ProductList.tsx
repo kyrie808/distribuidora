@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { Search, Plus, Minus } from 'lucide-react'
+import { Search, Plus, Minus, Package } from 'lucide-react'
 import { formatCurrency } from '../../../../utils/formatters'
 import type { DomainProduto } from '../../../../types/domain'
 
@@ -89,6 +89,21 @@ export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQua
                                 }`}
                         >
                             <div>
+                                {/* Product Image */}
+                                <div className="aspect-square w-full relative mb-3 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-100 dark:border-gray-700">
+                                    {produto.imagemUrl ? (
+                                        <img
+                                            src={produto.imagemUrl}
+                                            alt={produto.nome}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <div className="h-full w-full flex items-center justify-center text-gray-400">
+                                            <Package className="h-10 w-10 opacity-50" />
+                                        </div>
+                                    )}
+                                </div>
+
                                 <p className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 text-sm h-10">
                                     {produto.nome}
                                 </p>
