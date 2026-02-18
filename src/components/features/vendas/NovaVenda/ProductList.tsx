@@ -14,13 +14,50 @@ interface ProductListProps {
 export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQuantity }: ProductListProps) {
     const [search, setSearch] = useState('')
 
+    const PRODUCT_ORDER = [
+        'Massa Pão de Queijo 4kg',
+        'Massa Pão de Queijo 1kg',
+        'Chipa Congelada 2kg',
+        'Chipa Congelada 1kg',
+        'Palito de Queijo Congelado 2kg',
+        'Palito de Queijo Congelado 1kg',
+        'Pão de Queijo Congelado 2kg',
+        'Pão de Queijo Congelado 1kg'
+    ]
+
     const filteredProdutos = useMemo(() => {
-        if (!search) return produtos
-        const lower = search.toLowerCase()
-        return produtos.filter(p =>
-            p.nome.toLowerCase().includes(lower) ||
-            p.codigo?.toLowerCase().includes(lower)
-        )
+        let result = [...produtos]
+
+        if (search) {
+            const lower = search.toLowerCase()
+            result = result.filter(p =>
+                p.nome.toLowerCase().includes(lower) ||
+                p.codigo?.toLowerCase().includes(lower)
+            )
+        }
+
+        return result.sort((a, b) => {
+            const indexA = PRODUCT_ORDER.findIndex(name =>
+                a.nome.toLowerCase() === name.toLowerCase()
+            )
+            const indexB = PRODUCT_ORDER.findIndex(name =>
+                b.nome.toLowerCase() === name.toLowerCase()
+            )
+
+            // If both are in the list, sort by index
+            if (indexA !== -1 && indexB !== -1) {
+                return indexA - indexB
+            }
+
+            // If only A is in the list, it comes first
+            if (indexA !== -1) return -1
+
+            // If only B is in the list, it comes first
+            if (indexB !== -1) return 1
+
+            // If neither is in the list, keep original order (or sort alphabetically/by other criteria if desired)
+            return 0
+        })
     }, [produtos, search])
 
     if (loading) {
@@ -47,8 +84,8 @@ export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQua
                         <div
                             key={produto.id}
                             className={`bg-white dark:bg-gray-800 p-4 rounded-xl border-2 transition-all shadow-sm flex flex-col justify-between h-full ${qty > 0
-                                    ? 'border-primary-500 ring-1 ring-primary-500'
-                                    : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
+                                ? 'border-primary-500 ring-1 ring-primary-500'
+                                : 'border-gray-200 dark:border-gray-700 hover:border-primary-300'
                                 }`}
                         >
                             <div>

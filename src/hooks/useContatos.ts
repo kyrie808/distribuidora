@@ -44,7 +44,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
 
     // Mutations
     const createMutation = useMutation({
-        mutationFn: contatoService.create,
+        mutationFn: (data: ContatoInsert) => contatoService.create(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['contatos'] })
         }
@@ -60,7 +60,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
     })
 
     const deleteMutation = useMutation({
-        mutationFn: contatoService.delete,
+        mutationFn: (id: string) => contatoService.delete(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['contatos'] })
         }

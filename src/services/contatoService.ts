@@ -35,9 +35,9 @@ export class ContatoService {
             complemento: row.complemento,
             cidade: row.cidade,
             uf: row.uf,
-            indicador: 'indicador' in row && row.indicador ? {
-                id: row.indicador.id,
-                nome: row.indicador.nome
+            indicador: ('indicador' in row && row.indicador && typeof row.indicador === 'object' && 'id' in row.indicador) ? {
+                id: (row.indicador as any).id,
+                nome: (row.indicador as any).nome
             } : null
         }
     }
