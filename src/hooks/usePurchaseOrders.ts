@@ -66,6 +66,7 @@ export function usePurchaseOrders() {
     }, [])
 
     const createOrder = useCallback(async (order: Partial<PurchaseOrder>, items: any[]) => {
+        console.log('DEBUG: Executando createOrder v2 (sem total_cost)', { order, itemsCount: items.length })
         setLoading(true)
         setError(null)
         try {
