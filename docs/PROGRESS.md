@@ -7,6 +7,13 @@
 
 ## Entregas Recentes
 
+### 2026-02-18 - Correção de Erro 400 no Cadastro de Pedidos de Compra
+- **Bug Fix:** Resolvido o erro 400 ao salvar pedidos de compra.
+  - A causa era a tentativa de inserir valores na coluna `total_cost` da tabela `purchase_order_items`.
+  - Esta coluna é do tipo `GENERATED ALWAYS`, sendo calculada automaticamente pelo banco de dados.
+  - O hook `usePurchaseOrders` foi atualizado para remover o campo `total_cost` dos payloads de `INSERT` e `UPDATE`.
+- **Validação:** Verificado via build de produção e análise de esquema do banco de dados.
+
 ### 2026-02-09 - Redesign de UX & Acessibilidade nos Pedidos
 - **Refatoração Visual (Design System):**
   - **Status Chips:** Substituição do sistema "semáforo" (ícones soltos) por **Chips Explícitos** (Ícone + Texto).

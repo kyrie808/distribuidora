@@ -96,8 +96,7 @@ export function usePurchaseOrders() {
                     purchase_order_id: orderData.id,
                     product_id: item.product_id,
                     quantity: item.quantity,
-                    unit_cost: item.unit_cost,
-                    total_cost: item.unit_cost * item.quantity
+                    unit_cost: item.unit_cost
                 }))
 
                 const { error: itemsError } = await supabase
@@ -143,8 +142,7 @@ export function usePurchaseOrders() {
                     purchase_order_id: id,
                     product_id: item.product_id,
                     quantity: item.quantity,
-                    unit_cost: item.unit_cost,
-                    total_cost: item.unit_cost * item.quantity
+                    unit_cost: item.unit_cost
                 }))
 
                 const { error: insertError } = await supabase
