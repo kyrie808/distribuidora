@@ -1,23 +1,97 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
     Trophy,
     Users,
     TrendingUp,
     ShoppingBag,
+    DollarSign,
+    Target
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { useIndicacoes } from '../hooks/useIndicacoes'
+import { useRankingCompras } from '../hooks/useRankingCompras'
+import { useTopIndicadores } from '../hooks/useTopIndicadores'
 import { TopIndicadoresWidget } from '../components/dashboard/TopIndicadoresWidget'
 import { RankingComprasWidget } from '../components/dashboard/RankingComprasWidget'
 import { cn } from '../lib/utils'
+import { formatCurrency } from '../utils/formatters'
 
 type TabType = 'compras' | 'indicacoes'
 
 export function Ranking() {
-    const { totalIndicacoes, totalConversoes } = useIndicacoes()
+    const { totalConversoes } = useIndicacoes()
+    const { rankingCompras } = useRankingCompras()
+    const { topIndicadores } = useTopIndicadores()
     const [activeTab, setActiveTab] = useState<TabType>('compras')
+
+    // Cálculos Dinâmicos
+    const metrics = useMemo(() => {
+        if (activeTab === 'compras') {
+            const totalClientes = rankingCompras.length
+            const somaPontos = rankingCompras.reduce((acc, curr) => acc + curr.totalPontos, 0)
+            const totalCompras = rankingCompras.reduce((acc, curr) => acc + curr.totalCompras, 0)
+            const ticketMedio = totalCompras > 0 ? somaPontos / totalCompras : 0
+
+            return [
+                {
+                    title: "Clientes",
+                    value: totalClientes.toString(),
+                    trend: "No Ranking",
+                    icon: Users,
+                    color: "bg-primary",
+                    iconColor: "text-primary"
+                },
+                {
+                    title: "Total Pontos",
+                    value: formatCurrency(somaPontos),
+                    trend: "Gasto Total",
+                    icon: ShoppingBag,
+                    color: "bg-semantic-green",
+                    iconColor: "text-semantic-green"
+                },
+                {
+                    title: "Ticket Médio",
+                    value: formatCurrency(ticketMedio),
+                    trend: "Por Compra",
+                    icon: TrendingUp,
+                    color: "bg-semantic-yellow",
+                    iconColor: "text-semantic-yellow"
+                }
+            ]
+        } else {
+            const somaVendasIndicados = topIndicadores.reduce((acc, curr) => acc + curr.totalVendasIndicados, 0)
+            const topIndicador = topIndicadores[0]
+
+            return [
+                {
+                    title: "Conversões",
+                    value: totalConversoes.toString(),
+                    trend: "Indicados -> Clientes",
+                    icon: Target,
+                    color: "bg-primary",
+                    iconColor: "text-primary"
+                },
+                {
+                    title: "Receita Indicações",
+                    value: formatCurrency(somaVendasIndicados),
+                    trend: "Gerado por Embaixadores",
+                    icon: DollarSign,
+                    color: "bg-semantic-green",
+                    iconColor: "text-semantic-green"
+                },
+                {
+                    title: "Top Indicador",
+                    value: topIndicador ? `🏆 ${topIndicador.nome.split(' ')[0]}` : "Nenhum ainda",
+                    trend: topIndicador ? formatCurrency(topIndicador.totalVendasIndicados) : "Aguardando",
+                    icon: Trophy,
+                    color: "bg-semantic-yellow",
+                    iconColor: "text-semantic-yellow"
+                }
+            ]
+        }
+    }, [activeTab, rankingCompras, topIndicadores, totalConversoes])
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
@@ -30,43 +104,22 @@ export function Ranking() {
                 />
                 <PageContainer className="pt-0 pb-16 bg-transparent px-4">
                     {/* Metrics / KPI Summary */}
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                        <KpiCard
-                            title="Indicados"
-                            value={totalIndicacoes.toString()}
-                            progress={100}
-                            trend="Total"
-                            trendDirection="up"
-                            icon={Users}
-                            progressColor="bg-primary"
-                            trendColor="green"
-                            iconColor="text-primary"
-                            variant="compact"
-                        />
-                        <KpiCard
-                            title="Vendas"
-                            value={totalConversoes.toString()}
-                            progress={totalIndicacoes > 0 ? (totalConversoes / totalIndicacoes) * 100 : 0}
-                            trend={totalIndicacoes > 0 ? `${((totalConversoes / totalIndicacoes) * 100).toFixed(0)}%` : '0%'}
-                            trendDirection="up"
-                            icon={TrendingUp}
-                            progressColor="bg-semantic-green"
-                            trendColor="green"
-                            iconColor="text-semantic-green"
-                            variant="compact"
-                        />
-                        <KpiCard
-                            title="Top"
-                            value="Mont"
-                            progress={100}
-                            trend="Elite"
-                            trendDirection="up"
-                            icon={Trophy}
-                            progressColor="bg-semantic-yellow"
-                            trendColor="yellow"
-                            iconColor="text-semantic-yellow"
-                            variant="compact"
-                        />
+                    <div className="grid grid-cols-3 gap-3 mb-6 min-h-[110px]">
+                        {metrics.map((m, idx) => (
+                            <KpiCard
+                                key={idx}
+                                title={m.title}
+                                value={m.value}
+                                progress={100}
+                                trend={m.trend}
+                                trendDirection="up"
+                                icon={m.icon}
+                                progressColor={m.color}
+                                trendColor={m.color.replace('bg-', '') as any}
+                                iconColor={m.iconColor}
+                                variant="compact"
+                            />
+                        ))}
                     </div>
 
                     {/* Apple-like Tabs */}
