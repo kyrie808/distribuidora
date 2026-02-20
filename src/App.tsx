@@ -7,7 +7,7 @@ import {
   NovaVenda,
   Vendas,
   VendaDetalhe,
-  Indicacoes,
+  Ranking,
   Recompra,
   Configuracoes,
   Produtos,
@@ -30,7 +30,7 @@ function App() {
           <Route path="/vendas" element={<Vendas />} />
           <Route path="/vendas/:id" element={<VendaDetalhe />} />
           <Route path="/vendas/:id/editar" element={<NovaVenda />} />
-          <Route path="/indicacoes" element={<Indicacoes />} />
+          <Route path="/ranking" element={<Ranking />} />
           <Route path="/pedidos-compra" element={<PedidosCompra />} />
           <Route path="/recompra" element={<Recompra />} />
           <Route path="/configuracoes" element={<Configuracoes />} />

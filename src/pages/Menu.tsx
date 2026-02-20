@@ -3,7 +3,7 @@ import {
     Truck,
     Package,
     Bell,
-    Share2,
+    Trophy,
     Settings,
     ClipboardList,
     Refrigerator
@@ -50,11 +50,11 @@ export function Menu() {
             visible: ENABLE_RECOMPRA
         },
         {
-            title: 'Indicações',
-            icon: Share2,
-            iconColor: 'text-success',
-            iconBg: 'bg-success/10',
-            href: '/indicacoes',
+            title: 'Ranking',
+            icon: Trophy,
+            iconColor: 'text-semantic-yellow',
+            iconBg: 'bg-semantic-yellow/10',
+            href: '/ranking',
             visible: true
         },
         {
