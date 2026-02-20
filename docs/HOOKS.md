@@ -52,9 +52,14 @@ Monitoramento de ciclo de vida do cliente.
 - **Features:** Identifica clientes inativos baseados na última compra.
 
 ### `useTopIndicadores`
-Ranking de performance de indicações.
+Ranking de performance de indicações consumindo a view `ranking_indicacoes`.
 - **Path:** `src/hooks/useTopIndicadores.ts`
-- **Features:** Calcula stats de quantos clientes ativos cada indicador trouxe.
+- **Features:** Retorna top 10 indicadores baseados em volume de clientes indicados e conversão em vendas (R$).
+
+### `useRankingCompras`
+Ranking de fidelidade por volume de compras consumindo a view `ranking_compras`.
+- **Path:** `src/hooks/useRankingCompras.ts`
+- **Features:** Retorna top 10 clientes baseados no valor total gasto em pedidos pagos e entregues. Cada R$ 1,00 = 1 ponto.
 
 ### `useDashboardFilter`
 **Contexto Global** de filtro de data para o Dashboard.

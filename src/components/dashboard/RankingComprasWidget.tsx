@@ -1,45 +1,43 @@
-import { Medal, Trophy } from 'lucide-react'
-import { useTopIndicadores } from '@/hooks/useTopIndicadores'
-import type { IndicadorStats } from '@/hooks/useTopIndicadores'
+import { Medal, Trophy, Star } from 'lucide-react'
+import { useRankingCompras } from '@/hooks/useRankingCompras'
+import type { RankingComprasStats } from '@/hooks/useRankingCompras'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
 
-export function TopIndicadoresWidget() {
-    const { topIndicadores, loading } = useTopIndicadores()
+export function RankingComprasWidget() {
+    const { rankingCompras, loading } = useRankingCompras()
 
     if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 
-    // Filter out entries with 0 indications just in case (already handled by view)
-    const validIndicadores = topIndicadores.filter(i => i.totalIndicados > 0)
+    // Filter out entries with 0 points (already handled by view)
+    const validRanking = rankingCompras.filter(i => i.totalPontos > 0)
 
-    if (validIndicadores.length === 0) return null
+    if (validRanking.length === 0) return null
 
     return (
         <div className="flex flex-col gap-3 mt-4">
             <div className="flex items-center gap-2 px-1">
                 <Trophy className="size-4 text-semantic-yellow" />
                 <h2 className="text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wide">
-                    Ranking de Indicações
+                    Ranking de Compras
                 </h2>
             </div>
 
-            {/* Apple-like Horizontal Scroll / Grid */}
             <div className="grid grid-cols-1 gap-3">
-                {validIndicadores.map((indicador, index) => (
-                    <TopIndicadorCard key={indicador.indicadorId} indicador={indicador} index={index} />
+                {validRanking.map((item, index) => (
+                    <RankingCompraCard key={item.contatoId} item={item} index={index} />
                 ))}
             </div>
         </div>
     )
 }
 
-function TopIndicadorCard({ indicador, index }: { indicador: IndicadorStats, index: number }) {
-    // Apple-like gradients for top 3
+function RankingCompraCard({ item, index }: { item: RankingComprasStats, index: number }) {
     const getGradient = (ranking: number) => {
         switch (ranking) {
-            case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400" // Gold
-            case 2: return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 border-gray-400" // Silver
-            case 3: return "bg-gradient-to-r from-orange-300 to-orange-400 text-orange-900 border-orange-400" // Bronze (using orange as bronze proxy)
+            case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400"
+            case 2: return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 border-gray-400"
+            case 3: return "bg-gradient-to-r from-orange-300 to-orange-400 text-orange-900 border-orange-400"
             default: return "bg-white dark:bg-surface-dark text-gray-900 dark:text-white border-gray-100 dark:border-gray-800"
         }
     }
@@ -52,7 +50,7 @@ function TopIndicadorCard({ indicador, index }: { indicador: IndicadorStats, ind
             "relative overflow-hidden border transition-all hover:scale-[1.01]",
             isTop3 ? "border-0 shadow-lg" : "shadow-sm"
         )}>
-            <div className={cn("absolute inset-0 opacity-20", gradientClass)}></div> {/* Background tint */}
+            <div className={cn("absolute inset-0 opacity-20", gradientClass)}></div>
 
             <CardContent className={cn("flex items-center justify-between p-4 relative z-10", isTop3 ? "" : "bg-white/50 dark:bg-surface-dark/50")}>
                 <div className="flex items-center gap-4">
@@ -63,15 +61,23 @@ function TopIndicadorCard({ indicador, index }: { indicador: IndicadorStats, ind
                         {index + 1}
                     </div>
                     <div>
-                        <h3 className={cn("font-bold text-sm", isTop3 ? "text-black dark:text-white mix-blend-hard-light" : "text-gray-900 dark:text-white")}>
-                            {indicador.nome}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className={cn("font-bold text-sm", isTop3 ? "text-black dark:text-white mix-blend-hard-light" : "text-gray-900 dark:text-white")}>
+                                {item.nome}
+                            </h3>
+                            {isTop3 && (
+                                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/10 text-[9px] font-bold uppercase tracking-tight">
+                                    <Star className="size-2" />
+                                    Embaixador
+                                </span>
+                            )}
+                        </div>
                         <div className="flex flex-col gap-0.5">
                             <p className={cn("text-xs font-medium opacity-80", isTop3 ? "text-black dark:text-white" : "text-gray-500")}>
-                                {indicador.totalIndicados} {indicador.totalIndicados === 1 ? 'cliente indicado' : 'clientes indicados'}
+                                {item.totalCompras} {item.totalCompras === 1 ? 'venda entregue' : 'vendas entregues'}
                             </p>
-                            <p className={cn("text-[10px] font-bold", isTop3 ? "text-black/70 dark:text-white/70" : "text-semantic-violet")}>
-                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(indicador.totalVendasIndicados)} em vendas
+                            <p className={cn("text-[10px] font-bold", isTop3 ? "text-black/70 dark:text-white/70" : "text-semantic-orange")}>
+                                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.totalPontos)} em pontos
                             </p>
                         </div>
                     </div>

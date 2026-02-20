@@ -37,7 +37,9 @@ Componentes específicos de domínio.
 - **AlertasFinanceiroWidget**: Lista de clientes com pagamentos pendentes ("Fiado").
 - **UltimasVendasWidget**: Lista compacta das vendas mais recentes.
 
-### Contatos
+### Ranking
+- **TopIndicadoresWidget**: Exibe o ranking de indicações com gradientes para o Top 3 e valor total de vendas geradas.
+- **RankingComprasWidget**: Exibe o ranking de fidelidade por compras, com badge "Embaixador" para o Top 3 e pontuação em R$.
 - **ContatoCard**: Card rico com informações do cliente, badges dinâmicas e ações rápidas.
   - Badges: "Novo" (criado < 7 dias), "Lead", "Cliente", "Inativo".
   - **Atualização:** Agora exibe o "Apelido" ao lado do nome, se disponível.

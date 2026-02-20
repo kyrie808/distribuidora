@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
-  }
   public: {
     Tables: {
       cat_imagens_produto: {
@@ -621,7 +616,7 @@ export type Database = {
           data_prevista_pagamento?: string | null
           forma_pagamento: string
           id?: string
-          observacoes?: string | null
+          observacoes: string | null
           pago?: boolean | null
           parcelas?: number | null
           status?: string
@@ -659,6 +654,25 @@ export type Database = {
       }
     }
     Views: {
+      ranking_indicacoes: {
+        Row: {
+          indicador_id: string | null
+          nome: string | null
+          total_indicados: number | null
+          total_vendas_indicados: number | null
+        }
+        Relationships: []
+      }
+      ranking_compras: {
+        Row: {
+          contato_id: string | null
+          nome: string | null
+          total_pontos: number | null
+          total_compras: number | null
+          ultima_compra: string | null
+        }
+        Relationships: []
+      }
       crm_view_monthly_sales: {
         Row: {
           ano: number | null
@@ -711,40 +725,6 @@ export type Database = {
           stock_status: string | null
           weight_kg: number | null
         }
-        Insert: {
-          category?: string | null
-          description?: never
-          id?: string | null
-          images?: never
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name?: string | null
-          price_cents?: never
-          price_formatted?: number | null
-          primary_image_url?: never
-          slug?: string | null
-          stock_min_alert?: number | null
-          stock_quantity?: number | null
-          stock_status?: never
-          weight_kg?: number | null
-        }
-        Update: {
-          category?: string | null
-          description?: never
-          id?: string | null
-          images?: never
-          is_active?: boolean | null
-          is_featured?: boolean | null
-          name?: string | null
-          price_cents?: never
-          price_formatted?: number | null
-          primary_image_url?: never
-          slug?: string | null
-          stock_min_alert?: number | null
-          stock_quantity?: number | null
-          stock_status?: never
-          weight_kg?: number | null
-        }
         Relationships: []
       }
       vw_marketing_pedidos: {
@@ -775,204 +755,24 @@ export type Database = {
       purchase_order_payment_status: "paid" | "partial" | "unpaid"
       purchase_order_status: "pending" | "received" | "cancelled"
     }
-    CompositeTypes: {
-      [_ in never]: never
-    }
   }
 }
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
-> = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
-> = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
-  }
-  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
-> = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
-}
-  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
-
-export const Constants = {
-  public: {
-    Enums: {
-      purchase_order_payment_status: {
-        paid: "paid",
-        partial: "partial",
-        unpaid: "unpaid",
-      },
-      purchase_order_status: {
-        pending: "pending",
-        received: "received",
-        cancelled: "cancelled",
-      },
-    },
-  },
-} as const
-
-export type PurchaseOrder = {
-  id: string
-  supplier_id: string | null
-  order_date: string
-  status: 'pending' | 'received' | 'cancelled'
-  payment_status: 'paid' | 'partial' | 'unpaid'
-  total_amount: number
-  notes: string | null
-  data_recebimento: string | null
-  amount_paid: number
-  created_at: string
-  updated_at: string
-}
-
-export type PurchaseOrderItem = {
-  id: string
-  purchase_order_id: string
-  product_id: string
-  quantity: number
-  unit_cost: number
-  total_cost: number
-}
-
-// Convenience types
-export type Contato = Database['public']['Tables']['contatos']['Row']
+export type Contato = Tables<'contatos'>
 export type ContatoInsert = Database['public']['Tables']['contatos']['Insert']
 export type ContatoUpdate = Database['public']['Tables']['contatos']['Update']
 
-export type Produto = Database['public']['Tables']['produtos']['Row']
-export type ProdutoInsert = Database['public']['Tables']['produtos']['Insert']
-export type ProdutoUpdate = Database['public']['Tables']['produtos']['Update']
-
-export type Venda = Database['public']['Tables']['vendas']['Row']
+export type Venda = Tables<'vendas'>
 export type VendaInsert = Database['public']['Tables']['vendas']['Insert']
-export type VendaUpdate = Database['public']['Tables']['vendas']['Update']
 
-export type ItemVenda = Database['public']['Tables']['itens_venda']['Row']
-export type ItemVendaInsert = Database['public']['Tables']['itens_venda']['Insert']
-
-export type PagamentoVenda = Database['public']['Tables']['pagamentos_venda']['Row']
-export type PagamentoVendaInsert = Database['public']['Tables']['pagamentos_venda']['Insert']
-
-export type Configuracao = Database['public']['Tables']['configuracoes']['Row']
-
-// Extended types with relations
-export type PurchaseOrderPayment = Database['public']['Tables']['purchase_order_payments']['Row']
-export type PurchaseOrderPaymentInsert = Database['public']['Tables']['purchase_order_payments']['Insert']
+export type PurchaseOrder = Tables<'purchase_orders'>
+export type PurchaseOrderItem = Tables<'purchase_order_items'>
+export type PurchaseOrderPayment = Tables<'purchase_order_payments'>
 
 export type PurchaseOrderWithItems = PurchaseOrder & {
-  items: (PurchaseOrderItem & { product: Produto })[]
-  payments?: PurchaseOrderPayment[]
-}
-
-export type VendaComItens = Venda & {
-  itens: (ItemVenda & { produto: Produto })[]
-  contato: Contato
-}
-
-export type ContatoComIndicador = Contato & {
-  indicador?: Contato | null
+  items: (PurchaseOrderItem & { product: Tables<'produtos'> | null })[]
+  payments: PurchaseOrderPayment[]
 }

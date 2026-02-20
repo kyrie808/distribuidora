@@ -53,7 +53,7 @@ export function usePurchaseOrders() {
             // Sort payments by date desc locally
             const order = data as PurchaseOrderWithItems
             if (order.payments) {
-                order.payments.sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
+                order.payments.sort((a: any, b: any) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
             }
             return order
         } catch (err: any) {

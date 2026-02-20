@@ -58,5 +58,9 @@ Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que 
 - **Finalização**: com formas de pagamento múltiplas.
 - **Integração**: Busca proativa de produtos e tabela de preços.
 
-## Outras Páginas
-- `Produtos.tsx`, `Estoque.tsx`, `Entregas.tsx`: Padronizadas com o novo Header e PageContainer.
+## Ranking Mont (`/indicacoes`)
+- **Layout**: Sistema de abas duplas (Compras / Indicações).
+- **Abas**:
+    - _Compras_: Ranking de fidelidade baseado no total de pedidos pagos e entregues. Cada real gasto é um ponto.
+    - _Indicações_: Ranking de prospecção baseado no número de indicações convertidas em vendas.
+- **Destaque**: Top 3 em ambas as abas recebem tratamento visual premium (gradientes e badges "Embaixador").
