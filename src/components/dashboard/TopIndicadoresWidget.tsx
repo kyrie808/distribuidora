@@ -1,16 +1,29 @@
 import { Medal, Trophy } from 'lucide-react'
 import { useTopIndicadores } from '@/hooks/useTopIndicadores'
-import type { IndicadorStats } from '@/hooks/useTopIndicadores'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
 
-export function TopIndicadoresWidget() {
-    const { topIndicadores, loading } = useTopIndicadores()
+interface TopIndicadoresWidgetProps {
+    data?: any[]
+    loading?: boolean
+}
+
+export function TopIndicadoresWidget({ data, loading: externalLoading }: TopIndicadoresWidgetProps) {
+    // If data is provided, we skip the internal hook
+    const { topIndicadores: hookData, loading: internalLoading } = useTopIndicadores(!data)
+
+    const loading = data ? externalLoading : internalLoading
+    const rawData = data || hookData
 
     if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 
-    // Filter out entries with 0 indications just in case (already handled by view)
-    const validIndicadores = topIndicadores.filter(i => i.totalIndicados > 0)
+    // Map data to expected format if it comes from JSON view
+    const validIndicadores = rawData.map(i => ({
+        indicadorId: i.indicador_id || i.indicadorId,
+        nome: i.nome,
+        totalIndicados: i.total_indicados || i.totalIndicados,
+        totalVendasIndicados: i.total_vendas_indicados || i.totalVendasIndicados
+    })).filter(i => i.totalIndicados > 0)
 
     if (validIndicadores.length === 0) return null
 
@@ -23,23 +36,21 @@ export function TopIndicadoresWidget() {
                 </h2>
             </div>
 
-            {/* Apple-like Horizontal Scroll / Grid */}
             <div className="grid grid-cols-1 gap-3">
                 {validIndicadores.map((indicador, index) => (
-                    <TopIndicadorCard key={indicador.indicadorId} indicador={indicador} index={index} />
+                    <TopIndicadorCard key={indicador.indicadorId} indicador={indicador as any} index={index} />
                 ))}
             </div>
         </div>
     )
 }
 
-function TopIndicadorCard({ indicador, index }: { indicador: IndicadorStats, index: number }) {
-    // Apple-like gradients for top 3
+function TopIndicadorCard({ indicador, index }: { indicador: any, index: number }) {
     const getGradient = (ranking: number) => {
         switch (ranking) {
-            case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400" // Gold
-            case 2: return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 border-gray-400" // Silver
-            case 3: return "bg-gradient-to-r from-orange-300 to-orange-400 text-orange-900 border-orange-400" // Bronze (using orange as bronze proxy)
+            case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400"
+            case 2: return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 border-gray-400"
+            case 3: return "bg-gradient-to-r from-orange-300 to-orange-400 text-orange-900 border-orange-400"
             default: return "bg-white dark:bg-surface-dark text-gray-900 dark:text-white border-gray-100 dark:border-gray-800"
         }
     }
@@ -52,7 +63,7 @@ function TopIndicadorCard({ indicador, index }: { indicador: IndicadorStats, ind
             "relative overflow-hidden border transition-all hover:scale-[1.01]",
             isTop3 ? "border-0 shadow-lg" : "shadow-sm"
         )}>
-            <div className={cn("absolute inset-0 opacity-20", gradientClass)}></div> {/* Background tint */}
+            <div className={cn("absolute inset-0 opacity-20", gradientClass)}></div>
 
             <CardContent className={cn("flex items-center justify-between p-4 relative z-10", isTop3 ? "" : "bg-white/50 dark:bg-surface-dark/50")}>
                 <div className="flex items-center gap-4">

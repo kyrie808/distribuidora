@@ -302,8 +302,8 @@ export function PedidosCompra() {
                                                                 <span className="text-gray-400 font-normal text-[10px] uppercase tracking-wider">
                                                                     {order.id.slice(0, 8)}
                                                                 </span>
-                                                                {order.supplier_id && (
-                                                                    <span className="ml-2 text-gray-600 font-semibold">{order.supplier_id}</span>
+                                                                {order.fornecedor?.nome && (
+                                                                    <span className="ml-2 text-gray-600 font-semibold">{order.fornecedor.nome}</span>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-4">

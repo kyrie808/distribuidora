@@ -13,9 +13,9 @@ export const contatoSchema = z.object({
         .min(1, 'Telefone é obrigatório')
         .refine((val) => isValidPhone(val), 'Telefone inválido')
         .transform((val) => cleanPhone(val)),
-    tipo: z.enum(['B2C', 'B2B']),
+    tipo: z.enum(['B2C', 'B2B', 'FORNECEDOR']),
     subtipo: z.string().optional().nullable(),
-    status: z.enum(['lead', 'cliente', 'inativo']),
+    status: z.enum(['lead', 'cliente', 'inativo', 'fornecedor']),
     origem: z.enum(['direto', 'indicacao']),
     indicado_por_id: z.string().uuid().optional().nullable(),
     endereco: z.string().optional().nullable(),
@@ -36,8 +36,8 @@ export type ContatoFormData = z.infer<typeof contatoSchema>
 // Schema para busca/filtros
 export const contatoFiltrosSchema = z.object({
     busca: z.string().optional(),
-    tipo: z.enum(['B2C', 'B2B', 'todos']).default('todos'),
-    status: z.enum(['lead', 'cliente', 'inativo', 'todos']).default('todos'),
+    tipo: z.enum(['B2C', 'B2B', 'FORNECEDOR', 'todos']).default('todos'),
+    status: z.enum(['lead', 'cliente', 'inativo', 'fornecedor', 'todos']).default('todos'),
     origem: z.enum(['direto', 'indicacao', 'todos']).default('todos'),
 })
 

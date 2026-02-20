@@ -22,16 +22,17 @@ interface UseAlertasFinanceirosReturn {
     refetch: () => Promise<void>
 }
 
-export function useAlertasFinanceiros(): UseAlertasFinanceirosReturn {
+export function useAlertasFinanceiros(enabled: boolean = true): UseAlertasFinanceirosReturn {
     const [alertas, setAlertas] = useState<AlertaFinanceiro[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(enabled)
     const [error, setError] = useState<string | null>(null)
 
     const fetchAlertas = useCallback(async () => {
+        if (!enabled) return
+
         setLoading(true)
         setError(null)
         try {
-            // Buscando vendas pendentes do tipo fiado
             const { data, error: queryError } = await supabase
                 .from('vendas')
                 .select(`
@@ -47,19 +48,13 @@ export function useAlertasFinanceiros(): UseAlertasFinanceirosReturn {
             if (queryError) throw queryError
 
             const vendas = (data ?? []) as unknown as VendaComItens[]
-
             const hoje = startOfDay(new Date())
             const limiteProximo = addDays(hoje, 3)
-
             const alertasProcessados: AlertaFinanceiro[] = []
 
             vendas.forEach(venda => {
                 if (!venda.data_prevista_pagamento) return
-
-                // Ajustando timezone para garantir comparação correta de datas
-                // Assumindo que a data do banco vem como YYYY-MM-DD ou ISO
                 const dataPrevista = startOfDay(new Date(venda.data_prevista_pagamento))
-
                 let status: StatusFinanceiro | null = null
 
                 if (isBefore(dataPrevista, hoje)) {
@@ -74,8 +69,7 @@ export function useAlertasFinanceiros(): UseAlertasFinanceirosReturn {
                     alertasProcessados.push({
                         venda: {
                             ...venda,
-                            // Normalizing contact array if needed (though supabase types usually handle single relation correctly if configured, safe to cast or check)
-                            contato: Array.isArray(venda.contato) ? venda.contato[0] : venda.contato,
+                            contato: (venda.contato as any), // Type assertion to match VendaComItens expected by the widget
                         },
                         diasAtraso: differenceInDays(hoje, dataPrevista),
                         status,
@@ -90,7 +84,7 @@ export function useAlertasFinanceiros(): UseAlertasFinanceirosReturn {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [enabled])
 
     useEffect(() => {
         fetchAlertas()

@@ -6,14 +6,31 @@ import { useVendas } from '@/hooks/useVendas'
 import { formatCurrency, formatRelativeDate } from '@/utils/formatters'
 import { cn } from '@/lib/utils'
 
-export function UltimasVendasWidget() {
-    // Fetch recent sales, respects global dashboard filter
+interface UltimasVendasWidgetProps {
+    data?: any[]
+    loading?: boolean
+}
+
+export function UltimasVendasWidget({ data, loading: externalLoading }: UltimasVendasWidgetProps) {
     const { startDate, endDate } = useDashboardFilter()
-    const { vendas, loading } = useVendas({ startDate, endDate })
+    // Skip internal query if data is provided
+    const { vendas, loading: internalLoading } = useVendas({ startDate, endDate, enabled: !data })
     const navigate = useNavigate()
 
-    // Take top 5
-    const latestSales = vendas.slice(0, 5)
+    const loading = data ? externalLoading : internalLoading
+    const rawVendas = data || vendas
+
+    // Normalize data if it comes from JSON view
+    const latestSales = data
+        ? data.map(v => ({
+            id: v.id,
+            total: v.total,
+            status: v.status,
+            pago: v.pago,
+            data: v.data,
+            contato: { nome: v.contato_nome }
+        }))
+        : rawVendas.slice(0, 5)
 
     if (loading) return <div className="h-[300px] animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 
@@ -44,7 +61,6 @@ export function UltimasVendasWidget() {
                         className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-surface-dark"
                     >
                         <CardContent className="p-4 flex items-center justify-between relative">
-                            {/* Left Side: Indicator & Name */}
                             <div className="flex items-center gap-3">
                                 <div className={cn(
                                     "size-2 rounded-full",
@@ -62,7 +78,6 @@ export function UltimasVendasWidget() {
                                 </div>
                             </div>
 
-                            {/* Right Side: Status Tag & Amount */}
                             <div className="flex items-center gap-4">
                                 {!venda.pago && venda.status !== 'cancelada' && (
                                     <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 text-[10px] font-bold text-yellow-600 dark:text-yellow-400 border border-yellow-100 dark:border-yellow-800">
@@ -76,7 +91,6 @@ export function UltimasVendasWidget() {
                                 </span>
                             </div>
 
-                            {/* Hover effect gradient line */}
                             <div className="absolute bottom-0 left-0 h-[2px] w-0 bg-gradient-to-r from-primary to-green-400 group-hover:w-full transition-all duration-500 ease-out" />
                         </CardContent>
                     </Card>

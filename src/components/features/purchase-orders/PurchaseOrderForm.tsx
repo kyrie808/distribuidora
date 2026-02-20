@@ -5,6 +5,7 @@ import { Button } from '../../ui/Button'
 import { Input } from '../../ui/Input'
 // import { Select } from '../../ui/Select'
 import { useProdutos } from '../../../hooks/useProdutos'
+import { useContatos } from '../../../hooks/useContatos'
 import type { PurchaseOrder, PurchaseOrderWithItems } from '../../../types/database'
 import { formatCurrency } from '../../../utils/formatters'
 
@@ -17,12 +18,13 @@ interface PurchaseOrderFormProps {
 
 export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: PurchaseOrderFormProps) {
     const { produtos } = useProdutos()
+    const { contatos } = useContatos({ filtros: { tipo: 'FORNECEDOR', status: 'todos', origem: 'todos', busca: '' } })
     const [loading, setLoading] = useState(false)
 
     // Header State
     const [date, setDate] = useState(new Date().toISOString().split('T')[0])
     const [notes, setNotes] = useState('')
-    const [supplier, setSupplier] = useState('Fabricante') // Default for now
+    const [fornecedorId, setFornecedorId] = useState('')
     const [amountPaid, setAmountPaid] = useState<number>(0)
 
     // Items State
@@ -39,7 +41,7 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
             if (initialData) {
                 setDate(initialData.order_date.split('T')[0])
                 setNotes(initialData.notes || '')
-                setSupplier(initialData.supplier_id || 'Fabricante')
+                setFornecedorId(initialData.fornecedor_id || '')
                 setAmountPaid(initialData.amount_paid || 0)
                 setItems(initialData.items.map(item => ({
                     tempId: Math.random().toString(36),
@@ -51,7 +53,7 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
                 // Reset for new order
                 setDate(new Date().toISOString().split('T')[0])
                 setNotes('')
-                setSupplier('Fabricante')
+                setFornecedorId('')
                 setAmountPaid(0)
                 setItems([])
             }
@@ -114,7 +116,7 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
             await onSave({
                 order_date: date,
                 notes: notes,
-                supplier_id: supplier,
+                fornecedor_id: fornecedorId,
                 total_amount: totalAmount,
                 status: initialData ? initialData.status : 'pending',
                 payment_status: paymentStatus,
@@ -146,12 +148,22 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
                         onChange={(e) => setDate(e.target.value)}
                         required
                     />
-                    <Input
-                        label="Fornecedor"
-                        value={supplier}
-                        onChange={(e) => setSupplier(e.target.value)}
-                        placeholder="Nome do Fornecedor"
-                    />
+                    <div className="flex flex-col">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
+                        <select
+                            className="w-full bg-white border border-gray-300 rounded-lg py-2 px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-600 transition-all cursor-pointer h-10"
+                            value={fornecedorId}
+                            onChange={(e) => setFornecedorId(e.target.value)}
+                            required
+                        >
+                            <option value="">Selecione...</option>
+                            {contatos.map(c => (
+                                <option key={c.id} value={c.id}>
+                                    {c.nome}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="md:col-span-2">
                         <Input
                             label="Observações"

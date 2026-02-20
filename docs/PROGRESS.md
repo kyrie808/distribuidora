@@ -7,6 +7,26 @@
 
 ## Entregas Recentes
 
+### 2026-02-20 - Restauração Visual do Dashboard
+- **UI/UX Restoration:** Restaurada a estrutura visual completa do Dashboard pré-refatoração.
+  - Barra de navegação mensal horizontal (`MonthPicker`).
+  - Botão de Dark Mode (`ThemeToggle`) no cabeçalho.
+  - Títulos de seção com ícones e hierarquia visual: `$ FINANCEIRO` e `🛒 VENDAS & ENTREGAS`.
+  - Card "A RECEBER" com badge amarelo "Pendente".
+- **Refatoração de Código:** Clean up de componentes `FinanceiroCard` e `OperacionalCard` (deletados).
+- **Data Integration:** Conexão direta dos elementos restaurados com as novas views de alta performance do Supabase.
+- **Build:** Verificação de tipos via `tsc --noEmit` garantindo zero referências quebradas.
+
+### 2026-02-20 - Migração de Fornecedor (Purchase Orders -> Contatos)
+- **Database:** Migração do campo `supplier_id` (texto) para `fornecedor_id` (FK para `contatos`).
+- **Data Integrity:** Criação automática do contato "Izaulino (Fábrica)" com tipo `FORNECEDOR` para manter histórico.
+- **Frontend Refactoring:**
+  - `usePurchaseOrders`: Atualizado para realizar join com a tabela `contatos` e recuperar o nome do fornecedor.
+  - `PurchaseOrderForm`: Implementado seletor de fornecedor filtrando por `tipo: FORNECEDOR`.
+  - `PedidosCompra`: Exibição do nome real do fornecedor em vez do ID de texto.
+  - `database.ts`: Tipos atualizados para refletir a nova estrutura de relacionamentos.
+- **Segurança:** Expansão das check constraints (`tipo`, `status`) na tabela `contatos` para suportar adequadamente fornecedores.
+
 ### 2026-02-18 - Correção de Erro 400 no Cadastro de Pedidos de Compra
 - **Bug Fix:** Resolvido o erro 400 ao salvar pedidos de compra.
   - A causa era a tentativa de inserir valores na coluna `total_cost` da tabela `purchase_order_items`.

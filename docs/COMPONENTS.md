@@ -33,6 +33,7 @@ Componentes específicos de domínio.
 
 ### Dashboard
 - **KpiCard**: Cartão de métrica com título, valor, tendência e mini-gráfico opcional.
+- **MonthPicker**: Barra de navegação horizontal para seleção de mês/ano.
 - **LogisticsWidget**: Widget operacional para status de entregas.
 - **AlertasFinanceiroWidget**: Lista de clientes com pagamentos pendentes ("Fiado").
 - **UltimasVendasWidget**: Lista compacta das vendas mais recentes.
@@ -56,3 +57,7 @@ Componentes específicos de domínio.
   - Cálculo de taxa de entrega em tempo real.
 - **ClientSelector**: Componente de busca e seleção de clientes com feedback visual e link para cadastro.
 - **ProductList**: Grid de produtos filtrável com botões rápidos de adição ao carrinho e controle de quantidade.
+
+### Compras
+- **PurchaseOrderForm**: Formulário de criação/edição de pedidos de compra.
+  - **Destaque:** Agora inclui um seletor de fornecedor vinculado à tabela de contatos (tipo: FORNECEDOR).

@@ -3,19 +3,31 @@ import { supabase } from '../lib/supabase'
 
 export interface DashboardMetrics {
     operational: {
-        total_a_receber: number
+        total_vendas: number
+        total_itens: number
         entregas_pendentes_total: number
-        entregas_hoje_pendentes: number
         entregas_hoje_realizadas: number
         clientes_ativos: number
-    }
+        ranking_indicacoes: any[]
+        ultimas_vendas: any[]
+    },
     financial: {
         faturamento_mes_atual: number
         lucro_mes_atual: number
         ticket_medio_mes_atual: number
         vendas_mes_atual: number
         faturamento_mes_anterior: number
-    }
+        variacao_percentual: number
+        total_a_receber: number
+        alertas_financeiros: any[]
+    },
+    alertas_recompra: {
+        contato_id: string
+        nome: string
+        telefone: string
+        data_ultima_compra: string
+        dias_sem_compra: number
+    }[]
 }
 
 export function useDashboardMetrics(month?: number, year?: number) {
@@ -25,56 +37,80 @@ export function useDashboardMetrics(month?: number, year?: number) {
     return useQuery({
         queryKey: ['dashboard_metrics', targetMonth, targetYear],
         queryFn: async (): Promise<DashboardMetrics> => {
-            // Calculate Previous Month logic
-            const previousMonth = targetMonth === 1 ? 12 : targetMonth - 1
-            const previousYear = targetMonth === 1 ? targetYear - 1 : targetYear
+            const [
+                { data: financialData, error: finError },
+                { data: operationalData, error: opError },
+                { data: alertsData, error: alrError }
+            ] = await Promise.all([
+                supabase
+                    .from('view_home_financeiro')
+                    .select('*')
+                    .eq('mes', targetMonth)
+                    .eq('ano', targetYear)
+                    .maybeSingle(),
+                supabase
+                    .from('view_home_operacional')
+                    .select('*')
+                    .eq('mes', targetMonth)
+                    .eq('ano', targetYear)
+                    .maybeSingle(),
+                supabase
+                    .from('view_home_alertas')
+                    .select('*')
+                    .limit(10)
+            ])
 
-            // Fetch Operational Snapshot (This is usually a current snapshot, so filter might not apply if view is realtime, 
-            // BUT user asked to fix Month/Year filter. Operational snapshot typically implies "NOW", 
-            // but if the view supports history we would filter. 
-            // Looking at the view definition: It has subqueries on 'vendas'. 
-            // If the view doesn't have date columns, we can't filter it by date.
-            // The view 'crm_view_operational_snapshot' aggregates *current* state (pending deliveries, active clients).
-            // It doesn't seem to support historical browsing. 
-            // However, the prompt focuses on 'crm_view_monthly_sales' for the filtering.
-            // We will keep operational snapshot as is (current state) or ideally it should also be filtered if possible, 
-            // but based on view definition it's a snapshot.
-            // Let's focus on Financials which come from 'crm_view_monthly_sales'.
-
-            const { data: operationalData, error: opError } = await supabase
-                .from('crm_view_operational_snapshot')
-                .select('*')
-                .single()
-
+            if (finError) throw finError
             if (opError) throw opError
+            if (alrError) throw alrError
 
-            // Fetch Monthly Sales (Target & Previous)
-            // We need to fetch both possibly across different years if Jan is selected
-            const { data: salesData, error: salesError } = await supabase
-                .from('crm_view_monthly_sales')
-                .select('*')
-                .or(`and(mes.eq.${targetMonth},ano.eq.${targetYear}),and(mes.eq.${previousMonth},ano.eq.${previousYear})`)
+            const fin = financialData || {
+                faturamento: 0,
+                ticket_medio: 0,
+                lucro_estimado: 0,
+                total_a_receber: 0,
+                faturamento_anterior: 0,
+                variacao_faturamento_percentual: 0,
+                alertas_financeiros: []
+            }
 
-            if (salesError) throw salesError
-
-            const currentMonthData = salesData?.find(d => d.mes === targetMonth && d.ano === targetYear)
-            const previousMonthData = salesData?.find(d => d.mes === previousMonth && d.ano === previousYear)
+            const op = operationalData || {
+                total_vendas: 0,
+                total_itens: 0,
+                pedidos_pendentes: 0,
+                pedidos_entregues_hoje: 0,
+                clientes_ativos: 0,
+                ranking_indicacoes: [],
+                ultimas_vendas: []
+            }
 
             return {
                 operational: {
-                    total_a_receber: operationalData.total_a_receber ?? 0,
-                    entregas_pendentes_total: operationalData.entregas_pendentes_total ?? 0,
-                    entregas_hoje_pendentes: operationalData.entregas_hoje_pendentes ?? 0,
-                    entregas_hoje_realizadas: operationalData.entregas_hoje_realizadas ?? 0,
-                    clientes_ativos: operationalData.clientes_ativos ?? 0,
+                    total_vendas: op.total_vendas ?? 0,
+                    total_itens: op.total_itens ?? 0,
+                    entregas_pendentes_total: op.pedidos_pendentes ?? 0,
+                    entregas_hoje_realizadas: op.pedidos_entregues_hoje ?? 0,
+                    clientes_ativos: op.clientes_ativos ?? 0,
+                    ranking_indicacoes: (op.ranking_indicacoes as any[]) ?? [],
+                    ultimas_vendas: (op.ultimas_vendas as any[]) ?? [],
                 },
                 financial: {
-                    faturamento_mes_atual: currentMonthData?.faturamento ?? 0,
-                    lucro_mes_atual: currentMonthData?.lucro ?? 0,
-                    ticket_medio_mes_atual: currentMonthData?.ticket_medio ?? 0,
-                    vendas_mes_atual: currentMonthData?.total_vendas ?? 0,
-                    faturamento_mes_anterior: previousMonthData?.faturamento ?? 0,
-                }
+                    faturamento_mes_atual: fin.faturamento ?? 0,
+                    lucro_mes_atual: fin.lucro_estimado ?? 0,
+                    ticket_medio_mes_atual: fin.ticket_medio ?? 0,
+                    vendas_mes_atual: op.total_vendas ?? 0,
+                    faturamento_mes_anterior: fin.faturamento_anterior ?? 0,
+                    variacao_percentual: fin.variacao_faturamento_percentual ?? 0,
+                    total_a_receber: fin.total_a_receber ?? 0,
+                    alertas_financeiros: (fin.alertas_financeiros as any[]) ?? []
+                },
+                alertas_recompra: (alertsData || []).map(a => ({
+                    contato_id: a.contato_id ?? '',
+                    nome: a.nome ?? 'Cliente sem nome',
+                    telefone: a.telefone ?? '',
+                    data_ultima_compra: a.data_ultima_compra ?? '',
+                    dias_sem_compra: a.dias_sem_compra ?? 0
+                }))
             }
         },
         staleTime: 1000 * 60 * 5, // 5 minutes cache

@@ -6,11 +6,27 @@ import { useAlertasFinanceiros } from '@/hooks/useAlertasFinanceiros'
 import { Card, CardContent } from '@/components/ui/Card'
 import { formatRelativeDate, formatPhone } from '@/utils/formatters'
 
-export function AlertasFinanceiroWidget() {
-    const navigate = useNavigate()
-    const { alertas, loading } = useAlertasFinanceiros()
+interface AlertasFinanceiroWidgetProps {
+    data?: any[]
+    loading?: boolean
+}
 
-    const atrasados = alertas.filter(a => a.status === 'atrasado')
+export function AlertasFinanceiroWidget({ data, loading: externalLoading }: AlertasFinanceiroWidgetProps) {
+    const navigate = useNavigate()
+    // Skip hook if data is provided
+    const { alertas, loading: internalLoading } = useAlertasFinanceiros(!data)
+
+    const loading = data ? externalLoading : internalLoading
+    const rawAlerts = data || alertas
+
+    // Normalize data if it comes from JSON view
+    const atrasados = data
+        ? data.map(v => ({
+            venda: { id: v.venda_id, total: v.valor, contato: { nome: v.contato_nome, telefone: v.contato_telefone } },
+            diasAtraso: Math.floor((new Date().getTime() - new Date(v.vencimento).getTime()) / (1000 * 60 * 60 * 24)),
+            dataPrevista: v.vencimento
+        }))
+        : rawAlerts.filter(a => a.status === 'atrasado')
 
     const handleWhatsApp = (telefone: string, nome: string, valor: number) => {
         const message = `Olá ${nome}, tudo bem? Estou entrando em contato referente ao valor de ${formatCurrency(valor)} que está em aberto.`
@@ -20,7 +36,6 @@ export function AlertasFinanceiroWidget() {
 
     if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 
-    // Only show if there are delayed payments
     if (atrasados.length === 0) {
         return (
             <DashboardCarousel

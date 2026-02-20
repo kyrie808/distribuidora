@@ -7,10 +7,11 @@ import type { DomainVenda } from '../types/domain'
 export type { VendaComItens }
 
 interface UseVendasOptions {
-    realtime?: boolean // Kept for interface compatibility, but React Query handles freshness
+    realtime?: boolean
     startDate?: Date
     endDate?: Date
     includePending?: boolean
+    enabled?: boolean
 }
 
 interface UseVendasReturn {
@@ -29,11 +30,10 @@ interface UseVendasReturn {
     deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
-export function useVendas({ startDate, endDate, includePending = false }: UseVendasOptions = {}): UseVendasReturn {
+export function useVendas({ startDate, endDate, includePending = false, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
     const queryClient = useQueryClient()
     const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending]
 
-    // Main Query
     const { data, isLoading, error, refetch } = useQuery({
         queryKey,
         queryFn: async () => {
@@ -42,10 +42,8 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
                 vendaService.getTotalAReceber()
             ])
 
-            // Calculate standard metrics
             const calculatedMetrics = vendaService.calculateKPIs(vendasData)
 
-            // Override 'aReceber' with the total from all time
             return {
                 vendas: vendasData,
                 metrics: {
@@ -54,10 +52,10 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
                 }
             }
         },
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        enabled,
+        staleTime: 1000 * 60 * 5,
     })
 
-    // Mutations
     const createVendaMutation = useMutation({
         mutationFn: (data: VendaFormData) => vendaService.createVenda(data),
         onSuccess: () => {
@@ -108,7 +106,6 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
     const addPagamentoMutation = useMutation({
         mutationFn: async ({ vendaId, data }: { vendaId: string; data: PagamentoFormData }) => {
             const result = await vendaService.addPagamento(vendaId, data)
-            // Update venda status to paid if fully paid could be handled here or inside service
             return result
         },
         onSuccess: () => {
@@ -127,7 +124,6 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
         }
     })
 
-    // Default metrics if loading or error
     const metrics = data?.metrics || {
         faturamentoTotal: 0,
         faturamentoDia: 0,
@@ -143,7 +139,6 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
         lucroMes: 0,
     }
 
-    // Handlers matching the interface
     const createVenda = useCallback(async (formData: VendaFormData) => {
         try {
             return await createVendaMutation.mutateAsync(formData)
@@ -191,12 +186,9 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
         } catch (e) { console.error(e); return false }
     }, [deletePagamentoMutation])
 
-    // Direct service call for getById (no cache needed usually for detail view if coming from list)
-    // But since we have useVenda (singular), we can leave this as is.
     const getVendaById = useCallback(async (id: string) => {
         return vendaService.getVendaById(id)
     }, [])
-
 
     return {
         vendas: data?.vendas || [],
@@ -215,13 +207,12 @@ export function useVendas({ startDate, endDate, includePending = false }: UseVen
     }
 }
 
-// Hook for single venda detail
 export function useVenda(id: string | undefined) {
     const { data: venda, isLoading: loading, error, refetch } = useQuery({
         queryKey: ['venda', id],
         queryFn: () => id ? vendaService.getVendaById(id) : null,
         enabled: !!id,
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5,
     })
 
     return {

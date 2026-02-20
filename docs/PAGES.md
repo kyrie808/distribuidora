@@ -58,6 +58,11 @@ Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que 
 - **Finalização**: com formas de pagamento múltiplas.
 - **Integração**: Busca proativa de produtos e tabela de preços.
 
+## Pedidos de Compra (`/pedidos-compra`)
+- **Visual:** Lista de pedidos agrupados com cabeçalho informativo.
+- **Destaque:** Agora exibe o nome do fornecedor vindo da tabela `contatos` (Relationship).
+- **Ações:** Novo modal de criação com seletor de fornecedores.
+
 ## Ranking Mont (`/indicacoes`)
 - **Layout**: Sistema de abas duplas (Compras / Indicações).
 - **Abas**:

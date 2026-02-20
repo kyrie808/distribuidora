@@ -7,34 +7,45 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "13.0.5"
+  }
   public: {
     Tables: {
       cat_imagens_produto: {
         Row: {
-          criado_em: string | null
+          alt_text: string | null
+          ativo: boolean | null
+          created_at: string | null
           id: string
           ordem: number | null
-          principal: boolean | null
-          produto_id: string | null
-          texto_alternativo: string | null
+          produto_id: string
+          tipo: string
+          updated_at: string | null
           url: string
         }
         Insert: {
-          criado_em?: string | null
+          alt_text?: string | null
+          ativo?: boolean | null
+          created_at?: string | null
           id?: string
           ordem?: number | null
-          principal?: boolean | null
-          produto_id?: string | null
-          texto_alternativo?: string | null
+          produto_id: string
+          tipo?: string
+          updated_at?: string | null
           url: string
         }
         Update: {
-          criado_em?: string | null
+          alt_text?: string | null
+          ativo?: boolean | null
+          created_at?: string | null
           id?: string
           ordem?: number | null
-          principal?: boolean | null
-          produto_id?: string | null
-          texto_alternativo?: string | null
+          produto_id?: string
+          tipo?: string
+          updated_at?: string | null
           url?: string
         }
         Relationships: [
@@ -50,44 +61,6 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "vw_catalogo_produtos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      sis_imagens_produto: {
-        Row: {
-          ativo: boolean | null
-          criado_em: string | null
-          id: string
-          ordem: number | null
-          produto_id: string | null
-          tipo: string | null
-          url: string
-        }
-        Insert: {
-          ativo?: boolean | null
-          criado_em?: string | null
-          id?: string
-          ordem?: number | null
-          produto_id?: string | null
-          tipo?: string | null
-          url: string
-        }
-        Update: {
-          ativo?: boolean | null
-          criado_em?: string | null
-          id?: string
-          ordem?: number | null
-          produto_id?: string | null
-          tipo?: string | null
-          url?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
-            columns: ["produto_id"]
-            isOneToOne: false
-            referencedRelation: "produtos"
             referencedColumns: ["id"]
           },
         ]
@@ -305,6 +278,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "contatos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contatos_indicado_por_id_fkey"
+            columns: ["indicado_por_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_compras"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "contatos_indicado_por_id_fkey"
+            columns: ["indicado_por_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_indicacoes"
+            referencedColumns: ["indicador_id"]
+          },
+          {
+            foreignKeyName: "contatos_indicado_por_id_fkey"
+            columns: ["indicado_por_id"]
+            isOneToOne: false
+            referencedRelation: "view_home_alertas"
+            referencedColumns: ["contato_id"]
           },
         ]
       }
@@ -550,12 +544,12 @@ export type Database = {
           amount_paid: number | null
           created_at: string | null
           data_recebimento: string | null
+          fornecedor_id: string
           id: string
           notes: string | null
           order_date: string
           payment_status: Database["public"]["Enums"]["purchase_order_payment_status"]
           status: Database["public"]["Enums"]["purchase_order_status"]
-          supplier_id: string | null
           total_amount: number
           updated_at: string | null
         }
@@ -563,12 +557,12 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string | null
           data_recebimento?: string | null
+          fornecedor_id: string
           id?: string
           notes?: string | null
           order_date?: string
           payment_status?: Database["public"]["Enums"]["purchase_order_payment_status"]
           status?: Database["public"]["Enums"]["purchase_order_status"]
-          supplier_id?: string | null
           total_amount?: number
           updated_at?: string | null
         }
@@ -576,16 +570,72 @@ export type Database = {
           amount_paid?: number | null
           created_at?: string | null
           data_recebimento?: string | null
+          fornecedor_id?: string
           id?: string
           notes?: string | null
           order_date?: string
           payment_status?: Database["public"]["Enums"]["purchase_order_payment_status"]
           status?: Database["public"]["Enums"]["purchase_order_status"]
-          supplier_id?: string | null
           total_amount?: number
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "contatos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sis_imagens_produto: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          id: string
+          ordem: number | null
+          produto_id: string | null
+          tipo: string | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          ordem?: number | null
+          produto_id?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          id?: string
+          ordem?: number | null
+          produto_id?: string | null
+          tipo?: string | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "vw_catalogo_produtos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vendas: {
         Row: {
@@ -616,7 +666,7 @@ export type Database = {
           data_prevista_pagamento?: string | null
           forma_pagamento: string
           id?: string
-          observacoes: string | null
+          observacoes?: string | null
           pago?: boolean | null
           parcelas?: number | null
           status?: string
@@ -650,29 +700,31 @@ export type Database = {
             referencedRelation: "contatos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "vendas_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_compras"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "vendas_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_indicacoes"
+            referencedColumns: ["indicador_id"]
+          },
+          {
+            foreignKeyName: "vendas_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "view_home_alertas"
+            referencedColumns: ["contato_id"]
+          },
         ]
       }
     }
     Views: {
-      ranking_indicacoes: {
-        Row: {
-          indicador_id: string | null
-          nome: string | null
-          total_indicados: number | null
-          total_vendas_indicados: number | null
-        }
-        Relationships: []
-      }
-      ranking_compras: {
-        Row: {
-          contato_id: string | null
-          nome: string | null
-          total_pontos: number | null
-          total_compras: number | null
-          ultima_compra: string | null
-        }
-        Relationships: []
-      }
       crm_view_monthly_sales: {
         Row: {
           ano: number | null
@@ -695,6 +747,63 @@ export type Database = {
         }
         Relationships: []
       }
+      ranking_compras: {
+        Row: {
+          contato_id: string | null
+          nome: string | null
+          total_compras: number | null
+          total_pontos: number | null
+          ultima_compra: string | null
+        }
+        Relationships: []
+      }
+      ranking_indicacoes: {
+        Row: {
+          indicador_id: string | null
+          nome: string | null
+          total_indicados: number | null
+          total_vendas_indicados: number | null
+        }
+        Relationships: []
+      }
+      view_home_alertas: {
+        Row: {
+          contato_id: string | null
+          data_ultima_compra: string | null
+          dias_sem_compra: number | null
+          nome: string | null
+          telefone: string | null
+        }
+        Relationships: []
+      }
+      view_home_financeiro: {
+        Row: {
+          alertas_financeiros: Json | null
+          ano: number | null
+          faturamento: number | null
+          faturamento_anterior: number | null
+          lucro_estimado: number | null
+          mes: number | null
+          ticket_medio: number | null
+          total_a_receber: number | null
+          variacao_faturamento_percentual: number | null
+        }
+        Relationships: []
+      }
+      view_home_operacional: {
+        Row: {
+          ano: number | null
+          clientes_ativos: number | null
+          mes: number | null
+          pedidos_entregues_hoje: number | null
+          pedidos_pendentes: number | null
+          ranking_indicacoes: Json | null
+          total_itens: number | null
+          total_vendas: number | null
+          ultimas_vendas: Json | null
+        }
+        Relationships: []
+      }
       vw_admin_dashboard: {
         Row: {
           faturamento_hoje_cents: number | null
@@ -710,20 +819,57 @@ export type Database = {
       vw_catalogo_produtos: {
         Row: {
           category: string | null
-          description: string | null
+          codigo: string | null
+          descricao: string | null
           id: string | null
           images: Json | null
           is_active: boolean | null
           is_featured: boolean | null
-          name: string | null
+          nome: string | null
           price_cents: number | null
-          price_formatted: number | null
+          price_formatted: string | null
           primary_image_url: string | null
           slug: string | null
           stock_min_alert: number | null
           stock_quantity: number | null
           stock_status: string | null
           weight_kg: number | null
+        }
+        Insert: {
+          category?: string | null
+          codigo?: string | null
+          descricao?: string | null
+          id?: string | null
+          images?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          nome?: string | null
+          price_cents?: never
+          price_formatted?: never
+          primary_image_url?: never
+          slug?: string | null
+          stock_min_alert?: number | null
+          stock_quantity?: number | null
+          stock_status?: never
+          weight_kg?: number | null
+        }
+        Update: {
+          category?: string | null
+          codigo?: string | null
+          descricao?: string | null
+          id?: string | null
+          images?: never
+          is_active?: boolean | null
+          is_featured?: boolean | null
+          nome?: string | null
+          price_cents?: never
+          price_formatted?: never
+          primary_image_url?: never
+          slug?: string | null
+          stock_min_alert?: number | null
+          stock_quantity?: number | null
+          stock_status?: never
+          weight_kg?: number | null
         }
         Relationships: []
       }
@@ -755,35 +901,154 @@ export type Database = {
       purchase_order_payment_status: "paid" | "partial" | "unpaid"
       purchase_order_status: "pending" | "received" | "cancelled"
     }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
 }
 
-export type Tables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
-export type Enums<T extends keyof Database['public']['Enums']> = Database['public']['Enums'][T]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
 
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+    DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])
+  ? (DefaultSchema["Tables"] &
+    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+      Row: infer R
+    }
+  ? R
+  : never
+  : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Insert: infer I
+  }
+  ? I
+  : never
+  : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+  | keyof DefaultSchema["Tables"]
+  | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+  : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+    Update: infer U
+  }
+  ? U
+  : never
+  : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+  | keyof DefaultSchema["Enums"]
+  | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+  : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+  : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+  | keyof DefaultSchema["CompositeTypes"]
+  | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+  ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+  : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+  : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      purchase_order_payment_status: ["paid", "partial", "unpaid"],
+      purchase_order_status: ["pending", "received", "cancelled"],
+    },
+  },
+} as const
+
+// Helper exports for common tables
 export type Contato = Tables<'contatos'>
-export type ContatoInsert = Database['public']['Tables']['contatos']['Insert']
-export type ContatoUpdate = Database['public']['Tables']['contatos']['Update']
-
 export type Venda = Tables<'vendas'>
-export type VendaInsert = Database['public']['Tables']['vendas']['Insert']
-
+export type ItemVenda = Tables<'itens_venda'>
+export type PagamentoVenda = Tables<'pagamentos_venda'>
+export type Produto = Tables<'produtos'>
 export type PurchaseOrder = Tables<'purchase_orders'>
 export type PurchaseOrderItem = Tables<'purchase_order_items'>
 export type PurchaseOrderPayment = Tables<'purchase_order_payments'>
 
-export type PurchaseOrderWithItems = PurchaseOrder & {
-  items: (PurchaseOrderItem & { product: Tables<'produtos'> | null })[]
-  payments: PurchaseOrderPayment[]
-}
-
-export type Produto = Tables<'produtos'>
-export type ProdutoInsert = Database['public']['Tables']['produtos']['Insert']
-export type ProdutoUpdate = Database['public']['Tables']['produtos']['Update']
-
-export type ItemVenda = Tables<'itens_venda'>
-export type PagamentoVenda = Tables<'pagamentos_venda'>
-
-export type ContatoComIndicador = Contato & {
-  indicador: { id: string; nome: string } | null
+export interface PurchaseOrderWithItems extends PurchaseOrder {
+  items: (PurchaseOrderItem & {
+    product?: Produto
+  })[]
+  payments?: PurchaseOrderPayment[]
+  fornecedor?: {
+    nome: string
+  }
 }

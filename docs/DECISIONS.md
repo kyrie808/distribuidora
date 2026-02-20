@@ -41,3 +41,12 @@
 **Decisão:** Uso exclusivo do Supabase (Postgres + Auth + Edge Functions).
 - Lógica de Negócio complexa -> Edge Functions ou Database Functions (RPC).
 - Lógica de UI/Filtro -> Hooks React (`useVendas`, `useContatos`).
+
+## 2026-02-20: Migração de Fornecedor para Tabela de Contatos
+- **Contexto**: Pedidos de compra utilizavam um campo de texto livre (`supplier_id`) para identificar fornecedores, o que impedia relatórios precisos e centralização de dados.
+- **Decisão**: Migrar `supplier_id` para `fornecedor_id` como Chave Estrangeira (FK) referenciando `contatos`.
+- **Consequências**:
+  - (+) Integridade referencial garantida pelo banco de dados.
+  - (+) Possibilidade de usar o mesmo sistema de contatos para clientes e fornecedores.
+  - (+) UI aprimorada com busca real de fornecedores e exibição de nomes amigáveis.
+  - (!) Requer atenção às check constraints de `tipo` e `status` na tabela `contatos`.

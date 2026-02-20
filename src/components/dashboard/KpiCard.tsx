@@ -16,6 +16,7 @@ interface KpiCardProps {
     iconColor?: string
     className?: string
     variant?: 'default' | 'compact'
+    loading?: boolean
     onClick?: () => void
 }
 
@@ -32,8 +33,15 @@ export function KpiCard({
     iconColor,
     className,
     variant = 'default',
+    loading,
     onClick
 }: KpiCardProps) {
+
+    if (loading) {
+        return (
+            <div className={cn("h-[120px] w-full animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl", className)} />
+        )
+    }
 
     // Helper logic moved to SmartProgressBar, but we might still need some for the 'default' big card if we want to reuse it there too
     // For 'default' variant, the layout is slightly different (badge on top right, bar on bottom).

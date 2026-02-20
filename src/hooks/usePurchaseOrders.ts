@@ -14,6 +14,7 @@ export function usePurchaseOrders() {
                 .from('purchase_orders')
                 .select(`
                     *,
+                    fornecedor:contatos(nome),
                     items:purchase_order_items(
                         *,
                         product:produtos(*)
@@ -40,6 +41,7 @@ export function usePurchaseOrders() {
                 .from('purchase_orders')
                 .select(`
           *,
+          fornecedor:contatos(nome),
           items:purchase_order_items(
             *,
             product:produtos(*)
@@ -74,7 +76,7 @@ export function usePurchaseOrders() {
             const { data, error: orderError } = await supabase
                 .from('purchase_orders')
                 .insert({
-                    supplier_id: order.supplier_id || 'Fabricante',
+                    fornecedor_id: order.fornecedor_id!,
                     order_date: order.order_date,
                     status: order.status || 'pending',
                     payment_status: order.payment_status || 'unpaid',
@@ -82,7 +84,7 @@ export function usePurchaseOrders() {
                     notes: order.notes,
                     amount_paid: order.amount_paid || 0,
                     data_recebimento: order.data_recebimento
-                } as any)
+                })
                 .select()
                 .single()
 

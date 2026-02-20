@@ -16,12 +16,14 @@ interface UseTopIndicadoresReturn {
     refetch: () => Promise<void>
 }
 
-export function useTopIndicadores(): UseTopIndicadoresReturn {
+export function useTopIndicadores(enabled: boolean = true): UseTopIndicadoresReturn {
     const [topIndicadores, setTopIndicadores] = useState<IndicadorStats[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(enabled)
     const [error, setError] = useState<string | null>(null)
 
     const fetchTopIndicadores = useCallback(async () => {
+        if (!enabled) return
+
         setLoading(true)
         setError(null)
 
@@ -49,7 +51,7 @@ export function useTopIndicadores(): UseTopIndicadoresReturn {
         } finally {
             setLoading(false)
         }
-    }, [])
+    }, [enabled])
 
     useEffect(() => {
         fetchTopIndicadores()

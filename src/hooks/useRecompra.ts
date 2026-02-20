@@ -25,20 +25,19 @@ interface UseRecompraReturn {
     marcarComoContatado: (contatoId: string) => Promise<boolean>
 }
 
-export function useRecompra(): UseRecompraReturn {
+export function useRecompra(enabled: boolean = true): UseRecompraReturn {
     const { config, loading: loadingConfig } = useConfiguracoes()
     const [contatos, setContatos] = useState<ContatoRecompra[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(enabled)
     const [error, setError] = useState<string | null>(null)
 
     const fetchRecompra = useCallback(async () => {
-        if (loadingConfig) return
+        if (!enabled || loadingConfig) return
 
         setLoading(true)
         setError(null)
 
         try {
-            // Fetch all active clients
             const { data: clientesData, error: clientesError } = await supabase
                 .from('contatos')
                 .select('*')
@@ -47,7 +46,6 @@ export function useRecompra(): UseRecompraReturn {
             if (clientesError) throw clientesError
             const clientes = (clientesData ?? []) as Contato[]
 
-            // Fetch last sale date for each client
             const { data: vendasData, error: vendasError } = await supabase
                 .from('vendas')
                 .select('contato_id, data')
@@ -56,7 +54,6 @@ export function useRecompra(): UseRecompraReturn {
 
             if (vendasError) throw vendasError
 
-            // Build map of last sale per client
             const ultimaVendaPorContato = new Map<string, string>()
             vendasData?.forEach((v) => {
                 if (!ultimaVendaPorContato.has(v.contato_id)) {
@@ -68,16 +65,12 @@ export function useRecompra(): UseRecompraReturn {
             const contatosRecompra: ContatoRecompra[] = []
 
             clientes.forEach((cliente) => {
-                // Get cycle based on type
                 const ciclo = cliente.tipo === 'B2B'
                     ? config.cicloRecompra.b2b
                     : config.cicloRecompra.b2c
 
-                // Calculate days since last purchase
                 const ultimaVendaStr = ultimaVendaPorContato.get(cliente.id)
                 const ultimaCompra = ultimaVendaStr ? new Date(ultimaVendaStr) : null
-
-                // Use ultimo_contato if no sale, or the more recent of the two
                 const ultimoContato = cliente.ultimo_contato ? new Date(cliente.ultimo_contato) : null
 
                 let dataReferencia: Date | null = null
@@ -87,15 +80,11 @@ export function useRecompra(): UseRecompraReturn {
                     dataReferencia = ultimaCompra || ultimoContato
                 }
 
-                // If no reference date, use created date
                 if (!dataReferencia) {
                     dataReferencia = new Date(cliente.criado_em)
                 }
 
                 const diasSemCompra = differenceInDays(hoje, dataReferencia)
-
-                // Classify status
-                // Threshold for "próximo" alert: 3 days before for B2C, 2 days for B2B
                 const thresholdProximo = cliente.tipo === 'B2B' ? 2 : 3
 
                 let status: StatusRecompra
@@ -116,13 +105,11 @@ export function useRecompra(): UseRecompraReturn {
                 })
             })
 
-            // Sort by urgency: atrasado first (most days), then proximo, then ok
             contatosRecompra.sort((a, b) => {
                 const statusOrder = { atrasado: 0, proximo: 1, ok: 2 }
                 if (statusOrder[a.status] !== statusOrder[b.status]) {
                     return statusOrder[a.status] - statusOrder[b.status]
                 }
-                // Within same status, sort by most days first
                 return b.diasSemCompra - a.diasSemCompra
             })
 
@@ -132,13 +119,12 @@ export function useRecompra(): UseRecompraReturn {
         } finally {
             setLoading(false)
         }
-    }, [config.cicloRecompra, loadingConfig])
+    }, [config.cicloRecompra, loadingConfig, enabled])
 
     useEffect(() => {
         fetchRecompra()
     }, [fetchRecompra])
 
-    // Metrics
     const atrasados = useMemo(
         () => contatos.filter((c) => c.status === 'atrasado').length,
         [contatos]
@@ -154,7 +140,6 @@ export function useRecompra(): UseRecompraReturn {
         [contatos]
     )
 
-    // Mark as contacted - updates ultimo_contato
     const marcarComoContatado = async (contatoId: string): Promise<boolean> => {
         try {
             const { error } = await supabase
@@ -163,8 +148,6 @@ export function useRecompra(): UseRecompraReturn {
                 .eq('id', contatoId)
 
             if (error) throw error
-
-            // Refetch to update the list
             await fetchRecompra()
             return true
         } catch (err) {

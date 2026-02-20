@@ -8,28 +8,18 @@ import {
     ShoppingBag,
     Package,
     Truck,
-    CheckCircle,
+    CheckCircle2,
     DollarSign,
-    ShoppingCart,
-    Users,
-    ClipboardList
+    ShoppingCart
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useVendas } from '../hooks/useVendas'
-import { useContatos } from '../hooks/useContatos'
-import { useRecompra } from '../hooks/useRecompra'
-import { useAlertasFinanceiros } from '../hooks/useAlertasFinanceiros'
+import { useDashboardMetrics } from '../hooks/useDashboardMetrics'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
-import { useLogistica } from '../hooks/useLogistica'
-import { useDashboardMetrics } from '../hooks/useDashboardMetrics' // NEW HOOK
 import { formatCurrency } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-
-// New Components
 import { KpiCard } from '@/components/dashboard/KpiCard'
-import { LogisticsWidget } from '@/components/dashboard/LogisticsWidget'
 import { AlertasFinanceiroWidget } from '@/components/dashboard/AlertasFinanceiroWidget'
 import { AlertasRecompraWidget } from '@/components/dashboard/AlertasRecompraWidget'
 import { TopIndicadoresWidget } from '@/components/dashboard/TopIndicadoresWidget'
@@ -41,23 +31,21 @@ export function Dashboard() {
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [userName, setUserName] = useState<string>('Comandante')
     const [greeting, setGreeting] = useState<string>('Olá')
-    const { startDate, endDate, setMonth } = useDashboardFilter()
+    const { month, year, setMonth } = useDashboardFilter()
     const navigate = useNavigate()
+
+    const { data: metrics, isLoading, refetch } = useDashboardMetrics(month, year)
 
     // Greeting & User Logic
     useEffect(() => {
         const fetchUserAndGreeting = async () => {
-            // 1. Get User
             const { data: { user } } = await supabase.auth.getUser()
             if (user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email) {
-                // Try to get first name from metadata or email
                 const fullName = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0]
                 const firstName = fullName?.split(' ')[0]
-                // Capitalize first letter logic if needed, but usually data is okay
                 if (firstName) setUserName(firstName)
             }
 
-            // 2. Get Time for Greeting
             const currentHour = new Date().getHours()
             if (currentHour >= 5 && currentHour < 12) setGreeting('Bom dia')
             else if (currentHour >= 12 && currentHour < 18) setGreeting('Boa tarde')
@@ -67,76 +55,33 @@ export function Dashboard() {
         fetchUserAndGreeting()
     }, [])
 
-    // Derive selected month string from global filter
-    const selectedMonth = startDate.toLocaleString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' }).replace('.', '').replace(/^./, str => str.toUpperCase())
+    // Derive selected month string for MonthPicker
+    const selectedDate = new Date(year, month - 1, 1)
+    const selectedMonthStr = selectedDate.toLocaleString('pt-BR', { month: 'short', timeZone: 'America/Sao_Paulo' })
+        .replace('.', '')
+        .replace(/^./, str => str.toUpperCase())
 
-    const handleMonthSelect = (month: string) => {
-        // Map Portuguese months back to indices
+    const handleMonthSelect = (monthName: string) => {
         const monthsMap: { [key: string]: number } = {
-            'Jan': 0, 'Fev': 1, 'Mar': 2, 'Abr': 3, 'Mai': 4, 'Jun': 5,
-            'Jul': 6, 'Ago': 7, 'Set': 8, 'Out': 9, 'Nov': 10, 'Dez': 11
+            'Jan': 1, 'Fev': 2, 'Mar': 3, 'Abr': 4, 'Mai': 5, 'Jun': 6,
+            'Jul': 7, 'Ago': 8, 'Set': 9, 'Out': 10, 'Nov': 11, 'Dez': 12
         }
-
-        const monthIndex = monthsMap[month]
-        if (monthIndex !== undefined) {
+        const m = monthsMap[monthName]
+        if (m !== undefined) {
             const currentYear = new Date().getFullYear()
-            const newDate = new Date(currentYear, monthIndex, 1)
-            setMonth(newDate)
+            // Important: use current year or allow filter to handle year
+            // For now, we follow the old logic of current year but use setMonth from filter
+            setMonth(new Date(currentYear, m - 1, 1))
         }
     }
 
-
-    // OPTIMIZED FETCHING
-    // We keep existing hooks for widgets that need list data, but use useDashboardMetrics for top-level KPIs
-    const targetMonth = startDate.getMonth() + 1
-    const targetYear = startDate.getFullYear()
-    const { data: dashboardMetrics, isLoading: loadingMetrics, refetch: refetchMetrics } = useDashboardMetrics(targetMonth, targetYear)
-
-    // Existing hooks (Refactored to React Query internally)
-    // We still need them for the widgets below the fold
-    const { metrics: vendaMetrics, loading: loadingVendas, refetch: refetchVendas } = useVendas({ startDate, endDate })
-    const { metrics: logisticsMetrics, loading: loadingLogistica, refetch: refetchLogistica } = useLogistica() // Global Operational Data
-    const { contatos: recompraContatos, refetch: refetchRecompra } = useRecompra()
-    const { contatos: allContacts, loading: loadingContatos, refetch: refetchContatos } = useContatos()
-    const { alertas: alertasFinanceiros, loading: loadingFinanceiro, refetch: refetchFinanceiro } = useAlertasFinanceiros()
-
-    const loading = loadingMetrics || loadingVendas || loadingFinanceiro || loadingLogistica || loadingContatos
-
-    // Pull to refresh action
     const handleRefresh = useCallback(async () => {
         setIsRefreshing(true)
-        await Promise.all([
-            refetchMetrics(),
-            refetchVendas(),
-            refetchRecompra(),
-            refetchFinanceiro(),
-            refetchLogistica(),
-            refetchContatos()
-        ])
+        await refetch()
         setIsRefreshing(false)
-    }, [refetchMetrics, refetchVendas, refetchRecompra, refetchFinanceiro, refetchLogistica, refetchContatos])
+    }, [refetch])
 
-    // Calculations for KPIs (Prefer Dashboard Metrics if avail, fallback to basic calc)
-    const revenueTarget = 165000 // From HTML: $165k
-
-    // Use the SQL View data if available, otherwise fallback to potentially empty client-side calc
-    const faturamentoMes = dashboardMetrics?.financial.faturamento_mes_atual ?? vendaMetrics.faturamentoMes
-    const lucroMes = dashboardMetrics?.financial.lucro_mes_atual ?? vendaMetrics.lucroMes
-    const ticketMedio = dashboardMetrics?.financial.ticket_medio_mes_atual ?? vendaMetrics.ticketMedio
-    const aReceber = dashboardMetrics?.operational.total_a_receber ?? vendaMetrics.aReceber
-    const totalVendasCount = dashboardMetrics?.financial.vendas_mes_atual ?? vendaMetrics.totalVendas
-
-    const revenueProgress = Math.min((faturamentoMes / revenueTarget) * 100, 100)
-
-    // Calculate Trend based on previous month from view
-    const prevRevenue = dashboardMetrics?.financial.faturamento_mes_anterior ?? 0
-    const trendValue = prevRevenue > 0 ? ((faturamentoMes - prevRevenue) / prevRevenue) * 100 : 0
-    const trendLabel = `${trendValue.toFixed(1)}%`
-
-
-    // War Zone Data Extraction
-    const atrasadosRecompra = recompraContatos.filter(c => c.status === 'atrasado').length
-    const totalAlerts = atrasadosRecompra + alertasFinanceiros.length
+    const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
@@ -169,231 +114,157 @@ export function Dashboard() {
                 {/* Main Content */}
                 <main className="flex-1 flex flex-col gap-6 px-4 pb-32">
 
-                    {/* Month Picker */}
-                    <MonthPicker selectedMonth={selectedMonth} onMonthSelect={handleMonthSelect} />
+                    {/* Month Picker Navigation */}
+                    <MonthPicker selectedMonth={selectedMonthStr} onMonthSelect={handleMonthSelect} />
 
-                    {loading ? (
+                    {isLoading ? (
                         <div className="flex flex-col gap-6">
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {/* Revenue Skeleton */}
                                 <Skeleton className="h-[140px] w-full rounded-xl col-span-2 md:col-span-1" />
-                                {/* Margin Skeleton */}
                                 <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
-                                {/* Orders Skeleton */}
                                 <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
                                 <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
                             </div>
-                            {/* Widget Skeletons */}
                             <Skeleton className="h-[200px] w-full rounded-xl" />
-                            <Skeleton className="h-[100px] w-full rounded-xl" />
                         </div>
                     ) : (
                         <>
-                            {/* Financeiro Header */}
+                            {/* FINANCEIRO Section */}
                             <div className="flex items-center gap-2 mb-2 px-1">
                                 <DollarSign className="w-4 h-4 text-gray-400" />
                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Financeiro
+                                    $ FINANCEIRO
                                 </span>
                             </div>
 
-                            {/* KPI Cards Grid - Faturamento, Ticket Médio, Lucro, A Receber */}
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                {/* Faturamento - Neon Green */}
                                 <KpiCard
                                     title="Faturamento"
-                                    value={formatCurrency(faturamentoMes)}
-                                    progress={revenueProgress}
-                                    trend={trendLabel}
-                                    trendDirection={trendValue >= 0 ? "up" : "down"}
-                                    targetLabel="Meta: 165k"
-                                    progressColor="bg-primary"
-                                    trendColor={trendValue >= 0 ? "green" : "red"}
+                                    value={formatCurrency(metrics?.financial?.faturamento_mes_atual || 0)}
+                                    progress={100}
+                                    trend={`${metrics?.financial?.variacao_percentual?.toFixed(1) || 0}%`}
+                                    trendDirection={(metrics?.financial?.variacao_percentual || 0) >= 0 ? 'up' : 'down'}
                                     icon={TrendingUp}
                                     className="col-span-2 md:col-span-1"
                                     variant="default"
                                 />
 
-                                {/* Ticket Médio - Blue/Info */}
                                 <KpiCard
                                     title="Ticket Médio"
-                                    value={formatCurrency(ticketMedio)}
-                                    // Simulated progress/trend for Ticket Médio if not available
+                                    value={formatCurrency(metrics?.financial?.ticket_medio_mes_atual || 0)}
                                     progress={75}
-                                    trend="R$ 5,00"
-                                    trendDirection="up"
-                                    progressColor="bg-blue-500"
-                                    trendColor="green"
+                                    trend="Estável"
+                                    trendDirection="neutral"
                                     icon={ArrowUp}
                                     className="col-span-1"
                                     variant="compact"
                                 />
 
-                                {/* Lucro - Semantic Green */}
                                 <KpiCard
                                     title="Lucro"
-                                    value={formatCurrency(lucroMes)}
-                                    progress={totalVendasCount > 0 ? (lucroMes / faturamentoMes) * 100 : 0} // Approx margin
-                                    trend={`${totalVendasCount > 0 ? ((lucroMes / faturamentoMes) * 100).toFixed(1) : '0'}%`}
-                                    trendDirection={(totalVendasCount > 0 ? (lucroMes / faturamentoMes) * 100 : 0) > 20 ? "up" : "down"}
-                                    progressColor="bg-semantic-green"
-                                    trendColor="green"
-                                    icon={TrendingUp} // Or DollarSign if available
+                                    value={formatCurrency(metrics?.financial?.lucro_mes_atual || 0)}
+                                    progress={100}
+                                    trend="Est."
+                                    trendDirection="neutral"
+                                    icon={DollarSign}
                                     className="col-span-1"
                                     variant="compact"
                                 />
 
-                                {/* A Receber - Semantic Yellow */}
                                 <KpiCard
                                     title="A Receber"
-                                    value={formatCurrency(aReceber)}
-                                    progress={50} // Arbitrary or calculated based on total credit
+                                    value={formatCurrency(metrics?.financial?.total_a_receber || 0)}
+                                    progress={50}
                                     trend="Pendente"
                                     trendDirection="neutral"
-                                    progressColor="bg-semantic-yellow"
                                     trendColor="yellow"
-                                    icon={TrendingDown} // Or Clock/AlertCircle
+                                    icon={TrendingDown}
                                     className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                                     variant="compact"
                                     onClick={() => navigate('/vendas?pagamento=pendente')}
                                 />
                             </div>
 
-                            {/* Vendas & Entregas Header */}
+                            {/* VENDAS & ENTREGAS Section */}
                             <div className="flex items-center gap-2 mb-2 mt-2 px-1">
                                 <ShoppingCart className="w-4 h-4 text-gray-400" />
                                 <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Vendas & Entregas
+                                    🛒 VENDAS & ENTREGAS
                                 </span>
                             </div>
 
-                            {/* Sales & Operations Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {/* Vendas - Neon Green/Primary */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                                 <KpiCard
                                     title="Vendas"
-                                    value={totalVendasCount.toString()}
-                                    progress={70} // Simulated or calc based on target
-                                    trend="Total" // Simulated trend
+                                    value={(metrics?.financial?.vendas_mes_atual || 0).toString()}
+                                    progress={70}
+                                    trend="Mês"
                                     trendDirection="up"
-                                    progressColor="bg-primary"
-                                    trendColor="green"
                                     icon={ShoppingBag}
                                     className="col-span-1"
                                     variant="compact"
                                 />
 
-                                {/* Itens Vendidos - Blue/Info */}
                                 <KpiCard
                                     title="Itens"
-                                    value={vendaMetrics.produtosVendidos.total.toString()}
+                                    value={(metrics?.operational?.total_itens || 0).toString()}
                                     progress={65}
                                     trend="Vol"
                                     trendDirection="neutral"
-                                    progressColor="bg-blue-500"
-                                    trendColor="primary"
                                     icon={Package}
                                     className="col-span-1"
                                     variant="compact"
                                 />
 
-                                {/* Entregas Pendentes - Yellow/Warning */}
                                 <KpiCard
                                     title="Pendentes"
-                                    value={dashboardMetrics?.operational.entregas_pendentes_total.toString() ?? vendaMetrics.entregasPendentes.toString()}
-                                    progress={50}
+                                    value={(metrics?.operational?.entregas_pendentes_total || 0).toString()}
+                                    progress={100}
                                     trend="Total"
                                     trendDirection="neutral"
-                                    progressColor="bg-semantic-yellow"
-                                    trendColor="yellow"
                                     icon={Truck}
                                     className="col-span-1"
                                     variant="compact"
                                 />
 
-                                {/* Entregas Realizadas - Green/Success */}
                                 <KpiCard
                                     title="Entregues"
-                                    value={dashboardMetrics?.operational.entregas_hoje_realizadas.toString() ?? vendaMetrics.entregasRealizadas.toString()}
+                                    value={(metrics?.operational?.entregas_hoje_realizadas || 0).toString()}
                                     progress={100}
                                     trend="Hoje"
                                     trendDirection="up"
-                                    progressColor="bg-semantic-green"
-                                    trendColor="green"
-                                    icon={CheckCircle}
+                                    icon={CheckCircle2}
                                     className="col-span-1"
                                     variant="compact"
                                 />
                             </div>
 
-                            {/* Clients Header */}
-                            <div className="flex items-center gap-2 mb-2 mt-6 px-1">
-                                <Users className="w-4 h-4 text-gray-400" />
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    Clientes
-                                </span>
-                            </div>
+                            {/* Widgets Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                                <div className="space-y-8">
+                                    <AlertasFinanceiroWidget
+                                        data={metrics?.financial?.alertas_financeiros}
+                                        loading={isLoading}
+                                    />
+                                    <AlertasRecompraWidget
+                                        data={metrics?.alertas_recompra}
+                                        loading={isLoading}
+                                    />
+                                </div>
 
-                            {/* Clients Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                {/* Clientes Ativos - Purple */}
-                                <KpiCard
-                                    title="Clientes ativos"
-                                    value={dashboardMetrics?.operational.clientes_ativos.toString() ?? allContacts.filter(c => c.status === 'cliente').length.toString()}
-                                    progress={100}
-                                    trend="Total"
-                                    trendDirection="neutral"
-                                    progressColor="bg-violet-600"
-                                    trendColor="primary"
-                                    icon={Users}
-                                    className="col-span-1"
-                                    variant="compact"
-                                    iconColor="text-violet-600 dark:text-violet-400"
-                                />
-                                {/* Pedido Fábrica - Orange - Clickable */}
-                                <div onClick={() => navigate('/relatorio-fabrica')} className="cursor-pointer col-span-1">
-                                    <KpiCard
-                                        title="Pedido Fábrica"
-                                        value="Gerar"
-                                        progress={0}
-                                        trend="Relatório"
-                                        trendDirection="neutral"
-                                        progressColor="bg-orange-500"
-                                        trendColor="primary"
-                                        icon={ClipboardList}
-                                        className="h-full hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                                        variant="compact"
-                                        iconColor="text-orange-500 dark:text-orange-400"
+                                <div className="space-y-8">
+                                    <TopIndicadoresWidget
+                                        data={metrics?.operational?.ranking_indicacoes}
+                                        loading={isLoading}
+                                    />
+                                    <UltimasVendasWidget
+                                        data={metrics?.operational?.ultimas_vendas}
+                                        loading={isLoading}
                                     />
                                 </div>
                             </div>
-
-                            {/* Alerts Section (Carousels) */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-                                <div className="col-span-1">
-                                    <AlertasFinanceiroWidget />
-                                </div>
-                                <div className="col-span-1">
-                                    <AlertasRecompraWidget />
-                                </div>
-                                <div className="col-span-1">
-                                    <TopIndicadoresWidget />
-                                </div>
-                                <div className="col-span-1">
-                                    <UltimasVendasWidget />
-                                </div>
-                            </div>
-
-                            {/* Logistics Widget */}
-                            <LogisticsWidget
-                                metrics={{
-                                    entregasRealizadas: logisticsMetrics.entregasRealizadasHoje,
-                                    entregasPendentes: logisticsMetrics.entregasPendentesTotal
-                                }}
-                            />
                         </>
                     )}
-
                 </main>
             </div>
         </div>

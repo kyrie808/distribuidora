@@ -28,8 +28,8 @@ Catálogo de produtos.
 ### `usePurchaseOrders`
 Módulo de compras.
 - **Path:** `src/hooks/usePurchaseOrders.ts`
-- **Features:** Gestão de pedidos para fornecedores.
-- **Nota Técnica:** Os itens do pedido (`purchase_order_items`) têm o campo `total_cost` gerado automaticamente pelo banco de dados. O hook não deve enviar este campo em operações de escrita.
+- **Features:** Gestão de pedidos para fornecedores. Integrado com a tabela `contatos` via `fornecedor_id`.
+- **Nota Técnica:** Os itens do pedido (`purchase_order_items`) têm o campo `total_cost` gerado automaticamente pelo banco de dados. O hook não deve enviar este campo em operações de escrita. Agora realiza join com `contatos` para obter detalhes do fornecedor.
 
 ### `useIndicacoes`
 Sistema de referral.

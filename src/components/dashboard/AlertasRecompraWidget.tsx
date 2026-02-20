@@ -1,16 +1,31 @@
 import { useNavigate } from 'react-router-dom'
-import { RotateCw, MessageCircle, Eye, ShoppingCart } from 'lucide-react' // Changed AlertTriangle to RotateCw for Recompra/Cycle context
+import { RotateCw, MessageCircle, Eye, ShoppingCart } from 'lucide-react'
 import { formatPhone } from '@/utils/formatters'
 import { DashboardCarousel } from './DashboardCarousel'
 import { useRecompra } from '@/hooks/useRecompra'
 import { Card, CardContent } from '@/components/ui/Card'
 
-export function AlertasRecompraWidget() {
-    const navigate = useNavigate()
-    const { contatos, loading } = useRecompra()
+interface AlertasRecompraWidgetProps {
+    data?: any[]
+    loading?: boolean
+}
 
-    // Filter only those who need repurchase (atrasado)
-    const alertas = contatos.filter(c => c.status === 'atrasado')
+export function AlertasRecompraWidget({ data, loading: externalLoading }: AlertasRecompraWidgetProps) {
+    const navigate = useNavigate()
+    // Skip hook if data is provided
+    const { contatos, loading: internalLoading } = useRecompra(!data)
+
+    const loading = data ? externalLoading : internalLoading
+    const rawAlerts = data || contatos
+
+    // Normalize data if it comes from JSON view / different structure
+    const alertas = data
+        ? data.map(a => ({
+            contato: { id: a.contato_id, nome: a.nome, telefone: a.telefone },
+            diasSemCompra: a.dias_sem_compra,
+            status: 'atrasado'
+        }))
+        : rawAlerts.filter(c => c.status === 'atrasado')
 
     const handleWhatsApp = (telefone: string, nome: string) => {
         const message = `Olá, ${nome}! Notei que faz um tempinho desde sua última compra. Estamos com promoções especiais hoje!`
