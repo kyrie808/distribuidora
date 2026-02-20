@@ -776,3 +776,14 @@ export type PurchaseOrderWithItems = PurchaseOrder & {
   items: (PurchaseOrderItem & { product: Tables<'produtos'> | null })[]
   payments: PurchaseOrderPayment[]
 }
+
+export type Produto = Tables<'produtos'>
+export type ProdutoInsert = Database['public']['Tables']['produtos']['Insert']
+export type ProdutoUpdate = Database['public']['Tables']['produtos']['Update']
+
+export type ItemVenda = Tables<'itens_venda'>
+export type PagamentoVenda = Tables<'pagamentos_venda'>
+
+export type ContatoComIndicador = Contato & {
+  indicador: { id: string; nome: string } | null
+}

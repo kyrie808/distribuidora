@@ -20,7 +20,8 @@
   - **Acessibilidade:** Cores de alto contraste (Verde Neon/Amber) e remoção de indicadores cinza (inativos).
   - **VendaDetalhe:** Remoção de ícones do header para limpeza visual.
 - [x] Detalhes de Venda Premium (Quitar parcelas, status visual)
-- [x] Ranking Mont (Refatoração completa, views no Supabase, dois rankings)
+- [x] Milestone: Ranking Mont (Refatoração completa, views no Supabase, dois rankings)
+- [x] Fix: TypeScript Build Errors for Vercel Deployment
 - **Novas Ações de Venda:**
   - Botões de ação direta no rodapé: **"Entregar"** (Toggle) e **"Quitar"**.
   - Melhor hierarquia visual e facilidade de toque para usuários idosos.

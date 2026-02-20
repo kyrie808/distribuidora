@@ -147,7 +147,8 @@ export const vendaService = {
                 pago: false,
                 forma_pagamento: data.forma_pagamento,
                 taxa_entrega: data.taxa_entrega || 0,
-                data_prevista_pagamento: data.data_prevista_pagamento, // Adicionado campo
+                data_prevista_pagamento: data.data_prevista_pagamento,
+                observacoes: null,
             })
             .select()
             .single()

@@ -1,16 +1,14 @@
 import { supabase } from '../lib/supabase'
 import type {
-    Contato,
     ContatoInsert,
-    ContatoUpdate,
-    ContatoComIndicador
+    ContatoUpdate
 } from '../types/database'
 import type { DomainContato } from '../types/domain'
 import { getCoordinates } from '../utils/geocoding'
 
 export class ContatoService {
     /* MAPPERS */
-    private toDomain(row: Contato | ContatoComIndicador): DomainContato {
+    private toDomain(row: any): DomainContato {
         return {
             id: row.id,
             nome: row.nome,

@@ -51,7 +51,7 @@ export function PedidosCompra() {
     useEffect(() => {
         if (orders.length > 0) {
             const sorted = [...orders].sort((a, b) =>
-                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+                new Date(a.created_at || '').getTime() - new Date(b.created_at || '').getTime()
             )
             const map = new Map<string, number>()
             sorted.forEach((order, index) => {
@@ -285,7 +285,7 @@ export function PedidosCompra() {
 
 
                                     {orders.map((order) => {
-                                        const percentPaid = order.total_amount > 0 ? (order.amount_paid / order.total_amount) * 100 : 0
+                                        const percentPaid = order.total_amount > 0 ? ((order.amount_paid || 0) / order.total_amount) * 100 : 0
                                         const isPaid = percentPaid >= 100
                                         const isExpanded = expandedRows.has(order.id)
 
@@ -369,7 +369,7 @@ export function PedidosCompra() {
                                                                 <span className="text-gray-300">|</span>
                                                                 <span>Total: <span className="text-emerald-600 font-bold">{formatCurrency(order.total_amount)}</span></span>
                                                                 <span className="text-sm text-gray-500">
-                                                                    (Pago: {formatCurrency(order.amount_paid)})
+                                                                    (Pago: {formatCurrency(order.amount_paid || 0)})
                                                                 </span>
                                                             </div>
 
