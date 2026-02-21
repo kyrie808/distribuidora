@@ -53,11 +53,13 @@ export const SUBTIPOS_B2B_LABELS: Record<string, string> = {
 export const CONTATO_ORIGEM = {
     direto: 'direto',
     indicacao: 'indicacao',
+    catalogo: 'catalogo',
 } as const
 
 export const CONTATO_ORIGEM_LABELS: Record<string, string> = {
     direto: 'Direto',
     indicacao: 'Indicação',
+    catalogo: 'Catálogo',
 }
 
 // Status de venda

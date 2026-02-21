@@ -239,7 +239,7 @@ export function Configuracoes() {
                     {loading && <LoadingScreen message="Carregando configurações..." />}
 
                     {!loading && (
-                        <div className="space-y-6">
+                        <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
                             {/* Ciclos de Recompra */}
                             <Card>
                                 <div className="p-6">
@@ -417,7 +417,7 @@ export function Configuracoes() {
 
 
                             {/* Locais de Partida */}
-                            <Card>
+                            <Card className="lg:col-span-2">
                                 <div className="p-6">
                                     <div className="flex items-center gap-3 mb-4">
                                         <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
@@ -488,7 +488,7 @@ export function Configuracoes() {
                             <Card
                                 hover
                                 onClick={() => navigate('/produtos')}
-                                className="cursor-pointer"
+                                className="cursor-pointer lg:col-span-1"
                             >
                                 <div className="p-6">
                                     <div className="flex items-center justify-between">
@@ -509,7 +509,7 @@ export function Configuracoes() {
                             <Card
                                 hover
                                 onClick={() => navigate('/relatorio-fabrica')}
-                                className="cursor-pointer"
+                                className="cursor-pointer lg:col-span-1"
                             >
                                 <div className="p-6">
                                     <div className="flex items-center justify-between">
@@ -528,7 +528,7 @@ export function Configuracoes() {
                             </Card>
 
                             {/* Actions */}
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 lg:col-span-2">
                                 <Button
                                     variant="secondary"
                                     className="flex-1"

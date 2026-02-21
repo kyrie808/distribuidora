@@ -326,7 +326,7 @@ export function ContatoDetalhe() {
 
                     {/* INFO PANELS */}
                     {/* INFO PANELS (SYSTEM DESIGN) */}
-                    <div className="space-y-3">
+                    <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                         {/* Contact Intel Card (Collapsible) */}
                         <div className="flex flex-col bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden transition-all duration-300">
                             {/* Header (Clickable) */}

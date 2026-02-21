@@ -265,32 +265,34 @@ export function NovaVenda() {
                             </div>
                         )}
 
-                        {/* Floating Mobile Navigation */}
-                        <div className="absolute bottom-24 left-0 right-0 flex justify-center px-6 pointer-events-none md:hidden z-50">
-                            <div className="flex gap-4 w-full max-w-sm pointer-events-auto">
-                                {currentStep > 0 && (
-                                    <button
-                                        onClick={prevStep}
-                                        className="flex-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform"
-                                    >
-                                        <ChevronLeft className="h-5 w-5" />
-                                        Voltar
-                                    </button>
-                                )}
-                                {currentStep < 2 && (
-                                    <button
-                                        onClick={nextStep}
-                                        className={`flex-[2] h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
+                        {/* Floating Mobile Navigation — hidden on checkout (step 2 has inline buttons) */}
+                        {currentStep < 2 && (
+                            <div className="absolute bottom-24 left-0 right-0 flex justify-center px-6 pointer-events-none md:hidden z-50">
+                                <div className="flex gap-4 w-full max-w-sm pointer-events-auto">
+                                    {currentStep > 0 && (
+                                        <button
+                                            onClick={prevStep}
+                                            className="flex-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform"
+                                        >
+                                            <ChevronLeft className="h-5 w-5" />
+                                            Voltar
+                                        </button>
+                                    )}
+                                    {currentStep < 2 && (
+                                        <button
+                                            onClick={nextStep}
+                                            className={`flex-[2] h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
                                             ${(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)
-                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                : 'bg-primary text-white shadow-primary/30'}`}
-                                    >
-                                        Próximo
-                                        <ChevronRight className="h-5 w-5" />
-                                    </button>
-                                )}
+                                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                    : 'bg-primary text-white shadow-primary/30'}`}
+                                        >
+                                            Próximo
+                                            <ChevronRight className="h-5 w-5" />
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </main>
 
                     {/* Desktop Sidebar (Optional, maybe just a summary in steps 0/1) */}

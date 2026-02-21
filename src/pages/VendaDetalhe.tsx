@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Header } from '@/components/layout/Header'
-import { Button, LoadingScreen, Modal, ModalActions, Badge } from '../components/ui'
+import { Button, LoadingScreen, Modal, ModalActions, Badge, ConfirmDialog } from '../components/ui'
 import { useVenda, useVendas } from '../hooks/useVendas'
 import type { PagamentoFormData } from '../schemas/venda'
 import { useToast } from '../components/ui/Toast'
@@ -37,6 +37,7 @@ export function VendaDetalhe() {
     const [showRevertModal, setShowRevertModal] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
     const [loadingAction, setLoadingAction] = useState(false)
+    const [showUndoPaymentConfirm, setShowUndoPaymentConfirm] = useState(false)
 
     // Handlers
     const handleDelete = async () => {
@@ -97,7 +98,6 @@ export function VendaDetalhe() {
 
     const handleDesfazerPagamento = async () => {
         if (!venda) return
-        if (!confirm('Deseja realmente desfazer o último pagamento?')) return
 
         setLoadingAction(true)
         const success = await deleteUltimoPagamento(venda.id)
@@ -108,6 +108,7 @@ export function VendaDetalhe() {
             toast.error('Erro ao desfazer pagamento')
         }
         setLoadingAction(false)
+        setShowUndoPaymentConfirm(false)
     }
 
     const handleShare = async () => {
@@ -311,7 +312,7 @@ export function VendaDetalhe() {
                         <Button
                             className="flex-1 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border-transparent"
                             variant="outline"
-                            onClick={handleDesfazerPagamento}
+                            onClick={() => setShowUndoPaymentConfirm(true)}
                             disabled={loadingAction}
                         >
                             <RotateCcw className="h-4 w-4 mr-2" />
@@ -481,6 +482,18 @@ export function VendaDetalhe() {
                     </Button>
                 </ModalActions>
             </Modal>
+
+            {/* Undo Payment Confirmation */}
+            <ConfirmDialog
+                open={showUndoPaymentConfirm}
+                title="Desfazer Pagamento"
+                message="Deseja realmente desfazer o último pagamento registrado?"
+                confirmLabel="Desfazer"
+                variant="danger"
+                isLoading={loadingAction}
+                onConfirm={handleDesfazerPagamento}
+                onCancel={() => setShowUndoPaymentConfirm(false)}
+            />
 
         </div >
     )

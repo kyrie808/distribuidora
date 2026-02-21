@@ -248,15 +248,14 @@ Badge, Button (CVA), Card, EmptyState, FloatingDock, Input, Modal, PwaUpdateToas
 | SYS-001 | **RLS desabilitado** em 5 tabelas (itens_venda, pagamentos_venda, configuracoes, cat_imagens_produto, cat_pedidos_pendentes_vinculacao) | 🔴 Crítica | Segurança |
 | SYS-002 | **Mappers usam `any`** — sem type-safety na camada de mapeamento | 🟡 Alta | Tipagem |
 | SYS-003 | **Páginas monolíticas** — ContatoDetalhe (40KB), Configuracoes (30KB), Vendas (24KB) | 🟡 Alta | Manutenibilidade |
-| SYS-004 | **Three.js** incluído no bundle (~500KB+) mas aparentemente não utilizado no app principal | 🟡 Alta | Performance |
+| SYS-004 | **leva (debug panel)** incluído no bundle de produção — utilizado em `Estoque.tsx` para controlar cena 3D. Candidato a envolver em `import.meta.env.DEV` guard | 🟢 Baixa | Bundle |
 | SYS-005 | **Naming inconsistente** — purchase_orders (inglês) vs vendas/contatos (português) | 🟢 Baixa | Consistência |
-| SYS-006 | **Sem testes** — apenas setup de teste, sem testes unitários significativos (3 arquivos em `services/__tests__/`) | 🟡 Alta | Qualidade |
+| SYS-006 | **Cobertura de testes limitada** — 17 testes unitários passando em `services/__tests__/`, mas sem cobertura de hooks, componentes ou E2E | 🟢 Média | Qualidade |
 | SYS-007 | **`leva`** (debug panel) no bundle de produção | 🟢 Baixa | Bundle |
 | SYS-008 | **Sem error tracking** — Sentry configurado no .env mas não integrado | 🟡 Média | Observabilidade |
 | SYS-009 | **Duplicação imagens** — `sis_imagens_produto` (interno) + `cat_imagens_produto` (catálogo) | 🟢 Média | Schema |
 | SYS-010 | **Sem soft deletes** — deletes são hard deletes diretos | 🟡 Alta | Dados |
 | SYS-011 | **contatos.origem check constraint** tem `'Catálogo Online'` (com acento) vs domain type usa `'catalogo'` (sem acento) | 🟡 Alta | Integridade |
-| SYS-012 | **Sem migrations versionadas no Git** — apenas 3 migration files, um é baseline | 🟢 Média | DevOps |
 
 ---
 

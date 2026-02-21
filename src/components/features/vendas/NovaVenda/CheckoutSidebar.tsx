@@ -100,13 +100,7 @@ export function CheckoutSidebar({
         <div className="flex flex-col h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
             {/* Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50">
-                <button
-                    onClick={onBack}
-                    className="p-1.5 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                    <ChevronRight className="h-5 w-5 text-gray-500 rotate-180" />
-                </button>
-                <h2 className="font-semibold text-gray-900 dark:text-gray-100">Finalizar Venda</h2>
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">Finalizar Venda</h2>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -287,13 +281,23 @@ export function CheckoutSidebar({
                     </span>
                 </div>
 
-                <Button
-                    onClick={handleSubmit(onSubmit)}
-                    disabled={isSubmitting}
-                    className="w-full py-6 text-lg font-black uppercase tracking-tight shadow-xl shadow-primary-500/20"
-                >
-                    {isSubmitting ? 'Processando...' : 'Confirmar Venda'}
-                </Button>
+                <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={onBack}
+                        className="h-14 px-5 rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-white font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                    >
+                        <ChevronRight className="h-5 w-5 rotate-180" />
+                        Voltar
+                    </button>
+                    <Button
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={isSubmitting}
+                        className="flex-1 py-6 text-lg font-black uppercase tracking-tight shadow-xl shadow-primary-500/20"
+                    >
+                        {isSubmitting ? 'Processando...' : 'CONFIRMAR VENDA'}
+                    </Button>
+                </div>
             </div>
         </div>
     )

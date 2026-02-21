@@ -10,8 +10,65 @@ import type {
     PurchaseOrderStatus,
     PurchaseOrderPaymentStatus
 } from '../types/domain'
+import type { Tables } from '../types/database'
 
-export const toDomainContato = (dbContato: any): DomainContato => {
+// ---------------------------------------------------
+// Row aliases for readability
+// ---------------------------------------------------
+type ContatoRow = Tables<'contatos'>
+type ProdutoRow = Tables<'produtos'>
+type ItemVendaRow = Tables<'itens_venda'>
+type PagamentoRow = Tables<'pagamentos_venda'>
+type VendaRow = Tables<'vendas'>
+type PurchaseOrderRow = Tables<'purchase_orders'>
+type PurchaseOrderItemRow = Tables<'purchase_order_items'>
+
+// ---------------------------------------------------
+// Extended row types for Supabase joins
+// (Partial allows test fixtures to omit optional fields)
+// ---------------------------------------------------
+export type ContatoRowWithIndicador = ContatoRow & {
+    email?: string | null
+    observacao?: string | null
+    indicador?: { id: string; nome: string } | null
+}
+
+type ItemVendaRowWithProduto = ItemVendaRow & {
+    produto?: ProdutoRow | null
+}
+
+type PagamentoRowWithStatus = PagamentoRow & {
+    status?: string
+}
+
+type VendaRowWithRelations = VendaRow & {
+    contato?: ContatoRow | null
+    itens?: ItemVendaRow[]
+    pagamentos?: PagamentoRow[]
+}
+
+type ProdutoRowWithImages = ProdutoRow & {
+    sis_imagens_produto?: { url: string }[]
+}
+
+type PurchaseOrderItemRowWithProduct = PurchaseOrderItemRow & {
+    product?: ProdutoRow | null
+}
+
+type PurchaseOrderRowWithFornecedor = PurchaseOrderRow & {
+    fornecedor?: { nome: string } | null
+}
+
+type PurchaseOrderRowWithRelations = PurchaseOrderRowWithFornecedor & {
+    items?: PurchaseOrderItemRow[]
+    payments?: unknown[]
+}
+
+// ---------------------------------------------------
+// Mappers
+// ---------------------------------------------------
+
+export const toDomainContato = (dbContato: ContatoRowWithIndicador): DomainContato => {
     if (!dbContato) throw new Error('Cannot map null contact')
     return {
         id: dbContato.id,
@@ -19,9 +76,9 @@ export const toDomainContato = (dbContato: any): DomainContato => {
         telefone: dbContato.telefone || '',
         email: dbContato.email || null,
         apelido: dbContato.apelido || null,
-        origem: dbContato.origem || 'direto',
-        status: dbContato.status || 'lead',
-        tipo: dbContato.tipo || 'B2C',
+        origem: (dbContato.origem || 'direto') as DomainContato['origem'],
+        status: (dbContato.status || 'lead') as DomainContato['status'],
+        tipo: (dbContato.tipo || 'B2C') as DomainContato['tipo'],
         subtipo: dbContato.subtipo || null,
         indicadoPorId: dbContato.indicado_por_id,
         indicador: dbContato.indicador ? {
@@ -44,7 +101,7 @@ export const toDomainContato = (dbContato: any): DomainContato => {
     }
 }
 
-export const toDomainProduto = (dbProduto: any): DomainProduto => {
+export const toDomainProduto = (dbProduto: ProdutoRowWithImages): DomainProduto => {
     if (!dbProduto) throw new Error('Cannot map null product')
     return {
         id: dbProduto.id,
@@ -54,7 +111,7 @@ export const toDomainProduto = (dbProduto: any): DomainProduto => {
         unidade: dbProduto.unidade || 'un',
         ativo: dbProduto.ativo ?? true,
         custo: Number(dbProduto.custo || 0),
-        estoqueAtual: Number(dbProduto.estoque_actual || 0),
+        estoqueAtual: Number(dbProduto.estoque_atual || 0),
         estoqueMinimo: Number(dbProduto.estoque_minimo || 0),
         criadoEm: dbProduto.criado_em || new Date().toISOString(),
         atualizadoEm: dbProduto.atualizado_em || dbProduto.criado_em || new Date().toISOString(),
@@ -63,62 +120,62 @@ export const toDomainProduto = (dbProduto: any): DomainProduto => {
     }
 }
 
-export const toDomainItemVenda = (dbItem: any): DomainItemVenda => {
+export const toDomainItemVenda = (dbItem: ItemVendaRowWithProduto): DomainItemVenda => {
     return {
         id: dbItem.id,
         produtoId: dbItem.produto_id,
-        produto: dbItem.produto ? toDomainProduto(dbItem.produto) : undefined,
+        produto: dbItem.produto ? toDomainProduto(dbItem.produto as ProdutoRowWithImages) : undefined,
         quantidade: Number(dbItem.quantidade || 0),
         precoUnitario: Number(dbItem.preco_unitario || 0),
         subtotal: Number(dbItem.subtotal || 0)
     }
 }
 
-export const toDomainPagamento = (dbPagamento: any): DomainPagamento => {
+export const toDomainPagamento = (dbPagamento: PagamentoRowWithStatus): DomainPagamento => {
     return {
         id: dbPagamento.id,
         vendaId: dbPagamento.venda_id,
         valor: Number(dbPagamento.valor || 0),
         data: dbPagamento.data,
-        metodo: dbPagamento.metodo as any,
-        status: (dbPagamento as any).status || 'pago',
+        metodo: dbPagamento.metodo as DomainPagamento['metodo'],
+        status: (dbPagamento.status || 'pago') as DomainPagamento['status'],
         observacao: dbPagamento.observacao
     }
 }
 
-export const toDomainVenda = (dbVenda: any): DomainVenda => {
+export const toDomainVenda = (dbVenda: VendaRowWithRelations): DomainVenda => {
     return {
         id: dbVenda.id,
         contatoId: dbVenda.contato_id,
-        contato: dbVenda.contato ? toDomainContato(dbVenda.contato) : undefined,
+        contato: dbVenda.contato ? toDomainContato(dbVenda.contato as ContatoRowWithIndicador) : undefined,
         data: dbVenda.data,
         total: Number(dbVenda.total || 0),
         custoTotal: Number(dbVenda.custo_total || 0),
-        status: dbVenda.status as any,
+        status: dbVenda.status as DomainVenda['status'],
         pago: dbVenda.pago ?? false,
-        formaPagamento: dbVenda.forma_pagamento as any,
+        formaPagamento: dbVenda.forma_pagamento as DomainVenda['formaPagamento'],
         taxaEntrega: Number(dbVenda.taxa_entrega || 0),
-        itens: (dbVenda.itens || []).map(toDomainItemVenda),
-        pagamentos: (dbVenda.pagamentos || []).map(toDomainPagamento),
+        itens: (dbVenda.itens || []).map(i => toDomainItemVenda(i as ItemVendaRowWithProduto)),
+        pagamentos: (dbVenda.pagamentos || []).map(p => toDomainPagamento(p as PagamentoRowWithStatus)),
         criadoEm: dbVenda.criado_em,
-        valorPago: (dbVenda.pagamentos || []).reduce((acc: number, p: any) => acc + Number(p.valor || 0), 0)
+        valorPago: (dbVenda.pagamentos || []).reduce((acc: number, p) => acc + Number((p as PagamentoRowWithStatus).valor || 0), 0)
     }
 }
 
 /* PURCHASE ORDERS MAPPERS */
 
-export const toDomainPurchaseOrderItem = (dbItem: any): DomainPurchaseOrderItem => {
+export const toDomainPurchaseOrderItem = (dbItem: PurchaseOrderItemRowWithProduct): DomainPurchaseOrderItem => {
     return {
         id: dbItem.id,
         productId: dbItem.product_id,
-        product: dbItem.product ? toDomainProduto(dbItem.product) : undefined,
+        product: dbItem.product ? toDomainProduto(dbItem.product as ProdutoRowWithImages) : undefined,
         quantity: Number(dbItem.quantity || 0),
         unitCost: Number(dbItem.unit_cost || 0),
         totalCost: Number(dbItem.total_cost || (Number(dbItem.quantity || 0) * Number(dbItem.unit_cost || 0)))
     }
 }
 
-export const toDomainPurchaseOrder = (dbOrder: any): DomainPurchaseOrder => {
+export const toDomainPurchaseOrder = (dbOrder: PurchaseOrderRowWithFornecedor): DomainPurchaseOrder => {
     return {
         id: dbOrder.id,
         fornecedorId: dbOrder.fornecedor_id,
@@ -133,14 +190,14 @@ export const toDomainPurchaseOrder = (dbOrder: any): DomainPurchaseOrder => {
         amountPaid: Number(dbOrder.amount_paid || 0),
         notes: dbOrder.notes,
         dataRecebimento: dbOrder.data_recebimento,
-        createdAt: dbOrder.created_at
+        createdAt: dbOrder.created_at || new Date().toISOString()
     }
 }
 
-export const toDomainPurchaseOrderWithItems = (dbOrder: any): DomainPurchaseOrderWithItems => {
+export const toDomainPurchaseOrderWithItems = (dbOrder: PurchaseOrderRowWithRelations): DomainPurchaseOrderWithItems => {
     return {
         ...toDomainPurchaseOrder(dbOrder),
-        items: (dbOrder.items || []).map(toDomainPurchaseOrderItem),
+        items: (dbOrder.items || []).map(i => toDomainPurchaseOrderItem(i as PurchaseOrderItemRowWithProduct)),
         payments: dbOrder.payments || []
     }
 }

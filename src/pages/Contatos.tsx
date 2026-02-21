@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Search, Diamond, Flame, History, Users, X, UserCheck } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { EmptyState, LoadingScreen } from '../components/ui'
+import { EmptyState, LoadingScreen, Pagination, paginateArray } from '../components/ui'
 import { ContatoCard, ContatoFormModal, ContactStoryFilter } from '../components/contatos'
 import { useContatos } from '../hooks/useContatos'
 import { useDebounce } from '../hooks/useDebounce'
@@ -15,6 +15,8 @@ export function Contatos() {
     const [showSearch, setShowSearch] = useState(false)
     const [activeStory, setActiveStory] = useState<FilterStoryId>('all')
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const PAGE_SIZE = 30
 
     // Advanced Search Logic (Server-side)
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
@@ -63,6 +65,12 @@ export function Contatos() {
 
         return result
     }, [contatos, activeStory])
+
+    // Reset page when filters/search change
+    useMemo(() => setCurrentPage(1), [activeStory, debouncedSearchTerm])
+
+    // Client-side pagination (temporary — server-side in UX-S005-v2)
+    const paginatedContatos = paginateArray(filteredContatos, currentPage, PAGE_SIZE)
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
@@ -164,8 +172,8 @@ export function Contatos() {
                     {/* Contact List */}
                     {!loading && !error && (
                         filteredContatos.length > 0 ? (
-                            <div className="space-y-4">
-                                {filteredContatos.map((contato) => (
+                            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                                {paginatedContatos.map((contato) => (
                                     <ContatoCard
                                         key={contato.id}
                                         contato={contato}
@@ -181,6 +189,14 @@ export function Contatos() {
                             />
                         )
                     )}
+
+                    {/* Pagination */}
+                    <Pagination
+                        currentPage={currentPage}
+                        totalItems={filteredContatos.length}
+                        pageSize={PAGE_SIZE}
+                        onPageChange={setCurrentPage}
+                    />
 
                     <ContatoFormModal
                         isOpen={isModalOpen}

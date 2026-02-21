@@ -110,7 +110,7 @@ export function FluxoCaixa() {
 
             <div className="px-4 py-4 space-y-6">
                 {/* KPI Cards */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                     <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm">
                         <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center mb-3">
                             <TrendingUp size={18} />

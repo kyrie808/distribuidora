@@ -184,6 +184,7 @@ export function Produtos() {
 
     const _editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
     const _newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
+    void _handleCreate; void _handleUpdate; void _editMargem; void _newMargem
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">
@@ -225,7 +226,7 @@ export function Produtos() {
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                                 <KpiCard
                                     title="Ativos"
                                     value={produtosAtivos.toString()}
@@ -245,7 +246,7 @@ export function Produtos() {
                                 />
                             </div>
 
-                            <div className="space-y-3">
+                            <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
                                 {filteredProdutos.map((produto) => (
                                     <Card
                                         key={produto.id}

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, CardHeader, CardContent, CardFooter, Badge, EmptyState, LoadingScreen } from '../components/ui'
+import { Card, CardHeader, CardContent, CardFooter, Badge, EmptyState, LoadingScreen, Pagination, paginateArray } from '../components/ui'
 import { cn } from '@/lib/utils'
 import { Modal, ModalActions } from '../components/ui/Modal'
 import { Button } from '../components/ui/Button'
@@ -88,6 +88,8 @@ export function Vendas() {
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [currentPage, setCurrentPage] = useState(1)
+    const PAGE_SIZE = 25
 
 
 
@@ -130,6 +132,13 @@ export function Vendas() {
             return true
         })
     }, [vendas, statusFilter, pagamentoFilter, debouncedSearchTerm])
+
+    // Reset page when filters change
+    const filteredCount = filteredVendas.length
+    useMemo(() => setCurrentPage(1), [statusFilter, pagamentoFilter, debouncedSearchTerm])
+
+    // Client-side pagination (temporary — server-side in UX-S005-v2)
+    const paginatedVendas = paginateArray(filteredVendas, currentPage, PAGE_SIZE)
 
     // Helper to check if a sale is within the selected date range
     // We need this because 'vendas' now includes ALL pending items, even outside the range.
@@ -302,8 +311,8 @@ export function Vendas() {
                                 }
                             />
                         ) : (
-                            <div className="space-y-4">
-                                {filteredVendas.map((venda) => (
+                            <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                                {paginatedVendas.map((venda) => (
                                     <Card
                                         key={venda.id}
                                         className="group active:scale-[0.99] transition-all duration-200 overflow-hidden cursor-pointer hover:shadow-lg border-l-4 border-l-transparent hover:border-l-primary"
@@ -394,6 +403,14 @@ export function Vendas() {
                                 ))}
                             </div>
                         )}
+
+                        {/* Pagination */}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalItems={filteredCount}
+                            pageSize={PAGE_SIZE}
+                            onPageChange={setCurrentPage}
+                        />
 
                         {/* Delete Confirmation Modal */}
                         <Modal

@@ -23,7 +23,7 @@ describe('Domain Mappers', () => {
                 observacao: 'Cliente VIP'
             }
 
-            const result = toDomainContato(dbContato)
+            const result = toDomainContato(dbContato as any)
 
             expect(result.id).toBe('123')
             expect(result.nome).toBe('João Silva')
@@ -40,7 +40,7 @@ describe('Domain Mappers', () => {
                 // Missing tipo, bairro, cep, endereco, latitude, longitude, observacao
             }
 
-            const result = toDomainContato(dbContato)
+            const result = toDomainContato(dbContato as any)
 
             expect(result.id).toBe('456')
             expect(result.nome).toBe('Maria Souza')
@@ -66,7 +66,7 @@ describe('Domain Mappers', () => {
                 estoque_minimo: '10'
             }
 
-            const result = toDomainProduto(dbProduto)
+            const result = toDomainProduto(dbProduto as any)
 
             expect(result.id).toBe('p1')
             expect(result.preco).toBe(15.50)
@@ -85,7 +85,7 @@ describe('Domain Mappers', () => {
                 // Missing custo, estoque_atual, estoque_minimo
             }
 
-            const result = toDomainProduto(dbProduto)
+            const result = toDomainProduto(dbProduto as any)
 
             expect(result.custo).toBe(0)
             expect(result.estoqueAtual).toBe(0)
@@ -104,7 +104,7 @@ describe('Domain Mappers', () => {
                 subtotal: '21.00'
             }
 
-            const result = toDomainItemVenda(dbItem)
+            const result = toDomainItemVenda(dbItem as any)
 
             expect(result.id).toBe('item1')
             expect(result.produtoId).toBe('prod1')
@@ -172,7 +172,7 @@ describe('Domain Mappers', () => {
                 contato: { id: 'c1', nome: 'Cliente Teste' } as any
             } as unknown as VendaComItens
 
-            const result = toDomainVenda(dbVenda)
+            const result = toDomainVenda(dbVenda as any)
 
             expect(result.id).toBe('v1')
             expect(result.total).toBe(200)
@@ -194,7 +194,7 @@ describe('Domain Mappers', () => {
                 pagamentos: null as any // Simulate outer join missing
             } as any
 
-            const result = toDomainVenda(dbVenda)
+            const result = toDomainVenda(dbVenda as any)
 
             expect(result.valorPago).toBe(0)
             expect(result.pagamentos).toEqual([])
