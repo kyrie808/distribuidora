@@ -66,6 +66,24 @@ Ranking de fidelidade por volume de compras consumindo a view `ranking_compras`.
 - **Path:** `src/hooks/useDashboardFilter.ts`
 - **Features:** Gerencia `startDate`, `endDate`, e funções para manipular o mês selecionado (`prevMonth`, `nextMonth`, `setMonth`).
 
+### `useCatalogoPendentes`
+Fila de integração do catálogo online.
+- **Path:** `src/hooks/useCatalogoPendentes.ts`
+- **Exports:**
+    - `useCatalogoPendentes()`: Lista falhas na integração automática.
+    - `vincularManualmente`: Mutation para associar pedidos manuais ao CRM.
+
+### Módulo Financeiro
+Conjunto de hooks para gestão de caixa e fluxo financeiro.
+- **Path:** `src/hooks/`
+- **Hooks:**
+    - `usePlanoDeContas`: Gerenciamento de categorias (receitas/despesas).
+    - `useContas`: Gerenciamento de contas bancárias/caixas.
+    - `useLancamentos`: Registro de entradas, saídas e transferências; automação de quitação de vendas via RPC.
+    - `useContasReceber`: Listagem de vendas entregues mas não quitadas para fluxo de caixa proativo.
+    - `useExtrato(month)`: Consulta ao extrato mensal detalhado consumindo a view `view_extrato_mensal`.
+    - `useFluxoCaixa(month)`: Resumo executivo mensal (KPIs) consumindo a view `view_fluxo_resumo`.
+
 
 
 ## Hooks Utilitários

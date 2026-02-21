@@ -1,0 +1,29 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { cashFlowService } from '../services/cashFlowService'
+import type { Database } from '../types/database'
+
+type PlanoContaInsert = Database['public']['Tables']['plano_de_contas']['Insert']
+
+export function usePlanoDeContas() {
+    const queryClient = useQueryClient()
+
+    const { data: planoContas = [], isLoading, error } = useQuery({
+        queryKey: ['plano_de_contas'],
+        queryFn: () => cashFlowService.getPlanoDeContas(),
+    })
+
+    const createMutation = useMutation({
+        mutationFn: (data: PlanoContaInsert) => cashFlowService.createPlanoConta(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['plano_de_contas'] })
+        },
+    })
+
+    return {
+        planoContas,
+        isLoading,
+        error,
+        createPlanoConta: createMutation.mutateAsync,
+        isCreating: createMutation.isPending,
+    }
+}

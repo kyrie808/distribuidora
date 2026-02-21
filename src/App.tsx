@@ -1,5 +1,6 @@
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AppLayout } from './components/layout/AppLayout'
+import { AuthGuard } from './components/auth/AuthGuard'
 import {
   Dashboard,
   Contatos,
@@ -15,14 +16,20 @@ import {
   Estoque,
   Entregas,
   PedidosCompra,
-  Menu
+  Menu,
+  CatalogoPendentes,
+  FluxoCaixa,
+  PlanoDeContas,
+  LoginPage
 } from './pages'
 
 function App() {
   return (
     <HashRouter>
       <Routes>
-        <Route element={<AppLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route element={<AuthGuard><AppLayout /></AuthGuard>}>
           <Route path="/" element={<Dashboard />} />
           <Route path="/contatos" element={<Contatos />} />
           <Route path="/contatos/:id" element={<ContatoDetalhe />} />
@@ -39,6 +46,9 @@ function App() {
           <Route path="/estoque" element={<Estoque />} />
           <Route path="/entregas" element={<Entregas />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/catalogo-pendentes" element={<CatalogoPendentes />} />
+          <Route path="/fluxo-caixa" element={<FluxoCaixa />} />
+          <Route path="/plano-de-contas" element={<PlanoDeContas />} />
 
           {/* Redirects */}
           <Route path="/clientes" element={<Navigate to="/contatos" replace />} />

@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { startOfDay, differenceInDays, isBefore, isSameDay, addDays } from 'date-fns'
-import type { VendaComItens } from './useVendas'
+import type { VendaComItens } from '../types/database'
 
 export type StatusFinanceiro = 'atrasado' | 'hoje' | 'proximo'
 

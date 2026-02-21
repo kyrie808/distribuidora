@@ -8,10 +8,10 @@ export interface DomainContato {
     apelido?: string | null
     telefone: string
     email?: string | null
-    tipo: 'B2C' | 'B2B'
+    tipo: 'B2C' | 'B2B' | 'FORNECEDOR'
     subtipo?: string | null
-    status: 'lead' | 'cliente' | 'inativo'
-    origem: 'direto' | 'indicacao'
+    status: 'lead' | 'cliente' | 'inativo' | 'fornecedor'
+    origem: 'direto' | 'indicacao' | 'catalogo'
     indicadoPorId?: string | null
     indicador?: {
         id: string

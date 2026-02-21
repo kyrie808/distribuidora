@@ -58,6 +58,10 @@ Componentes específicos de domínio.
 - **ClientSelector**: Componente de busca e seleção de clientes com feedback visual e link para cadastro.
 - **ProductList**: Grid de produtos filtrável com botões rápidos de adição ao carrinho e controle de quantidade.
 
-### Compras
-- **PurchaseOrderForm**: Formulário de criação/edição de pedidos de compra.
-  - **Destaque:** Agora inclui um seletor de fornecedor vinculado à tabela de contatos (tipo: FORNECEDOR).
+### Financeiro
+- **FluxoCaixa.tsx**: Dashboard financeiro premium com KPIs segregados, listagem de contas a receber e extrato mensal detalhado.
+- **PlanoDeContas.tsx**: Interface de gestão de categorias financeiras com navegação por abas (Receitas/Despesas) e identificadores visuais semânticos.
+- **LancamentoModal**: Modal para registro manual de Entradas e Saídas.
+  - **Destaque:** Máscara de moeda BRL em tempo real e cabeçalhos coloridos (Verde/Vermelho).
+- **TransferenciaModal**: Modal para movimentação de saldo entre contas.
+  - **Destaque:** Validação de segurança (contas diferentes) e cabeçalho visual (Violeta).

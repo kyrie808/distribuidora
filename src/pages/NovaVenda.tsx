@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
-import { ShoppingCart } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { useProdutos } from '../hooks/useProdutos'
 import { useCartStore } from '../stores/useCartStore'
@@ -13,7 +12,15 @@ import { ClientSelector } from '../components/features/vendas/NovaVenda/ClientSe
 import { ProductList } from '../components/features/vendas/NovaVenda/ProductList'
 import { CartSidebar } from '../components/features/vendas/NovaVenda/CartSidebar'
 import { CheckoutSidebar } from '../components/features/vendas/NovaVenda/CheckoutSidebar'
+import { WizardProgress } from '../components/features/vendas/NovaVenda/WizardProgress'
+import { User, ShoppingBag, CheckCircle, ChevronRight, ChevronLeft } from 'lucide-react'
 import type { VendaFormData } from '../schemas/venda'
+
+const WIZARD_STEPS = [
+    { id: 'cliente', label: 'Cliente', icon: User },
+    { id: 'produtos', label: 'Produtos', icon: ShoppingBag },
+    { id: 'checkout', label: 'Checkout', icon: CheckCircle },
+]
 
 export function NovaVenda() {
     const { id } = useParams<{ id: string }>()
@@ -40,8 +47,7 @@ export function NovaVenda() {
     } = useCartStore()
 
     // Local UI State
-    const [isCartOpen, setIsCartOpen] = useState(false) // For mobile drawer
-    const [sidebarView, setSidebarView] = useState<'cart' | 'checkout'>('cart')
+    const [currentStep, setCurrentStep] = useState(0)
 
     // Load existing sale data
     useEffect(() => {
@@ -99,10 +105,6 @@ export function NovaVenda() {
         [cart]
     )
 
-    const cartItemsCount = useMemo(
-        () => cart.reduce((acc, item) => acc + item.quantidade, 0),
-        [cart]
-    )
 
     // Handlers
     const getCartQuantity = (produtoId: string) => {
@@ -134,18 +136,6 @@ export function NovaVenda() {
         }
     }
 
-    const handleCheckout = () => {
-        if (!selectedContato) {
-            toast.error('Selecione um cliente primeiro')
-            return
-        }
-        if (cart.length === 0) {
-            toast.error('O carrinho está vazio')
-            return
-        }
-        setSidebarView('checkout')
-        if (!isCartOpen) setIsCartOpen(true) // Ensure it opens on mobile
-    }
 
     const handleConfirmSale = async (data: VendaFormData) => {
         try {
@@ -153,8 +143,7 @@ export function NovaVenda() {
             if (venda) {
                 toast.success('Venda realizada com sucesso!')
                 clearCart()
-                setSidebarView('cart')
-                setIsCartOpen(false)
+                setCurrentStep(0)
                 navigate(`/vendas/${venda.id}`)
             } else {
                 toast.error('Erro ao realizar venda. Tente novamente.')
@@ -165,6 +154,22 @@ export function NovaVenda() {
         }
     }
 
+    const nextStep = () => {
+        if (currentStep === 0 && !selectedContato) {
+            toast.error('Selecione um cliente primeiro')
+            return
+        }
+        if (currentStep === 1 && cart.length === 0) {
+            toast.error('O carrinho está vazio')
+            return
+        }
+        if (currentStep < 2) setCurrentStep(currentStep + 1)
+    }
+
+    const prevStep = () => {
+        if (currentStep > 0) setCurrentStep(currentStep - 1)
+    }
+
     return (
         <div className="bg-background-light dark:bg-background-dark min-h-screen flex justify-center">
             <div className="relative flex h-screen w-full flex-col overflow-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
@@ -172,113 +177,122 @@ export function NovaVenda() {
                     title={isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Nova Venda'}
                     showBack
                     className="flex-shrink-0"
-                    rightAction={
-                        <div className="md:hidden">
-                            <button
-                                onClick={() => setIsCartOpen(true)}
-                                className="relative p-2"
-                            >
-                                <ShoppingCart className="h-6 w-6 text-gray-700 dark:text-gray-100" />
-                                {cartItemsCount > 0 && (
-                                    <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                        {cartItemsCount}
-                                    </span>
-                                )}
-                            </button>
-                        </div>
-                    }
                 />
 
-                <div className="flex-1 flex overflow-hidden">
-                    {/* Main Content Area (Products) */}
-                    <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50">
-                        <div className="p-4 flex-shrink-0">
-                            <ClientSelector
-                                selectedContato={selectedContato}
-                                onSelect={setSelectedContato}
-                            />
-                        </div>
+                <WizardProgress currentStep={currentStep} steps={WIZARD_STEPS} />
 
-                        <div className="flex-1 overflow-hidden px-4">
-                            <ProductList
-                                produtos={produtos}
-                                loading={loadingProdutos}
-                                getQuantity={getCartQuantity}
-                                onAdd={handleAddToCart}
-                                onUpdateQuantity={handleUpdateQuantity}
-                            />
+                <div className="flex-1 flex overflow-hidden relative">
+                    {/* Main Content Area */}
+                    <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50 relative">
+                        {/* Step 0: Cliente */}
+                        {currentStep === 0 && (
+                            <div className="p-4 flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                    <User className="h-5 w-5 text-primary" />
+                                    Selecionar Cliente
+                                </h2>
+                                <ClientSelector
+                                    selectedContato={selectedContato}
+                                    onSelect={(c) => {
+                                        setSelectedContato(c)
+                                        if (c) setTimeout(nextStep, 300) // Auto-advance after small delay
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        {/* Step 1: Produtos */}
+                        {currentStep === 1 && (
+                            <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+                                <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-between">
+                                    <h2 className="text-lg font-bold flex items-center gap-2">
+                                        <ShoppingBag className="h-5 w-5 text-primary" />
+                                        Adicionar Produtos
+                                    </h2>
+                                    <div className="text-sm font-medium text-primary">
+                                        Total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}
+                                    </div>
+                                </div>
+                                <div className="flex-1 overflow-hidden px-4">
+                                    <ProductList
+                                        produtos={produtos}
+                                        loading={loadingProdutos}
+                                        getQuantity={getCartQuantity}
+                                        onAdd={handleAddToCart}
+                                        onUpdateQuantity={handleUpdateQuantity}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 2: Checkout (Full screen mobile, part of main on desktop) */}
+                        {currentStep === 2 && (
+                            <div className="flex-1 overflow-y-auto p-4 animate-in fade-in scale-in-95 duration-500">
+                                <div className="max-w-2xl mx-auto">
+                                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                        <CheckCircle className="h-5 w-5 text-primary" />
+                                        Finalizar Venda
+                                    </h2>
+                                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                        <CheckoutSidebar
+                                            onBack={prevStep}
+                                            onConfirm={handleConfirmSale}
+                                            total={cartTotal}
+                                            contatoId={selectedContato?.id || ''}
+                                            contatoNome={selectedContato?.nome || ''}
+                                            items={cart.map(item => ({
+                                                produto_id: item.produto_id,
+                                                quantidade: item.quantidade,
+                                                preco_unitario: item.preco_unitario,
+                                                subtotal: item.subtotal
+                                            }))}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Floating Mobile Navigation */}
+                        <div className="absolute bottom-24 left-0 right-0 flex justify-center px-6 pointer-events-none md:hidden z-50">
+                            <div className="flex gap-4 w-full max-w-sm pointer-events-auto">
+                                {currentStep > 0 && (
+                                    <button
+                                        onClick={prevStep}
+                                        className="flex-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform"
+                                    >
+                                        <ChevronLeft className="h-5 w-5" />
+                                        Voltar
+                                    </button>
+                                )}
+                                {currentStep < 2 && (
+                                    <button
+                                        onClick={nextStep}
+                                        className={`flex-[2] h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
+                                            ${(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)
+                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'bg-primary text-white shadow-primary/30'}`}
+                                    >
+                                        Próximo
+                                        <ChevronRight className="h-5 w-5" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </main>
 
-                    {/* Desktop Sidebar (Cart/Checkout) */}
-                    <aside className="hidden md:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-hidden">
-                        {sidebarView === 'cart' ? (
-                            <CartSidebar
-                                items={cart}
-                                total={cartTotal}
-                                onUpdateQuantity={handleUpdateQuantity}
-                                onCheckout={handleCheckout}
-                                onClear={clearCart}
-                            />
-                        ) : (
-                            <CheckoutSidebar
-                                onBack={() => setSidebarView('cart')}
-                                onConfirm={handleConfirmSale}
-                                total={cartTotal}
-                                contatoId={selectedContato?.id || ''}
-                                contatoNome={selectedContato?.nome || ''}
-                                items={cart.map(item => ({
-                                    produto_id: item.produto_id,
-                                    quantidade: item.quantidade,
-                                    preco_unitario: item.preco_unitario,
-                                    subtotal: item.subtotal
-                                }))}
-                            />
-                        )}
+                    {/* Desktop Sidebar (Optional, maybe just a summary in steps 0/1) */}
+                    <aside className="hidden lg:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-hidden">
+                        <CartSidebar
+                            items={cart}
+                            total={cartTotal}
+                            onUpdateQuantity={handleUpdateQuantity}
+                            onCheckout={nextStep}
+                            onClear={clearCart}
+                            hideCheckoutButton={currentStep === 2}
+                        />
                     </aside>
                 </div>
 
-                {/* Mobile Cart/Checkout Drawer */}
-                {isCartOpen && (
-                    <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
-                        {/* Backdrop */}
-                        <div
-                            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                            onClick={() => {
-                                setIsCartOpen(false)
-                                setSidebarView('cart')
-                            }}
-                        />
-
-                        {/* Drawer Content */}
-                        <div className="relative w-[85vw] max-w-sm bg-white dark:bg-gray-800 h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
-                            {sidebarView === 'cart' ? (
-                                <CartSidebar
-                                    items={cart}
-                                    total={cartTotal}
-                                    onUpdateQuantity={handleUpdateQuantity}
-                                    onCheckout={handleCheckout}
-                                    onClear={clearCart}
-                                    onClose={() => setIsCartOpen(false)}
-                                />
-                            ) : (
-                                <CheckoutSidebar
-                                    onBack={() => setSidebarView('cart')}
-                                    onConfirm={handleConfirmSale}
-                                    total={cartTotal}
-                                    contatoId={selectedContato?.id || ''}
-                                    contatoNome={selectedContato?.nome || ''}
-                                    items={cart.map(item => ({
-                                        produto_id: item.produto_id,
-                                        quantidade: item.quantidade,
-                                        preco_unitario: item.preco_unitario,
-                                        subtotal: item.subtotal
-                                    }))}
-                                />
-                            )}
-                        </div>
-                    </div>
-                )}
             </div>
         </div>
     )

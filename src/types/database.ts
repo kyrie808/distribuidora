@@ -174,6 +174,35 @@ export type Database = {
         }
         Relationships: []
       }
+      cat_pedidos_pendentes_vinculacao: {
+        Row: {
+          cat_pedido_id: string
+          criado_em: string | null
+          id: string
+          motivo_falha: string
+        }
+        Insert: {
+          cat_pedido_id: string
+          criado_em?: string | null
+          id?: string
+          motivo_falha: string
+        }
+        Update: {
+          cat_pedido_id?: string
+          criado_em?: string | null
+          id?: string
+          motivo_falha?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cat_pedidos_pendentes_vinculacao_cat_pedido_id_fkey"
+            columns: ["cat_pedido_id"]
+            isOneToOne: false
+            referencedRelation: "cat_pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       configuracoes: {
         Row: {
           atualizado_em: string
@@ -192,6 +221,33 @@ export type Database = {
           chave?: string
           id?: string
           valor?: Json
+        }
+        Relationships: []
+      }
+      contas: {
+        Row: {
+          ativo: boolean | null
+          criado_em: string | null
+          id: string
+          nome: string
+          saldo_inicial: number | null
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome: string
+          saldo_inicial?: number | null
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean | null
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          saldo_inicial?: number | null
+          tipo?: string
         }
         Relationships: []
       }
@@ -354,6 +410,87 @@ export type Database = {
           },
         ]
       }
+      lancamentos: {
+        Row: {
+          conta_destino_id: string | null
+          conta_id: string
+          criado_em: string | null
+          data: string
+          descricao: string | null
+          id: string
+          origem: string
+          plano_conta_id: string | null
+          purchase_order_payment_id: string | null
+          tipo: string
+          valor: number
+          venda_id: string | null
+        }
+        Insert: {
+          conta_destino_id?: string | null
+          conta_id: string
+          criado_em?: string | null
+          data?: string
+          descricao?: string | null
+          id?: string
+          origem: string
+          plano_conta_id?: string | null
+          purchase_order_payment_id?: string | null
+          tipo: string
+          valor: number
+          venda_id?: string | null
+        }
+        Update: {
+          conta_destino_id?: string | null
+          conta_id?: string
+          criado_em?: string | null
+          data?: string
+          descricao?: string | null
+          id?: string
+          origem?: string
+          plano_conta_id?: string | null
+          purchase_order_payment_id?: string | null
+          tipo?: string
+          valor?: number
+          venda_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lancamentos_conta_destino_id_fkey"
+            columns: ["conta_destino_id"]
+            isOneToOne: false
+            referencedRelation: "contas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "contas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_plano_conta_id_fkey"
+            columns: ["plano_conta_id"]
+            isOneToOne: false
+            referencedRelation: "plano_de_contas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_purchase_order_payment_id_fkey"
+            columns: ["purchase_order_payment_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_order_payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lancamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pagamentos_venda: {
         Row: {
           criado_em: string
@@ -391,6 +528,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      plano_de_contas: {
+        Row: {
+          ativo: boolean | null
+          categoria: string
+          criado_em: string | null
+          id: string
+          nome: string
+          tipo: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria: string
+          criado_em?: string | null
+          id?: string
+          nome: string
+          tipo: string
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string
+          criado_em?: string | null
+          id?: string
+          nome?: string
+          tipo?: string
+        }
+        Relationships: []
       }
       produtos: {
         Row: {
@@ -587,6 +751,27 @@ export type Database = {
             referencedRelation: "contatos"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "purchase_orders_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_compras"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "ranking_indicacoes"
+            referencedColumns: ["indicador_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "view_home_alertas"
+            referencedColumns: ["contato_id"]
+          },
         ]
       }
       sis_imagens_produto: {
@@ -640,6 +825,7 @@ export type Database = {
       vendas: {
         Row: {
           atualizado_em: string
+          cat_pedido_id: string | null
           contato_id: string
           criado_em: string
           custo_total: number | null
@@ -649,6 +835,7 @@ export type Database = {
           forma_pagamento: string
           id: string
           observacoes: string | null
+          origem: string | null
           pago: boolean | null
           parcelas: number | null
           status: string
@@ -658,6 +845,7 @@ export type Database = {
         }
         Insert: {
           atualizado_em?: string
+          cat_pedido_id?: string | null
           contato_id: string
           criado_em?: string
           custo_total?: number | null
@@ -667,6 +855,7 @@ export type Database = {
           forma_pagamento: string
           id?: string
           observacoes?: string | null
+          origem?: string | null
           pago?: boolean | null
           parcelas?: number | null
           status?: string
@@ -676,6 +865,7 @@ export type Database = {
         }
         Update: {
           atualizado_em?: string
+          cat_pedido_id?: string | null
           contato_id?: string
           criado_em?: string
           custo_total?: number | null
@@ -685,6 +875,7 @@ export type Database = {
           forma_pagamento?: string
           id?: string
           observacoes?: string | null
+          origem?: string | null
           pago?: boolean | null
           parcelas?: number | null
           status?: string
@@ -763,6 +954,30 @@ export type Database = {
           nome: string | null
           total_indicados: number | null
           total_vendas_indicados: number | null
+        }
+        Relationships: []
+      }
+      view_extrato_mensal: {
+        Row: {
+          categoria_nome: string | null
+          categoria_tipo: string | null
+          data: string | null
+          descricao: string | null
+          id: string | null
+          origem: string | null
+          tipo: string | null
+          valor: number | null
+        }
+        Relationships: []
+      }
+      view_fluxo_resumo: {
+        Row: {
+          ano: number | null
+          lucro_estimado: number | null
+          mes: number | null
+          total_a_receber: number | null
+          total_entradas: number | null
+          total_saidas: number | null
         }
         Relationships: []
       }
@@ -894,6 +1109,10 @@ export type Database = {
     Functions: {
       receive_purchase_order: {
         Args: { p_order_id: string }
+        Returns: undefined
+      }
+      rpc_marcar_venda_paga: {
+        Args: { p_conta_id: string; p_data?: string; p_venda_id: string }
         Returns: undefined
       }
     }
@@ -1033,22 +1252,64 @@ export const Constants = {
   },
 } as const
 
-// Helper exports for common tables
-export type Contato = Tables<'contatos'>
-export type Venda = Tables<'vendas'>
-export type ItemVenda = Tables<'itens_venda'>
-export type PagamentoVenda = Tables<'pagamentos_venda'>
-export type Produto = Tables<'produtos'>
-export type PurchaseOrder = Tables<'purchase_orders'>
-export type PurchaseOrderItem = Tables<'purchase_order_items'>
-export type PurchaseOrderPayment = Tables<'purchase_order_payments'>
+// Helper aliases
+export type Table<T extends keyof (Database['public']['Tables'] & Database['public']['Views'])> = Tables<T>
+export type Insert<T extends keyof Database['public']['Tables']> = TablesInsert<T>
+export type Update<T extends keyof Database['public']['Tables']> = TablesUpdate<T>
+
+export type Conta = Table<'contas'>
+export type PlanoConta = Table<'plano_de_contas'>
+export type Lancamento = Table<'lancamentos'>
+export type ExtratoItem = Table<'view_extrato_mensal'>
+export type FluxoResumo = Table<'view_fluxo_resumo'>
+
+// STORY-005 Missing Table Aliases
+export type Venda = Table<'vendas'>
+export type Contato = Table<'contatos'>
+export type Produto = Table<'produtos'>
+export type ItemVenda = Table<'itens_venda'>
+export type PagamentoVenda = Table<'pagamentos_venda'>
+
+export type PurchaseOrder = Table<'purchase_orders'>
+export type PurchaseOrderItem = Table<'purchase_order_items'>
+export type PurchaseOrderPayment = Table<'purchase_order_payments'>
+
+// CRUD Aliases
+export type VendaInsert = Insert<'vendas'>
+export type VendaUpdate = Update<'vendas'>
+export type ContatoInsert = Insert<'contatos'>
+export type ContatoUpdate = Update<'contatos'>
+export type ProdutoInsert = Insert<'produtos'>
+export type ProdutoUpdate = Update<'produtos'>
+
+// Complex Types for Services
+export interface VendaComItens extends Venda {
+  itens: (ItemVenda & {
+    produto?: {
+      id: string
+      nome: string
+      codigo: string
+    }
+  })[]
+  contato?: {
+    id: string
+    nome: string
+    telefone: string
+    origem: string
+    indicado_por_id?: string | null
+    indicador?: {
+      id: string
+      nome: string
+    } | null
+    status: string
+  }
+  pagamentos?: PagamentoVenda[]
+}
 
 export interface PurchaseOrderWithItems extends PurchaseOrder {
+  fornecedor: { nome: string }
   items: (PurchaseOrderItem & {
-    product?: Produto
+    product: Produto
   })[]
-  payments?: PurchaseOrderPayment[]
-  fornecedor?: {
-    nome: string
-  }
+  payments: PurchaseOrderPayment[]
 }

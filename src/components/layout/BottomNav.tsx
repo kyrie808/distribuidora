@@ -46,13 +46,15 @@ export function BottomNav() {
                     </button>
                 </div>
 
-                {/* Vendas */}
-                <NavButton
-                    active={isActive('/vendas')}
-                    onClick={() => navigate('/vendas')}
-                    icon={ShoppingCart}
-                    label="Vendas"
-                />
+                {/* Vendas - Ocultar se estiver no fluxo de Nova Venda ou Edição */}
+                {!(location.pathname === '/nova-venda' || location.pathname.endsWith('/editar')) && (
+                    <NavButton
+                        active={isActive('/vendas')}
+                        onClick={() => navigate('/vendas')}
+                        icon={ShoppingCart}
+                        label="Vendas"
+                    />
+                )}
 
                 {/* Menu */}
                 <NavButton

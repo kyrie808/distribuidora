@@ -323,7 +323,7 @@ export function PedidosCompra() {
                                                 </tr>
 
                                                 {/* Items Rows */}
-                                                {order.items && order.items.map((item, index) => (
+                                                {order.items && order.items.map((item: any, index: number) => (
                                                     <tr
                                                         key={item.id || index}
                                                         className="border-b border-gray-100 last:border-0 hover:bg-white cursor-pointer"
@@ -422,7 +422,7 @@ export function PedidosCompra() {
                                                                 </h4>
                                                                 {order.payments && order.payments.length > 0 ? (
                                                                     <div className="space-y-1">
-                                                                        {order.payments.map((payment) => (
+                                                                        {order.payments.map((payment: any) => (
                                                                             <div key={payment.id} className="flex justify-between text-xs text-gray-600 bg-gray-50 p-1.5 rounded">
                                                                                 <span>{formatDate(payment.payment_date)} - <span className="uppercase">{payment.payment_method}</span></span>
                                                                                 <div className="flex gap-4">

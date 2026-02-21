@@ -69,3 +69,21 @@ Isso garante que o tema (Light/Tactical Dark) seja aplicado uniformemente e que 
     - _Compras_: Ranking de fidelidade baseado no total de pedidos pagos e entregues. Cada real gasto é um ponto.
     - _Indicações_: Ranking de prospecção baseado no número de indicações convertidas em vendas.
 - **Destaque**: Top 3 em ambas as abas recebem tratamento visual premium (gradientes e badges "Embaixador").
+
+## Pendentes Catálogo (`/catalogo-pendentes`)
+- **Layout**: Lista vertical de cartões de erro.
+- **Funcionalidade**: Gestão de exceções do trigger automático.
+- **Ações**: "Vincular manualmente" que utiliza um seletor de contatos (Search/Modal) para forçar a criação da venda.
+
+## Fluxo de Caixa (`/fluxo-caixa`)
+- **Layout**: Dashboard financeiro com KPIs e Extrato Mensal.
+- **KPIs**: Entradas, Saídas, Lucro Estimado, A Receber.
+- **Seções**:
+    - _Contas a Receber_: Lista de vendas entregues pendentes de quitação.
+    - _Extrato Mensal_: Lista cronológica de lançamentos (Entradas, Saídas, Transferências).
+- **Interação**: Filtro de mês via `MonthPicker`.
+
+## Plano de Contas (`/plano-de-contas`)
+- **Layout**: Lista de categorias segregadas por Abas (Receitas / Despesas).
+- **Funcionalidade**: Cadastro e visualização de categorias para classificação financeira.
+- **Destaque**: Interface limpa com ícones semânticos para distinção visual rápida.

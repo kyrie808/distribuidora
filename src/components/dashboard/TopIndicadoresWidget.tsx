@@ -9,8 +9,8 @@ interface TopIndicadoresWidgetProps {
 }
 
 export function TopIndicadoresWidget({ data, loading: externalLoading }: TopIndicadoresWidgetProps) {
-    // If data is provided, we skip the internal hook
-    const { topIndicadores: hookData, loading: internalLoading } = useTopIndicadores(!data)
+    // If data is provided (even if empty array), we skip the internal hook
+    const { topIndicadores: hookData, loading: internalLoading } = useTopIndicadores(data === undefined)
 
     const loading = data ? externalLoading : internalLoading
     const rawData = data || hookData

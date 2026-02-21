@@ -10,9 +10,10 @@ interface CartSidebarProps {
     onCheckout: () => void
     onClear: () => void
     onClose?: () => void
+    hideCheckoutButton?: boolean
 }
 
-export function CartSidebar({ items, total, onUpdateQuantity, onCheckout, onClear, onClose }: CartSidebarProps) {
+export function CartSidebar({ items, total, onUpdateQuantity, onCheckout, onClear, onClose, hideCheckoutButton }: CartSidebarProps) {
     if (items.length === 0) {
         return (
             <div className="h-full flex flex-col items-center justify-center text-gray-400 p-8 relative">
@@ -94,21 +95,23 @@ export function CartSidebar({ items, total, onUpdateQuantity, onCheckout, onClea
                 ))}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-                <div className="flex items-center justify-between mb-4">
-                    <span className="text-gray-500 font-medium">Total Geral</span>
-                    <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatCurrency(total)}</span>
-                </div>
+            {!hideCheckoutButton && (
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    <div className="flex items-center justify-between mb-4">
+                        <span className="text-gray-500 font-medium">Total Geral</span>
+                        <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{formatCurrency(total)}</span>
+                    </div>
 
-                <Button
-                    onClick={onCheckout}
-                    className="w-full"
-                    size="lg"
-                    leftIcon={<CreditCard className="h-5 w-5" />}
-                >
-                    Finalizar Venda
-                </Button>
-            </div>
+                    <Button
+                        onClick={onCheckout}
+                        className="w-full"
+                        size="lg"
+                        leftIcon={<CreditCard className="h-5 w-5" />}
+                    >
+                        Finalizar Venda
+                    </Button>
+                </div>
+            )}
         </div>
     )
 }

@@ -2,8 +2,10 @@ import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { contatoService } from '../services/contatoService'
 import type { DomainContato } from '../types/domain'
-import type { ContatoInsert } from '../types/database'
+import type { TablesInsert } from '../types/database'
 import type { ContatoFiltros } from '../schemas/contato'
+
+type ContatoInsert = TablesInsert<'contatos'>
 
 // Export types used by components
 export type { DomainContato }
@@ -20,7 +22,7 @@ interface UseContatosReturn {
     refetch: () => Promise<void>
     createContato: (data: ContatoInsert) => Promise<DomainContato | null>
     updateContato: (id: string, data: Partial<DomainContato>) => Promise<DomainContato | null>
-    deleteContato: (id: string) => Promise<boolean>
+    deleteContato: (id: string) => Promise<{ success: boolean; error?: string }>
     getContatoById: (id: string) => Promise<DomainContato | null>
     searchContatos: (query: string) => Promise<DomainContato[]>
     getNomeIndicador: (contato: DomainContato) => string | null
@@ -66,6 +68,7 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
         }
     })
 
+
     // Actions
     const createContato = useCallback(async (data: ContatoInsert) => {
         try {
@@ -88,12 +91,18 @@ export function useContatos(options: UseContatosOptions = {}): UseContatosReturn
     const deleteContato = useCallback(async (id: string) => {
         try {
             await deleteMutation.mutateAsync(id)
-            return true
-        } catch (e) {
-            console.error(e)
-            return false
+            return { success: true }
+        } catch (e: any) {
+            console.error('Erro ao deletar contato:', e)
+            return {
+                success: false,
+                error: e?.message?.includes('violates foreign key constraint')
+                    ? 'Este contato possui vendas ou pedidos vinculados e não pode ser excluído.'
+                    : (e as Error).message
+            }
         }
     }, [deleteMutation])
+
 
     const getContatoById = useCallback(async (id: string) => {
         return contatoService.getById(id)

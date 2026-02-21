@@ -1,0 +1,137 @@
+import { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/Button'
+import { Shield, Lock, User, ArrowRight, Loader2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { useToast } from '@/components/ui/Toast'
+
+export function LoginPage() {
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
+    const navigate = useNavigate()
+    const location = useLocation()
+    const toast = useToast()
+
+    const from = location.state?.from?.pathname || '/'
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!email || !password) {
+            toast.error('Preencha todos os campos')
+            return
+        }
+
+        setIsLoading(true)
+        try {
+            const { error } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+            })
+
+            if (error) {
+                if (error.message === 'Invalid login credentials') {
+                    toast.error('Credenciais inválidas')
+                } else {
+                    toast.error(error.message)
+                }
+                return
+            }
+
+            toast.success('Bem-vindo de volta!')
+            navigate(from, { replace: true })
+        } catch (error) {
+            toast.error('Ocorreu um erro ao realizar o login')
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    return (
+        <div className="min-h-screen w-full flex items-center justify-center bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200">
+            <div className="relative flex h-full min-h-screen w-full flex-col items-center justify-center max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark overflow-hidden">
+
+                {/* Decorative elements - subtle as in Dashboard */}
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary-neo shadow-[0_0_15px_rgba(19,236,19,0.3)]" />
+
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="w-full max-w-[400px] px-6"
+                >
+                    {/* Logo / Header */}
+                    <div className="flex flex-col items-center mb-12">
+                        <div className="w-16 h-16 bg-primary-neo rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(19,236,19,0.2)] mb-6">
+                            <Shield className="w-8 h-8 text-black" />
+                        </div>
+                        <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-1">
+                            Mont Distribuidora
+                        </h1>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-widest">
+                            Acesso Restrito
+                        </p>
+                    </div>
+
+                    {/* Login Form - Simple Card style as in Dashboard widgets */}
+                    <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-8 shadow-sm">
+                        <form onSubmit={handleLogin} className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                                    E-mail
+                                </label>
+                                <div className="relative group">
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-neo transition-colors" />
+                                    <input
+                                        type="email"
+                                        placeholder="comandante@mont.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary-neo focus:border-primary-neo transition-all outline-none font-display"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                                    Senha
+                                </label>
+                                <div className="relative group">
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-neo transition-colors" />
+                                    <input
+                                        type="password"
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary-neo focus:border-primary-neo transition-all outline-none font-display"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full bg-primary-neo hover:opacity-90 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group border-none shadow-sm h-auto"
+                            >
+                                {isLoading ? (
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                ) : (
+                                    <>
+                                        Entrar
+                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    </>
+                                )}
+                            </Button>
+                        </form>
+                    </div>
+
+                    <div className="mt-12 text-center">
+                        <p className="text-gray-400 dark:text-gray-600 text-[10px] font-bold uppercase tracking-[0.2em]">
+                            Gestão Comercial & Logística
+                        </p>
+                    </div>
+                </motion.div>
+            </div>
+        </div>
+    )
+}

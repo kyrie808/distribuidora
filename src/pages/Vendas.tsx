@@ -18,8 +18,8 @@ import { Button } from '../components/ui/Button'
 
 
 import { useVendas } from '../hooks/useVendas'
-import { useScrollPersistence } from '../hooks/useScrollPersistence'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
+import { useDebounce } from '../hooks/useDebounce'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { FORMA_PAGAMENTO_LABELS } from '../constants'
 
@@ -73,19 +73,18 @@ export function Vendas() {
         setSearchParams(newParams)
     }
 
+    const [searchTerm, setSearchTerm] = useState('')
+    const debouncedSearchTerm = useDebounce(searchTerm, 500)
+
     // Pass filters to hook
     // We always include pending items from all time to support the "Pendentes" badge/filter
     // The service handles the OR logic: (Date Range) OR (Status=Pending) OR (Payment=Pending)
     const { vendas, loading, deleteVenda } = useVendas({
         startDate,
         endDate,
-        includePending: true
+        includePending: true,
+        search: debouncedSearchTerm
     })
-
-    // Persistence
-    useScrollPersistence('vendas-scroll', loading)
-
-    const [searchTerm, setSearchTerm] = useState('')
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [vendaToDelete, setVendaToDelete] = useState<string | null>(null)
     const [isDeleting, setIsDeleting] = useState(false)
@@ -105,10 +104,11 @@ export function Vendas() {
 
 
 
-    // Filter logic
+    // Filter logic (Note: Search is now handled server-side)
     const filteredVendas = useMemo(() => {
         // If NO filter is selected, return empty list (User Requirement)
-        if (!statusFilter && !pagamentoFilter && !searchTerm) {
+        // EXCEPT if there's a search term
+        if (!statusFilter && !pagamentoFilter && !debouncedSearchTerm) {
             return []
         }
 
@@ -118,8 +118,6 @@ export function Vendas() {
 
             // Pagamento
             if (pagamentoFilter && pagamentoFilter !== 'todos') {
-                // Fix: Consider both the 'pago' flag AND the actual paid amount.
-                // Sometimes a sale is manually marked as paid (pago=true) without a specific payment record (valorPago=0).
                 const isPaid = venda.pago || venda.valorPago >= venda.total
                 const isPartial = !isPaid && venda.valorPago > 0 && venda.valorPago < venda.total
                 const isPending = !isPaid && venda.valorPago === 0
@@ -129,18 +127,9 @@ export function Vendas() {
                 if (pagamentoFilter === 'pendente' && !isPending) return false
             }
 
-            // Search (override empty filter rule if searching?)
-            // The check above `!statusFilter && !pagamentoFilter && !searchTerm` handles this.
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase()
-                const cliente = venda.contato?.nome?.toLowerCase() || ''
-                const id = venda.id.toLowerCase().slice(0, 8)
-                return cliente.includes(term) || id.includes(term)
-            }
-
             return true
         })
-    }, [vendas, statusFilter, pagamentoFilter, searchTerm])
+    }, [vendas, statusFilter, pagamentoFilter, debouncedSearchTerm])
 
     // Helper to check if a sale is within the selected date range
     // We need this because 'vendas' now includes ALL pending items, even outside the range.

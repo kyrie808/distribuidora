@@ -6,7 +6,10 @@ import {
     Trophy,
     Settings,
     ClipboardList,
-    Refrigerator
+    Refrigerator,
+    Unlink,
+    DollarSign,
+    LayoutGrid
 } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Header } from '../components/layout/Header'
@@ -71,6 +74,30 @@ export function Menu() {
             iconColor: 'text-muted-foreground',
             iconBg: 'bg-muted',
             href: '/relatorio-fabrica',
+            visible: true
+        },
+        {
+            title: 'Pendentes Catálogo',
+            icon: Unlink,
+            iconColor: 'text-red-500',
+            iconBg: 'bg-red-500/10',
+            href: '/catalogo-pendentes',
+            visible: true
+        },
+        {
+            title: 'Fluxo de Caixa',
+            icon: DollarSign,
+            iconColor: 'text-emerald-600',
+            iconBg: 'bg-emerald-500/10',
+            href: '/fluxo-caixa',
+            visible: true
+        },
+        {
+            title: 'Plano de Contas',
+            icon: LayoutGrid,
+            iconColor: 'text-violet-600',
+            iconBg: 'bg-violet-500/10',
+            href: '/plano-de-contas',
             visible: true
         },
         {

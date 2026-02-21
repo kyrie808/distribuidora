@@ -50,3 +50,11 @@
   - (+) Possibilidade de usar o mesmo sistema de contatos para clientes e fornecedores.
   - (+) UI aprimorada com busca real de fornecedores e exibição de nomes amigáveis.
   - (!) Requer atenção às check constraints de `tipo` e `status` na tabela `contatos`.
+
+## 2026-02-20: Módulo Financeiro e Fluxo de Caixa (Milestone)
+**Contexto:** Necessidade de visibilidade sobre lucro real, controle de contas bancárias e automação de quitações.
+**Decisão:**
+1. **Regime de Caixa Estrito:** O módulo financeiro baseia-se em lançamentos reais em contas (`lancamentos`), separando previsão (vendas não pagas) de realização.
+2. **RPC para Atomicidade:** Implementação da função `rpc_marcar_venda_paga` para garantir que a baixa de uma venda e a criação do lançamento financeiro correspondente ocorram em uma única transação atômica.
+3. **Views de Performance:** Uso de Views (`view_fluxo_resumo`, `view_extrato_mensal`) para consolidar dados complexos de múltiplos relacionamentos no banco, entregando KPIs prontos para o frontend.
+4. **Agrupamento por Abas:** Interface do Plano de Contas segregada por Receitas/Despesas para reduzir carga cognitiva.

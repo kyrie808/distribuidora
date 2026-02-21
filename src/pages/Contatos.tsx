@@ -1,10 +1,11 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import { Plus, Search, Diamond, Flame, History, Users, X, UserCheck } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
 import { EmptyState, LoadingScreen } from '../components/ui'
 import { ContatoCard, ContatoFormModal, ContactStoryFilter } from '../components/contatos'
 import { useContatos } from '../hooks/useContatos'
+import { useDebounce } from '../hooks/useDebounce'
 
 // Types for the filter stories
 type FilterStoryId = 'all' | 'clients' | 'hot-leads' | 'inactives' | 'vips' | 'new'
@@ -15,11 +16,20 @@ export function Contatos() {
     const [activeStory, setActiveStory] = useState<FilterStoryId>('all')
     const [isModalOpen, setIsModalOpen] = useState(false)
 
-    useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
+    // Advanced Search Logic (Server-side)
+    const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-    const { contatos, loading, error, getNomeIndicador, refetch } = useContatos()
+    const { contatos, loading, error, getNomeIndicador, refetch } = useContatos({
+        filtros: {
+            busca: debouncedSearchTerm,
+            status: activeStory === 'all' ? 'todos' :
+                activeStory === 'clients' ? 'cliente' :
+                    activeStory === 'hot-leads' ? 'lead' :
+                        activeStory === 'inactives' ? 'inativo' : 'todos',
+            tipo: activeStory === 'vips' ? 'B2B' : 'todos',
+            origem: 'todos',
+        }
+    })
 
     // Calculate dynamic counts for stories
     const stats = useMemo(() => {
@@ -40,33 +50,19 @@ export function Contatos() {
         { id: 'inactives', label: 'Inativos', icon: History, count: stats.inactive, color: 'info' as const },
     ]
 
-    // Filter logic
+    // Filter logic (Note: Search is now handled server-side)
     const filteredContatos = useMemo(() => {
         let result = contatos
 
-        // Story/Status Filter
-        if (activeStory === 'clients') {
-            result = result.filter(c => c.status === 'cliente')
-        } else if (activeStory === 'hot-leads') {
-            result = result.filter(c => c.status === 'lead')
-        } else if (activeStory === 'inactives') {
-            result = result.filter(c => c.status === 'inativo')
-        } else if (activeStory === 'vips') {
+        // We still keep story filters here for immediate UI feedback if needed, 
+        // but the hook already filters by status. 
+        // We only need to handle the 'vips' story which is a custom combination.
+        if (activeStory === 'vips') {
             result = result.filter(c => c.status === 'cliente' && c.tipo === 'B2B')
         }
 
-        // Text Search
-        if (searchTerm) {
-            const search = searchTerm.toLowerCase()
-            result = result.filter((contato) =>
-                contato.nome.toLowerCase().includes(search) ||
-                (contato.apelido && contato.apelido.toLowerCase().includes(search)) ||
-                contato.telefone.includes(search)
-            )
-        }
-
         return result
-    }, [contatos, searchTerm, activeStory])
+    }, [contatos, activeStory])
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">

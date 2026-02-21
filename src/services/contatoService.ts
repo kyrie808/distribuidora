@@ -82,7 +82,11 @@ export class ContatoService {
             .order('criado_em', { ascending: false })
 
         if (query) {
-            builder = builder.or(`nome.ilike.%${query}%,telefone.ilike.%${query}%,apelido.ilike.%${query}%`)
+            // Using websearch for more intuitive multi-term queries
+            builder = builder.textSearch('fts', query, {
+                type: 'websearch',
+                config: 'portuguese'
+            })
         }
         if (tipo && tipo !== 'todos') {
             builder = builder.eq('tipo', tipo)

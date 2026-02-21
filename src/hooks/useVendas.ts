@@ -11,6 +11,7 @@ interface UseVendasOptions {
     startDate?: Date
     endDate?: Date
     includePending?: boolean
+    search?: string
     enabled?: boolean
 }
 
@@ -30,15 +31,15 @@ interface UseVendasReturn {
     deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
-export function useVendas({ startDate, endDate, includePending = false, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
+export function useVendas({ startDate, endDate, includePending = false, search, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
     const queryClient = useQueryClient()
-    const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending]
+    const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending, search]
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey,
         queryFn: async () => {
             const [vendasData, totalAReceber] = await Promise.all([
-                vendaService.getVendas(startDate, endDate, includePending),
+                vendaService.getVendas(startDate, endDate, includePending, search),
                 vendaService.getTotalAReceber()
             ])
 

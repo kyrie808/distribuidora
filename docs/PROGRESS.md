@@ -1,9 +1,36 @@
 # Progresso do Projeto
 
-## Próximos Passos
-- [ ] Implementar autenticação de usuários
-- [ ] Criar testes E2E
-- [ ] Otimizar queries de dashboard (Server-Side Pagination)
+## Entregas Recentes
+
+### 2026-02-20 - Módulo Financeiro: Lançamentos Manuais & UX — MILESTONE CONCLUÍDO
+- **Novas Funcionalidades de Fluxo de Caixa:**
+  - **Modais de Lançamento:** Implementação de modais dedicados para Entrada, Saída e Transferência manual.
+  - **Máscara de Moeda (BRL):** Formatação automática "R$ 0,00" durante a digitação para facilitar o uso.
+  - **Expandable FAB:** Menu flutuante dinâmico com identificação visual (cores e labels) para ações financeiras rápidas.
+  - **Quitação de Vendas (Contas a Receber):** Ação direta para marcar vendas como pagas, com seleção instantânea da conta de destino.
+- **Backend & Performance:**
+  - Invalidação inteligente de cache via React Query para atualização instantânea do extrato e KPIs sem recarregar a página.
+  - RPC SQL otimizada para garantir atomicidade entre baixa de venda e geração de lançamento.
+- [x] Milestone: Módulo Financeiro (Caixa, DRE Simples, Plano de Contas)
+
+### 2026-02-20 - Integração Automática de Pedidos (Catálogo Online) — FASE 3 CONCLUÍDA
+- **Automação Backend:** Trigger `tr_sync_cat_pedido_to_venda` implementado no Supabase.
+  - Sincroniza pedidos 'entregue' do catálogo para a tabela de vendas do CRM.
+  - **Conversão de Moeda:** Trata valores em centavos (ex: 15000 -> R$ 150.00).
+  - **Normalização de Contatos:** Identifica clientes pelo telefone (removendo +55, espaços e traços).
+  - **Auto-Cadastro:** Cria novos contatos automaticamente com origem 'Catálogo Online'.
+- **Gestão de Exceções:** 
+  - Tabela `cat_pedidos_pendentes_vinculacao` para logar falhas de integração.
+  - Nova página `/catalogo-pendentes` no CRM para resolução manual de conflitos.
+- **Frontend:**
+  - Hook `useCatalogoPendentes` para gerenciamento da fila.
+  - Menu lateral atualizado com acesso à fila de pendências.
+- [x] Milestone 3: PDV & Caixa (Base)
+- [x] Milestone 4: Reconciliação de Tipos e Dashboard (CONCLUÍDO)
+  - [x] Restauração total de `database.ts` (Views e Tipos Base)
+  - [x] Correção de Erros de Tipo em Hooks (`useDashboardMetrics`, `usePurchaseOrders`, `useAlertasFinanceiros`)
+  - [x] Alinhamento de propriedades `fornecedor` e `product` em Pedidos de Compra
+  - [x] Dashboard funcional com dados reais e zero erros de tipo
 
 ## Entregas Recentes
 

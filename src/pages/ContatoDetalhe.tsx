@@ -210,15 +210,16 @@ export function ContatoDetalhe() {
     const handleDelete = async () => {
         if (!contato) return
         setIsDeleting(true)
-        const success = await deleteContato(contato.id)
+        const result = await deleteContato(contato.id)
         setIsDeleting(false)
-        if (success) {
+        if (result.success) {
             toast.success('Contato excluído!')
             navigate('/contatos')
         } else {
-            toast.error('Erro ao excluir contato')
+            toast.error(result.error || 'Erro ao excluir contato')
         }
     }
+
 
     const handleWhatsApp = () => {
         if (!contato) return
@@ -277,6 +278,13 @@ export function ContatoDetalhe() {
                         <h1 className="text-2xl font-bold text-center text-foreground tracking-tight mb-1">
                             {contato.nome} {contato.apelido && <span className="text-muted-foreground font-medium text-lg ml-2">● ({contato.apelido})</span>}
                         </h1>
+
+                        {contato.indicador && (
+                            <div className="flex items-center gap-1.5 text-xs text-orange-500 font-bold uppercase tracking-wider mb-2">
+                                <Target className="w-3 h-3" />
+                                Indicado por: {contato.indicador.nome}
+                            </div>
+                        )}
 
                         <div className="flex items-center gap-2 mb-6">
                             <span className={cn(

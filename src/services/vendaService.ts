@@ -49,7 +49,7 @@ export interface VendasMetrics {
 }
 
 export const vendaService = {
-    async getVendas(startDate?: Date, endDate?: Date, includePending = false): Promise<DomainVenda[]> {
+    async getVendas(startDate?: Date, endDate?: Date, includePending = false, search?: string): Promise<DomainVenda[]> {
         let query = supabase
             .from('vendas')
             .select(`
@@ -59,6 +59,13 @@ export const vendaService = {
                 pagamentos:pagamentos_venda(*)
             `)
             .order('criado_em', { ascending: false })
+
+        if (search) {
+            query = query.textSearch('fts', search, {
+                type: 'websearch',
+                config: 'simple'
+            })
+        }
 
         // Logic:
         // If includePending is TRUE:
