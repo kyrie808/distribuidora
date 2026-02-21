@@ -1,95 +1,50 @@
-# Gilmar Distribuidor Massas - System Architecture Documentation
+# System Architecture & Tech Stack
 
-## Introduction
+## Análise do Sistema
 
-This document captures the **CURRENT STATE** of the Gilmar Distribuidor Massas codebase. It is designed to provide AI agents and developers with a clear understanding of the project's architecture, patterns, and technical debt.
+### Stack Tecnológico
+- **Frontend Framework**: React 19.2 com TypeScript 5.9
+- **Build Tool**: Vite 7.2 com suporte a PWA (vite-plugin-pwa)
+- **Styling**: Tailwind CSS 3.4 com Shadcn UI (clsx, tailwind-merge)
+- **State Management**: Zustand (App state) e React Query v5 (Server state)
+- **Routing**: React Router DOM v7
+- **Forms**: React Hook Form + Zod
+- **Backend/BaaS**: Supabase (PostgreSQL + Auth + Storage)
+- **Mobile/Capacitor**: Capacitor v8 (Android/iOS integration)
 
-### Document Scope
-Comprehensive documentation of the entire system as part of the Brownfield Discovery workflow.
+### Estrutura de Pastas e Componentes
+- `src/components/`: Modularizado em layout, ui (shadcn), e domínios específicos.
+- `src/hooks/`: Alto grau de abstração (ex: `useVendas`, `useCartStore`, `useAuth`).
+- `src/pages/`: Páginas mapeadas 1:1 com rotas (`Dashboard.tsx`, `NovaVenda.tsx`, `CatalogoPendentes.tsx`).
+- `src/services/`: Camada de serviço isolando lógica de negócios e RPCs.
+- `src/stores/`: Gerenciamento de estado global com persistência (Zustand).
+- `src/types/`: Tipagem TypeScript robusta, com transição para Domain Shielding em andamento.
 
-### Change Log
-| Date | Version | Description | Author |
-|------|---------|-------------|--------|
-| 2026-02-20 | 1.0 | Initial brownfield architecture analysis | Orion (Orchestrator) |
+### Padrões de Código
+- **Type Safety**: TypeScript Strict Mode. Zero erros de compilação em `tsc --noEmit`.
+- **Domain Shielding**: Arquitetura evoluindo para isolar a UI dos tipos gerados pelo DB (Mappers & Domain Models).
+- **Componentização**: "Mobile-First" e uso extensivo do contexto `ThemeContext` para dark mode nativo (Tactical Dark).
+- **Data Fetching**: Hook pattern integrado com Supabase e React Query para cache e invalidação inteligente.
 
-## Quick Reference - Key Files and Entry Points
+### Pontos de Integração e Configurações
+- **Supabase**: Integração direta viabilizando Realtime DB, Auth e Edge Functions.
+- **PWA**: PWA ativado com `registerType: 'prompt'` via Vite.
+- **Capacitor**: Integração nativa Android presente (pasta `android/`).
+- **Deploy**: Vercel configurado (`vercel.json`).
 
-### Critical Files
-- **Main Entry**: `src/main.tsx`
-- **Root Component**: `src/App.tsx` (contains all routes)
-- **Supabase Client**: `src/lib/supabase.ts`
-- **Global Styles**: `src/index.css`
-- **Constants**: `src/constants/`
-- **Types**: `src/types/database.ts` (DB schema), `src/types/domain.ts` (Domain models)
+## ⚠️ Débitos Identificados (Nível Sistema)
 
-## High Level Architecture
+1. **Falta de Testes Automatizados** (Severidade: Alta)
+   - O projeto possui 0% de cobertura de testes automatizados (Jest/Vitest/Cypress ausentes no package.json).
 
-### Technical Summary
-The project is a modern web application built with **React 19** and **Vite**, using **Supabase** as the Backend-as-a-Service (BaaS). It is also configured for mobile deployment via **Capacitor**.
+2. **Acoplamento Remanescente de Banco de Dados** (Severidade: Média)
+   - Apesar da Fase 3 de refatoração para "Domain Shielding" estar em andamento (conforme ARCHITECTURE_AUDIT.md), ainda existem pontos da UI acoplados aos tipos do banco.
 
-### Tech Stack
-| Category | Technology | Version | Notes |
-|----------|------------|---------|--------|
-| Runtime | Node.js | >=18 | Managed via Vite |
-| Frontend Framework | React | 19.2.0 | Latest stable |
-| Build Tool | Vite | 7.2.4 | Fast ESM-based builder |
-| Database/Backend | Supabase | ^2.95.3 | BaaS for Auth, DB, and Realtime |
-| State Management | Zustand | ^5.0.9 | Lightweight global state |
-| Data Fetching | React Query | ^5.90.20 | Server state management |
-| Styling | Tailwind CSS | ^3.4.18 | Utility-first CSS |
-| Animations | Framer Motion | ^12.23.26 | Premium UI animations |
-| 3D Rendering | Three.js / R3F | ^0.182.0 | Used for advanced visuals |
-| Mobile Bridge | Capacitor | ^8.0.0 | iOS/Android wrapper |
+3. **Duplicação de Lógica vs Estado Global** (Severidade: Baixa)
+   - É necessário avaliar se os Mappers podem ser centralizados para evitar duplicação no parsing de entidades como Contatos e Vendas.
 
-## Source Tree and Module Organization
+4. **Gerenciamento de Erros Client-Side** (Severidade: Média)
+   - Embora existam "Toast Notifications", pode faltar um ErrorBoundary global robusto para capturar exceptions do React sem quebrar a tela branca.
 
-### Project Structure (Actual)
-```text
-distribuidora/
-├── .aios-core/          # AIOS framework configuration
-├── .antigravity/        # Antigravity agent settings
-├── android/             # Capacitor Android project
-├── docs/                # Project documentation
-├── public/              # Static assets
-├── scripts/             # Utility scripts
-├── src/
-│   ├── assets/          # Images/Icons
-│   ├── components/      # UI components (atoms, layout, domain-specific)
-│   ├── constants/       # App-wide constants
-│   ├── contexts/        # React Contexts
-│   ├── hooks/           # Custom hooks (React Query wrappers)
-│   ├── lib/             # External library initializers (Supabase, react-query)
-│   ├── pages/           # Page/Route components
-│   ├── schemas/         # Zod schemas for validation
-│   ├── services/        # Direct Supabase API calls & Data mappers
-│   ├── stores/          # Zustand stores
-│   ├── types/           # TypeScript definitions
-│   └── utils/           # Helper functions
-└── supabase/            # Database migrations and configuration
-```
-
-### Architectural Patterns
-1. **Layered Services**: Direct DB interactions are isolated in `src/services/`.
-2. **Hook-Based State**: Pages interact with data through custom hooks in `src/hooks/` using `@tanstack/react-query`.
-3. **Domain Mapping**: Raw database types are often mapped to domain models (`src/services/mappers.ts`).
-4. **Auth Guards**: Routes are protected via `AuthGuard` in `App.tsx`.
-
-## Technical Debt and Known Issues
-
-### Identified Debt
-1. **Inconsistent Data Mapping**: Some services use mappers heavily, while others return raw DB objects.
-2. **Placeholder Logic**: `vendaService.ts` contains placeholders (e.g., `custo_unitario: 0` during insert).
-3. **Client-side KPI Calculations**: Many business metrics are calculated in the frontend (`calculateKPIs`), which may impact performance as data grows.
-4. **Status Hardcoding**: Page statuses and types are often hardcoded strings instead of strongly typed enums/constants.
-5. **Partial Payment Limitations**: Logic for payment cancellation in `vendaService.ts` assumes total payment reversals.
-
-## Integration Points
-- **Supabase**: Primary data source and authentication.
-- **Capacitor**: Bridge for native device features.
-- **Vercel**: (Optional) Configuration present in `vercel.json` for web deployment.
-
-## Development and Deployment
-- **Dev**: `npm run dev`
-- **Build**: `npm run build`
-- **Lint**: `npm run lint`
-- **Capacitor Sync**: `npx cap sync`
+## Conclusão da Fase 1
+O sistema é moderno e utiliza as versões mais recentes das principais bibliotecas (React 19, Vite 7, Capacitor 8). A saúde do código (zero chamadas falhas do TS) e a adoção de Zustand indicam refinamento recente ("Saneado"). O débito principal é exclusividade à falta de testes E2E/Unitários para segurar as regras de negócio refatoradas.

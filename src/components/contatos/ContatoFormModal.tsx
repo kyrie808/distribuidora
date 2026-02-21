@@ -14,7 +14,7 @@ import {
     SUBTIPOS_B2B_LABELS,
     CONTATO_STATUS_LABELS,
 } from '../../constants'
-import type { DomainContato } from '../../types/domain'
+import type { DomainContato, CreateContato } from '../../types/domain'
 
 interface ContatoFormModalProps {
     isOpen: boolean
@@ -31,7 +31,7 @@ export function ContatoFormModal({
 }: ContatoFormModalProps) {
     const isEditing = !!contato
     const toast = useToast()
-    const { createContato, updateContato, searchContatos } = useContatos({ realtime: false })
+    const { createContato, updateContato, searchContatos } = useContatos()
     const { fetchCep, loading: loadingCep } = useCep()
 
     // Autocomplete state
@@ -206,21 +206,20 @@ export function ContatoFormModal({
             // Merge raw values over data for specific address fields to ensure we have them
             const formDataKeyed = { ...data, ...rawValues }
 
-            // Clean payload to match database schema
-            const cleanPayload = {
+            // Clean payload to match CreateContato domain type (camelCase)
+            const cleanPayload: CreateContato = {
                 nome: formDataKeyed.nome,
                 apelido: formDataKeyed.apelido,
                 telefone: formDataKeyed.telefone,
-                tipo: formDataKeyed.tipo,
+                tipo: formDataKeyed.tipo as 'B2C' | 'B2B',
                 subtipo: formDataKeyed.subtipo,
-                status: formDataKeyed.status,
-                origem: formDataKeyed.origem,
-                indicado_por_id: formDataKeyed.indicado_por_id,
-                endereco: formDataKeyed.endereco, // Legacy field, can keep as backup or calculated
+                status: formDataKeyed.status as 'lead' | 'cliente' | 'inativo',
+                origem: formDataKeyed.origem as 'direto' | 'indicacao',
+                indicadoPorId: formDataKeyed.indicado_por_id,
+                endereco: formDataKeyed.endereco,
                 bairro: formDataKeyed.bairro,
                 observacoes: formDataKeyed.observacoes,
                 cep: formDataKeyed.cep?.replace(/\D/g, '') || null,
-                // New structured fields
                 logradouro: formDataKeyed.logradouro,
                 numero: formDataKeyed.numero,
                 complemento: formDataKeyed.complemento,
@@ -240,18 +239,9 @@ export function ContatoFormModal({
             let result: DomainContato | null
 
             if (isEditing && contato) {
-                // Update expects Domain format (camelCase)
-                const updatePayload: Partial<DomainContato> = {
-                    ...cleanPayload,
-                    // Map snake_case form fields to camelCase domain fields
-                    indicadoPorId: cleanPayload.indicado_por_id
-                }
-                result = await updateContato(contato.id, updatePayload)
+                result = await updateContato(contato.id, cleanPayload)
             } else {
-                // Create expects DB format (snake_case)
-                // We cast to any because the hook might still be expecting strictly the old type, 
-                // but the service handles the new fields.
-                result = await createContato(cleanPayload as any)
+                result = await createContato(cleanPayload)
             }
 
             if (result) {

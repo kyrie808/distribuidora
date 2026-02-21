@@ -1,39 +1,42 @@
-# Technical Debt Assessment: Final Report
+# Technical Debt Assessment - FINAL
 
-## 1. Introduction
-This report provides a comprehensive evaluation of the "Distribuidora" system technical debt. It incorporates detailed audits from structural, database, and UX viewpoints, as well as specialist recommendations for remediation.
+## Executive Summary
+- **Total de débitos**: 8 identificados
+- **Críticos**: 2 | Altos: 3 | Médios: 3
+- **Esforço total estimado**: ~35 horas (estimativa base)
+- **Status Geral**: Risco crítico identificado em Segurança (RLS).
 
-## 2. Prioritized Debt Inventory
+## Inventário Completo de Débitos
 
-### 🟥 Level 1: Critical (Immediate Action)
-- **Security (RLS)**: Core tables (`vendas`, `contatos`, `lancamentos`) are publicly accessible via Supabase API without RLS. This is the highest risk factor.
-- **Security (Function Path)**: Database functions lack fixed `search_path`, making them vulnerable to hijacking.
+### Sistema (validado por @architect)
+| ID | Débito | Severidade | Horas | Prioridade |
+|----|--------|------------|-------|------------|
+| DT-003 | Acoplamento de Business Logic em Hooks | Médio | 12h | P2 |
+| DT-006 | Tipagem Fraca e Casting Forçado | Baixo | 10h | P3 |
 
-### 🟧 Level 2: High (Next 2 Sprints)
-- **Test Infrastructure**: Absence of automated testing. Manual regressions are required for every change.
-- **Data Consistency**: Inventory updates are client-side only; lack of database-level triggers makes metrics fragile.
-- **Environment config**: Hardcoded localhost proxies in Vite prevent smooth containerization or varying env setups.
+### Database (validado por @data-engineer)
+| ID | Débito | Severidade | Horas | Prioridade |
+|----|--------|------------|-------|------------|
+| DT-001 | RLS Desativado (Tabelas Financeiras) | Crítico | 4h | **P0** |
+| DT-002 | Políticas RLS Genéricas (True) | Alto | 8h | **P1** |
+| DT-007 | Ausência de Índices em Foreign Keys | Médio | 2h | P2 |
 
-### 🟨 Level 3: Medium (Refactor Roadmap)
-- **Accessibility**: Low compliance with ARIA standards in custom UI components.
-- **Design Token Consistency**: Redundant color tokens and non-unified design system definitions.
-- **Maintainability**: High reliance on manual mappers for DB-to-Frontend translations.
+### Frontend/UX (validado por @ux-design-expert)
+| ID | Débito | Severidade | Horas | Prioridade |
+|----|--------|------------|-------|------------|
+| DT-005 | Otimização de Safe-Areas (Mobile) | Alto | 6h | P1 |
+| DT-004 | Inconsistência de Grid (1920px) | Médio | 3h | P2 |
+| DT-008 | Loading States Flash no Dashboard | Médio | 4h | P2 |
 
-## 3. Specialist Recommendations Summary
+## Plano de Resolução
 
-### Data Engineering
-- Enable RLS using an "Authenticated Only" baseline.
-- Implement soft-delete patterns for critical entities.
-- Migrate view logic to `SECURITY INVOKER` where possible.
+1. **Sprint 1 (Segurança & Core)**: Ativar RLS em tabelas financeiras e restringir políticas globais. (DT-001, DT-002).
+2. **Sprint 2 (UX & Mobile)**: Ajustar Safe-areas, Grid 1920px e esqueletos de carregamento. (DT-004, DT-005, DT-008).
+3. **Sprint 3 (Infra & Refactor)**: Índices de banco, tipagem TS e refatoração de hooks complexos. (DT-003, DT-006, DT-007).
 
-### UX Design
-- Audit mobile forms for density and cognitive load.
-- Implement centralized loading skeletons for all secondary widgets.
-- Refactor design tokens into a single cohesive system.
+## Riscos e Mitigações
+- **Risco de Regressão**: Ativação de RLS pode bloquear acessos legítimos se não testada com impersonate.
+- **Mitigação**: Suite de testes QA sugerida por @qa deve preceder o deploy de P0 fixes.
 
-### QA
-- Adopt Vitest (Unit) and Playwright (E2E).
-- Target 40% initial coverage focusing on Sales and Financial calculation logic.
-
-## 4. Conclusion
-The "Distribuidora" project is architecturally sound but operationally risky. Resolving the Security and Testing debt will significantly improve its stability and professional readiness for wide distribution.
+---
+*Aprovado por Orion, Orchestrator.*

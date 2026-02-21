@@ -21,7 +21,6 @@ import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import { getCoordinates } from '../utils/geocoding'
 import { useCep } from '../hooks/useCep'
-import type { Json } from '../types/database'
 
 interface LocalPartida {
     id: string
@@ -129,7 +128,7 @@ export function Configuracoes() {
             // Auto-save changes to DB
             await supabase.from('configuracoes').upsert({
                 chave: 'locais_partida',
-                valor: updatedLocais as unknown as Json
+                valor: updatedLocais as any
             }, { onConflict: 'chave' })
 
             setNovoLocalNome('')
@@ -150,7 +149,7 @@ export function Configuracoes() {
         try {
             await supabase.from('configuracoes').upsert({
                 chave: 'locais_partida',
-                valor: updatedLocais as unknown as Json
+                valor: updatedLocais as any
             }, { onConflict: 'chave' })
             toast.success('Local removido!')
         } catch (error) {
@@ -192,7 +191,7 @@ export function Configuracoes() {
                 .from('configuracoes')
                 .upsert({
                     chave: 'locais_partida',
-                    valor: locais as unknown as Json
+                    valor: locais as any
                 }, { onConflict: 'chave' })
 
             await refetch()

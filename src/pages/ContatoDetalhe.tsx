@@ -34,6 +34,7 @@ import { useVendas } from '../hooks/useVendas'
 import { calcularNivelCliente } from '../utils/calculations'
 import { useIndicacoes } from '../hooks/useIndicacoes'
 import { cn } from '@/lib/utils'
+import type { DomainContato, DomainVenda } from '../types/domain'
 
 // --- VISUAL COMPONENTS (STICH STYLE) ---
 
@@ -54,7 +55,7 @@ function GamificationBadge({ icon: Icon, label, colorClass }: { icon: any, label
 }
 
 interface ReceiptCardProps {
-    venda: any;
+    venda: DomainVenda;
     onEdit?: (id: string, e: React.MouseEvent) => void;
     onView?: (id: string, e: React.MouseEvent) => void;
     onDelete?: (id: string, e: React.MouseEvent) => void;
@@ -83,7 +84,7 @@ function ReceiptCard({ venda, onEdit, onView, onDelete }: ReceiptCardProps) {
             <div className="flex justify-between items-end">
                 <div className="flex-1 pr-4">
                     <div className="space-y-1">
-                        {venda.itens.map((item: any, idx: number) => (
+                        {venda.itens.map((item, idx: number) => (
                             <div key={idx} className="text-xs text-gray-400 flex items-center justify-between border-b border-white/5 pb-1 last:border-0 last:pb-0">
                                 <span className="line-clamp-1">
                                     <span className="text-gray-500 font-mono mr-2">{item.quantidade}x</span>
@@ -192,7 +193,7 @@ export function ContatoDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { contato, loading, error, refetch } = useContato(id)
-    const { deleteContato } = useContatos({ realtime: false })
+    const { deleteContato } = useContatos()
     const { vendas: vendasRaw } = useVendas()
     const todasVendas = vendasRaw.filter(v => v.contatoId === id)
     const { getIndicadorById } = useIndicacoes()
@@ -229,7 +230,8 @@ export function ContatoDetalhe() {
     if (loading) return <> <Header title="..." showBack /><LoadingScreen /> </>
     if (error || !contato) return <> <Header title="Erro" showBack /><PageContainer><div className="text-red-500">Contato não encontrado</div></PageContainer> </>
 
-    const AvatarIcon = contato.tipo === 'B2B' ? Building2 : User
+    const c = contato as DomainContato
+    const AvatarIcon = c.tipo === 'B2B' ? Building2 : User
 
     // Configuração de Levels
     const isGold = nivelCliente.nivel === 'ouro'

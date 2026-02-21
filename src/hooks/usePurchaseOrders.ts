@@ -1,110 +1,70 @@
-import { useState, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { purchaseOrderService } from '../services/purchaseOrderService'
-import type { PurchaseOrder } from '../types/database'
+import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
 
 export function usePurchaseOrders() {
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState<string | null>(null)
+    const queryClient = useQueryClient()
 
-    const fetchOrders = useCallback(async () => {
-        setLoading(true)
-        setError(null)
-        try {
-            return await purchaseOrderService.fetchOrders()
-        } catch (err: any) {
-            setError(err.message)
-            return []
-        } finally {
-            setLoading(false)
-        }
-    }, [])
+    const { data: orders, isLoading: loading, error, refetch } = useQuery({
+        queryKey: ['purchase_orders'],
+        queryFn: () => purchaseOrderService.fetchOrders(),
+    })
 
-    const fetchOrderById = useCallback(async (id: string) => {
-        setLoading(true)
-        setError(null)
-        try {
-            return await purchaseOrderService.fetchOrderById(id)
-        } catch (err: any) {
-            console.error('Error fetching order:', err)
-            setError(err.message)
-            return null
-        } finally {
-            setLoading(false)
+    const createMutation = useMutation({
+        mutationFn: ({ order, items }: { order: CreatePurchaseOrder, items: any[] }) =>
+            purchaseOrderService.createOrder(order, items),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
+            queryClient.invalidateQueries({ queryKey: ['produtos'] }) // Refresh stock
         }
-    }, [])
+    })
 
-    const createOrder = useCallback(async (order: Partial<PurchaseOrder>, items: any[]) => {
-        setLoading(true)
-        setError(null)
-        try {
-            return await purchaseOrderService.createOrder(order, items)
-        } catch (err: any) {
-            setError(err.message)
-            throw err
-        } finally {
-            setLoading(false)
+    const updateMutation = useMutation({
+        mutationFn: ({ id, updates }: { id: string, updates: UpdatePurchaseOrder }) =>
+            purchaseOrderService.updateOrder(id, updates),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
         }
-    }, [])
+    })
 
-    const updateOrder = useCallback(async (id: string, updates: Partial<PurchaseOrder>, items?: any[]) => {
-        setLoading(true)
-        setError(null)
-        try {
-            return await purchaseOrderService.updateOrder(id, updates, items)
-        } catch (err: any) {
-            setError(err.message)
-            throw err
-        } finally {
-            setLoading(false)
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => purchaseOrderService.deleteOrder(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
         }
-    }, [])
+    })
 
-    const receiveOrder = useCallback(async (id: string) => {
-        setLoading(true)
-        setError(null)
-        try {
-            return await purchaseOrderService.receiveOrder(id)
-        } catch (err: any) {
-            setError(err.message)
-            throw err
-        } finally {
-            setLoading(false)
+    const addPaymentMutation = useMutation({
+        mutationFn: ({ orderId, payment }: { orderId: string, payment: { amount: number, method: string, notes?: string } }) =>
+            purchaseOrderService.addPayment(orderId, payment),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
         }
-    }, [])
-
-    const deleteOrder = useCallback(async (id: string) => {
-        setLoading(true)
-        try {
-            return await purchaseOrderService.deleteOrder(id)
-        } catch (err: any) {
-            setError(err.message)
-            throw err
-        } finally {
-            setLoading(false)
-        }
-    }, [])
-
-    const addPayment = useCallback(async (orderId: string, paymentData: { amount: number, payment_method: string, payment_date: string, notes?: string }) => {
-        setLoading(true)
-        try {
-            return await purchaseOrderService.addPayment(orderId, paymentData)
-        } catch (err: any) {
-            setError(err.message)
-            throw err
-        } finally {
-            setLoading(false)
-        }
-    }, [])
+    })
 
     return {
+        orders: orders || [],
         loading,
-        error,
-        fetchOrders,
-        fetchOrderById,
-        createOrder,
-        updateOrder,
-        receiveOrder,
-        deleteOrder,
-        addPayment
+        error: error ? (error as Error).message : null,
+        refetch,
+        createOrder: createMutation.mutateAsync,
+        updateOrder: updateMutation.mutateAsync,
+        deleteOrder: deleteMutation.mutateAsync,
+        addPayment: addPaymentMutation.mutateAsync
+    }
+}
+
+export function usePurchaseOrder(id: string | undefined) {
+    const { data: order, isLoading: loading, error, refetch } = useQuery({
+        queryKey: ['purchase_order', id],
+        queryFn: () => id ? purchaseOrderService.fetchOrderById(id) : null,
+        enabled: !!id,
+    })
+
+    return {
+        order: order || null,
+        loading,
+        error: error ? (error as Error).message : null,
+        refetch
     }
 }

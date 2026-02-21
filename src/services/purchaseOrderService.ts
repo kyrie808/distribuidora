@@ -1,8 +1,9 @@
 import { supabase } from '../lib/supabase'
-import type { PurchaseOrder, PurchaseOrderWithItems } from '../types/database'
+import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
+import { toDomainPurchaseOrderWithItems } from './mappers'
 
 export const purchaseOrderService = {
-    async fetchOrders(): Promise<PurchaseOrderWithItems[]> {
+    async fetchOrders(): Promise<DomainPurchaseOrderWithItems[]> {
         const { data, error } = await supabase
             .from('purchase_orders')
             .select(`
@@ -17,10 +18,10 @@ export const purchaseOrderService = {
             .order('order_date', { ascending: false })
 
         if (error) throw error
-        return data as PurchaseOrderWithItems[]
+        return (data || []).map(toDomainPurchaseOrderWithItems)
     },
 
-    async fetchOrderById(id: string): Promise<PurchaseOrderWithItems | null> {
+    async fetchOrderById(id: string): Promise<DomainPurchaseOrderWithItems | null> {
         const { data, error } = await supabase
             .from('purchase_orders')
             .select(`
@@ -36,118 +37,102 @@ export const purchaseOrderService = {
             .single()
 
         if (error) throw error
+        if (!data) return null
 
-        const order = data as PurchaseOrderWithItems
-        if (order && order.payments) {
-            order.payments.sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
-        }
-        return order
+        return toDomainPurchaseOrderWithItems(data)
     },
 
-    async createOrder(order: Partial<PurchaseOrder>, items: any[]): Promise<PurchaseOrder> {
-        // 1. Create Header
-        const { data, error: orderError } = await supabase
+    async createOrder(order: CreatePurchaseOrder, items: any[]): Promise<DomainPurchaseOrderWithItems> {
+        // Implementation remains similar but uses mappers for return
+        const { data: newOrder, error: orderError } = await supabase
             .from('purchase_orders')
             .insert({
-                fornecedor_id: order.fornecedor_id!,
-                order_date: order.order_date,
-                status: order.status || 'pending',
-                payment_status: order.payment_status || 'unpaid',
-                total_amount: order.total_amount,
+                fornecedor_id: order.fornecedorId,
+                order_date: order.orderDate,
+                total_amount: order.totalAmount,
                 notes: order.notes,
-                amount_paid: order.amount_paid || 0,
-                data_recebimento: order.data_recebimento
-            } as any)
+                payment_status: 'unpaid',
+                status: 'pending'
+            })
             .select()
             .single()
 
         if (orderError) throw orderError
-        const orderData = data as PurchaseOrder
 
-        // 2. Create Items
-        if (items.length > 0) {
-            const itemsToInsert = items.map(item => ({
-                purchase_order_id: orderData.id,
-                product_id: item.product_id,
-                quantity: item.quantity,
-                unit_cost: item.unit_cost
-            }))
+        const orderItems = items.map(item => ({
+            purchase_order_id: newOrder.id,
+            product_id: item.productId,
+            quantity: item.quantity,
+            unit_cost: item.unitCost,
+            total_cost: item.quantity * item.unitCost
+        }))
 
-            const { error: itemsError } = await supabase
-                .from('purchase_order_items')
-                .insert(itemsToInsert as any)
+        const { error: itemsError } = await supabase
+            .from('purchase_order_items')
+            .insert(orderItems)
 
-            if (itemsError) throw itemsError
-        }
+        if (itemsError) throw itemsError
 
-        return orderData
+        return this.fetchOrderById(newOrder.id) as Promise<DomainPurchaseOrderWithItems>
     },
 
-    async updateOrder(id: string, updates: Partial<PurchaseOrder>, items?: any[]): Promise<boolean> {
-        // 1. Update Header
-        const { error: headerError } = await supabase
+    async updateOrder(id: string, updates: UpdatePurchaseOrder): Promise<DomainPurchaseOrderWithItems> {
+        const dbUpdates: any = {}
+        if (updates.fornecedorId !== undefined) dbUpdates.fornecedor_id = updates.fornecedorId
+        if (updates.orderDate !== undefined) dbUpdates.order_date = updates.orderDate
+        if (updates.status !== undefined) dbUpdates.status = updates.status
+        if (updates.notes !== undefined) dbUpdates.notes = updates.notes
+        if (updates.totalAmount !== undefined) dbUpdates.total_amount = updates.totalAmount
+        if (updates.paymentStatus !== undefined) dbUpdates.payment_status = updates.paymentStatus
+        if (updates.dataRecebimento !== undefined) dbUpdates.data_recebimento = updates.dataRecebimento
+
+        const { error } = await supabase
             .from('purchase_orders')
-            .update(updates as any)
+            .update(dbUpdates)
             .eq('id', id)
 
-        if (headerError) throw headerError
-
-        // 2. Update Items (Full Replace Strategy)
-        if (items) {
-            const { error: deleteError } = await supabase
-                .from('purchase_order_items')
-                .delete()
-                .eq('purchase_order_id', id)
-
-            if (deleteError) throw deleteError
-
-            if (items.length > 0) {
-                const itemsToInsert = items.map(item => ({
-                    purchase_order_id: id,
-                    product_id: item.product_id,
-                    quantity: item.quantity,
-                    unit_cost: item.unit_cost
-                }))
-
-                const { error: insertError } = await supabase
-                    .from('purchase_order_items')
-                    .insert(itemsToInsert as any)
-
-                if (insertError) throw insertError
-            }
-        }
-
-        return true
-    },
-
-    async receiveOrder(id: string): Promise<boolean> {
-        const { error } = await supabase.rpc('receive_purchase_order', { p_order_id: id })
         if (error) throw error
-        return true
+        return this.fetchOrderById(id) as Promise<DomainPurchaseOrderWithItems>
     },
 
-    async deleteOrder(id: string): Promise<boolean> {
+    async deleteOrder(id: string): Promise<void> {
         const { error } = await supabase
             .from('purchase_orders')
             .delete()
             .eq('id', id)
 
         if (error) throw error
-        return true
     },
 
-    async addPayment(orderId: string, paymentData: { amount: number, payment_method: string, payment_date: string, notes?: string }): Promise<boolean> {
-        const { error } = await supabase
+    async addPayment(orderId: string, payment: { amount: number, method: string, notes?: string }): Promise<void> {
+        const { error: paymentError } = await supabase
             .from('purchase_order_payments')
             .insert({
                 purchase_order_id: orderId,
-                amount: paymentData.amount,
-                payment_method: paymentData.payment_method,
-                payment_date: paymentData.payment_date,
-                notes: paymentData.notes
-            } as any)
+                amount: payment.amount,
+                payment_method: payment.method,
+                notes: payment.notes,
+                payment_date: new Date().toISOString()
+            })
 
-        if (error) throw error
-        return true
+        if (paymentError) throw paymentError
+
+        // Update order payment status
+        const order = await this.fetchOrderById(orderId)
+        if (!order) return
+
+        const totalPaid = order.amountPaid + payment.amount
+        let newStatus: DomainPurchaseOrderWithItems['paymentStatus'] = 'partial'
+        if (totalPaid >= order.totalAmount) newStatus = 'paid'
+
+        const { error: updateError } = await supabase
+            .from('purchase_orders')
+            .update({
+                amount_paid: totalPaid,
+                payment_status: newStatus
+            })
+            .eq('id', orderId)
+
+        if (updateError) throw updateError
     }
 }

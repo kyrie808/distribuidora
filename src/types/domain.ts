@@ -84,3 +84,64 @@ export interface DomainVenda {
     criadoEm: string
     valorPago: number
 }
+
+// Creation/Update types (Domain-side)
+export type CreateProduto = Omit<DomainProduto, 'id' | 'criadoEm' | 'atualizadoEm' | 'estoqueAtual'>
+export type UpdateProduto = Partial<CreateProduto> & { ativo?: boolean }
+
+export type CreateContato = Omit<DomainContato, 'id' | 'criadoEm' | 'atualizadoEm' | 'indicador'>
+export type UpdateContato = Partial<CreateContato>
+
+export interface CreateVenda {
+    contatoId: string
+    data: string
+    formaPagamento: PagamentoMetodo
+    taxaEntrega: number
+    dataPrevistaPagamento?: string | null
+    itens: {
+        produtoId: string
+        quantidade: number
+        precoUnitario: number
+        subtotal: number
+    }[]
+}
+
+export type UpdateVenda = Partial<Omit<CreateVenda, 'itens'>> & {
+    status?: VendaStatus
+    pago?: boolean
+}
+
+// Purchase Order Domain Types
+export type PurchaseOrderStatus = 'pending' | 'received' | 'cancelled'
+export type PurchaseOrderPaymentStatus = 'unpaid' | 'partial' | 'paid'
+
+export interface DomainPurchaseOrderItem {
+    id: string
+    productId: string
+    product?: DomainProduto
+    quantity: number
+    unitCost: number
+    totalCost: number
+}
+
+export interface DomainPurchaseOrder {
+    id: string
+    fornecedorId: string
+    fornecedor?: { id: string, nome: string }
+    orderDate: string
+    status: PurchaseOrderStatus
+    paymentStatus: PurchaseOrderPaymentStatus
+    totalAmount: number
+    amountPaid: number
+    notes?: string | null
+    dataRecebimento?: string | null
+    createdAt: string
+}
+
+export interface DomainPurchaseOrderWithItems extends DomainPurchaseOrder {
+    items: DomainPurchaseOrderItem[]
+    payments: any[] // We can refine this if needed
+}
+
+export type CreatePurchaseOrder = Omit<DomainPurchaseOrder, 'id' | 'createdAt' | 'status' | 'paymentStatus' | 'amountPaid'>
+export type UpdatePurchaseOrder = Partial<DomainPurchaseOrder>

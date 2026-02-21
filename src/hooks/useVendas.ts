@@ -1,13 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
-import { vendaService, type VendasMetrics, type VendaComItens } from '../services/vendaService'
-import type { VendaFormData, PagamentoFormData } from '../schemas/venda'
-import type { DomainVenda } from '../types/domain'
-
-export type { VendaComItens }
+import { vendaService } from '../services/vendaService'
+import type { DomainVenda, CreateVenda, UpdateVenda, VendasMetrics } from '../types/domain'
 
 interface UseVendasOptions {
-    realtime?: boolean
     startDate?: Date
     endDate?: Date
     includePending?: boolean
@@ -21,14 +17,12 @@ interface UseVendasReturn {
     error: string | null
     metrics: VendasMetrics
     refetch: () => Promise<void>
-    createVenda: (data: VendaFormData) => Promise<DomainVenda | null>
+    createVenda: (data: CreateVenda) => Promise<DomainVenda | null>
     updateVendaStatus: (id: string, status: 'pendente' | 'entregue' | 'cancelada') => Promise<boolean>
     updateVendaPago: (id: string, pago: boolean) => Promise<boolean>
     deleteVenda: (id: string) => Promise<boolean>
-    updateVenda: (id: string, data: VendaFormData) => Promise<DomainVenda | null>
+    updateVenda: (id: string, data: UpdateVenda) => Promise<DomainVenda | null>
     getVendaById: (id: string) => Promise<DomainVenda | null>
-    addPagamento: (vendaId: string, data: PagamentoFormData) => Promise<boolean>
-    deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
 export function useVendas({ startDate, endDate, includePending = false, search, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
@@ -58,7 +52,7 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
     })
 
     const createVendaMutation = useMutation({
-        mutationFn: (data: VendaFormData) => vendaService.createVenda(data),
+        mutationFn: (data: CreateVenda) => vendaService.createVenda(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
             queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
@@ -67,11 +61,11 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
     })
 
     const updateVendaMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: VendaFormData }) => vendaService.updateVenda(id, data),
+        mutationFn: ({ id, data }: { id: string; data: UpdateVenda }) => vendaService.updateVenda(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['vendas', id] })
             queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
     })
 
@@ -80,8 +74,6 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
             vendaService.updateVendaStatus(id, status),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
     })
 
@@ -90,8 +82,6 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
             vendaService.updateVendaPago(id, pago),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
     })
 
@@ -99,29 +89,6 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         mutationFn: (id: string) => vendaService.deleteVenda(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
-        }
-    })
-
-    const addPagamentoMutation = useMutation({
-        mutationFn: async ({ vendaId, data }: { vendaId: string; data: PagamentoFormData }) => {
-            const result = await vendaService.addPagamento(vendaId, data)
-            return result
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
-        }
-    })
-
-    const deletePagamentoMutation = useMutation({
-        mutationFn: (vendaId: string) => vendaService.deleteUltimoPagamento(vendaId),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-            queryClient.invalidateQueries({ queryKey: ['produtos'] })
         }
     })
 
@@ -140,13 +107,13 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         lucroMes: 0,
     }
 
-    const createVenda = useCallback(async (formData: VendaFormData) => {
+    const createVenda = useCallback(async (formData: CreateVenda) => {
         try {
             return await createVendaMutation.mutateAsync(formData)
         } catch (e) { console.error(e); return null }
     }, [createVendaMutation])
 
-    const updateVenda = useCallback(async (id: string, formData: VendaFormData) => {
+    const updateVenda = useCallback(async (id: string, formData: UpdateVenda) => {
         try {
             return await updateVendaMutation.mutateAsync({ id, data: formData })
         } catch (e) { console.error(e); return null }
@@ -173,20 +140,6 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         } catch (e) { console.error(e); return false }
     }, [deleteVendaMutation])
 
-    const addPagamento = useCallback(async (vendaId: string, formData: PagamentoFormData) => {
-        try {
-            await addPagamentoMutation.mutateAsync({ vendaId, data: formData })
-            return true
-        } catch (e) { console.error(e); return false }
-    }, [addPagamentoMutation])
-
-    const deleteUltimoPagamento = useCallback(async (vendaId: string) => {
-        try {
-            await deletePagamentoMutation.mutateAsync(vendaId)
-            return true
-        } catch (e) { console.error(e); return false }
-    }, [deletePagamentoMutation])
-
     const getVendaById = useCallback(async (id: string) => {
         return vendaService.getVendaById(id)
     }, [])
@@ -202,9 +155,7 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         updateVendaStatus,
         updateVendaPago,
         deleteVenda,
-        getVendaById,
-        addPagamento,
-        deleteUltimoPagamento
+        getVendaById
     }
 }
 

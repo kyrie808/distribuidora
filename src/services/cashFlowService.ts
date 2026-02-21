@@ -1,6 +1,37 @@
 import { supabase } from '../lib/supabase'
 import type { Conta, PlanoConta, Lancamento, ExtratoItem, FluxoResumo, Insert } from '../types/database'
-import { startOfMonth, endOfMonth, format } from 'date-fns'
+import { startOfMonth, endOfMonth, format, startOfDay, differenceInDays, isBefore, isSameDay, addDays } from 'date-fns'
+import type { QueryData } from '@supabase/supabase-js'
+
+export type StatusFinanceiro = 'atrasado' | 'hoje' | 'proximo'
+
+const alertasQuery = supabase
+    .from('vendas')
+    .select(`
+        *,
+        contato:contatos(id, nome, telefone, origem, indicado_por_id),
+        itens:itens_venda(*, produto:produtos(id, nome, codigo))
+    `)
+    .eq('pago', false)
+    .eq('forma_pagamento', 'fiado')
+    .neq('status', 'cancelada')
+    .order('data_prevista_pagamento', { ascending: true })
+
+export type VendaAlerta = QueryData<typeof alertasQuery>[number]
+
+export interface AlertaFinanceiro {
+    venda: VendaAlerta
+    diasAtraso: number
+    status: StatusFinanceiro
+    dataPrevista: Date
+}
+
+export interface AlertasFinanceirosResumo {
+    alertas: AlertaFinanceiro[]
+    totalAtrasado: number
+    totalHoje: number
+    totalProximo: number
+}
 
 export const cashFlowService = {
     // --- Contas ---
@@ -141,5 +172,55 @@ export const cashFlowService = {
 
         if (error) throw error
         return data
+    },
+
+    async getAlertasFinanceiros(): Promise<AlertasFinanceirosResumo> {
+        const { data, error } = await alertasQuery
+
+        if (error) throw error
+
+        const vendas = data || []
+        return processAlertasFinanceiros(vendas as VendaAlerta[])
+    }
+}
+
+// Pure business logic extracted for testing
+export function processAlertasFinanceiros(vendas: VendaAlerta[]): AlertasFinanceirosResumo {
+    const hoje = startOfDay(new Date())
+    const limiteProximo = addDays(hoje, 3)
+    const alertasProcessados: AlertaFinanceiro[] = []
+
+    vendas.forEach(venda => {
+        if (!venda.data_prevista_pagamento) return
+        const dataPrevista = startOfDay(new Date(venda.data_prevista_pagamento))
+        let status: StatusFinanceiro | null = null
+
+        if (isBefore(dataPrevista, hoje)) {
+            status = 'atrasado'
+        } else if (isSameDay(dataPrevista, hoje)) {
+            status = 'hoje'
+        } else if (isBefore(dataPrevista, limiteProximo) || isSameDay(dataPrevista, limiteProximo)) {
+            status = 'proximo'
+        }
+
+        if (status) {
+            alertasProcessados.push({
+                venda,
+                diasAtraso: differenceInDays(hoje, dataPrevista),
+                status,
+                dataPrevista
+            })
+        }
+    })
+
+    const totalAtrasado = alertasProcessados.filter(a => a.status === 'atrasado').reduce((acc, curr) => acc + curr.venda.total, 0)
+    const totalHoje = alertasProcessados.filter(a => a.status === 'hoje').reduce((acc, curr) => acc + curr.venda.total, 0)
+    const totalProximo = alertasProcessados.filter(a => a.status === 'proximo').reduce((acc, curr) => acc + curr.venda.total, 0)
+
+    return {
+        alertas: alertasProcessados,
+        totalAtrasado,
+        totalHoje,
+        totalProximo
     }
 }

@@ -25,7 +25,6 @@ import { AlertasRecompraWidget } from '@/components/dashboard/AlertasRecompraWid
 import { TopIndicadoresWidget } from '@/components/dashboard/TopIndicadoresWidget'
 import { UltimasVendasWidget } from '@/components/dashboard/UltimasVendasWidget'
 import { MonthPicker } from '@/components/dashboard/MonthPicker'
-import { Skeleton } from '@/components/ui/Skeleton'
 
 export function Dashboard() {
     const [isRefreshing, setIsRefreshing] = useState(false)
@@ -84,8 +83,8 @@ export function Dashboard() {
     const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
+        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">
+            <div className="relative flex h-auto min-h-[100dvh] w-full flex-col overflow-x-hidden max-w-screen-2xl shadow-2xl bg-background-light dark:bg-background-dark">
 
                 {/* TopAppBar */}
                 <header className="flex items-center px-6 py-4 justify-between sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
@@ -117,154 +116,148 @@ export function Dashboard() {
                     {/* Month Picker Navigation */}
                     <MonthPicker selectedMonth={selectedMonthStr} onMonthSelect={handleMonthSelect} />
 
-                    {isLoading ? (
-                        <div className="flex flex-col gap-6">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                <Skeleton className="h-[140px] w-full rounded-xl col-span-2 md:col-span-1" />
-                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
-                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
-                                <Skeleton className="h-[140px] w-full rounded-xl col-span-1" />
-                            </div>
-                            <Skeleton className="h-[200px] w-full rounded-xl" />
+                    {/* FINANCEIRO Section */}
+                    <div className="flex items-center gap-2 mb-2 px-1">
+                        <DollarSign className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            $ FINANCEIRO
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <KpiCard
+                            title="Faturamento"
+                            value={formatCurrency(metrics?.financial?.faturamento_mes_atual || 0)}
+                            progress={100}
+                            trend={`${metrics?.financial?.variacao_percentual?.toFixed(1) || 0}%`}
+                            trendDirection={(metrics?.financial?.variacao_percentual || 0) >= 0 ? 'up' : 'down'}
+                            icon={TrendingUp}
+                            className="col-span-2 md:col-span-1"
+                            variant="default"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="Ticket Médio"
+                            value={formatCurrency(metrics?.financial?.ticket_medio_mes_atual || 0)}
+                            progress={75}
+                            trend="Estável"
+                            trendDirection="neutral"
+                            icon={ArrowUp}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="Lucro"
+                            value={formatCurrency(metrics?.financial?.lucro_mes_atual || 0)}
+                            progress={100}
+                            trend="Est."
+                            trendDirection="neutral"
+                            icon={DollarSign}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="A Receber"
+                            value={formatCurrency(metrics?.financial?.total_a_receber || 0)}
+                            progress={50}
+                            trend="Pendente"
+                            trendDirection="neutral"
+                            trendColor="yellow"
+                            icon={TrendingDown}
+                            className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
+                            variant="compact"
+                            onClick={() => navigate('/vendas?pagamento=pendente')}
+                            loading={isLoading}
+                        />
+                    </div>
+
+                    {/* VENDAS & ENTREGAS Section */}
+                    <div className="flex items-center gap-2 mb-2 mt-2 px-1">
+                        <ShoppingCart className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            🛒 VENDAS & ENTREGAS
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <KpiCard
+                            title="Vendas"
+                            value={(metrics?.financial?.vendas_mes_atual || 0).toString()}
+                            progress={70}
+                            trend="Mês"
+                            trendDirection="up"
+                            icon={ShoppingBag}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="Itens"
+                            value={(metrics?.operational?.total_itens || 0).toString()}
+                            progress={65}
+                            trend="Vol"
+                            trendDirection="neutral"
+                            icon={Package}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="Pendentes"
+                            value={(metrics?.operational?.entregas_pendentes_total || 0).toString()}
+                            progress={100}
+                            trend="Total"
+                            trendDirection="neutral"
+                            icon={Truck}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+
+                        <KpiCard
+                            title="Entregues"
+                            value={(metrics?.operational?.entregas_hoje_realizadas || 0).toString()}
+                            progress={100}
+                            trend="Hoje"
+                            trendDirection="up"
+                            icon={CheckCircle2}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                        />
+                    </div>
+
+                    {/* Widgets Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                        <div className="space-y-8">
+                            <AlertasFinanceiroWidget
+                                data={metrics?.financial?.alertas_financeiros}
+                                loading={isLoading}
+                            />
+                            <AlertasRecompraWidget
+                                data={metrics?.alertas_recompra}
+                                loading={isLoading}
+                            />
                         </div>
-                    ) : (
-                        <>
-                            {/* FINANCEIRO Section */}
-                            <div className="flex items-center gap-2 mb-2 px-1">
-                                <DollarSign className="w-4 h-4 text-gray-400" />
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    $ FINANCEIRO
-                                </span>
-                            </div>
 
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <KpiCard
-                                    title="Faturamento"
-                                    value={formatCurrency(metrics?.financial?.faturamento_mes_atual || 0)}
-                                    progress={100}
-                                    trend={`${metrics?.financial?.variacao_percentual?.toFixed(1) || 0}%`}
-                                    trendDirection={(metrics?.financial?.variacao_percentual || 0) >= 0 ? 'up' : 'down'}
-                                    icon={TrendingUp}
-                                    className="col-span-2 md:col-span-1"
-                                    variant="default"
-                                />
-
-                                <KpiCard
-                                    title="Ticket Médio"
-                                    value={formatCurrency(metrics?.financial?.ticket_medio_mes_atual || 0)}
-                                    progress={75}
-                                    trend="Estável"
-                                    trendDirection="neutral"
-                                    icon={ArrowUp}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-
-                                <KpiCard
-                                    title="Lucro"
-                                    value={formatCurrency(metrics?.financial?.lucro_mes_atual || 0)}
-                                    progress={100}
-                                    trend="Est."
-                                    trendDirection="neutral"
-                                    icon={DollarSign}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-
-                                <KpiCard
-                                    title="A Receber"
-                                    value={formatCurrency(metrics?.financial?.total_a_receber || 0)}
-                                    progress={50}
-                                    trend="Pendente"
-                                    trendDirection="neutral"
-                                    trendColor="yellow"
-                                    icon={TrendingDown}
-                                    className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
-                                    variant="compact"
-                                    onClick={() => navigate('/vendas?pagamento=pendente')}
-                                />
-                            </div>
-
-                            {/* VENDAS & ENTREGAS Section */}
-                            <div className="flex items-center gap-2 mb-2 mt-2 px-1">
-                                <ShoppingCart className="w-4 h-4 text-gray-400" />
-                                <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                    🛒 VENDAS & ENTREGAS
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                                <KpiCard
-                                    title="Vendas"
-                                    value={(metrics?.financial?.vendas_mes_atual || 0).toString()}
-                                    progress={70}
-                                    trend="Mês"
-                                    trendDirection="up"
-                                    icon={ShoppingBag}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-
-                                <KpiCard
-                                    title="Itens"
-                                    value={(metrics?.operational?.total_itens || 0).toString()}
-                                    progress={65}
-                                    trend="Vol"
-                                    trendDirection="neutral"
-                                    icon={Package}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-
-                                <KpiCard
-                                    title="Pendentes"
-                                    value={(metrics?.operational?.entregas_pendentes_total || 0).toString()}
-                                    progress={100}
-                                    trend="Total"
-                                    trendDirection="neutral"
-                                    icon={Truck}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-
-                                <KpiCard
-                                    title="Entregues"
-                                    value={(metrics?.operational?.entregas_hoje_realizadas || 0).toString()}
-                                    progress={100}
-                                    trend="Hoje"
-                                    trendDirection="up"
-                                    icon={CheckCircle2}
-                                    className="col-span-1"
-                                    variant="compact"
-                                />
-                            </div>
-
-                            {/* Widgets Grid */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                                <div className="space-y-8">
-                                    <AlertasFinanceiroWidget
-                                        data={metrics?.financial?.alertas_financeiros}
-                                        loading={isLoading}
-                                    />
-                                    <AlertasRecompraWidget
-                                        data={metrics?.alertas_recompra}
-                                        loading={isLoading}
-                                    />
-                                </div>
-
-                                <div className="space-y-8">
-                                    <TopIndicadoresWidget
-                                        data={metrics?.operational?.ranking_indicacoes}
-                                        loading={isLoading}
-                                    />
-                                    <UltimasVendasWidget
-                                        data={metrics?.operational?.ultimas_vendas}
-                                        loading={isLoading}
-                                    />
-                                </div>
-                            </div>
-                        </>
-                    )}
+                        <div className="space-y-8">
+                            <TopIndicadoresWidget
+                                data={metrics?.operational?.ranking_indicacoes}
+                                loading={isLoading}
+                            />
+                            <UltimasVendasWidget
+                                data={metrics?.operational?.ultimas_vendas}
+                                loading={isLoading}
+                            />
+                        </div>
+                    </div>
                 </main>
             </div>
         </div>

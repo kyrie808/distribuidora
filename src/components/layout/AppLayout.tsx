@@ -5,7 +5,7 @@ import { ToastContainer } from '../ui/Toast'
 
 export function AppLayout() {
   return (
-    <div className="min-h-screen bg-background font-sans antialiased">
+    <div className="min-h-[100dvh] bg-background font-sans antialiased">
       <PwaUpdateToast />
       <ToastContainer />
       <div className="pb-20"> {/* Add padding bottom for BottomNav */}

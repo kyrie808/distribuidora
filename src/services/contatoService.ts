@@ -3,71 +3,11 @@ import type {
     ContatoInsert,
     ContatoUpdate
 } from '../types/database'
-import type { DomainContato } from '../types/domain'
+import type { DomainContato, CreateContato, UpdateContato } from '../types/domain'
 import { getCoordinates } from '../utils/geocoding'
+import { toDomainContato } from './mappers'
 
 export class ContatoService {
-    /* MAPPERS */
-    private toDomain(row: any): DomainContato {
-        return {
-            id: row.id,
-            nome: row.nome,
-            apelido: row.apelido,
-            telefone: row.telefone,
-            tipo: row.tipo as 'B2C' | 'B2B',
-            subtipo: row.subtipo,
-            status: row.status as 'lead' | 'cliente' | 'inativo',
-            origem: row.origem as 'direto' | 'indicacao',
-            indicadoPorId: row.indicado_por_id,
-            endereco: row.endereco,
-            cep: row.cep,
-            bairro: row.bairro,
-            lat: row.latitude,
-            lng: row.longitude,
-            observacoes: row.observacoes,
-            criadoEm: row.criado_em,
-            atualizadoEm: row.atualizado_em || row.criado_em,
-            // New address fields
-            logradouro: row.logradouro,
-            numero: row.numero,
-            complemento: row.complemento,
-            cidade: row.cidade,
-            uf: row.uf,
-            indicador: ('indicador' in row && row.indicador && typeof row.indicador === 'object' && 'id' in row.indicador) ? {
-                id: (row.indicador as any).id,
-                nome: (row.indicador as any).nome
-            } : null
-        }
-    }
-
-    private toPersistence(domain: Partial<DomainContato>): ContatoUpdate {
-        const update: ContatoUpdate = {}
-        if (domain.nome !== undefined) update.nome = domain.nome
-        if (domain.apelido !== undefined) update.apelido = domain.apelido
-        if (domain.telefone !== undefined) update.telefone = domain.telefone
-        // Type casting needed as domain usage matches DB strings but types are strict/loose
-        if (domain.tipo !== undefined) update.tipo = domain.tipo as any
-        if (domain.subtipo !== undefined) update.subtipo = domain.subtipo
-        if (domain.status !== undefined) update.status = domain.status as any
-        if (domain.origem !== undefined) update.origem = domain.origem as any
-        if (domain.indicadoPorId !== undefined) update.indicado_por_id = domain.indicadoPorId
-        if (domain.endereco !== undefined) update.endereco = domain.endereco
-        if (domain.cep !== undefined) update.cep = domain.cep
-        if (domain.bairro !== undefined) update.bairro = domain.bairro
-        if (domain.lat !== undefined) update.latitude = domain.lat
-        if (domain.lng !== undefined) update.longitude = domain.lng
-        if (domain.observacoes !== undefined) update.observacoes = domain.observacoes
-
-        // New address fields
-        if (domain.logradouro !== undefined) update.logradouro = domain.logradouro
-        if (domain.numero !== undefined) update.numero = domain.numero
-        if (domain.complemento !== undefined) update.complemento = domain.complemento
-        if (domain.cidade !== undefined) update.cidade = domain.cidade
-        if (domain.uf !== undefined) update.uf = domain.uf
-
-        return update
-    }
-
     /* CRUD */
     async func(query: string = '', tipo?: string, status?: string): Promise<DomainContato[]> {
         let builder = supabase
@@ -82,7 +22,6 @@ export class ContatoService {
             .order('criado_em', { ascending: false })
 
         if (query) {
-            // Using websearch for more intuitive multi-term queries
             builder = builder.textSearch('fts', query, {
                 type: 'websearch',
                 config: 'portuguese'
@@ -102,7 +41,7 @@ export class ContatoService {
             throw new Error(`Erro ao buscar contatos: ${error.message}`)
         }
 
-        return (data || []).map(this.toDomain)
+        return (data || []).map(toDomainContato)
     }
 
     async getById(id: string): Promise<DomainContato | null> {
@@ -123,28 +62,47 @@ export class ContatoService {
             return null
         }
 
-        return this.toDomain(data)
+        return toDomainContato(data)
     }
 
-    async create(data: ContatoInsert): Promise<DomainContato> {
-        // Tentar geocoding se houver endereço mas não coordenadas
-        if (data.endereco && (!data.latitude || !data.longitude)) {
+    async create(data: CreateContato): Promise<DomainContato> {
+        const dbInsert: ContatoInsert = {
+            nome: data.nome,
+            apelido: data.apelido || null,
+            telefone: data.telefone,
+            tipo: data.tipo as any,
+            subtipo: data.subtipo,
+            status: data.status as any,
+            origem: data.origem as any,
+            indicado_por_id: data.indicadoPorId,
+            endereco: data.endereco,
+            cep: data.cep,
+            bairro: data.bairro,
+            latitude: data.lat,
+            longitude: data.lng,
+            observacoes: data.observacoes,
+            logradouro: data.logradouro,
+            numero: data.numero,
+            complemento: data.complemento,
+            cidade: data.cidade,
+            uf: data.uf
+        }
+
+        if (dbInsert.endereco && (!dbInsert.latitude || !dbInsert.longitude)) {
             try {
-                // Adiciona cidade/estado fixos se necessário ou confia no input completo
-                const coords = await getCoordinates(data.endereco)
+                const coords = await getCoordinates(dbInsert.endereco)
                 if (coords) {
-                    data.latitude = coords.lat
-                    data.longitude = coords.lng
+                    dbInsert.latitude = coords.lat
+                    dbInsert.longitude = coords.lng
                 }
             } catch (e) {
                 console.warn('Falha no geocoding durante criação:', e)
-                // Não impede a criação
             }
         }
 
         const { data: created, error } = await supabase
             .from('contatos')
-            .insert(data)
+            .insert(dbInsert)
             .select(`
                 *,
                 indicador:contatos!indicado_por_id (
@@ -159,19 +117,37 @@ export class ContatoService {
             throw new Error(`Erro ao criar contato: ${error.message}`)
         }
 
-        return this.toDomain(created)
+        return toDomainContato(created)
     }
 
-    async update(id: string, data: Partial<DomainContato>): Promise<DomainContato> {
-        const persistenceData = this.toPersistence(data)
+    async update(id: string, data: UpdateContato): Promise<DomainContato> {
+        const dbUpdate: ContatoUpdate = {}
+        if (data.nome !== undefined) dbUpdate.nome = data.nome
+        if (data.apelido !== undefined) dbUpdate.apelido = data.apelido
+        if (data.telefone !== undefined) dbUpdate.telefone = data.telefone
+        if (data.tipo !== undefined) dbUpdate.tipo = data.tipo as any
+        if (data.subtipo !== undefined) dbUpdate.subtipo = data.subtipo
+        if (data.status !== undefined) dbUpdate.status = data.status as any
+        if (data.origem !== undefined) dbUpdate.origem = data.origem as any
+        if (data.indicadoPorId !== undefined) dbUpdate.indicado_por_id = data.indicadoPorId
+        if (data.endereco !== undefined) dbUpdate.endereco = data.endereco
+        if (data.cep !== undefined) dbUpdate.cep = data.cep
+        if (data.bairro !== undefined) dbUpdate.bairro = data.bairro
+        if (data.lat !== undefined) dbUpdate.latitude = data.lat
+        if (data.lng !== undefined) dbUpdate.longitude = data.lng
+        if (data.observacoes !== undefined) dbUpdate.observacoes = data.observacoes
+        if (data.logradouro !== undefined) dbUpdate.logradouro = data.logradouro
+        if (data.numero !== undefined) dbUpdate.numero = data.numero
+        if (data.complemento !== undefined) dbUpdate.complemento = data.complemento
+        if (data.cidade !== undefined) dbUpdate.cidade = data.cidade
+        if (data.uf !== undefined) dbUpdate.uf = data.uf
 
-        // Se endereço mudou e coordenadas não foram fornecidas, tentar geocoding
-        if (data.endereco && persistenceData.latitude === undefined) {
+        if (dbUpdate.endereco && dbUpdate.latitude === undefined) {
             try {
-                const coords = await getCoordinates(data.endereco)
+                const coords = await getCoordinates(dbUpdate.endereco)
                 if (coords) {
-                    persistenceData.latitude = coords.lat
-                    persistenceData.longitude = coords.lng
+                    dbUpdate.latitude = coords.lat
+                    dbUpdate.longitude = coords.lng
                 }
             } catch (e) {
                 console.warn('Falha no geocoding durante atualização:', e)
@@ -180,7 +156,7 @@ export class ContatoService {
 
         const { data: updated, error } = await supabase
             .from('contatos')
-            .update(persistenceData)
+            .update(dbUpdate)
             .eq('id', id)
             .select(`
                 *,
@@ -196,7 +172,7 @@ export class ContatoService {
             throw new Error(`Erro ao atualizar contato: ${error.message}`)
         }
 
-        return this.toDomain(updated)
+        return toDomainContato(updated)
     }
 
     async delete(id: string): Promise<void> {
