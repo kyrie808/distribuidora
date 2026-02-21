@@ -111,6 +111,21 @@ export type UpdateVenda = Partial<Omit<CreateVenda, 'itens'>> & {
     pago?: boolean
 }
 
+export interface VendasMetrics {
+    faturamentoTotal: number
+    faturamentoDia: number
+    faturamentoMes: number
+    totalVendas: number
+    vendasMes: number
+    ticketMedio: number
+    produtosVendidos: { total: number; pote1kg: number; pote4kg: number }
+    recebido: number
+    aReceber: number
+    entregasPendentes: number
+    entregasRealizadas: number
+    lucroMes: number
+}
+
 // Purchase Order Domain Types
 export type PurchaseOrderStatus = 'pending' | 'received' | 'cancelled'
 export type PurchaseOrderPaymentStatus = 'unpaid' | 'partial' | 'paid'

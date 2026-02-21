@@ -4,51 +4,6 @@ import type { DomainVenda, CreateVenda, UpdateVenda, VendasMetrics } from '../ty
 import { toDomainVenda } from './mappers'
 import { isToday } from 'date-fns'
 
-// Internal interface for database joins
-interface VendaRawResponse {
-    id: string
-    contato_id: string
-    data: string
-    total: number
-    status: string
-    pago: boolean
-    forma_pagamento: string
-    taxa_entrega: number
-    data_prevista_pagamento: string | null
-    criado_em: string
-    atualizado_em: string
-    contato?: {
-        id: string
-        nome: string
-        telefone: string
-        origem: string
-        indicado_por_id?: string | null
-        status: string
-    }
-    itens: {
-        id: string
-        produto_id: string
-        venda_id: string
-        quantidade: number
-        preco_unitario: number
-        subtotal: number
-        custo_unitario: number
-        produto?: {
-            id: string
-            nome: string
-            codigo: string
-        }
-    }[]
-    pagamentos: {
-        id: string
-        venda_id: string
-        valor: number
-        data: string
-        metodo: string
-        observacao: string | null
-        criado_em: string
-    }[]
-}
 
 export const vendaService = {
     async getVendas(startDate?: Date, endDate?: Date, includePending = false, search?: string): Promise<DomainVenda[]> {
@@ -177,7 +132,7 @@ export const vendaService = {
         const totalVendas = vendas.length
         const faturamentoTotal = vendas.filter(v => v.pago).reduce((acc, v) => acc + v.total, 0)
         const faturamentoDia = vendas.filter(v => isToday(new Date(v.data)) && v.pago).reduce((acc, v) => acc + v.total, 0)
-        
+
         const produtosVendidos = vendas.reduce((acc, v) => {
             v.itens?.forEach(item => {
                 acc.total += item.quantidade

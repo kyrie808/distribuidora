@@ -1281,6 +1281,7 @@ export type ContatoInsert = Insert<'contatos'>
 export type ContatoUpdate = Update<'contatos'>
 export type ProdutoInsert = Insert<'produtos'>
 export type ProdutoUpdate = Update<'produtos'>
+export type ItemVendaInsert = Insert<'itens_venda'>
 
 // Complex Types for Services
 export interface VendaComItens extends Venda {

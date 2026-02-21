@@ -19,7 +19,7 @@ export function Contatos() {
     // Advanced Search Logic (Server-side)
     const debouncedSearchTerm = useDebounce(searchTerm, 500)
 
-    const { contatos, loading, error, getNomeIndicador, refetch } = useContatos({
+    const { contatos, loading, error, refetch } = useContatos({
         filtros: {
             busca: debouncedSearchTerm,
             status: activeStory === 'all' ? 'todos' :
@@ -169,7 +169,7 @@ export function Contatos() {
                                     <ContatoCard
                                         key={contato.id}
                                         contato={contato}
-                                        nomeIndicador={getNomeIndicador(contato)}
+                                        nomeIndicador={contato.indicador?.nome}
                                     />
                                 ))}
                             </div>

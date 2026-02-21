@@ -30,7 +30,7 @@ export function VendaDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { venda, loading, error, refetch } = useVenda(id)
-    const { deleteVenda, addPagamento, updateVendaStatus, deleteUltimoPagamento } = useVendas({ realtime: false })
+    const { deleteVenda, addPagamento, updateVendaStatus, deleteUltimoPagamento } = useVendas()
 
     const [showDeleteModal, setShowDeleteModal] = useState(false)
     const [showPaymentModal, setShowPaymentModal] = useState(false)

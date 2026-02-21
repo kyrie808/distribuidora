@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { purchaseOrderService } from '../services/purchaseOrderService'
-import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
+import type { CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
 
 export function usePurchaseOrders() {
     const queryClient = useQueryClient()

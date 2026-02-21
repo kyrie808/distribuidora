@@ -1,15 +1,14 @@
-import { useState, useMemo } from 'react'
-import { Plus, CheckCircle, TrendingUp, DollarSign, Wallet, Settings, ChevronDown, ChevronUp, History } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, TrendingUp, DollarSign, Wallet, Settings } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, Badge, EmptyState, Button } from '../components/ui'
+import { Card, EmptyState, Button } from '../components/ui'
 import { PurchaseOrderForm } from '../components/features/purchase-orders/PurchaseOrderForm'
 import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
 import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { Spinner } from '../components/ui/Spinner'
 import { ProductNicknamesModal } from '../components/features/purchase-orders/ProductNicknamesModal'
-import { PurchaseOrderPaymentModal } from '../components/features/purchase-orders/PurchaseOrderPaymentModal'
 import { KpiCard } from '../components/dashboard/KpiCard'
 
 export function PedidosCompra() {
@@ -18,32 +17,12 @@ export function PedidosCompra() {
         loading,
         createOrder,
         updateOrder,
-        addPayment,
         refetch
     } = usePurchaseOrders()
 
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [isNicknamesOpen, setIsNicknamesOpen] = useState(false)
     const [selectedOrder, setSelectedOrder] = useState<DomainPurchaseOrderWithItems | null>(null)
-
-    // Payment Modal State
-    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
-    const [paymentOrder, setPaymentOrder] = useState<DomainPurchaseOrderWithItems | null>(null)
-
-    // Expanded rows state
-    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set())
-
-    // Calculate sequential order numbers
-    const orderNumbers = useMemo(() => {
-        const sorted = [...orders].sort((a, b) =>
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-        )
-        const map = new Map<string, number>()
-        sorted.forEach((order, index) => {
-            map.set(order.id, index + 1)
-        })
-        return map
-    }, [orders])
 
     // Calcula KPIs
     const kpis = orders.reduce((acc, order) => {
@@ -65,7 +44,7 @@ export function PedidosCompra() {
         setIsFormOpen(true)
     }
 
-    const handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: any[]) => {
+    const _handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: any[]) => {
         if (selectedOrder) {
             await updateOrder({ id: selectedOrder.id, updates: orderData as UpdatePurchaseOrder })
         } else {
@@ -119,6 +98,21 @@ export function PedidosCompra() {
                                 ))}
                             </table>
                         </Card>
+                    )}
+
+                    {isFormOpen && (
+                        <PurchaseOrderForm
+                            isOpen={isFormOpen}
+                            onClose={() => setIsFormOpen(false)}
+                            onSave={_handleSave}
+                        />
+                    )}
+
+                    {isNicknamesOpen && (
+                        <ProductNicknamesModal
+                            isOpen={isNicknamesOpen}
+                            onClose={() => setIsNicknamesOpen(false)}
+                        />
                     )}
                 </PageContainer>
             </div>

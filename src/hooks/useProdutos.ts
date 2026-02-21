@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { produtoService } from '../services/produtoService'
-import type { DomainProduto, CreateProduto, UpdateProduto } from '../types/domain'
+import type { CreateProduto, UpdateProduto } from '../types/domain'
 
 export function useProdutos(includeInactive: boolean = false) {
     const queryClient = useQueryClient()

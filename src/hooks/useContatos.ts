@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { contatoService } from '../services/contatoService'
-import type { DomainContato, CreateContato, UpdateContato } from '../types/domain'
+import type { CreateContato, UpdateContato } from '../types/domain'
 import type { ContatoFiltros } from '../schemas/contato'
 
 interface UseContatosOptions {
@@ -73,6 +73,10 @@ export function useContatos(options: UseContatosOptions = {}) {
         return contatoService.func(query)
     }, [])
 
+    const getContatoById = useCallback(async (id: string) => {
+        return contatoService.getById(id)
+    }, [])
+
     return {
         contatos: contatos || [],
         loading,
@@ -81,7 +85,8 @@ export function useContatos(options: UseContatosOptions = {}) {
         createContato,
         updateContato,
         deleteContato,
-        searchContatos
+        searchContatos,
+        getContatoById
     }
 }
 

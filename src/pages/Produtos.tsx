@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, Button, Badge, LoadingScreen, Modal, ModalActions, Input } from '../components/ui'
+import { Card, LoadingScreen } from '../components/ui'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
@@ -42,7 +42,7 @@ export function Produtos() {
     }
 
     // Modal states
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [_isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [editingProduto, setEditingProduto] = useState<DomainProduto | null>(null)
 
     // Form states for create
@@ -53,7 +53,7 @@ export function Produtos() {
     const [newCusto, setNewCusto] = useState('')
     const [newUnidade, setNewUnidade] = useState('un')
     const [newEstoqueMinimo, setNewEstoqueMinimo] = useState('10')
-    const [creating, setCreating] = useState(false)
+    const [_creating, _setCreating] = useState(false)
 
     // Form states for edit
     const [editNome, setEditNome] = useState('')
@@ -63,7 +63,7 @@ export function Produtos() {
     const [editCusto, setEditCusto] = useState('')
     const [editEstoqueMinimo, setEditEstoqueMinimo] = useState('')
     const [editAtivo, setEditAtivo] = useState(true)
-    const [updating, setUpdating] = useState(false)
+    const [_updating, _setUpdating] = useState(false)
 
     // Stats
     const produtosAtivos = produtos.filter(p => p.ativo).length
@@ -100,7 +100,7 @@ export function Produtos() {
         setIsCreateModalOpen(true)
     }
 
-    const handleCreate = async () => {
+    const _handleCreate = async () => {
         if (!newNome.trim() || !newCodigo.trim()) {
             toast.error('Nome e código são obrigatórios')
             return
@@ -119,7 +119,7 @@ export function Produtos() {
             return
         }
 
-        setCreating(true)
+        _setCreating(true)
 
         const data: CreateProduto = {
             nome: newNome.trim(),
@@ -139,11 +139,11 @@ export function Produtos() {
         } catch (e: any) {
             toast.error(e.message || 'Erro ao criar produto')
         } finally {
-            setCreating(false)
+            _setCreating(false)
         }
     }
 
-    const handleUpdate = async () => {
+    const _handleUpdate = async () => {
         if (!editingProduto) return
 
         const preco = parseFloat(editPreco)
@@ -154,7 +154,7 @@ export function Produtos() {
             return
         }
 
-        setUpdating(true)
+        _setUpdating(true)
 
         const data: UpdateProduto = {
             nome: editNome.trim(),
@@ -173,7 +173,7 @@ export function Produtos() {
         } catch (e: any) {
             toast.error(e.message || 'Erro ao atualizar produto')
         } finally {
-            setUpdating(false)
+            _setUpdating(false)
         }
     }
 
@@ -182,8 +182,8 @@ export function Produtos() {
         return ((preco - custo) / preco) * 100
     }
 
-    const editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
-    const newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
+    const _editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
+    const _newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">

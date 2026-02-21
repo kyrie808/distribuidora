@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { toDomainContato, toDomainProduto, toDomainItemVenda, toDomainPagamento, toDomainVenda } from '../mappers'
-import type { PagamentoVenda } from '../../types/database'
-import type { VendaComItens } from '../vendaService'
+import type { PagamentoVenda, VendaComItens } from '../../types/database'
 
 describe('Domain Mappers', () => {
     describe('toDomainContato', () => {
@@ -144,7 +143,7 @@ describe('Domain Mappers', () => {
 
     describe('toDomainVenda', () => {
         it('should aggregate fully loaded Venda with items and pagamentos calculating valorPago', () => {
-            const dbVenda: VendaComItens = {
+            const dbVenda = {
                 id: 'v1',
                 contato_id: 'c1',
                 data: '2023-10-01',
@@ -171,7 +170,7 @@ describe('Domain Mappers', () => {
                     { id: 'pag2', venda_id: 'v1', valor: 50, metodo: 'dinheiro', data: '2023-10-01' } as any
                 ],
                 contato: { id: 'c1', nome: 'Cliente Teste' } as any
-            }
+            } as unknown as VendaComItens
 
             const result = toDomainVenda(dbVenda)
 

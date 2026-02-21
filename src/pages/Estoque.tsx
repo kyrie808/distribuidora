@@ -387,7 +387,7 @@ function EstoqueCard({ produto, onIncrement, onDecrement, isUpdating }: EstoqueC
 // Página principal
 export function Estoque() {
     const toast = useToast()
-    const { produtos, loading, updateEstoque } = useProdutos({ includeInactive: false })
+    const { produtos, loading, updateEstoque } = useProdutos(false)
     const [updatingId, setUpdatingId] = useState<string | null>(null)
 
     const handleUpdateEstoque = async (produto: DomainProduto, delta: number) => {

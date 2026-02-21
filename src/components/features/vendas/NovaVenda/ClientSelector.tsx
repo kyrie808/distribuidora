@@ -15,7 +15,7 @@ export function ClientSelector({ selectedContato, onSelect }: ClientSelectorProp
     const [isOpen, setIsOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [results, setResults] = useState<DomainContato[]>([])
-    const { contatos, searchContatos, createContato } = useContatos({ realtime: false })
+    const { contatos, searchContatos, createContato } = useContatos()
     const toast = useToast()
 
     // Quick add state

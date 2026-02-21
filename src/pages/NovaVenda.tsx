@@ -31,8 +31,8 @@ export function NovaVenda() {
     const toast = useToast()
 
     const { produtos, loading: loadingProdutos } = useProdutos()
-    const { getVendaById, createVenda } = useVendas({ realtime: false })
-    const { getContatoById } = useContatos({ realtime: false })
+    const { getVendaById, createVenda } = useVendas()
+    const { getContatoById } = useContatos()
 
     // Store
     const {
@@ -139,7 +139,20 @@ export function NovaVenda() {
 
     const handleConfirmSale = async (data: VendaFormData) => {
         try {
-            const venda = await createVenda(data)
+            const vendaData = {
+                contatoId: data.contato_id || selectedContato?.id || '',
+                data: data.data,
+                formaPagamento: data.forma_pagamento,
+                taxaEntrega: data.taxa_entrega,
+                itens: data.itens.map(it => ({
+                    produtoId: it.produto_id,
+                    quantidade: it.quantidade,
+                    precoUnitario: it.preco_unitario,
+                    subtotal: it.subtotal
+                })),
+                dataPrevistaPagamento: data.data_entrega,
+            }
+            const venda = await createVenda(vendaData)
             if (venda) {
                 toast.success('Venda realizada com sucesso!')
                 clearCart()

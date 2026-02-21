@@ -23,6 +23,8 @@ interface UseVendasReturn {
     deleteVenda: (id: string) => Promise<boolean>
     updateVenda: (id: string, data: UpdateVenda) => Promise<DomainVenda | null>
     getVendaById: (id: string) => Promise<DomainVenda | null>
+    addPagamento: (vendaId: string, data: { valor: number; metodo: string; data: string; observacao?: string }) => Promise<boolean>
+    deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
 export function useVendas({ startDate, endDate, includePending = false, search, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
@@ -62,16 +64,16 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
 
     const updateVendaMutation = useMutation({
         mutationFn: ({ id, data }: { id: string; data: UpdateVenda }) => vendaService.updateVenda(id, data),
-        onSuccess: () => {
+        onSuccess: (_data, variables) => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['vendas', id] })
+            queryClient.invalidateQueries({ queryKey: ['venda', variables.id] })
             queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
         }
     })
 
     const updateStatusMutation = useMutation({
         mutationFn: ({ id, status }: { id: string; status: 'pendente' | 'entregue' | 'cancelada' }) =>
-            vendaService.updateVendaStatus(id, status),
+            vendaService.updateVenda(id, { status }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
         }
@@ -79,7 +81,7 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
 
     const updatePagoMutation = useMutation({
         mutationFn: ({ id, pago }: { id: string; pago: boolean }) =>
-            vendaService.updateVendaPago(id, pago),
+            vendaService.updateVenda(id, { pago }),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
         }
@@ -144,6 +146,21 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         return vendaService.getVendaById(id)
     }, [])
 
+    const addPagamento = useCallback(async (vendaId: string, data: { valor: number; metodo: string; data: string; observacao?: string }) => {
+        try {
+            await vendaService.addPagamento(vendaId, data.valor, data.metodo, data.data, data.observacao)
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['venda', vendaId] })
+            return true
+        } catch (e) { console.error(e); return false }
+    }, [queryClient])
+
+    const deleteUltimoPagamento = useCallback(async (_vendaId: string) => {
+        // TODO: implement server-side delete last payment
+        console.warn('deleteUltimoPagamento not yet implemented')
+        return false
+    }, [])
+
     return {
         vendas: data?.vendas || [],
         loading: isLoading,
@@ -155,7 +172,9 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         updateVendaStatus,
         updateVendaPago,
         deleteVenda,
-        getVendaById
+        getVendaById,
+        addPagamento,
+        deleteUltimoPagamento
     }
 }
 

@@ -3,12 +3,12 @@ import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/Card'
 import { SmartProgressBar } from './SmartProgressBar'
 
-interface KpiCardProps {
+export interface KpiCardProps {
     title: string
     value: string
-    progress: number
-    trend: string
-    trendDirection: 'up' | 'down' | 'neutral'
+    progress?: number
+    trend?: string
+    trendDirection?: 'up' | 'down' | 'neutral'
     targetLabel?: string
     icon?: LucideIcon
     progressColor?: string
@@ -23,9 +23,9 @@ interface KpiCardProps {
 export function KpiCard({
     title,
     value,
-    progress,
-    trend,
-    trendDirection,
+    progress = 0,
+    trend = '',
+    trendDirection = 'neutral',
     targetLabel,
     icon: Icon,
     progressColor = "bg-primary",
