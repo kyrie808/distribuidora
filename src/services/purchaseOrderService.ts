@@ -116,23 +116,14 @@ export const purchaseOrderService = {
             })
 
         if (paymentError) throw paymentError
+    },
 
-        // Update order payment status
-        const order = await this.fetchOrderById(orderId)
-        if (!order) return
+    async deletePayment(paymentId: string): Promise<void> {
+        const { error } = await supabase
+            .from('purchase_order_payments')
+            .delete()
+            .eq('id', paymentId)
 
-        const totalPaid = order.amountPaid + payment.amount
-        let newStatus: DomainPurchaseOrderWithItems['paymentStatus'] = 'partial'
-        if (totalPaid >= order.totalAmount) newStatus = 'paid'
-
-        const { error: updateError } = await supabase
-            .from('purchase_orders')
-            .update({
-                amount_paid: totalPaid,
-                payment_status: newStatus
-            })
-            .eq('id', orderId)
-
-        if (updateError) throw updateError
+        if (error) throw error
     }
 }

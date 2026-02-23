@@ -1,3 +1,5 @@
+import type { Database } from './database'
+
 export type VendaStatus = 'pendente' | 'entregue' | 'cancelada'
 export type PagamentoMetodo = 'pix' | 'dinheiro' | 'cartao' | 'fiado' | 'brinde' | 'pre_venda'
 export type PagamentoStatus = 'pendente' | 'pago'
@@ -153,9 +155,11 @@ export interface DomainPurchaseOrder {
     createdAt: string
 }
 
+export type PurchaseOrderPaymentRow = Database['public']['Tables']['purchase_order_payments']['Row']
+
 export interface DomainPurchaseOrderWithItems extends DomainPurchaseOrder {
     items: DomainPurchaseOrderItem[]
-    payments: any[] // We can refine this if needed
+    payments: PurchaseOrderPaymentRow[]
 }
 
 export type CreatePurchaseOrder = Omit<DomainPurchaseOrder, 'id' | 'createdAt' | 'status' | 'paymentStatus' | 'amountPaid'>

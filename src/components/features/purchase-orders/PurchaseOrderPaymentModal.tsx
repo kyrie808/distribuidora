@@ -4,7 +4,7 @@ import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { formatCurrency } from '../../../utils/formatters'
-import type { PurchaseOrderWithItems } from '../../../types/database'
+import type { DomainPurchaseOrderWithItems } from '../../../types/domain'
 
 // Schema similar to sales payment but for purchase orders
 const paymentSchema = z.object({
@@ -20,7 +20,7 @@ interface PurchaseOrderPaymentModalProps {
     isOpen: boolean
     onClose: () => void
     onConfirm: (data: PaymentFormData) => Promise<void>
-    order: PurchaseOrderWithItems
+    order: DomainPurchaseOrderWithItems
 }
 
 const PAYMENT_METHODS = [
@@ -33,7 +33,7 @@ const PAYMENT_METHODS = [
 ] as const
 
 export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }: PurchaseOrderPaymentModalProps) {
-    const remainingAmount = order.total_amount - (order.amount_paid || 0)
+    const remainingAmount = order.totalAmount - (order.amountPaid || 0)
 
     const {
         register,
@@ -91,11 +91,11 @@ export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }:
                 <div className="p-4 bg-gray-50 border-b">
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-sm text-gray-600">Total do Pedido:</span>
-                        <span className="font-medium">{formatCurrency(order.total_amount)}</span>
+                        <span className="font-medium">{formatCurrency(order.totalAmount)}</span>
                     </div>
                     <div className="flex justify-between items-center mb-1">
                         <span className="text-sm text-gray-600">Já Pago:</span>
-                        <span className="font-medium text-emerald-600">{formatCurrency(order.amount_paid || 0)}</span>
+                        <span className="font-medium text-emerald-600">{formatCurrency(order.amountPaid || 0)}</span>
                     </div>
                     <div className="flex justify-between items-center pt-2 border-t mt-2">
                         <span className="text-sm font-bold text-gray-900">Restante:</span>

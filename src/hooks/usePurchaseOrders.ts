@@ -42,6 +42,13 @@ export function usePurchaseOrders() {
         }
     })
 
+    const deletePaymentMutation = useMutation({
+        mutationFn: (paymentId: string) => purchaseOrderService.deletePayment(paymentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
+        }
+    })
+
     return {
         orders: orders || [],
         loading,
@@ -50,7 +57,8 @@ export function usePurchaseOrders() {
         createOrder: createMutation.mutateAsync,
         updateOrder: updateMutation.mutateAsync,
         deleteOrder: deleteMutation.mutateAsync,
-        addPayment: addPaymentMutation.mutateAsync
+        addPayment: addPaymentMutation.mutateAsync,
+        deletePayment: deletePaymentMutation.mutateAsync
     }
 }
 

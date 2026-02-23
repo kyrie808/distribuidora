@@ -25,8 +25,8 @@ export function StoryFilter({ items, activeId, onSelect, size = 'md' }: StoryFil
     const { outer, icon } = sizeClasses[size]
 
     return (
-        <div className="w-full overflow-x-auto pb-4 pt-2 px-1 hide-scrollbar -mx-4 md:mx-0 flex justify-center">
-            <div className="flex gap-4 px-4 md:px-0 min-w-max md:min-w-0">
+        <div className="w-full overflow-x-auto pb-4 pt-2 px-1 hide-scrollbar -mx-4 md:mx-0">
+            <div className="flex gap-4 px-4 md:px-0 min-w-max md:min-w-0 md:justify-center after:content-[''] after:min-w-[16px] after:shrink-0 md:after:hidden">
                 {items.map((item) => {
                     const isActive = activeId === item.id
                     // Default to 'purple' if not specified to match previous default style unless overridden
