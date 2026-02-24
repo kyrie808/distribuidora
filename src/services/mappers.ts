@@ -22,6 +22,7 @@ type PagamentoRow = Tables<'pagamentos_venda'>
 type VendaRow = Tables<'vendas'>
 type PurchaseOrderRow = Tables<'purchase_orders'>
 type PurchaseOrderItemRow = Tables<'purchase_order_items'>
+type PurchaseOrderPaymentRow = Tables<'purchase_order_payments'>
 
 // ---------------------------------------------------
 // Extended row types for Supabase joins
@@ -61,7 +62,7 @@ type PurchaseOrderRowWithFornecedor = PurchaseOrderRow & {
 
 type PurchaseOrderRowWithRelations = PurchaseOrderRowWithFornecedor & {
     items?: PurchaseOrderItemRow[]
-    payments?: unknown[]
+    payments?: PurchaseOrderPaymentRow[]
 }
 
 // ---------------------------------------------------
