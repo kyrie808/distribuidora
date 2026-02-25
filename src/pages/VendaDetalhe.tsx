@@ -284,42 +284,44 @@ export function VendaDetalhe() {
                     <div className="absolute -bottom-4 left-4 right-4 h-4 bg-black/10 dark:bg-black/40 blur-lg rounded-[100%] z-[-1]"></div>
                 </div>
 
-                {/* Main Action Buttons (Moved) */}
-                <div className="flex gap-3 mb-6">
-                    {(venda.status === 'pendente' || venda.status === 'entregue') && (
-                        <Button
-                            className="flex-1"
-                            variant={venda.status === 'entregue' ? "secondary" : "primary"}
-                            onClick={handleEntregar}
-                        >
-                            <Truck className="h-4 w-4 mr-2" />
-                            {venda.status === 'entregue' ? 'Voltar para Pendente' : 'Entregar'}
-                        </Button>
-                    )}
+                {/* Main Action Buttons (Moved) - Hide if from Catalog */}
+                {venda.origem !== 'catalogo' && (
+                    <div className="flex gap-3 mb-6">
+                        {(venda.status === 'pendente' || venda.status === 'entregue') && (
+                            <Button
+                                className="flex-1"
+                                variant={venda.status === 'entregue' ? "secondary" : "primary"}
+                                onClick={handleEntregar}
+                            >
+                                <Truck className="h-4 w-4 mr-2" />
+                                {venda.status === 'entregue' ? 'Voltar para Pendente' : 'Entregar'}
+                            </Button>
+                        )}
 
-                    {!venda.pago && venda.status !== 'cancelada' && (
-                        <Button
-                            className="flex-1"
-                            variant="primary"
-                            onClick={() => setShowPaymentModal(true)}
-                        >
-                            <DollarSign className="h-4 w-4 mr-2" />
-                            Quitar
-                        </Button>
-                    )}
+                        {!venda.pago && venda.status !== 'cancelada' && (
+                            <Button
+                                className="flex-1"
+                                variant="primary"
+                                onClick={() => setShowPaymentModal(true)}
+                            >
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Quitar
+                            </Button>
+                        )}
 
-                    {venda.pago && venda.status !== 'cancelada' && (
-                        <Button
-                            className="flex-1 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border-transparent"
-                            variant="outline"
-                            onClick={() => setShowUndoPaymentConfirm(true)}
-                            disabled={loadingAction}
-                        >
-                            <RotateCcw className="h-4 w-4 mr-2" />
-                            Desfazer Pagamento
-                        </Button>
-                    )}
-                </div>
+                        {venda.pago && venda.status !== 'cancelada' && (
+                            <Button
+                                className="flex-1 bg-red-100 text-red-700 hover:bg-red-200 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 border-transparent"
+                                variant="outline"
+                                onClick={() => setShowUndoPaymentConfirm(true)}
+                                disabled={loadingAction}
+                            >
+                                <RotateCcw className="h-4 w-4 mr-2" />
+                                Desfazer Pagamento
+                            </Button>
+                        )}
+                    </div>
+                )}
 
                 {/* CLIENT INFO CARD */}
                 <div
@@ -371,27 +373,27 @@ export function VendaDetalhe() {
                             Compartilhar
                         </Button>
 
-                        {/* Action Buttons */}
-
-
-                        {venda.status !== 'cancelada' ? (
-                            <Button
-                                variant="outline"
-                                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
-                                onClick={() => setShowDeleteModal(true)}
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Cancelar
-                            </Button>
-                        ) : (
-                            <Button
-                                variant="outline"
-                                className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
-                                onClick={() => setShowDeleteModal(true)}
-                            >
-                                <Trash2 className="h-4 w-4 mr-2" />
-                                Excluir
-                            </Button>
+                        {/* Action Buttons - Hide Delete if from Catalog */}
+                        {venda.origem !== 'catalogo' && (
+                            venda.status !== 'cancelada' ? (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                                    onClick={() => setShowDeleteModal(true)}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Cancelar
+                                </Button>
+                            ) : (
+                                <Button
+                                    variant="outline"
+                                    className="flex-1 border-red-200 text-red-600 hover:bg-red-50 dark:border-red-500/30 dark:text-red-400 dark:hover:bg-red-500/10"
+                                    onClick={() => setShowDeleteModal(true)}
+                                >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Excluir
+                                </Button>
+                            )
                         )}
                     </div>
 

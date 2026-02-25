@@ -42,7 +42,7 @@ export function CheckoutSidebar({
         setValue,
         watch,
         reset,
-        formState: { }
+        formState: { errors }
     } = useForm<VendaFormData>({
         resolver: zodResolver(vendaSchema) as any,
         defaultValues: {
@@ -100,7 +100,7 @@ export function CheckoutSidebar({
         <div className="flex flex-col h-full bg-white dark:bg-gray-800 border-l border-gray-200 dark:border-gray-700 shadow-xl overflow-hidden">
             {/* Header */}
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center gap-3 bg-gray-50 dark:bg-gray-800/50">
-                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">Finalizar Venda</h2>
+                <h2 className="font-semibold text-gray-900 dark:text-gray-100">Finalizar Venda</h2>
             </div>
 
             <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto p-4 space-y-6">
@@ -185,8 +185,18 @@ export function CheckoutSidebar({
                                 <input
                                     type="date"
                                     {...register('data_prevista_pagamento')}
-                                    className="w-full px-3 py-2 bg-white dark:bg-zinc-800 border border-orange-200 dark:border-orange-800 rounded-lg outline-none"
+                                    className={cn(
+                                        "w-full px-3 py-2 bg-white dark:bg-zinc-800 border rounded-lg outline-none",
+                                        errors.data_prevista_pagamento
+                                            ? "border-red-500 focus:ring-red-500"
+                                            : "border-orange-200 dark:border-orange-800"
+                                    )}
                                 />
+                                {errors.data_prevista_pagamento && (
+                                    <span className="text-[10px] text-red-500 mt-1 font-bold">
+                                        {errors.data_prevista_pagamento.message}
+                                    </span>
+                                )}
                             </div>
                             <div className="flex items-center text-[10px] text-orange-700 dark:text-orange-500 italic">
                                 <ChevronRight className="w-3 h-3 mr-1 shrink-0 px-0" />

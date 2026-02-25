@@ -9,7 +9,8 @@ import {
     Refrigerator,
     Unlink,
     DollarSign,
-    LayoutGrid
+    LayoutGrid,
+    CalendarClock
 } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Header } from '../components/layout/Header'
@@ -90,6 +91,14 @@ export function Menu() {
             iconColor: 'text-emerald-600',
             iconBg: 'bg-emerald-500/10',
             href: '/fluxo-caixa',
+            visible: true
+        },
+        {
+            title: 'Contas a Receber',
+            icon: CalendarClock,
+            iconColor: 'text-orange-600',
+            iconBg: 'bg-orange-500/10',
+            href: '/contas-a-receber',
             visible: true
         },
         {

@@ -19,6 +19,16 @@ export interface DashboardMetrics {
         variacao_percentual: number
         total_a_receber: number
         alertas_financeiros: any[]
+        a_receber_detalhado?: {
+            vencidos: number
+            vencem_hoje: number
+            vencem_semana: number
+            sem_data: number
+            valor_vencido: number
+            valor_hoje: number
+            valor_semana: number
+            valor_sem_data: number
+        }
     },
     alertas_recompra: {
         contato_id: string
@@ -34,7 +44,8 @@ export const dashboardService = {
         const [
             { data: financialData, error: finError },
             { data: operationalData, error: opError },
-            { data: alertsData, error: alrError }
+            { data: alertsData, error: alrError },
+            { data: breakdownData, error: breakdownError }
         ] = await Promise.all([
             supabase
                 .from('view_home_financeiro')
@@ -51,19 +62,21 @@ export const dashboardService = {
             supabase
                 .from('view_home_alertas')
                 .select('*')
-                .limit(10)
+                .limit(10),
+            supabase.rpc('get_areceber_breakdown' as any).maybeSingle()
         ]) as any[]
 
         if (finError) throw finError
         if (opError) throw opError
         if (alrError) throw alrError
+        if (breakdownError) throw breakdownError
 
-        return mapDashboardMetrics(financialData, operationalData, alertsData)
+        return mapDashboardMetrics(financialData, operationalData, alertsData, breakdownData)
     }
 }
 
 // Pure business logic extracted for testing
-export function mapDashboardMetrics(financialData: any, operationalData: any, alertsData: any): DashboardMetrics {
+export function mapDashboardMetrics(financialData: any, operationalData: any, alertsData: any, breakdownData?: any): DashboardMetrics {
     const fin = financialData || {
         faturamento: 0,
         ticket_medio: 0,
@@ -102,7 +115,17 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
             faturamento_mes_anterior: fin.faturamento_anterior ?? 0,
             variacao_percentual: fin.variacao_faturamento_percentual ?? 0,
             total_a_receber: fin.total_a_receber ?? 0,
-            alertas_financeiros: (fin.alertas_financeiros as any[]) ?? []
+            alertas_financeiros: (fin.alertas_financeiros as any[]) ?? [],
+            a_receber_detalhado: breakdownData ? {
+                vencidos: Number(breakdownData.vencidos || 0),
+                vencem_hoje: Number(breakdownData.vencem_hoje || 0),
+                vencem_semana: Number(breakdownData.vencem_semana || 0),
+                sem_data: Number(breakdownData.sem_data || 0),
+                valor_vencido: Number(breakdownData.valor_vencido || 0),
+                valor_hoje: Number(breakdownData.valor_hoje || 0),
+                valor_semana: Number(breakdownData.valor_semana || 0),
+                valor_sem_data: Number(breakdownData.valor_sem_data || 0),
+            } : undefined
         },
         alertas_recompra: (alertsData || []).map((a: any) => ({
             contato_id: a.contato_id ?? '',

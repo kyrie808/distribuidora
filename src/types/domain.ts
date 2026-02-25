@@ -10,7 +10,7 @@ export interface DomainContato {
     apelido?: string | null
     telefone: string
     email?: string | null
-    tipo: 'B2C' | 'B2B' | 'FORNECEDOR'
+    tipo: 'B2C' | 'B2B' | 'FORNECEDOR' | 'catalogo'
     subtipo?: string | null
     status: 'lead' | 'cliente' | 'inativo' | 'fornecedor'
     origem: 'direto' | 'indicacao' | 'catalogo'
@@ -85,6 +85,8 @@ export interface DomainVenda {
     pagamentos: DomainPagamento[]
     criadoEm: string
     valorPago: number
+    origem?: 'catalogo' | 'direta' | string | null
+    dataPrevistaPagamento?: string | null
 }
 
 // Creation/Update types (Domain-side)

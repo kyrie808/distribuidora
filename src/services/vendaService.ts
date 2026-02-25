@@ -156,5 +156,18 @@ export const vendaService = {
             entregasRealizadas: vendas.filter(v => v.status === 'entregue').length,
             lucroMes: vendas.filter(v => v.pago).reduce((acc, v) => acc + (v.total - (v.custoTotal || 0)), 0)
         }
+    },
+
+    async quitarVenda(id: string, valor: number, metodo: string, observacao?: string): Promise<DomainVenda> {
+        const { error: vendaError } = await supabase
+            .from('vendas')
+            .update({ pago: true })
+            .eq('id', id)
+
+        if (vendaError) throw vendaError
+
+        await this.addPagamento(id, valor, metodo, new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).split(' ')[0], observacao)
+
+        return this.getVendaById(id)
     }
 }

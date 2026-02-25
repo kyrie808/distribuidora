@@ -25,6 +25,7 @@ const CatalogoPendentes = lazy(() => import('./pages/CatalogoPendentes').then(m 
 const FluxoCaixa = lazy(() => import('./pages/FluxoCaixa').then(m => ({ default: m.FluxoCaixa })))
 const PlanoDeContas = lazy(() => import('./pages/PlanoDeContas').then(m => ({ default: m.PlanoDeContas })))
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
+const ContasReceber = lazy(() => import('./pages/ContasReceber').then(m => ({ default: m.ContasReceber })))
 
 function PageFallback() {
   return (
@@ -62,6 +63,7 @@ function App() {
               <Route path="/catalogo-pendentes" element={<CatalogoPendentes />} />
               <Route path="/fluxo-caixa" element={<FluxoCaixa />} />
               <Route path="/plano-de-contas" element={<PlanoDeContas />} />
+              <Route path="/contas-a-receber" element={<ContasReceber />} />
 
               {/* Redirects */}
               <Route path="/clientes" element={<Navigate to="/contatos" replace />} />

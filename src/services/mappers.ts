@@ -159,7 +159,9 @@ export const toDomainVenda = (dbVenda: VendaRowWithRelations): DomainVenda => {
         itens: (dbVenda.itens || []).map(i => toDomainItemVenda(i as ItemVendaRowWithProduto)),
         pagamentos: (dbVenda.pagamentos || []).map(p => toDomainPagamento(p as PagamentoRowWithStatus)),
         criadoEm: dbVenda.criado_em,
-        valorPago: (dbVenda.pagamentos || []).reduce((acc: number, p) => acc + Number((p as PagamentoRowWithStatus).valor || 0), 0)
+        valorPago: (dbVenda.pagamentos || []).reduce((acc: number, p) => acc + Number((p as PagamentoRowWithStatus).valor || 0), 0),
+        origem: dbVenda.origem,
+        dataPrevistaPagamento: dbVenda.data_prevista_pagamento
     }
 }
 

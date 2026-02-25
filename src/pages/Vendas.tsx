@@ -7,6 +7,7 @@ import {
     Trash2,
     Truck,
     DollarSign,
+    Monitor,
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -352,6 +353,14 @@ export function Vendas() {
                                                         <DollarSign className="h-3.5 w-3.5" />
                                                         <span>{(venda.pago || venda.valorPago >= venda.total) ? 'Pago' : 'Pagamento Pendente'}</span>
                                                     </div>
+
+                                                    {/* Origin Badge */}
+                                                    {venda.origem === 'catalogo' && (
+                                                        <div className="px-2.5 py-1 rounded-lg text-xs font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm flex items-center gap-1.5">
+                                                            <Monitor className="h-3.5 w-3.5" />
+                                                            <span>Catálogo Online</span>
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
                                         </CardHeader>
@@ -373,8 +382,8 @@ export function Vendas() {
                                         </CardContent>
 
                                         <CardFooter className="pt-0 p-5 bg-gray-50/30 flex items-center justify-between border-t border-gray-100">
-                                            {/* Trash Button - Discreet */}
-                                            {venda.status !== 'cancelada' ? (
+                                            {/* Action Buttons - Hide if from Catalog */}
+                                            {venda.status !== 'cancelada' && venda.origem !== 'catalogo' ? (
                                                 <Button
                                                     size="icon"
                                                     variant="ghost"

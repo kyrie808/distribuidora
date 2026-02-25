@@ -80,6 +80,13 @@ export function Dashboard() {
         setIsRefreshing(false)
     }, [refetch])
 
+    const totalContas = metrics?.financial?.a_receber_detalhado
+        ? (metrics.financial.a_receber_detalhado.vencidos +
+            metrics.financial.a_receber_detalhado.vencem_hoje +
+            metrics.financial.a_receber_detalhado.vencem_semana +
+            metrics.financial.a_receber_detalhado.sem_data)
+        : 0;
+
     const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
 
     return (
@@ -165,16 +172,17 @@ export function Dashboard() {
                             title="A Receber"
                             value={formatCurrency(metrics?.financial?.total_a_receber || 0)}
                             progress={50}
-                            trend="Pendente"
+                            trend={totalContas > 0 ? `${totalContas} pendências` : 'Tudo em dia'}
                             trendDirection="neutral"
-                            trendColor="yellow"
+                            trendColor={totalContas > 0 ? "yellow" : "green"}
                             icon={TrendingDown}
                             className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                             variant="compact"
-                            onClick={() => navigate('/vendas?pagamento=pendente')}
+                            onClick={() => navigate('/contas-a-receber')}
                             loading={isLoading}
                         />
                     </div>
+
 
                     {/* VENDAS & ENTREGAS Section */}
                     <div className="flex items-center gap-2 mb-2 mt-2 px-1">
