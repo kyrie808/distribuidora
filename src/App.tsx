@@ -23,7 +23,6 @@ const PedidosCompra = lazy(() => import('./pages/PedidosCompra').then(m => ({ de
 const Menu = lazy(() => import('./pages/Menu').then(m => ({ default: m.Menu })))
 const CatalogoPendentes = lazy(() => import('./pages/CatalogoPendentes').then(m => ({ default: m.CatalogoPendentes })))
 const FluxoCaixa = lazy(() => import('./pages/FluxoCaixa').then(m => ({ default: m.FluxoCaixa })))
-const PlanoDeContas = lazy(() => import('./pages/PlanoDeContas').then(m => ({ default: m.PlanoDeContas })))
 const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })))
 const ContasReceber = lazy(() => import('./pages/ContasReceber').then(m => ({ default: m.ContasReceber })))
 
@@ -62,7 +61,6 @@ function App() {
               <Route path="/menu" element={<Menu />} />
               <Route path="/catalogo-pendentes" element={<CatalogoPendentes />} />
               <Route path="/fluxo-caixa" element={<FluxoCaixa />} />
-              <Route path="/plano-de-contas" element={<PlanoDeContas />} />
               <Route path="/contas-a-receber" element={<ContasReceber />} />
 
               {/* Redirects */}

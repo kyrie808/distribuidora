@@ -26,9 +26,10 @@ type TransferenciaFormData = z.infer<typeof transferenciaSchema>
 interface TransferenciaModalProps {
     isOpen: boolean
     onClose: () => void
+    onSuccess?: () => void
 }
 
-export function TransferenciaModal({ isOpen, onClose }: TransferenciaModalProps) {
+export function TransferenciaModal({ isOpen, onClose, onSuccess }: TransferenciaModalProps) {
     const toast = useToast()
     const { contas } = useContas()
     const { createTransferencia } = useLancamentos()
@@ -83,6 +84,7 @@ export function TransferenciaModal({ isOpen, onClose }: TransferenciaModalProps)
         try {
             await createTransferencia(data as any)
             toast.success('Transferência realizada com sucesso!')
+            onSuccess?.()
             onClose()
         } catch (error) {
             console.error(error)

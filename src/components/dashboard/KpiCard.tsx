@@ -1,4 +1,4 @@
-import { TrendingUp, TrendingDown, Minus, type LucideIcon } from 'lucide-react'
+import { TrendingUp, TrendingDown, Minus, Info, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent } from '@/components/ui/Card'
 import { SmartProgressBar } from './SmartProgressBar'
@@ -18,6 +18,7 @@ export interface KpiCardProps {
     variant?: 'default' | 'compact'
     loading?: boolean
     onClick?: () => void
+    tooltip?: string
 }
 
 export function KpiCard({
@@ -34,7 +35,8 @@ export function KpiCard({
     className,
     variant = 'default',
     loading,
-    onClick
+    onClick,
+    tooltip
 }: KpiCardProps) {
 
     if (loading) {
@@ -75,7 +77,18 @@ export function KpiCard({
                 {isCompact ? (
                     // Compact Layout
                     <div className="flex flex-col gap-1">
-                        <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{title}</span>
+                        <div className="flex items-center gap-1.5 group relative">
+                            <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{title}</span>
+                            {tooltip && (
+                                <div className="relative flex items-center group/tooltip">
+                                    <Info className="w-3 h-3 text-gray-400 hover:text-primary transition-colors cursor-help" />
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-xl font-normal text-center">
+                                        {tooltip}
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                         <span className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</span>
 
                         <SmartProgressBar
@@ -94,7 +107,18 @@ export function KpiCard({
                     <>
                         <div className="flex justify-between items-start">
                             <div className="flex flex-col">
-                                <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{title}</span>
+                                <div className="flex items-center gap-1.5 group relative">
+                                    <span className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{title}</span>
+                                    {tooltip && (
+                                        <div className="relative flex items-center group/tooltip">
+                                            <Info className="w-3 h-3 text-gray-400 hover:text-primary transition-colors cursor-help" />
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-xl font-normal text-center">
+                                                {tooltip}
+                                                <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                                 <span className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</span>
                             </div>
                             <span className={cn("inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-xs font-bold", getTrendColors())}>

@@ -47,8 +47,14 @@ export type VendaFiltros = z.infer<typeof vendaFiltrosSchema>
 export const pagamentoSchema = z.object({
     venda_id: z.string().uuid(),
     valor: z.number().min(0.01, 'Valor deve ser maior que zero'),
-    data: z.string().default(() => new Date().toISOString()),
+    data: z.string().refine((val) => {
+        const date = new Date(val);
+        const todayStr = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).split(' ')[0];
+        const endOfToday = new Date(`${todayStr}T23:59:59`);
+        return date <= endOfToday;
+    }, 'A data de pagamento não pode ser futura'),
     metodo: z.enum(['pix', 'dinheiro', 'cartao', 'fiado', 'brinde', 'pre_venda']).default('pix'),
+    conta_id: z.string().uuid('Selecione uma conta de destino'),
     observacao: z.string().optional(),
 })
 

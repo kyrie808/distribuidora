@@ -226,15 +226,16 @@ export type Database = {
       }
       contas: {
         Row: {
-          ativo: boolean | null
+          banco: string | null
           criado_em: string | null
           id: string
           nome: string
+          saldo_atual: number | null
           saldo_inicial: number | null
           tipo: string
         }
         Insert: {
-          ativo?: boolean | null
+          banco?: string | null
           criado_em?: string | null
           id?: string
           nome: string
@@ -977,6 +978,7 @@ export type Database = {
           mes: number | null
           total_a_receber: number | null
           total_entradas: number | null
+          total_faturamento: number | null
           total_saidas: number | null
         }
         Relationships: []
@@ -1113,6 +1115,10 @@ export type Database = {
       }
       rpc_marcar_venda_paga: {
         Args: { p_conta_id: string; p_data?: string; p_venda_id: string }
+        Returns: undefined
+      }
+      registrar_lancamento_venda: {
+        Args: { p_venda_id: string; p_valor: number; p_conta_id: string; p_data: string }
         Returns: undefined
       }
     }

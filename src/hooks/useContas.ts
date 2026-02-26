@@ -7,7 +7,7 @@ type ContaInsert = Database['public']['Tables']['contas']['Insert']
 export function useContas() {
     const queryClient = useQueryClient()
 
-    const { data: contas = [], isLoading, error } = useQuery({
+    const { data: contas = [], isLoading, error, refetch } = useQuery({
         queryKey: ['contas'],
         queryFn: () => cashFlowService.getContas(),
     })
@@ -23,6 +23,7 @@ export function useContas() {
         contas,
         isLoading,
         error,
+        refetch,
         createConta: createMutation.mutateAsync,
         isCreating: createMutation.isPending,
     }

@@ -165,4 +165,37 @@ export interface DomainPurchaseOrderWithItems extends DomainPurchaseOrder {
 }
 
 export type CreatePurchaseOrder = Omit<DomainPurchaseOrder, 'id' | 'createdAt' | 'status' | 'paymentStatus' | 'amountPaid'>
-export type UpdatePurchaseOrder = Partial<DomainPurchaseOrder>
+// Catalog Orders Domain Types
+export type CatalogOrderStatus = 'pendente' | 'confirmado' | 'preparando' | 'enviado' | 'entregue' | 'cancelado'
+export type CatalogPaymentStatus = 'pendente' | 'pago' | 'parcial'
+
+export interface DomainCatalogOrderItem {
+    id: string
+    pedidoId: string
+    produtoId?: string | null
+    nomeProduto: string
+    quantidade: number
+    precoUnitarioCentavos: number
+    totalCentavos: number
+}
+
+export interface DomainCatalogOrder {
+    id: string
+    numeroPedido: number
+    nomeCliente: string
+    telefoneCliente: string
+    enderecoEntrega?: string | null
+    metodoEntrega?: 'entrega' | 'retirada' | null
+    status: CatalogOrderStatus
+    subtotalCentavos: number
+    freteCentavos: number
+    totalCentavos: number
+    metodoPagamento?: PagamentoMetodo | null
+    statusPagamento: CatalogPaymentStatus
+    observacoes?: string | null
+    indicadoPor?: string | null
+    criadoEm: string
+    atualizadoEm: string
+    contatoId?: string | null
+    itens?: DomainCatalogOrderItem[]
+}

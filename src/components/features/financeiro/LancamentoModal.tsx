@@ -25,9 +25,10 @@ interface LancamentoModalProps {
     type: 'entrada' | 'saida'
     isOpen: boolean
     onClose: () => void
+    onSuccess?: () => void
 }
 
-export function LancamentoModal({ type, isOpen, onClose }: LancamentoModalProps) {
+export function LancamentoModal({ type, isOpen, onClose, onSuccess }: LancamentoModalProps) {
     const toast = useToast()
     const { contas } = useContas()
     const { planoContas } = usePlanoDeContas()
@@ -90,6 +91,7 @@ export function LancamentoModal({ type, isOpen, onClose }: LancamentoModalProps)
                 origem: 'manual'
             })
             toast.success(`${type === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`)
+            onSuccess?.()
             onClose()
         } catch (error) {
             console.error(error)

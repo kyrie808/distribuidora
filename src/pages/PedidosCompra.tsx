@@ -83,38 +83,38 @@ export function PedidosCompra() {
 
                 <PageContainer className="!pt-6 px-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <KpiCard 
-                            title="Total Pedido" 
-                            value={formatCurrency(kpis.totalPedido)} 
+                        <KpiCard
+                            title="Total Pedido"
+                            value={formatCurrency(kpis.totalPedido)}
                             icon={DollarSign}
                             progress={100}
                             progressColor="bg-blue-500"
                             trend="Total Bruto"
                             trendColor="primary"
                         />
-                        <KpiCard 
-                            title="Valor em Aberto" 
-                            value={formatCurrency(kpis.totalAberto)} 
+                        <KpiCard
+                            title="Valor em Aberto"
+                            value={formatCurrency(kpis.totalAberto)}
                             icon={Wallet}
-                            progress={kpis.totalPedido > 0 
-                                ? Math.round((kpis.totalAberto / kpis.totalPedido) * 100) 
+                            progress={kpis.totalPedido > 0
+                                ? Math.round((kpis.totalAberto / kpis.totalPedido) * 100)
                                 : 0}
                             progressColor="bg-yellow-500"
-                            trend={`${kpis.totalPedido > 0 
-                                ? Math.round((kpis.totalAberto / kpis.totalPedido) * 100) 
+                            trend={`${kpis.totalPedido > 0
+                                ? Math.round((kpis.totalAberto / kpis.totalPedido) * 100)
                                 : 0}% Pendente`}
                             trendColor="yellow"
                         />
-                        <KpiCard 
-                            title="Valor Pago" 
-                            value={formatCurrency(kpis.totalPago)} 
+                        <KpiCard
+                            title="Valor Pago"
+                            value={formatCurrency(kpis.totalPago)}
                             icon={TrendingUp}
-                            progress={kpis.totalPedido > 0 
-                                ? Math.round((kpis.totalPago / kpis.totalPedido) * 100) 
+                            progress={kpis.totalPedido > 0
+                                ? Math.round((kpis.totalPago / kpis.totalPedido) * 100)
                                 : 0}
                             progressColor="bg-emerald-500"
-                            trend={`${kpis.totalPedido > 0 
-                                ? Math.round((kpis.totalPago / kpis.totalPedido) * 100) 
+                            trend={`${kpis.totalPedido > 0
+                                ? Math.round((kpis.totalPago / kpis.totalPedido) * 100)
                                 : 0}% Quitado`}
                             trendColor="green"
                         />
@@ -191,7 +191,7 @@ export function PedidosCompra() {
                                                                 <span className="font-medium text-gray-900 dark:text-gray-100">
                                                                     {formatCurrency(payment.amount)}
                                                                 </span>
-                                                                <button 
+                                                                <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation()
                                                                         setPaymentToDelete(payment.id)
@@ -276,7 +276,12 @@ export function PedidosCompra() {
                             onConfirm={async (data) => {
                                 await addPayment({
                                     orderId: paymentModalOrder.id,
-                                    payment: { amount: data.amount, method: data.payment_method, notes: data.notes }
+                                    payment: {
+                                        amount: data.amount,
+                                        method: data.payment_method,
+                                        contaId: data.conta_id,
+                                        notes: data.notes
+                                    }
                                 })
                                 refetch()
                             }}

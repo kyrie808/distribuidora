@@ -18,6 +18,9 @@ import { formatCurrency } from '../utils/formatters'
 import { differenceInDays, parseISO, isPast, isToday as isTodayFns, addDays, isBefore } from 'date-fns'
 import { cn } from '../utils/cn'
 import { useToast } from '../components/ui/Toast'
+import { cashFlowService } from '../services/cashFlowService'
+import { Modal, ModalActions, Select } from '../components/ui'
+import type { Conta } from '../types/database'
 
 type StatusFilter = 'todos' | 'vencidos' | 'hoje' | 'semana'
 
@@ -26,6 +29,10 @@ export function ContasReceber() {
     const [isLoading, setIsLoading] = useState(true)
     const [filter, setFilter] = useState<StatusFilter>('todos')
     const [searchTerm, setSearchTerm] = useState('')
+    const [contas, setContas] = useState<Conta[]>([])
+    const [selectedVenda, setSelectedVenda] = useState<DomainVenda | null>(null)
+    const [selectedContaId, setSelectedContaId] = useState('')
+    const [isQuitting, setIsQuitting] = useState(false)
     const navigate = useNavigate()
     const toast = useToast()
 
@@ -34,7 +41,7 @@ export function ContasReceber() {
             setIsLoading(true)
             // Fetch all delivered but unpaid sales
             const data = await vendaService.getVendas(undefined, undefined, false)
-            setVendas(data.filter(v => v.status === 'entregue' && !v.pago && v.origem !== 'catalogo'))
+            setVendas(data.filter(v => v.status === 'entregue' && !v.pago && v.origem !== 'catalogo' && v.formaPagamento !== 'brinde'))
         } catch (error) {
             console.error('Erro ao carregar contas a receber:', error)
             toast.error('Não foi possível carregar as contas a receber')
@@ -45,7 +52,18 @@ export function ContasReceber() {
 
     useEffect(() => {
         fetchVendas()
+        fetchContas()
     }, [])
+
+    const fetchContas = async () => {
+        try {
+            const data = await cashFlowService.getContas()
+            setContas(data)
+            if (data.length > 0) setSelectedContaId(data[0].id)
+        } catch (error) {
+            console.error('Erro ao carregar contas:', error)
+        }
+    }
 
     const filteredVendas = useMemo(() => {
         let result = vendas
@@ -87,16 +105,24 @@ export function ContasReceber() {
         })
     }, [vendas, filter, searchTerm])
 
-    const handleQuitar = async (venda: DomainVenda) => {
-        if (!confirm(`Deseja quitar a venda de ${formatCurrency(venda.total)} para ${venda.contato?.nome}?`)) return
+    const handleQuitar = (venda: DomainVenda) => {
+        setSelectedVenda(venda)
+    }
+
+    const confirmQuitar = async () => {
+        if (!selectedVenda || !selectedContaId) return
 
         try {
-            await vendaService.quitarVenda(venda.id, venda.total, venda.formaPagamento)
+            setIsQuitting(true)
+            await vendaService.quitarVenda(selectedVenda.id, selectedVenda.total, selectedVenda.formaPagamento, selectedContaId)
             toast.success('Venda quitada com sucesso')
+            setSelectedVenda(null)
             fetchVendas()
         } catch (error) {
             console.error('Erro ao quitar venda:', error)
             toast.error('Não foi possível quitar a venda')
+        } finally {
+            setIsQuitting(false)
         }
     }
 
@@ -288,6 +314,65 @@ export function ContasReceber() {
                         })
                     )}
                 </div>
+
+                {/* Modal de Quitação */}
+                <Modal
+                    isOpen={!!selectedVenda}
+                    onClose={() => !isQuitting && setSelectedVenda(null)}
+                    title="Confirmar Recebimento"
+                    size="sm"
+                >
+                    {selectedVenda && (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="text-xs font-bold text-zinc-500 uppercase">Cliente</span>
+                                    <span className="text-sm font-black text-zinc-900 dark:text-white">{selectedVenda.contato?.nome}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-zinc-500 uppercase">Valor</span>
+                                    <span className="text-lg font-black text-primary-600 dark:text-primary-400">{formatCurrency(selectedVenda.total)}</span>
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider ml-1">
+                                    Conta de Destino
+                                </label>
+                                <Select
+                                    value={selectedContaId}
+                                    onChange={(e) => setSelectedContaId(e.target.value)}
+                                    className="w-full"
+                                    options={contas.map(ct => ({ value: ct.id, label: ct.nome }))}
+                                />
+                            </div>
+
+                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                                <p className="text-[11px] text-blue-700 dark:text-blue-300 font-medium">
+                                    Este recebimento será registrado automaticamente no Fluxo de Caixa como entrada na conta selecionada.
+                                </p>
+                            </div>
+
+                            <ModalActions>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSelectedVenda(null)}
+                                    disabled={isQuitting}
+                                    className="flex-1"
+                                >
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    onClick={confirmQuitar}
+                                    isLoading={isQuitting}
+                                    className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black"
+                                >
+                                    Confirmar Recebimento
+                                </Button>
+                            </ModalActions>
+                        </div>
+                    )}
+                </Modal>
             </main>
         </div>
     )

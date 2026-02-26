@@ -6,7 +6,7 @@ import { isToday } from 'date-fns'
 
 
 export const vendaService = {
-    async getVendas(startDate?: Date, endDate?: Date, includePending = false, search?: string): Promise<DomainVenda[]> {
+    async getVendas(startDate?: Date, endDate?: Date, includePending = false, search?: string, excludeCatalogo = false): Promise<DomainVenda[]> {
         let query = supabase
             .from('vendas')
             .select(`
@@ -16,6 +16,10 @@ export const vendaService = {
                 pagamentos:pagamentos_venda(*)
             `)
             .order('criado_em', { ascending: false })
+
+        if (excludeCatalogo) {
+            query = query.neq('origem', 'catalogo')
+        }
 
         if (search) {
             query = query.textSearch('fts', search, { type: 'websearch', config: 'simple' })
@@ -59,6 +63,22 @@ export const vendaService = {
     },
 
     async createVenda(data: CreateVenda): Promise<DomainVenda> {
+        // 1. Buscar custos dos produtos para cálculo de lucro
+        const produtoIds = data.itens.map(it => it.produtoId)
+        const { data: produtos } = await supabase
+            .from('produtos')
+            .select('id, custo')
+            .in('id', produtoIds)
+
+        const custoPorProduto = Object.fromEntries(
+            (produtos || []).map(p => [p.id, p.custo || 0])
+        )
+
+        // 2. Calcular custo total da venda
+        const custoTotal = data.itens.reduce((acc, it) =>
+            acc + (custoPorProduto[it.produtoId] || 0) * it.quantidade, 0
+        )
+
         const vInsert: VendaInsert = {
             contato_id: data.contatoId,
             data: data.data,
@@ -68,6 +88,7 @@ export const vendaService = {
             forma_pagamento: data.formaPagamento,
             taxa_entrega: data.taxaEntrega || 0,
             data_prevista_pagamento: data.dataPrevistaPagamento,
+            custo_total: custoTotal
         }
 
         const { data: vendaData, error: vendaError } = await supabase.from('vendas').insert(vInsert).select().single()
@@ -80,7 +101,7 @@ export const vendaService = {
                 quantidade: it.quantidade,
                 preco_unitario: it.precoUnitario,
                 subtotal: it.subtotal,
-                custo_unitario: 0
+                custo_unitario: custoPorProduto[it.produtoId] || 0
             }))
             const { error: itensError } = await supabase.from('itens_venda').insert(iInserts)
             if (itensError) throw itensError
@@ -110,7 +131,7 @@ export const vendaService = {
         return true
     },
 
-    async addPagamento(vendaId: string, valor: number, metodo: string, data: string, observacao?: string): Promise<boolean> {
+    async addPagamento(vendaId: string, valor: number, metodo: string, data: string, contaId: string, observacao?: string): Promise<boolean> {
         const { error } = await supabase.from('pagamentos_venda').insert({
             venda_id: vendaId,
             valor,
@@ -119,11 +140,29 @@ export const vendaService = {
             observacao
         })
         if (error) throw error
+
+        // Chama a RPC para gerar lançamento automático no fluxo de caixa
+        const { error: rpcError } = await supabase.rpc('registrar_lancamento_venda', {
+            p_venda_id: vendaId,
+            p_valor: valor,
+            p_conta_id: contaId,
+            p_data: data.includes('T') ? data.split('T')[0] : data
+        })
+
+        if (rpcError) {
+            console.error('LANCAMENTO_AUTOMATICO_ERROR:', rpcError)
+        }
+
         return true
     },
 
     async getTotalAReceber(): Promise<number> {
-        const { data, error } = await supabase.from('vendas').select('total').eq('pago', false).neq('status', 'cancelada')
+        const { data, error } = await supabase
+            .from('vendas')
+            .select('total')
+            .eq('pago', false)
+            .neq('status', 'cancelada')
+            .neq('forma_pagamento', 'brinde')
         if (error) return 0
         return (data || []).reduce((acc, v) => acc + (v.total || 0), 0)
     },
@@ -151,14 +190,15 @@ export const vendaService = {
             ticketMedio: totalVendas > 0 ? faturamentoTotal / totalVendas : 0,
             produtosVendidos,
             recebido: faturamentoTotal,
-            aReceber: vendas.filter(v => !v.pago && v.status !== 'cancelada').reduce((acc, v) => acc + v.total, 0),
+            aReceber: vendas.filter(v => !v.pago && v.status !== 'cancelada' && v.formaPagamento !== 'brinde').reduce((acc, v) => acc + v.total, 0),
             entregasPendentes: vendas.filter(v => v.status === 'pendente').length,
             entregasRealizadas: vendas.filter(v => v.status === 'entregue').length,
             lucroMes: vendas.filter(v => v.pago).reduce((acc, v) => acc + (v.total - (v.custoTotal || 0)), 0)
         }
     },
 
-    async quitarVenda(id: string, valor: number, metodo: string, observacao?: string): Promise<DomainVenda> {
+    async quitarVenda(id: string, valor: number, metodo: string, contaId: string, observacao?: string): Promise<DomainVenda> {
+        // 1. Marca como pago
         const { error: vendaError } = await supabase
             .from('vendas')
             .update({ pago: true })
@@ -166,7 +206,9 @@ export const vendaService = {
 
         if (vendaError) throw vendaError
 
-        await this.addPagamento(id, valor, metodo, new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).split(' ')[0], observacao)
+        // 2. Registra em pagamentos_venda (que por sua vez chama a RPC de lançamento)
+        const dataPagamento = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).split(' ')[0]
+        await this.addPagamento(id, valor, metodo, dataPagamento, contaId, observacao)
 
         return this.getVendaById(id)
     }

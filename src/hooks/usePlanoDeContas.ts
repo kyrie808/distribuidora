@@ -7,7 +7,7 @@ type PlanoContaInsert = Database['public']['Tables']['plano_de_contas']['Insert'
 export function usePlanoDeContas() {
     const queryClient = useQueryClient()
 
-    const { data: planoContas = [], isLoading, error } = useQuery({
+    const { data: planoContas = [], isLoading, error, refetch } = useQuery({
         queryKey: ['plano_de_contas'],
         queryFn: () => cashFlowService.getPlanoDeContas(),
     })
@@ -23,6 +23,7 @@ export function usePlanoDeContas() {
         planoContas,
         isLoading,
         error,
+        refetch,
         createPlanoConta: createMutation.mutateAsync,
         isCreating: createMutation.isPending,
     }

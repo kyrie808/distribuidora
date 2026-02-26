@@ -20,10 +20,11 @@ type PlanoContaFormData = z.infer<typeof planoContaSchema>
 interface PlanoContaModalProps {
     isOpen: boolean
     onClose: () => void
+    onSuccess?: () => void
     defaultType?: 'receita' | 'despesa'
 }
 
-export function PlanoContaModal({ isOpen, onClose, defaultType = 'receita' }: PlanoContaModalProps) {
+export function PlanoContaModal({ isOpen, onClose, onSuccess, defaultType = 'receita' }: PlanoContaModalProps) {
     const toast = useToast()
     const { createPlanoConta } = usePlanoDeContas()
 
@@ -58,6 +59,7 @@ export function PlanoContaModal({ isOpen, onClose, defaultType = 'receita' }: Pl
         try {
             await createPlanoConta(data as any)
             toast.success('Categoria criada com sucesso!')
+            onSuccess?.()
             onClose()
         } catch (error) {
             console.error(error)

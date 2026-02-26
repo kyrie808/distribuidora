@@ -1,16 +1,19 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { X, DollarSign } from 'lucide-react'
 import { useForm, type SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { formatCurrency } from '../../../utils/formatters'
 import type { DomainPurchaseOrderWithItems } from '../../../types/domain'
+import { cashFlowService } from '../../../services/cashFlowService'
+import type { Conta } from '../../../types/database'
 
 // Schema similar to sales payment but for purchase orders
 const paymentSchema = z.object({
     amount: z.number().min(0.01, 'Valor deve ser maior que zero'),
     payment_method: z.enum(['pix', 'dinheiro', 'cartao_credito', 'cartao_debito', 'boleto', 'transferencia']),
     payment_date: z.string(),
+    conta_id: z.string().uuid('Selecione uma conta de origem'),
     notes: z.string().optional()
 })
 
@@ -34,6 +37,7 @@ const PAYMENT_METHODS = [
 
 export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }: PurchaseOrderPaymentModalProps) {
     const remainingAmount = order.totalAmount - (order.amountPaid || 0)
+    const [contas, setContas] = useState<Conta[]>([])
 
     const {
         register,
@@ -44,24 +48,41 @@ export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }:
     } = useForm<PaymentFormData>({
         resolver: zodResolver(paymentSchema),
         defaultValues: {
-            amount: 0, // Will be set in useEffect
+            amount: 0,
             payment_date: new Date().toISOString().split('T')[0],
             payment_method: 'pix',
+            conta_id: '',
             notes: ''
         }
     })
 
-    // Reset form when opening
+    // Load accounts
+    useEffect(() => {
+        async function loadContas() {
+            try {
+                const data = await cashFlowService.getContas()
+                setContas(data.filter((c: any) => c.ativo !== false))
+            } catch (err) {
+                console.error('Erro ao carregar contas:', err)
+            }
+        }
+        if (isOpen) {
+            loadContas()
+        }
+    }, [isOpen])
+
+    // Reset form when opening or accounts loaded
     useEffect(() => {
         if (isOpen && order) {
             reset({
                 amount: remainingAmount > 0 ? remainingAmount : 0,
                 payment_date: new Date().toISOString().split('T')[0],
                 payment_method: 'pix',
+                conta_id: contas.length > 0 ? contas[0].id : '',
                 notes: ''
             })
         }
-    }, [isOpen, order, remainingAmount, reset])
+    }, [isOpen, order, remainingAmount, reset, contas])
 
     const handleConfirm: SubmitHandler<PaymentFormData> = async (data) => {
         await onConfirm(data)
@@ -136,6 +157,26 @@ export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }:
                                 <span className="text-xs text-red-500">{errors.payment_method.message}</span>
                             )}
                         </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Conta de Origem
+                        </label>
+                        <select
+                            {...register('conta_id')}
+                            className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-violet-500"
+                        >
+                            <option value="">Selecione uma conta...</option>
+                            {contas.map(ct => (
+                                <option key={ct.id} value={ct.id}>
+                                    {ct.nome}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.conta_id && (
+                            <span className="text-xs text-red-500">{errors.conta_id.message}</span>
+                        )}
                     </div>
 
                     <div>

@@ -18,6 +18,8 @@ export interface DashboardMetrics {
         faturamento_mes_anterior: number
         variacao_percentual: number
         total_a_receber: number
+        liquidado_mes: number
+        liquidado_mes_count: number
         alertas_financeiros: any[]
         a_receber_detalhado?: {
             vencidos: number
@@ -72,6 +74,97 @@ export const dashboardService = {
         if (breakdownError) throw breakdownError
 
         return mapDashboardMetrics(financialData, operationalData, alertsData, breakdownData)
+    },
+
+    async getLucroLiquido(mes: Date): Promise<{
+        receita_bruta: number
+        custo_produtos: number
+        lucro_bruto: number
+        despesas_operacionais: number
+        custo_fabrica: number
+        lucro_liquido: number
+        margem_liquida_pct: number
+    }> {
+        const ano = mes.getFullYear()
+        const mesNum = mes.getMonth() + 1
+        const inicio = `${ano}-${String(mesNum).padStart(2, '0')}-01`
+        const fimMes = new Date(ano, mesNum, 0).getDate()
+        const fim = `${ano}-${String(mesNum).padStart(2, '0')}-${fimMes}`
+
+        const { data, error } = await supabase
+            .from('view_lucro_liquido_mensal' as any)
+            .select('*')
+            .gte('mes', inicio)
+            .lte('mes', fim)
+            .maybeSingle()
+
+        if (error || !data) return {
+            receita_bruta: 0, custo_produtos: 0, lucro_bruto: 0,
+            despesas_operacionais: 0, custo_fabrica: 0,
+            lucro_liquido: 0, margem_liquida_pct: 0
+        }
+
+        return {
+            receita_bruta: Number((data as any).receita_bruta) || 0,
+            custo_produtos: Number((data as any).custo_produtos) || 0,
+            lucro_bruto: Number((data as any).lucro_bruto) || 0,
+            despesas_operacionais: Number((data as any).despesas_operacionais) || 0,
+            custo_fabrica: Number((data as any).custo_fabrica) || 0,
+            lucro_liquido: Number((data as any).lucro_liquido) || 0,
+            margem_liquida_pct: Number((data as any).margem_liquida_pct) || 0,
+        }
+    },
+
+    async getLiquidadoMes(mes: Date): Promise<{
+        vendas_liquidadas: number
+        total_liquidado: number
+    }> {
+        const ano = mes.getFullYear()
+        const mesNum = mes.getMonth() + 1
+        const inicio = `${ano}-${String(mesNum).padStart(2, '0')}-01`
+        const fimMes = new Date(ano, mesNum, 0).getDate()
+        const fim = `${ano}-${String(mesNum).padStart(2, '0')}-${fimMes}`
+
+        const { data, error } = await supabase
+            .from('view_liquidado_mensal' as any)
+            .select('*')
+            .gte('mes', inicio)
+            .lte('mes', fim)
+            .maybeSingle()
+
+        if (error || !data) return {
+            vendas_liquidadas: 0,
+            total_liquidado: 0
+        }
+
+        return {
+            vendas_liquidadas: Number((data as any).vendas_liquidadas) || 0,
+            total_liquidado: Number((data as any).total_liquidado) || 0
+        }
+    },
+
+    async getTotalAReceber(): Promise<{
+        total_a_receber: number
+        total_vendas_abertas: number
+    }> {
+        const { data, error } = await supabase
+            .from('vendas')
+            .select('total')
+            .eq('pago', false)
+            .eq('status', 'entregue')
+            .neq('forma_pagamento', 'brinde')
+            .or('origem.is.null,origem.neq.catalogo')
+
+        if (error || !data) return {
+            total_a_receber: 0,
+            total_vendas_abertas: 0
+        }
+
+        return {
+            total_a_receber: data.reduce((acc, v) =>
+                acc + Number(v.total), 0),
+            total_vendas_abertas: data.length
+        }
     }
 }
 
@@ -82,6 +175,8 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
         ticket_medio: 0,
         lucro_estimado: 0,
         total_a_receber: 0,
+        liquidado_mes: 0,
+        liquidado_mes_count: 0,
         faturamento_anterior: 0,
         variacao_faturamento_percentual: 0,
         alertas_financeiros: []
@@ -115,6 +210,8 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
             faturamento_mes_anterior: fin.faturamento_anterior ?? 0,
             variacao_percentual: fin.variacao_faturamento_percentual ?? 0,
             total_a_receber: fin.total_a_receber ?? 0,
+            liquidado_mes: fin.liquidado_mes ?? 0,
+            liquidado_mes_count: fin.liquidado_mes_count ?? 0,
             alertas_financeiros: (fin.alertas_financeiros as any[]) ?? [],
             a_receber_detalhado: breakdownData ? {
                 vencidos: Number(breakdownData.vencidos || 0),

@@ -8,7 +8,12 @@ import type {
     DomainPurchaseOrderItem,
     DomainPurchaseOrderWithItems,
     PurchaseOrderStatus,
-    PurchaseOrderPaymentStatus
+    PurchaseOrderPaymentStatus,
+    DomainCatalogOrder,
+    DomainCatalogOrderItem,
+    CatalogOrderStatus,
+    CatalogPaymentStatus,
+    PagamentoMetodo
 } from '../types/domain'
 import type { Tables } from '../types/database'
 
@@ -202,5 +207,40 @@ export const toDomainPurchaseOrderWithItems = (dbOrder: PurchaseOrderRowWithRela
         ...toDomainPurchaseOrder(dbOrder),
         items: (dbOrder.items || []).map(i => toDomainPurchaseOrderItem(i as PurchaseOrderItemRowWithProduct)),
         payments: dbOrder.payments || []
+    }
+}
+
+export const toDomainCatalogOrderItem = (dbItem: any): DomainCatalogOrderItem => {
+    return {
+        id: dbItem.id,
+        pedidoId: dbItem.pedido_id,
+        produtoId: dbItem.produto_id,
+        nomeProduto: dbItem.nome_produto,
+        quantidade: Number(dbItem.quantidade || 0),
+        precoUnitarioCentavos: Number(dbItem.preco_unitario_centavos || 0),
+        totalCentavos: Number(dbItem.total_centavos || 0)
+    }
+}
+
+export const toDomainCatalogOrder = (dbOrder: any): DomainCatalogOrder => {
+    return {
+        id: dbOrder.id,
+        numeroPedido: dbOrder.numero_pedido,
+        nomeCliente: dbOrder.nome_cliente,
+        telefoneCliente: dbOrder.telefone_cliente,
+        enderecoEntrega: dbOrder.endereco_entrega,
+        metodoEntrega: dbOrder.metodo_entrega,
+        status: dbOrder.status as CatalogOrderStatus,
+        subtotalCentavos: Number(dbOrder.subtotal_centavos || 0),
+        freteCentavos: Number(dbOrder.frete_centavos || 0),
+        totalCentavos: Number(dbOrder.total_centavos || 0),
+        metodoPagamento: dbOrder.metodo_pagamento as PagamentoMetodo,
+        statusPagamento: dbOrder.status_pagamento as CatalogPaymentStatus,
+        observacoes: dbOrder.observacoes,
+        indicadoPor: dbOrder.indicado_por,
+        criadoEm: dbOrder.criado_em,
+        atualizadoEm: dbOrder.atualizado_em,
+        contatoId: dbOrder.contato_id,
+        itens: (dbOrder.itens || []).map((i: any) => toDomainCatalogOrderItem(i))
     }
 }

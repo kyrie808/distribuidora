@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, LoadingScreen } from '../components/ui'
+import { Card, LoadingScreen, Modal, ModalActions, Button, Input, Select, Badge } from '../components/ui'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
@@ -184,7 +184,6 @@ export function Produtos() {
 
     const _editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
     const _newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
-    void _handleCreate; void _handleUpdate; void _editMargem; void _newMargem
 
     return (
         <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">
@@ -283,7 +282,175 @@ export function Produtos() {
                         </div>
                     )}
 
-                    {/* Modals omitted for brevity but they should use the new types */}
+                    {/* Modal de Criação */}
+                    <Modal
+                        isOpen={_isCreateModalOpen}
+                        onClose={() => setIsCreateModalOpen(false)}
+                        title="Novo Produto"
+                        size="lg"
+                    >
+                        <div className="space-y-4">
+                            <Input
+                                label="Nome do Produto"
+                                value={newNome}
+                                onChange={(e) => setNewNome(e.target.value)}
+                                placeholder="Ex: Pão de Queijo 1kg"
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Código"
+                                    value={newCodigo}
+                                    onChange={(e) => setNewCodigo(e.target.value)}
+                                    placeholder="Ex: PQ001"
+                                />
+                                <Input
+                                    label="Apelido"
+                                    value={newApelido}
+                                    onChange={(e) => setNewApelido(e.target.value)}
+                                    placeholder="Nome curto"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Preço de Venda"
+                                    type="number"
+                                    value={newPreco}
+                                    onChange={(e) => setNewPreco(e.target.value)}
+                                    placeholder="0.00"
+                                />
+                                <Input
+                                    label="Custo"
+                                    type="number"
+                                    value={newCusto}
+                                    onChange={(e) => setNewCusto(e.target.value)}
+                                    placeholder="0.00"
+                                />
+                            </div>
+
+                            {/* Margem Preview */}
+                            {(parseFloat(newPreco) > 0) && (
+                                <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg flex justify-between items-center transition-all animate-in fade-in slide-in-from-left-2">
+                                    <span className="text-sm text-gray-500">Margem Estimada</span>
+                                    <Badge variant={_newMargem > 30 ? 'success' : _newMargem > 15 ? 'warning' : 'destructive'}>
+                                        {_newMargem.toFixed(1)}%
+                                    </Badge>
+                                </div>
+                            )}
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Select
+                                    label="Unidade"
+                                    value={newUnidade}
+                                    onChange={(e) => setNewUnidade(e.target.value)}
+                                    options={[
+                                        { label: 'Unidade (un)', value: 'un' },
+                                        { label: 'Quilograma (kg)', value: 'kg' },
+                                        { label: 'Pacote (pct)', value: 'pct' },
+                                    ]}
+                                />
+                                <Input
+                                    label="Estoque Mínimo"
+                                    type="number"
+                                    value={newEstoqueMinimo}
+                                    onChange={(e) => setNewEstoqueMinimo(e.target.value)}
+                                />
+                            </div>
+
+                            <ModalActions>
+                                <Button variant="ghost" onClick={() => setIsCreateModalOpen(false)}>
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={_handleCreate}
+                                    isLoading={_creating}
+                                >
+                                    Criar Produto
+                                </Button>
+                            </ModalActions>
+                        </div>
+                    </Modal>
+
+                    {/* Modal de Edição */}
+                    <Modal
+                        isOpen={!!editingProduto}
+                        onClose={handleCloseEdit}
+                        title="Editar Produto"
+                        size="lg"
+                    >
+                        <div className="space-y-4">
+                            <Input
+                                label="Nome do Produto"
+                                value={editNome}
+                                onChange={(e) => setEditNome(e.target.value)}
+                            />
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Código"
+                                    value={editCodigo}
+                                    onChange={(e) => setEditCodigo(e.target.value)}
+                                />
+                                <Input
+                                    label="Apelido"
+                                    value={editApelido}
+                                    onChange={(e) => setEditApelido(e.target.value)}
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Preço de Venda"
+                                    type="number"
+                                    value={editPreco}
+                                    onChange={(e) => setEditPreco(e.target.value)}
+                                />
+                                <Input
+                                    label="Custo"
+                                    type="number"
+                                    value={editCusto}
+                                    onChange={(e) => setEditCusto(e.target.value)}
+                                />
+                            </div>
+
+                            {/* Margem Preview */}
+                            <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg flex justify-between items-center">
+                                <span className="text-sm text-gray-500">Margem Estimada</span>
+                                <Badge variant={_editMargem > 30 ? 'success' : _editMargem > 15 ? 'warning' : 'destructive'}>
+                                    {_editMargem.toFixed(1)}%
+                                </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
+                                    label="Estoque Mínimo"
+                                    type="number"
+                                    value={editEstoqueMinimo}
+                                    onChange={(e) => setEditEstoqueMinimo(e.target.value)}
+                                />
+                                <Select
+                                    label="Status"
+                                    value={editAtivo ? 'true' : 'false'}
+                                    onChange={(e) => setEditAtivo(e.target.value === 'true')}
+                                    options={[
+                                        { label: 'Ativo', value: 'true' },
+                                        { label: 'Inativo', value: 'false' },
+                                    ]}
+                                />
+                            </div>
+
+                            <ModalActions>
+                                <Button variant="ghost" onClick={handleCloseEdit}>
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={_handleUpdate}
+                                    isLoading={_updating}
+                                >
+                                    Salvar Alterações
+                                </Button>
+                            </ModalActions>
+                        </div>
+                    </Modal>
                 </PageContainer>
             </div>
         </div>

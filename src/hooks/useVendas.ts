@@ -9,6 +9,7 @@ interface UseVendasOptions {
     includePending?: boolean
     search?: string
     enabled?: boolean
+    excludeCatalogo?: boolean
 }
 
 interface UseVendasReturn {
@@ -23,19 +24,19 @@ interface UseVendasReturn {
     deleteVenda: (id: string) => Promise<boolean>
     updateVenda: (id: string, data: UpdateVenda) => Promise<DomainVenda | null>
     getVendaById: (id: string) => Promise<DomainVenda | null>
-    addPagamento: (vendaId: string, data: { valor: number; metodo: string; data: string; observacao?: string }) => Promise<boolean>
+    addPagamento: (vendaId: string, data: { valor: number; metodo: string; data: string; conta_id: string; observacao?: string }) => Promise<boolean>
     deleteUltimoPagamento: (vendaId: string) => Promise<boolean>
 }
 
-export function useVendas({ startDate, endDate, includePending = false, search, enabled = true }: UseVendasOptions = {}): UseVendasReturn {
+export function useVendas({ startDate, endDate, includePending = false, search, enabled = true, excludeCatalogo = false }: UseVendasOptions = {}): UseVendasReturn {
     const queryClient = useQueryClient()
-    const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending, search]
+    const queryKey = ['vendas', startDate?.toISOString(), endDate?.toISOString(), includePending, search, excludeCatalogo]
 
     const { data, isLoading, error, refetch } = useQuery({
         queryKey,
         queryFn: async () => {
             const [vendasData, totalAReceber] = await Promise.all([
-                vendaService.getVendas(startDate, endDate, includePending, search),
+                vendaService.getVendas(startDate, endDate, includePending, search, excludeCatalogo),
                 vendaService.getTotalAReceber()
             ])
 
@@ -146,9 +147,9 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         return vendaService.getVendaById(id)
     }, [])
 
-    const addPagamento = useCallback(async (vendaId: string, data: { valor: number; metodo: string; data: string; observacao?: string }) => {
+    const addPagamento = useCallback(async (vendaId: string, data: { valor: number; metodo: string; data: string; conta_id: string; observacao?: string }) => {
         try {
-            await vendaService.addPagamento(vendaId, data.valor, data.metodo, data.data, data.observacao)
+            await vendaService.addPagamento(vendaId, data.valor, data.metodo, data.data, data.conta_id, data.observacao)
             queryClient.invalidateQueries({ queryKey: ['vendas'] })
             queryClient.invalidateQueries({ queryKey: ['venda', vendaId] })
             return true

@@ -10,11 +10,13 @@ import {
     Truck,
     CheckCircle2,
     DollarSign,
-    ShoppingCart
+    ShoppingCart,
+    Wallet
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
+import { dashboardService } from '../services/dashboardService'
 import { formatCurrency } from '../utils/formatters'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -33,7 +35,30 @@ export function Dashboard() {
     const { month, year, setMonth } = useDashboardFilter()
     const navigate = useNavigate()
 
-    const { data: metrics, isLoading, refetch } = useDashboardMetrics(month, year)
+    const { data: metrics, isLoading: isLoadingMetrics, refetch } = useDashboardMetrics(month, year)
+    const [lucroData, setLucroData] = useState({ lucro_bruto: 0, receita_bruta: 0, lucro_liquido: 0, margem_liquida_pct: 0 })
+    const [liquidadoData, setLiquidadoData] = useState({ vendas_liquidadas: 0, total_liquidado: 0 })
+    const [aReceberGlobal, setAReceberGlobal] = useState({ total_a_receber: 0, total_vendas_abertas: 0 })
+    const [isLoadingLucro, setIsLoadingLucro] = useState(true)
+
+    const isLoading = isLoadingMetrics || isLoadingLucro
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoadingLucro(true)
+            const date = new Date(year, month - 1, 1)
+            const [lucro, liquidado, aReceber] = await Promise.all([
+                dashboardService.getLucroLiquido(date),
+                dashboardService.getLiquidadoMes(date),
+                dashboardService.getTotalAReceber()
+            ])
+            setLucroData(lucro)
+            setLiquidadoData(liquidado)
+            setAReceberGlobal(aReceber)
+            setIsLoadingLucro(false)
+        }
+        fetchData()
+    }, [month, year])
 
     // Greeting & User Logic
     useEffect(() => {
@@ -79,13 +104,6 @@ export function Dashboard() {
         await refetch()
         setIsRefreshing(false)
     }, [refetch])
-
-    const totalContas = metrics?.financial?.a_receber_detalhado
-        ? (metrics.financial.a_receber_detalhado.vencidos +
-            metrics.financial.a_receber_detalhado.vencem_hoje +
-            metrics.financial.a_receber_detalhado.vencem_semana +
-            metrics.financial.a_receber_detalhado.sem_data)
-        : 0;
 
     const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
 
@@ -142,6 +160,36 @@ export function Dashboard() {
                             className="col-span-2 md:col-span-1"
                             variant="default"
                             loading={isLoading}
+                            tooltip="Soma de todas as vendas entregues no mês, incluindo pedidos do catálogo. Vendas pagas e fiado em aberto."
+                        />
+
+                        <KpiCard
+                            title="Lucro Bruto"
+                            value={formatCurrency(lucroData.lucro_bruto)}
+                            progress={100}
+                            trend={lucroData.receita_bruta > 0
+                                ? `${((lucroData.lucro_bruto / lucroData.receita_bruta) * 100).toFixed(1)}%`
+                                : '0%'}
+                            trendDirection="neutral"
+                            icon={DollarSign}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                            tooltip="Receita das vendas entregues menos o custo dos produtos. Não considera despesas operacionais nem pagamentos à fábrica."
+                        />
+
+                        <KpiCard
+                            title="Lucro Líquido"
+                            value={formatCurrency(lucroData.lucro_liquido)}
+                            progress={100}
+                            trend={`${lucroData.margem_liquida_pct.toFixed(1)}%`}
+                            trendDirection={lucroData.lucro_liquido >= 0 ? "up" : "down"}
+                            trendColor={lucroData.lucro_liquido >= 0 ? "green" : "red"}
+                            icon={Wallet}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                            tooltip="Lucro real do mês. Desconta o custo dos produtos, pagamentos à fábrica e despesas operacionais lançadas. Valor mais próximo do resultado real do negócio."
                         />
 
                         <KpiCard
@@ -154,32 +202,36 @@ export function Dashboard() {
                             className="col-span-1"
                             variant="compact"
                             loading={isLoading}
-                        />
-
-                        <KpiCard
-                            title="Lucro"
-                            value={formatCurrency(metrics?.financial?.lucro_mes_atual || 0)}
-                            progress={100}
-                            trend="Est."
-                            trendDirection="neutral"
-                            icon={DollarSign}
-                            className="col-span-1"
-                            variant="compact"
-                            loading={isLoading}
+                            tooltip="Valor médio por venda entregue no mês."
                         />
 
                         <KpiCard
                             title="A Receber"
-                            value={formatCurrency(metrics?.financial?.total_a_receber || 0)}
+                            value={formatCurrency(aReceberGlobal.total_a_receber)}
                             progress={50}
-                            trend={totalContas > 0 ? `${totalContas} pendências` : 'Tudo em dia'}
+                            trend={`— ${aReceberGlobal.total_vendas_abertas} pendências`}
                             trendDirection="neutral"
-                            trendColor={totalContas > 0 ? "yellow" : "green"}
+                            trendColor={aReceberGlobal.total_vendas_abertas > 0 ? "yellow" : "green"}
                             icon={TrendingDown}
                             className="col-span-1 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5 transition-colors"
                             variant="compact"
                             onClick={() => navigate('/contas-a-receber')}
                             loading={isLoading}
+                            tooltip="Total de fiado em aberto de todos os meses — não é filtrado pelo mês selecionado."
+                        />
+
+                        <KpiCard
+                            title="Liquidado no Mês"
+                            value={formatCurrency(liquidadoData.total_liquidado)}
+                            progress={100}
+                            trend={`${liquidadoData.vendas_liquidadas} quitadas`}
+                            trendDirection="neutral"
+                            trendColor="green"
+                            icon={Wallet}
+                            className="col-span-1"
+                            variant="compact"
+                            loading={isLoading}
+                            tooltip="Dinheiro que entrou no caixa no mês selecionado. Inclui fiados de meses anteriores pagos agora."
                         />
                     </div>
 

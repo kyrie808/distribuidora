@@ -7,7 +7,10 @@ import { ptBR } from 'date-fns/locale'
 import { pagamentoSchema, type PagamentoFormData } from '../../../schemas/venda'
 import type { DomainPagamento } from '../../../types/domain'
 import { Button } from '../../ui/Button'
+import { Select } from '../../ui/Select'
 import { cn } from '../../../utils/cn'
+import { cashFlowService } from '../../../services/cashFlowService'
+import type { Conta } from '../../../types/database'
 
 interface PaymentSidebarProps {
     onBack: () => void
@@ -37,6 +40,7 @@ export function PaymentSidebar({
 }: PaymentSidebarProps) {
     const restante = Math.max(0, total - valorPago)
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [contas, setContas] = useState<Conta[]>([])
 
     // Format datetime for datetime-local input
     const formatDateTimeLocal = (isoString: string) => {
@@ -55,14 +59,16 @@ export function PaymentSidebar({
         setValue,
         watch,
         reset,
-        formState: { errors }
+        formState: { errors, isValid }
     } = useForm<PagamentoFormData>({
+        mode: 'onChange',
         resolver: zodResolver(pagamentoSchema) as any,
         defaultValues: {
             venda_id: vendaId,
             valor: restante,
-            data: new Date().toISOString(),
+            data: new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T').slice(0, 16),
             metodo: 'pix' as const,
+            conta_id: '',
             observacao: ''
         }
     })
@@ -72,15 +78,31 @@ export function PaymentSidebar({
 
     // Reset form when sidebar opens or props change
     useEffect(() => {
-        const now = new Date().toISOString()
+        const now = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T').slice(0, 16)
         reset({
             venda_id: vendaId,
             valor: restante,
             data: now,
             metodo: 'pix',
+            conta_id: contas[0]?.id || '',
             observacao: ''
         })
-    }, [vendaId, restante, reset])
+    }, [vendaId, restante, reset, contas])
+
+    useEffect(() => {
+        const fetchContas = async () => {
+            try {
+                const data = await cashFlowService.getContas()
+                setContas(data)
+                if (data.length > 0) {
+                    setValue('conta_id', data[0].id)
+                }
+            } catch (error) {
+                console.error('Erro ao buscar contas:', error)
+            }
+        }
+        fetchContas()
+    }, [setValue])
 
     const handleConfirm: SubmitHandler<PagamentoFormData> = async (data) => {
         try {
@@ -179,19 +201,38 @@ export function PaymentSidebar({
                 </div>
 
                 {/* Data & Observacao */}
-                <div className="space-y-3">
+                <div className="space-y-4">
+                    <div>
+                        <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider ml-1 mb-1 block">
+                            Conta de Destino
+                        </label>
+                        <Select
+                            {...register('conta_id')}
+                            options={contas.map(ct => ({ value: ct.id, label: ct.nome }))}
+                            error={errors.conta_id?.message}
+                            placeholder="Selecione a conta..."
+                        />
+                    </div>
                     <div>
                         <label className="block text-xs font-medium text-zinc-500 mb-1">Data</label>
                         <input
                             type="datetime-local"
-                            value={formatDateTimeLocal(currentData || new Date().toISOString())}
+                            value={formatDateTimeLocal(currentData || new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).replace(' ', 'T'))}
                             onChange={(e) => {
-                                // Convert back to ISO string for storage
-                                const isoString = new Date(e.target.value).toISOString()
-                                setValue('data', isoString)
+                                // Store as local ISO-like string to avoid UTC jumps
+                                const val = e.target.value; // YYYY-MM-DDTHH:MM
+                                setValue('data', val)
                             }}
-                            className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm focus:ring-2 focus:ring-violet-500 focus:border-transparent outline-none transition-all"
+                            className={cn(
+                                "w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800/50 border rounded-lg text-sm outline-none transition-all",
+                                errors.data ? "border-red-500 focus:ring-red-500/20" : "border-zinc-200 dark:border-zinc-700 focus:ring-violet-500"
+                            )}
                         />
+                        {errors.data && (
+                            <p className="text-red-500 text-[10px] mt-1 ml-1 font-medium italic">
+                                {errors.data.message}
+                            </p>
+                        )}
                     </div>
                     <div>
                         <label className="block text-xs font-medium text-zinc-500 mb-1">Observação (Opcional)</label>
@@ -238,8 +279,13 @@ export function PaymentSidebar({
             <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 pb-10 md:pb-6">
                 <Button
                     onClick={handleSubmit(handleConfirm)}
-                    disabled={isSubmitting}
-                    className="w-full py-6 text-lg font-black uppercase tracking-tight shadow-xl shadow-primary-500/20"
+                    disabled={isSubmitting || !isValid}
+                    className={cn(
+                        "w-full py-6 text-lg font-black uppercase tracking-tight shadow-xl transition-all",
+                        (!isValid || isSubmitting)
+                            ? "bg-zinc-200 text-zinc-400 shadow-none cursor-not-allowed"
+                            : "shadow-primary-500/20"
+                    )}
                 >
                     {isSubmitting ? 'Processando...' : 'Confirmar Pagamento'}
                 </Button>

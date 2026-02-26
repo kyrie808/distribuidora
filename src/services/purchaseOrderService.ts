@@ -104,13 +104,14 @@ export const purchaseOrderService = {
         if (error) throw error
     },
 
-    async addPayment(orderId: string, payment: { amount: number, method: string, notes?: string }): Promise<void> {
+    async addPayment(orderId: string, payment: { amount: number, method: string, contaId: string, notes?: string }): Promise<void> {
         const { error: paymentError } = await supabase
             .from('purchase_order_payments')
             .insert({
                 purchase_order_id: orderId,
                 amount: payment.amount,
                 payment_method: payment.method,
+                conta_id: payment.contaId,
                 notes: payment.notes,
                 payment_date: new Date().toISOString()
             })

@@ -9,7 +9,6 @@ import {
     Refrigerator,
     Unlink,
     DollarSign,
-    LayoutGrid,
     CalendarClock
 } from 'lucide-react'
 import { PageContainer } from '../components/layout/PageContainer'
@@ -99,14 +98,6 @@ export function Menu() {
             iconColor: 'text-orange-600',
             iconBg: 'bg-orange-500/10',
             href: '/contas-a-receber',
-            visible: true
-        },
-        {
-            title: 'Plano de Contas',
-            icon: LayoutGrid,
-            iconColor: 'text-violet-600',
-            iconBg: 'bg-violet-500/10',
-            href: '/plano-de-contas',
             visible: true
         },
         {

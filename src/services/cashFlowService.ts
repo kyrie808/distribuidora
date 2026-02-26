@@ -1,5 +1,14 @@
 import { supabase } from '../lib/supabase'
 import type { Conta, PlanoConta, Lancamento, ExtratoItem, FluxoResumo, Insert } from '../types/database'
+
+export interface ExtratoDeSaldoRow {
+    mes: string
+    mes_ordem: string
+    entradas: number
+    saidas: number
+    saldo_mes: number
+    saldo_acumulado: number
+}
 import { startOfMonth, endOfMonth, format, startOfDay, differenceInDays, isBefore, isSameDay, addDays } from 'date-fns'
 import type { QueryData } from '@supabase/supabase-js'
 
@@ -59,9 +68,20 @@ export const cashFlowService = {
         const { data, error } = await supabase
             .from('plano_de_contas')
             .select('*')
+            .eq('ativo', true)
+            .eq('automatica', false)
             .order('nome')
         if (error) throw error
         return data as PlanoConta[]
+    },
+
+    async getExtratoDeSaldo() {
+        const { data, error } = await supabase
+            .from('view_extrato_saldo')
+            .select('*')
+            .order('mes_ordem', { ascending: false })
+        if (error) throw error
+        return data as ExtratoDeSaldoRow[]
     },
 
     async createPlanoConta(data: Insert<'plano_de_contas'>) {
