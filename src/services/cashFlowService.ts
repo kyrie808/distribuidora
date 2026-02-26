@@ -77,11 +77,11 @@ export const cashFlowService = {
 
     async getExtratoDeSaldo() {
         const { data, error } = await supabase
-            .from('view_extrato_saldo')
+            .from('view_extrato_saldo' as any)
             .select('*')
             .order('mes_ordem', { ascending: false })
         if (error) throw error
-        return data as ExtratoDeSaldoRow[]
+        return data as unknown as ExtratoDeSaldoRow[]
     },
 
     async createPlanoConta(data: Insert<'plano_de_contas'>) {
