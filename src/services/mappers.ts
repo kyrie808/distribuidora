@@ -122,6 +122,7 @@ export const toDomainProduto = (dbProduto: ProdutoRowWithImages): DomainProduto 
         criadoEm: dbProduto.criado_em || new Date().toISOString(),
         atualizadoEm: dbProduto.atualizado_em || dbProduto.criado_em || new Date().toISOString(),
         apelido: dbProduto.apelido || null,
+        subtitulo: dbProduto.subtitulo || null,
         precoAncoragem: dbProduto.preco_ancoragem
             ? Number(dbProduto.preco_ancoragem)
             : null,

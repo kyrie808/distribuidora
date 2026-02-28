@@ -572,7 +572,8 @@ export type Database = {
           estoque_minimo: number | null
           id: string
           nome: string
-          peso_kg: number | null
+          peso_kg?: never
+          subtitulo: string | null
           preco: number
           preco_ancoragem: number | null
           slug: string | null
@@ -592,7 +593,7 @@ export type Database = {
           estoque_minimo?: number | null
           id?: string
           nome: string
-          peso_kg?: number | null
+          subtitulo?: string | null
           preco: number
           preco_ancoragem?: number | null
           slug?: string | null
@@ -613,6 +614,7 @@ export type Database = {
           id?: string
           nome?: string
           peso_kg?: number | null
+          subtitulo?: string | null
           preco?: number
           preco_ancoragem?: number | null
           slug?: string | null

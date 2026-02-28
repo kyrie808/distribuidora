@@ -52,6 +52,7 @@ export interface DomainProduto {
     atualizadoEm: string
     imagemUrl?: string
     categoria?: string | null
+    subtitulo?: string | null
 }
 
 export interface DomainItemVenda {
