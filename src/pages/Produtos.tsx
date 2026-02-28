@@ -293,38 +293,40 @@ export function Produtos() {
                             </div>
 
                             <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
-                                {filteredProdutos.map((produto) => (
-                                    <Card
-                                        key={produto.id}
-                                        className={cn(
-                                            "transition-all cursor-pointer hover:shadow-md border-l-4",
-                                            !produto.ativo ? "opacity-60 border-l-gray-300" :
-                                                (produto.estoqueAtual <= produto.estoqueMinimo ? "border-l-warning" : "border-l-success")
-                                        )}
-                                        onClick={() => handleOpenEdit(produto)}
-                                        hover
-                                    >
-                                        <div className="p-4 flex items-center gap-4">
-                                            <div className="h-16 w-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-200">
-                                                {produto.imagemUrl ? (
-                                                    <img src={produto.imagemUrl} alt={produto.nome} className="h-full w-full object-cover" />
-                                                ) : (
-                                                    <div className="h-full w-full flex items-center justify-center text-gray-400">
-                                                        <Package className="h-8 w-8" />
+                                {filteredProdutos.map((produto) => {
+                                    return (
+                                        <Card
+                                            key={produto.id}
+                                            className={cn(
+                                                "transition-all cursor-pointer hover:shadow-md border-l-4",
+                                                !produto.ativo ? "opacity-60 border-l-gray-300" :
+                                                    (produto.estoqueAtual <= produto.estoqueMinimo ? "border-l-warning" : "border-l-success")
+                                            )}
+                                            onClick={() => handleOpenEdit(produto)}
+                                            hover
+                                        >
+                                            <div className="p-4 flex items-center gap-4">
+                                                <div className="h-16 w-16 rounded-lg bg-gray-100 dark:bg-gray-700 flex-shrink-0 overflow-hidden border border-gray-200">
+                                                    {produto.imagemUrl ? (
+                                                        <img src={produto.imagemUrl} alt={produto.nome} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center text-gray-400">
+                                                            <Package className="h-8 w-8" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h3 className="font-bold truncate">{produto.nome}</h3>
+                                                    <div className="text-sm text-gray-500 font-mono">#{produto.codigo}</div>
+                                                    <div className="flex gap-4 mt-1">
+                                                        <span className="text-sm font-semibold">{formatCurrency(produto.preco)}</span>
+                                                        <span className="text-sm text-gray-400">Estoque: {produto.estoqueAtual}</span>
                                                     </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h3 className="font-bold truncate">{produto.nome}</h3>
-                                                <div className="text-sm text-gray-500 font-mono">#{produto.codigo}</div>
-                                                <div className="flex gap-4 mt-1">
-                                                    <span className="text-sm font-semibold">{formatCurrency(produto.preco)}</span>
-                                                    <span className="text-sm text-gray-400">Estoque: {produto.estoqueAtual}</span>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </Card>
-                                ))}
+                                        </Card>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}

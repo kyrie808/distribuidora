@@ -11,7 +11,7 @@ export class ProdutoService {
     async getAll(includeInactive: boolean = false): Promise<DomainProduto[]> {
         let query = supabase
             .from('produtos')
-            .select('*, sis_imagens_produto(url)')
+            .select('*')
             .order('nome')
 
         if (!includeInactive) {
@@ -19,13 +19,22 @@ export class ProdutoService {
         }
 
         const { data, error } = await query
+        if (error) throw error
 
-        if (error) {
-            console.error('Erro ao buscar produtos:', error)
-            throw new Error(`Erro ao buscar produtos: ${error.message}`)
-        }
+        // Buscar imagens separadamente
+        const { data: imagens } = await supabase
+            .from('sis_imagens_produto')
+            .select('produto_id, url')
 
-        return (data || []).map(toDomainProduto)
+        // Merge manual
+        const imagensMap = new Map(imagens?.map(i => [i.produto_id, i.url]) ?? [])
+
+        return (data || []).map(p => toDomainProduto({
+            ...p,
+            sis_imagens_produto: imagensMap.has(p.id)
+                ? [{ url: imagensMap.get(p.id)! }]
+                : []
+        }))
     }
 
     async getById(id: string): Promise<DomainProduto | null> {
