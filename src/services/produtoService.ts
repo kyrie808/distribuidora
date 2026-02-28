@@ -148,13 +148,19 @@ export class ProdutoService {
     }
 
     async addImageReference(produtoId: string, url: string): Promise<void> {
-        // Primeiro remove imagens anteriores
+        // Remove imagens anteriores das duas tabelas
         await supabase
             .from('sis_imagens_produto')
             .delete()
             .eq('produto_id', produtoId)
 
-        const { error } = await supabase
+        await supabase
+            .from('cat_imagens_produto')
+            .delete()
+            .eq('produto_id', produtoId)
+
+        // Insere em sis_imagens_produto (sistema interno)
+        const { error: errorSis } = await supabase
             .from('sis_imagens_produto')
             .insert({
                 produto_id: produtoId,
@@ -164,9 +170,20 @@ export class ProdutoService {
                 ativo: true
             })
 
-        if (error) {
-            throw error
-        }
+        if (errorSis) throw errorSis
+
+        // Insere em cat_imagens_produto (catálogo público)
+        const { error: errorCat } = await supabase
+            .from('cat_imagens_produto')
+            .insert({
+                produto_id: produtoId,
+                url,
+                tipo: 'cover',
+                ordem: 0,
+                ativo: true
+            })
+
+        if (errorCat) throw errorCat
     }
 }
 

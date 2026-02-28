@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
 import { formatCurrency } from '../utils/formatters'
-import { supabase } from '../lib/supabase'
+import { produtoService } from '../services/produtoService'
 import type { DomainProduto, CreateProduto, UpdateProduto } from '../types/domain'
 
 export function Produtos() {
@@ -196,26 +196,9 @@ export function Produtos() {
     const handleImageUpload = async (file: File) => {
         setUploadingImage(true)
         try {
-            const ext = file.name.split('.').pop()
-            const fileName = `${editingProduto!.id}.${ext}`
-            const { error: uploadError } = await supabase.storage
-                .from('products')
-                .upload(fileName, file, { upsert: true })
-
-            if (uploadError) throw uploadError
-
-            const { data: urlData } = supabase.storage
-                .from('products')
-                .getPublicUrl(fileName)
-
-            await supabase
-                .from('sis_imagens_produto')
-                .upsert({
-                    produto_id: editingProduto!.id,
-                    url: urlData.publicUrl
-                }, { onConflict: 'produto_id' })
-
-            setEditImagemUrl(urlData.publicUrl)
+            const url = await produtoService.uploadImage(file)
+            await produtoService.addImageReference(editingProduto!.id, url)
+            setEditImagemUrl(url)
             toast.success('Imagem atualizada!')
         } catch (err) {
             toast.error('Erro ao fazer upload da imagem')
