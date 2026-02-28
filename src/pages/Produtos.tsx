@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
 import { formatCurrency } from '../utils/formatters'
+import { supabase } from '../lib/supabase'
 import type { DomainProduto, CreateProduto, UpdateProduto } from '../types/domain'
 
 export function Produtos() {
@@ -57,6 +58,8 @@ export function Produtos() {
     const [_creating, _setCreating] = useState(false)
 
     // Form states for edit
+    const [uploadingImage, setUploadingImage] = useState(false)
+    const [editImagemUrl, setEditImagemUrl] = useState<string | null>(null)
     const [editNome, setEditNome] = useState('')
     const [editCodigo, setEditCodigo] = useState('')
     const [editApelido, setEditApelido] = useState('')
@@ -88,6 +91,7 @@ export function Produtos() {
         setEditEstoqueMinimo(String(produto.estoqueMinimo || 10))
         setEditAtivo(produto.ativo)
         setEditCategoria(produto.categoria || '')
+        setEditImagemUrl(produto.imagemUrl || null)
         setEditUnidade(produto.unidade || 'un')
         setEditPrecoAncoragem(produto.precoAncoragem?.toString() || '')
     }
@@ -186,6 +190,37 @@ export function Produtos() {
             toast.error(e.message || 'Erro ao atualizar produto')
         } finally {
             _setUpdating(false)
+        }
+    }
+
+    const handleImageUpload = async (file: File) => {
+        setUploadingImage(true)
+        try {
+            const ext = file.name.split('.').pop()
+            const fileName = `${editingProduto!.id}.${ext}`
+            const { error: uploadError } = await supabase.storage
+                .from('products')
+                .upload(fileName, file, { upsert: true })
+
+            if (uploadError) throw uploadError
+
+            const { data: urlData } = supabase.storage
+                .from('products')
+                .getPublicUrl(fileName)
+
+            await supabase
+                .from('sis_imagens_produto')
+                .upsert({
+                    produto_id: editingProduto!.id,
+                    url: urlData.publicUrl
+                }, { onConflict: 'produto_id' })
+
+            setEditImagemUrl(urlData.publicUrl)
+            toast.success('Imagem atualizada!')
+        } catch (err) {
+            toast.error('Erro ao fazer upload da imagem')
+        } finally {
+            setUploadingImage(false)
         }
     }
 
@@ -492,6 +527,25 @@ export function Produtos() {
                                     { value: 'combo', label: 'Combo' }
                                 ]}
                             />
+
+                            <div>
+                                <label className="block text-sm font-medium mb-1">
+                                    Imagem do Produto
+                                </label>
+                                {editImagemUrl && (
+                                    <img src={editImagemUrl}
+                                        className="w-20 h-20 object-cover rounded-lg mb-2" />
+                                )}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={e => e.target.files?.[0] &&
+                                        handleImageUpload(e.target.files[0])}
+                                    disabled={uploadingImage}
+                                    className="text-sm"
+                                />
+                                {uploadingImage && <p className="text-xs mt-1">Enviando...</p>}
+                            </div>
 
                             <ModalActions>
                                 <Button variant="ghost" onClick={handleCloseEdit}>
