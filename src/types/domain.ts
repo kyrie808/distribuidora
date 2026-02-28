@@ -40,6 +40,8 @@ export interface DomainProduto {
     nome: string
     codigo: string
     preco: number
+    preco_ancoragem?: number | null
+    precoAncoragem?: number | null
     unidade?: string
     apelido?: string | null
     ativo: boolean
@@ -49,6 +51,7 @@ export interface DomainProduto {
     criadoEm: string
     atualizadoEm: string
     imagemUrl?: string
+    categoria?: string | null
 }
 
 export interface DomainItemVenda {
@@ -91,7 +94,7 @@ export interface DomainVenda {
 
 // Creation/Update types (Domain-side)
 export type CreateProduto = Omit<DomainProduto, 'id' | 'criadoEm' | 'atualizadoEm' | 'estoqueAtual'>
-export type UpdateProduto = Partial<CreateProduto> & { ativo?: boolean }
+export type UpdateProduto = Partial<CreateProduto> & { ativo?: boolean; preco_ancoragem?: number | null }
 
 export type CreateContato = Omit<DomainContato, 'id' | 'criadoEm' | 'atualizadoEm' | 'indicador'>
 export type UpdateContato = Partial<CreateContato>

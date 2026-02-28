@@ -574,6 +574,7 @@ export type Database = {
           nome: string
           peso_kg: number | null
           preco: number
+          preco_ancoragem: number | null
           slug: string | null
           unidade: string
         }
@@ -593,6 +594,7 @@ export type Database = {
           nome: string
           peso_kg?: number | null
           preco: number
+          preco_ancoragem?: number | null
           slug?: string | null
           unidade?: string
         }
@@ -612,6 +614,7 @@ export type Database = {
           nome?: string
           peso_kg?: number | null
           preco?: number
+          preco_ancoragem?: number | null
           slug?: string | null
           unidade?: string
         }

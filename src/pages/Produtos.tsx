@@ -53,6 +53,7 @@ export function Produtos() {
     const [newCusto, setNewCusto] = useState('')
     const [newUnidade, setNewUnidade] = useState('un')
     const [newEstoqueMinimo, setNewEstoqueMinimo] = useState('10')
+    const [newCategoria, setNewCategoria] = useState('')
     const [_creating, _setCreating] = useState(false)
 
     // Form states for edit
@@ -63,6 +64,9 @@ export function Produtos() {
     const [editCusto, setEditCusto] = useState('')
     const [editEstoqueMinimo, setEditEstoqueMinimo] = useState('')
     const [editAtivo, setEditAtivo] = useState(true)
+    const [editCategoria, setEditCategoria] = useState('')
+    const [editUnidade, setEditUnidade] = useState('un')
+    const [editPrecoAncoragem, setEditPrecoAncoragem] = useState('')
     const [_updating, _setUpdating] = useState(false)
 
     // Stats
@@ -83,6 +87,9 @@ export function Produtos() {
         setEditCusto(String(produto.custo))
         setEditEstoqueMinimo(String(produto.estoqueMinimo || 10))
         setEditAtivo(produto.ativo)
+        setEditCategoria(produto.categoria || '')
+        setEditUnidade(produto.unidade || 'un')
+        setEditPrecoAncoragem(produto.precoAncoragem?.toString() || '')
     }
 
     const handleCloseEdit = () => {
@@ -97,6 +104,7 @@ export function Produtos() {
         setNewCusto('')
         setNewUnidade('un')
         setNewEstoqueMinimo('10')
+        setNewCategoria('')
         setIsCreateModalOpen(true)
     }
 
@@ -130,7 +138,8 @@ export function Produtos() {
             unidade: newUnidade,
             estoqueMinimo: parseInt(newEstoqueMinimo) || 10,
             ativo: true,
-        }
+            categoria: newCategoria,
+        } as CreateProduto
 
         try {
             await createProduto(data)
@@ -164,7 +173,10 @@ export function Produtos() {
             custo,
             estoqueMinimo: parseInt(editEstoqueMinimo) || 10,
             ativo: editAtivo,
-        }
+            categoria: editCategoria,
+            unidade: editUnidade,
+            preco_ancoragem: editPrecoAncoragem ? parseFloat(editPrecoAncoragem) : null,
+        } as UpdateProduto
 
         try {
             await updateProduto(editingProduto.id, data)
@@ -344,8 +356,6 @@ export function Produtos() {
                                     onChange={(e) => setNewUnidade(e.target.value)}
                                     options={[
                                         { label: 'Unidade (un)', value: 'un' },
-                                        { label: 'Quilograma (kg)', value: 'kg' },
-                                        { label: 'Pacote (pct)', value: 'pct' },
                                     ]}
                                 />
                                 <Input
@@ -355,6 +365,18 @@ export function Produtos() {
                                     onChange={(e) => setNewEstoqueMinimo(e.target.value)}
                                 />
                             </div>
+
+                            <Select
+                                label="Categoria"
+                                value={newCategoria}
+                                onChange={e => setNewCategoria(e.target.value)}
+                                options={[
+                                    { value: '', label: 'Selecione...' },
+                                    { value: 'congelado', label: 'Congelado' },
+                                    { value: 'refrigerado', label: 'Refrigerado' },
+                                    { value: 'combo', label: 'Combo' }
+                                ]}
+                            />
 
                             <ModalActions>
                                 <Button variant="ghost" onClick={() => setIsCreateModalOpen(false)}>
@@ -404,6 +426,15 @@ export function Produtos() {
                                     onChange={(e) => setEditPreco(e.target.value)}
                                 />
                                 <Input
+                                    label="Preço de Ancoragem (riscado)"
+                                    type="number"
+                                    value={editPrecoAncoragem}
+                                    onChange={(e) => setEditPrecoAncoragem(e.target.value)}
+                                    placeholder="Opcional"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <Input
                                     label="Custo"
                                     type="number"
                                     value={editCusto}
@@ -436,6 +467,31 @@ export function Produtos() {
                                     ]}
                                 />
                             </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <Select
+                                    label="Unidade"
+                                    value={editUnidade}
+                                    onChange={e => setEditUnidade(e.target.value)}
+                                    options={[
+                                        { label: 'Unidade (un)', value: 'un' },
+                                    ]}
+                                />
+                                {/* Placeholder for grid alignment if needed */}
+                                <div></div>
+                            </div>
+
+                            <Select
+                                label="Categoria"
+                                value={editCategoria}
+                                onChange={e => setEditCategoria(e.target.value)}
+                                options={[
+                                    { value: '', label: 'Selecione...' },
+                                    { value: 'congelado', label: 'Congelado' },
+                                    { value: 'refrigerado', label: 'Refrigerado' },
+                                    { value: 'combo', label: 'Combo' }
+                                ]}
+                            />
 
                             <ModalActions>
                                 <Button variant="ghost" onClick={handleCloseEdit}>

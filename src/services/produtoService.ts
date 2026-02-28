@@ -80,6 +80,7 @@ export class ProdutoService {
         if (data.apelido !== undefined) dbUpdate.apelido = data.apelido
         if (data.estoqueMinimo !== undefined) dbUpdate.estoque_minimo = data.estoqueMinimo
         if (data.ativo !== undefined) dbUpdate.ativo = data.ativo
+        if (data.preco_ancoragem !== undefined) dbUpdate.preco_ancoragem = data.preco_ancoragem
 
         const { data: updated, error } = await supabase
             .from('produtos')
