@@ -113,25 +113,27 @@ export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQua
                             </div>
 
                             {qty > 0 ? (
-                                <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-lg p-1">
+                                <div className="flex items-center justify-between bg-gray-100 rounded-xl p-1 gap-1">
                                     <button
                                         onClick={() => onUpdateQuantity(produto.id, -1)}
-                                        className="w-8 h-8 bg-white dark:bg-gray-600 rounded shadow-sm flex items-center justify-center hover:bg-gray-50 active:scale-95 transition-transform"
+                                        className="w-11 h-11 bg-white rounded-lg shadow-sm flex items-center justify-center active:scale-95 transition-transform border border-gray-200"
                                     >
-                                        <Minus className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                                        <Minus className="h-5 w-5 text-gray-700" />
                                     </button>
-                                    <span className="font-bold text-gray-900 dark:text-gray-100">{qty}</span>
+                                    <span className="font-bold text-gray-900 text-base min-w-[2rem] text-center">
+                                        {qty}
+                                    </span>
                                     <button
                                         onClick={() => onUpdateQuantity(produto.id, 1)}
-                                        className="w-8 h-8 bg-primary-500 text-white rounded shadow-sm flex items-center justify-center hover:bg-primary-600 active:scale-95 transition-transform"
+                                        className="w-11 h-11 bg-primary rounded-lg shadow-sm flex items-center justify-center active:scale-95 transition-transform"
                                     >
-                                        <Plus className="h-4 w-4" />
+                                        <Plus className="h-5 w-5 text-white" />
                                     </button>
                                 </div>
                             ) : (
                                 <button
                                     onClick={() => onAdd(produto)}
-                                    className="w-full py-2 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-lg font-medium hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors text-sm"
+                                    className="w-full py-3 bg-primary text-white rounded-xl font-semibold hover:opacity-90 active:scale-95 transition-all text-sm"
                                 >
                                     Adicionar
                                 </button>

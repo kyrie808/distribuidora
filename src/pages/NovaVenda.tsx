@@ -167,8 +167,9 @@ export function NovaVenda() {
         }
     }
 
-    const nextStep = () => {
-        if (currentStep === 0 && !selectedContato) {
+    const nextStep = (contatoOverride?: typeof selectedContato) => {
+        const contato = contatoOverride ?? selectedContato
+        if (currentStep === 0 && !contato) {
             toast.error('Selecione um cliente primeiro')
             return
         }
@@ -208,7 +209,7 @@ export function NovaVenda() {
                                     selectedContato={selectedContato}
                                     onSelect={(c) => {
                                         setSelectedContato(c)
-                                        if (c) setTimeout(nextStep, 300) // Auto-advance after small delay
+                                        if (c) setTimeout(() => nextStep(c), 300) // Auto-advance after small delay
                                     }}
                                 />
 
