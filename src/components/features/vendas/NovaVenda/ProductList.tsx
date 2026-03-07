@@ -77,7 +77,7 @@ export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQua
                 />
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto pb-24">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 overflow-y-auto">
                 {filteredProdutos.map((produto) => {
                     const qty = getQuantity(produto.id)
                     return (

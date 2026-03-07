@@ -196,7 +196,7 @@ export function NovaVenda() {
 
                 <div className="flex-1 flex overflow-hidden relative">
                     {/* Main Content Area */}
-                    <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50 relative">
+                    <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50">
                         {/* Step 0: Cliente */}
                         {currentStep === 0 && (
                             <div className="p-4 flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -211,6 +211,16 @@ export function NovaVenda() {
                                         if (c) setTimeout(nextStep, 300) // Auto-advance after small delay
                                     }}
                                 />
+
+                                {selectedContato && (
+                                    <button
+                                        onClick={nextStep}
+                                        className="mt-4 w-full bg-primary text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                                    >
+                                        Próximo
+                                        <ChevronRight className="h-5 w-5" />
+                                    </button>
+                                )}
                             </div>
                         )}
 
@@ -265,31 +275,29 @@ export function NovaVenda() {
                             </div>
                         )}
 
-                        {/* Floating Mobile Navigation — hidden on checkout (step 2 has inline buttons) */}
+                        {/* Bottom Navigation Bar — fixed height, outside scroll, hidden on checkout */}
                         {currentStep < 2 && (
-                            <div className="absolute bottom-24 left-0 right-0 flex justify-center px-6 pointer-events-none md:hidden z-50">
-                                <div className="flex gap-4 w-full max-w-sm pointer-events-auto">
+                            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 md:hidden">
+                                <div className="flex gap-3 max-w-sm mx-auto">
                                     {currentStep > 0 && (
                                         <button
                                             onClick={prevStep}
-                                            className="flex-1 bg-white dark:bg-gray-800 text-gray-700 dark:text-white h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold border border-gray-100 dark:border-gray-700 active:scale-95 transition-transform"
+                                            className="flex-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-white h-12 rounded-2xl shadow-sm flex items-center justify-center gap-2 font-bold border border-gray-200 dark:border-gray-600 active:scale-95 transition-transform"
                                         >
                                             <ChevronLeft className="h-5 w-5" />
                                             Voltar
                                         </button>
                                     )}
-                                    {currentStep < 2 && (
-                                        <button
-                                            onClick={nextStep}
-                                            className={`flex-[2] h-14 rounded-2xl shadow-xl flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
+                                    <button
+                                        onClick={nextStep}
+                                        className={`flex-[2] h-12 rounded-2xl shadow-sm flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
                                             ${(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)
-                                                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-primary text-white shadow-primary/30'}`}
-                                        >
-                                            Próximo
-                                            <ChevronRight className="h-5 w-5" />
-                                        </button>
-                                    )}
+                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                                : 'bg-primary text-white shadow-primary/30'}`}
+                                    >
+                                        Próximo
+                                        <ChevronRight className="h-5 w-5" />
+                                    </button>
                                 </div>
                             </div>
                         )}

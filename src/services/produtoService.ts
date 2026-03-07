@@ -61,6 +61,7 @@ export class ProdutoService {
             custo: data.custo,
             unidade: data.unidade || 'un',
             apelido: data.apelido || null,
+            subtitulo: data.subtitulo || null,
             estoque_minimo: data.estoqueMinimo || 0,
             ativo: true
         }
@@ -124,7 +125,15 @@ export class ProdutoService {
     }
 
     /* IMAGENS */
-    async uploadImage(file: File): Promise<string> {
+    async uploadImage(file: File, oldImageUrl?: string | null): Promise<string> {
+        // Deleta arquivo antigo do bucket se existir
+        if (oldImageUrl) {
+            const oldFileName = oldImageUrl.split('/').pop()
+            if (oldFileName) {
+                await supabase.storage.from('products').remove([oldFileName])
+            }
+        }
+
         const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
         const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`
 
@@ -148,42 +157,27 @@ export class ProdutoService {
     }
 
     async addImageReference(produtoId: string, url: string): Promise<void> {
-        // Remove imagens anteriores das duas tabelas
-        await supabase
-            .from('sis_imagens_produto')
-            .delete()
-            .eq('produto_id', produtoId)
+        const { error } = await supabase.rpc('add_image_reference', {
+            p_produto_id: produtoId,
+            p_url: url
+        })
 
-        await supabase
-            .from('cat_imagens_produto')
-            .delete()
-            .eq('produto_id', produtoId)
+        if (error) throw error
+    }
 
-        // Insere em sis_imagens_produto (sistema interno)
-        const { error: errorSis } = await supabase
-            .from('sis_imagens_produto')
-            .insert({
-                produto_id: produtoId,
-                url,
-                ordem: 0,
-                tipo: 'internal',
-                ativo: true
-            })
+    async deleteImage(produtoId: string, imageUrl: string): Promise<void> {
+        const fileName = imageUrl.split('/').pop()
+        if (!fileName) throw new Error('URL de imagem inválida')
 
-        if (errorSis) throw errorSis
+        // 1. Remove das tabelas via RPC
+        const { error: rpcError } = await supabase
+            .rpc('delete_image_reference', { p_produto_id: produtoId })
+        if (rpcError) throw rpcError
 
-        // Insere em cat_imagens_produto (catálogo público)
-        const { error: errorCat } = await supabase
-            .from('cat_imagens_produto')
-            .insert({
-                produto_id: produtoId,
-                url,
-                tipo: 'cover',
-                ordem: 0,
-                ativo: true
-            })
-
-        if (errorCat) throw errorCat
+        // 2. Deleta arquivo do bucket
+        const { error: storageError } = await supabase
+            .storage.from('products').remove([fileName])
+        if (storageError) console.warn('[DeleteImage] Storage error:', storageError)
     }
 }
 

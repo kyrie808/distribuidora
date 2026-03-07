@@ -280,7 +280,8 @@ export function PedidosCompra() {
                                         amount: data.amount,
                                         method: data.payment_method,
                                         contaId: data.conta_id,
-                                        notes: data.notes
+                                        notes: data.notes,
+                                        paymentDate: data.payment_date
                                     }
                                 })
                                 refetch()

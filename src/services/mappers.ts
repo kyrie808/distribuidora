@@ -126,6 +126,7 @@ export const toDomainProduto = (dbProduto: ProdutoRowWithImages): DomainProduto 
         precoAncoragem: dbProduto.preco_ancoragem
             ? Number(dbProduto.preco_ancoragem)
             : null,
+        categoria: dbProduto.categoria || null,
         imagemUrl: dbProduto.sis_imagens_produto?.[0]?.url
     }
 }
