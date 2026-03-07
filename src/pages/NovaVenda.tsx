@@ -185,8 +185,8 @@ export function NovaVenda() {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark min-h-screen flex justify-center">
-            <div className="relative flex h-screen w-full flex-col overflow-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
+        <div className="bg-background-light dark:bg-background-dark flex justify-center">
+            <div className="relative flex h-[calc(100dvh-80px)] w-full flex-col overflow-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
                 <Header
                     title={isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Nova Venda'}
                     showBack
@@ -200,7 +200,7 @@ export function NovaVenda() {
                     <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50">
                         {/* Step 0: Cliente */}
                         {currentStep === 0 && (
-                            <div className="p-4 flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="p-4 flex-1 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                     <User className="h-5 w-5 text-primary" />
                                     Selecionar Cliente
@@ -277,7 +277,7 @@ export function NovaVenda() {
                         )}
 
                         {/* Bottom Navigation Bar — fixed height, outside scroll, hidden on checkout */}
-                        {currentStep < 2 && (
+                        {currentStep > 0 && currentStep < 2 && (
                             <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 md:hidden">
                                 <div className="flex gap-3 max-w-sm mx-auto">
                                     {currentStep > 0 && (
