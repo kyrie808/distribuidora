@@ -215,7 +215,7 @@ export function NovaVenda() {
 
                                 {selectedContato && (
                                     <button
-                                        onClick={nextStep}
+                                        onClick={() => nextStep()}
                                         className="mt-4 w-full bg-primary text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
                                     >
                                         Próximo
@@ -290,7 +290,7 @@ export function NovaVenda() {
                                         </button>
                                     )}
                                     <button
-                                        onClick={nextStep}
+                                        onClick={() => nextStep()}
                                         className={`flex-[2] h-12 rounded-2xl shadow-sm flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
                                             ${(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)
                                                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'

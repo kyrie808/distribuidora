@@ -35,7 +35,7 @@ export function usePurchaseOrders() {
     })
 
     const addPaymentMutation = useMutation({
-        mutationFn: ({ orderId, payment }: { orderId: string, payment: { amount: number, method: string, contaId: string, notes?: string } }) =>
+        mutationFn: ({ orderId, payment }: { orderId: string, payment: { amount: number, method: string, contaId: string, notes?: string, paymentDate?: string } }) =>
             purchaseOrderService.addPayment(orderId, payment),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })

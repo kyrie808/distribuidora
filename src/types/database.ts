@@ -1126,6 +1126,14 @@ export type Database = {
         Args: { p_venda_id: string; p_valor: number; p_conta_id: string; p_data: string }
         Returns: undefined
       }
+      add_image_reference: {
+        Args: { p_produto_id: string; p_url: string }
+        Returns: undefined
+      }
+      delete_image_reference: {
+        Args: { p_produto_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       purchase_order_payment_status: "paid" | "partial" | "unpaid"
