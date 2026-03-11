@@ -218,6 +218,17 @@ export function VendaDetalhe() {
                                 )}
                             </div>
 
+                            {/* Pagamento parcial info */}
+                            {venda.valorPago > 0 && !venda.pago && (
+                                <p className="text-xs font-mono text-gray-500 dark:text-gray-400">
+                                    Pago: {formatCurrency(venda.valorPago)}
+                                    <span className="mx-1.5">·</span>
+                                    <span className="text-red-600 dark:text-red-400 font-bold">
+                                        Saldo: {formatCurrency(venda.total - venda.valorPago)}
+                                    </span>
+                                </p>
+                            )}
+
                             <p className="text-xs font-mono text-gray-400 dark:text-gray-500 mt-4">
                                 {formatDate(venda.data)}
                             </p>
@@ -271,6 +282,27 @@ export function VendaDetalhe() {
                                     )}
                                 </span>
                             </div>
+
+                            {/* Pagamentos recebidos */}
+                            {venda.pago ? (
+                                <div className="flex justify-center mt-4 pt-3 border-t border-dashed border-gray-200 dark:border-border">
+                                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">✓ Quitado</span>
+                                </div>
+                            ) : venda.pagamentos.length > 0 && (
+                                <div className="mt-4 pt-3 border-t border-dashed border-gray-200 dark:border-border">
+                                    <span className="text-[10px] font-mono text-gray-400 uppercase tracking-wider block mb-2">Pagamentos recebidos</span>
+                                    {venda.pagamentos.map((pag) => (
+                                        <div key={pag.id} className="flex justify-between text-xs py-1">
+                                            <span className="font-mono text-gray-500 dark:text-gray-400">
+                                                {formatDate(pag.data)} · {pag.metodo}
+                                            </span>
+                                            <span className="font-mono text-gray-700 dark:text-gray-300">
+                                                {formatCurrency(pag.valor)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 

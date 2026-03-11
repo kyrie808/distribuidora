@@ -156,11 +156,14 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         } catch (e) { console.error(e); return false }
     }, [queryClient])
 
-    const deleteUltimoPagamento = useCallback(async (_vendaId: string) => {
-        // TODO: implement server-side delete last payment
-        console.warn('deleteUltimoPagamento not yet implemented')
-        return false
-    }, [])
+    const deleteUltimoPagamento = useCallback(async (vendaId: string) => {
+        try {
+            await vendaService.deleteUltimoPagamento(vendaId)
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['venda', vendaId] })
+            return true
+        } catch (e) { console.error(e); return false }
+    }, [queryClient])
 
     return {
         vendas: data?.vendas || [],

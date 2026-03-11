@@ -126,6 +126,11 @@ export const vendaService = {
     },
 
     async deleteVenda(id: string): Promise<boolean> {
+        // Deletar lancamentos primeiro (FK sem CASCADE)
+        const { error: lancError } = await supabase.from('lancamentos').delete().eq('venda_id', id)
+        if (lancError) throw lancError
+
+        // vendas DELETE cascadeia para itens_venda e pagamentos_venda
         const { error } = await supabase.from('vendas').delete().eq('id', id)
         if (error) throw error
         return true
@@ -141,17 +146,16 @@ export const vendaService = {
         })
         if (error) throw error
 
-        // Chama a RPC para gerar lançamento automático no fluxo de caixa
+        // Gera lançamento automático no fluxo de caixa
         const { error: rpcError } = await supabase.rpc('registrar_lancamento_venda', {
             p_venda_id: vendaId,
             p_valor: valor,
             p_conta_id: contaId,
-            p_data: data.includes('T') ? data.split('T')[0] : data
+            p_data: data.includes('T') ? data.split('T')[0] : data,
+            p_metodo: metodo
         })
 
-        if (rpcError) {
-            console.error('LANCAMENTO_AUTOMATICO_ERROR:', rpcError)
-        }
+        if (rpcError) throw rpcError
 
         return true
     },
@@ -197,18 +201,57 @@ export const vendaService = {
         }
     },
 
-    async quitarVenda(id: string, valor: number, metodo: string, contaId: string, observacao?: string): Promise<DomainVenda> {
-        // 1. Marca como pago
-        const { error: vendaError } = await supabase
-            .from('vendas')
-            .update({ pago: true })
-            .eq('id', id)
+    async deleteUltimoPagamento(vendaId: string): Promise<boolean> {
+        // 1. Buscar último pagamento
+        const { data: pagamento, error: fetchError } = await supabase
+            .from('pagamentos_venda')
+            .select('*')
+            .eq('venda_id', vendaId)
+            .order('criado_em', { ascending: false })
+            .limit(1)
+            .single()
 
-        if (vendaError) throw vendaError
+        if (fetchError || !pagamento) throw fetchError || new Error('Nenhum pagamento encontrado')
 
-        // 2. Registra em pagamentos_venda (que por sua vez chama a RPC de lançamento)
+        // 2. Buscar lançamento correspondente por ID e deletar
+        const { data: lancamento } = await supabase
+            .from('lancamentos')
+            .select('id')
+            .eq('venda_id', vendaId)
+            .eq('origem', 'venda')
+            .eq('valor', pagamento.valor)
+            .order('criado_em', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        if (lancamento) {
+            const { error: lancError } = await supabase
+                .from('lancamentos')
+                .delete()
+                .eq('id', lancamento.id)
+
+            if (lancError) console.error('Erro ao deletar lançamento:', lancError)
+        }
+
+        // 3. Deletar o pagamento — trigger recalcula valor_pago e pago
+        const { error: delError } = await supabase
+            .from('pagamentos_venda')
+            .delete()
+            .eq('id', pagamento.id)
+
+        if (delError) throw delError
+        return true
+    },
+
+    async quitarVenda(id: string, metodo: string, contaId: string, observacao?: string): Promise<DomainVenda> {
+        // Busca a venda para calcular saldo restante
+        const venda = await this.getVendaById(id)
+        const saldo = venda.total - venda.valorPago
+        if (saldo <= 0) return venda
+
+        // Registra pagamento do saldo restante — o trigger cuida de marcar pago=true
         const dataPagamento = new Date().toLocaleString('sv-SE', { timeZone: 'America/Sao_Paulo' }).split(' ')[0]
-        await this.addPagamento(id, valor, metodo, dataPagamento, contaId, observacao)
+        await this.addPagamento(id, saldo, metodo, dataPagamento, contaId, observacao)
 
         return this.getVendaById(id)
     }

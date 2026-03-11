@@ -114,7 +114,7 @@ export function ContasReceber() {
 
         try {
             setIsQuitting(true)
-            await vendaService.quitarVenda(selectedVenda.id, selectedVenda.total, selectedVenda.formaPagamento, selectedContaId)
+            await vendaService.quitarVenda(selectedVenda.id, selectedVenda.formaPagamento, selectedContaId)
             toast.success('Venda quitada com sucesso')
             setSelectedVenda(null)
             fetchVendas()
