@@ -1,2 +1,0 @@
-﻿src/hooks/usePurchaseOrders.ts(3,30): error TS6196: 'PurchaseOrderWithItems' is declared but never used.
-src/services/purchaseOrderService.ts(2,54): error TS6196: 'TablesInsert' is declared but never used.

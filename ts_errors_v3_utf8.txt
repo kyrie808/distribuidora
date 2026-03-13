@@ -1,4 +1,0 @@
-﻿src/components/contatos/ContatoFormModal.tsx(244,23): error TS2322: Type '{ indicadoPorId: string | null | undefined; nome: string; apelido: string | null | undefined; telefone: string; tipo: "B2B" | "B2C" | "FORNECEDOR"; subtipo: string | null | undefined; ... 11 more ...; uf: string | ... 1 more ... | undefined; }' is not assignable to type 'Partial<DomainContato>'.
-  Types of property 'status' are incompatible.
-    Type '"cliente" | "lead" | "inativo" | "fornecedor"' is not assignable to type '"cliente" | "lead" | "inativo" | undefined'.
-      Type '"fornecedor"' is not assignable to type '"cliente" | "lead" | "inativo" | undefined'.
