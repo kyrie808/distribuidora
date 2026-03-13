@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "mcp__supabase-kyrie__list_projects",
+      "mcp__supabase-kyrie__list_tables",
+      "mcp__supabase-kyrie__execute_sql",
+      "mcp__supabase-distribuidora__list_projects",
+      "mcp__supabase-distribuidora__execute_sql",
+      "mcp__supabase-distribuidora__apply_migration",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && rm -f AGENTS.md ARCHITECTURE_AUDIT.md .mcp.json build-errors.txt build-output.txt cashflow_test_output.txt debug_raw_output.txt diag.js diag_out.txt duplicates_report.txt latest_groq_response.txt link_out.txt lint-results.txt sales_dump.json test_api.py requirements.txt ts_errors.txt ts_errors_final.txt ts_errors_final_utf8.txt ts_errors_full.txt ts_errors_utf8.txt ts_errors_v2.txt ts_errors_v2_utf8.txt ts_errors_v2_utf8.txt ts_errors_v3.txt ts_errors_v3_utf8.txt todos_fiados.md analise_fiados.md)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && echo \"=== Directories check ===\" && ls -d .aios-core/ .agent/ .agents/ .antigravity/agents/ 2>&1; echo \"=== Files check ===\" && ls AGENTS.md ARCHITECTURE_AUDIT.md .mcp.json build-errors.txt build-output.txt cashflow_test_output.txt debug_raw_output.txt diag.js diag_out.txt duplicates_report.txt latest_groq_response.txt link_out.txt lint-results.txt sales_dump.json test_api.py requirements.txt ts_errors*.txt todos_fiados.md analise_fiados.md 2>&1; echo \"=== Done ===\")",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx skills add vercel-labs/skills --skill find-skills 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add vercel-labs/skills --skill find-skills -y 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add pbakaus/impeccable --skill frontend-design -y 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add vercel-labs/agent-skills --skill vercel-react-best-practices -y 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add supabase/agent-skills --skill supabase-postgres-best-practices -y 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add nextlevelbuilder/ui-ux-pro-max-skill --skill ui-ux-pro-max -y 2>&1)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && mkdir -p .claude/skills/fix-and-deploy .claude/skills/supabase-distribuidora .claude/skills/review-compact)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && mkdir -p .agent/skills && cp -r .claude/skills/* .agent/skills/)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && rm -rf .antigravity/)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase-distribuidora"
+  ]
+}

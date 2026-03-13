@@ -27,29 +27,34 @@ dist-ssr
 .env
 venv/
 
+# Agent configs com tokens
+.mcp.json
+
+# Antigravity IDE (config local, não versionado)
+.antigravity/
+
+# Skills locais por máquina (Antigravity lê .agent/, npx cria .agents/)
+.agent/
+.agents/
+
+# Debug/output temporários
+*_output.txt
+*_errors*.txt
+lint-results.txt
+diag_out.txt
+
 # OpenCode config with sensitive credentials
 opencode.json
 
-# Environment & Secrets (AIOS)
+# Environment & Secrets
 .env.local
 .env.*.local
 *.key
 *.pem
 
-# Dependencies (AIOS)
-node_modules/
-
-# Build & Logs (AIOS)
-dist/
+# Build
 build/
-logs/
 
-# IDE & OS (AIOS)
+# IDE & OS
 Thumbs.db
-.idea/
 *.swp
-
-# AIOS Local (AIOS)
-.aios-core/local/
-.claude/settings.local.json
-.aios/install-log.txt
