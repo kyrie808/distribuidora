@@ -1,4 +1,4 @@
-// @ts-ignore
+/// <reference types="vite-plugin-pwa/client" />
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { RefreshCw, X } from 'lucide-react'
 
@@ -8,11 +8,12 @@ export function PwaUpdateToast() {
         needRefresh: [needRefresh, setNeedRefresh],
         updateServiceWorker,
     } = useRegisterSW({
-        // @ts-ignore - Plugin types issue
-        onRegisteredMR(r: ServiceWorkerRegistration | undefined) {
-            r && setInterval(() => {
-                r.update()
-            }, 60 * 60 * 1000) // Check for updates every hour
+        onRegistered(r: ServiceWorkerRegistration | undefined) {
+            if (r) {
+                setInterval(() => {
+                    r.update()
+                }, 60 * 60 * 1000) // Check for updates every hour
+            }
         },
     })
 

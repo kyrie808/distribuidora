@@ -29,7 +29,7 @@ export function useRankingCompras(): UseRankingComprasReturn {
         try {
             const { data, error: fetchError } = await supabase
                 .from('ranking_compras')
-                .select('*')
+                .select('contato_id, nome, total_pontos, total_compras, ultima_compra')
                 .order('total_pontos', { ascending: false })
                 .limit(10)
 

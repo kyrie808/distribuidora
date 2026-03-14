@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cashFlowService } from '../services/cashFlowService'
 import type { Database } from '../types/database'
@@ -44,12 +45,30 @@ export function useLancamentos() {
         },
     })
 
+    const createLancamento = useCallback(async (data: LancamentoInsert) => {
+        return createMutation.mutateAsync(data)
+    }, [createMutation])
+
+    const createTransferencia = useCallback(async (data: {
+        valor: number
+        data: string
+        conta_id: string
+        conta_destino_id: string
+        descricao?: string
+    }) => {
+        return createTransferenciaMutation.mutateAsync(data)
+    }, [createTransferenciaMutation])
+
+    const marcarVendaPaga = useCallback(async (params: { vendaId: string, contaId: string, dataPagamento?: string }) => {
+        return marcarVendaPagaMutation.mutateAsync(params)
+    }, [marcarVendaPagaMutation])
+
     return {
-        createLancamento: createMutation.mutateAsync,
+        createLancamento,
         isCreating: createMutation.isPending,
-        createTransferencia: createTransferenciaMutation.mutateAsync,
+        createTransferencia,
         isTransferring: createTransferenciaMutation.isPending,
-        marcarVendaPaga: marcarVendaPagaMutation.mutateAsync,
+        marcarVendaPaga,
         isMarkingPaid: marcarVendaPagaMutation.isPending,
     }
 }

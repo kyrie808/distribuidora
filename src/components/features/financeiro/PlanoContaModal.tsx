@@ -34,7 +34,7 @@ export function PlanoContaModal({ isOpen, onClose, onSuccess, defaultType = 'rec
         reset,
         formState: { errors, isSubmitting },
     } = useForm<PlanoContaFormData>({
-        resolver: zodResolver(planoContaSchema) as any,
+        resolver: zodResolver(planoContaSchema),
         defaultValues: {
             nome: '',
             tipo: defaultType,
@@ -57,7 +57,7 @@ export function PlanoContaModal({ isOpen, onClose, onSuccess, defaultType = 'rec
 
     const onSubmit = async (data: PlanoContaFormData) => {
         try {
-            await createPlanoConta(data as any)
+            await createPlanoConta(data)
             toast.success('Categoria criada com sucesso!')
             onSuccess?.()
             onClose()

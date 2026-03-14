@@ -29,18 +29,18 @@ export function useTopIndicadores(enabled: boolean = true): UseTopIndicadoresRet
 
         try {
             const { data, error: fetchError } = await (supabase
-                .from('ranking_indicacoes') as any)
-                .select('*')
+                .from('ranking_indicacoes'))
+                .select('indicador_id, nome, total_indicados, total_vendas_indicados')
                 .order('total_indicados', { ascending: false })
                 .limit(10)
 
             if (fetchError) throw fetchError
 
-            const stats: IndicadorStats[] = (data || []).map((item: any, index: number) => ({
-                indicadorId: item.indicador_id || '',
-                nome: item.nome || 'Indicador sem nome',
-                totalIndicados: item.total_indicados || 0,
-                totalVendasIndicados: Number(item.total_vendas_indicados) || 0,
+            const stats: IndicadorStats[] = (data || []).map((item, index: number) => ({
+                indicadorId: (item as Record<string, unknown>).indicador_id as string || '',
+                nome: (item as Record<string, unknown>).nome as string || 'Indicador sem nome',
+                totalIndicados: (item as Record<string, unknown>).total_indicados as number || 0,
+                totalVendasIndicados: Number((item as Record<string, unknown>).total_vendas_indicados) || 0,
                 ranking: index + 1
             }))
 

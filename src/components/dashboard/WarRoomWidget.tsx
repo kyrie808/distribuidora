@@ -4,8 +4,18 @@ import { formatCurrency, formatRelativeDate, formatPhone } from '@/utils/formatt
 import { TacticalActionCard } from './TacticalActionCard'
 
 interface WarRoomWidgetProps {
-    overdueAlert: any
-    recompraAlert: any
+    overdueAlert: {
+        nome: string
+        valorDevido: number
+        diasAtraso: number
+        ultimaCompra: string
+        telefone: string
+    } | null
+    recompraAlert: {
+        id: string
+        nome: string
+        diasSemComprar: number
+    } | null
 }
 
 export function WarRoomWidget({ overdueAlert, recompraAlert }: WarRoomWidgetProps) {

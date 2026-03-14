@@ -41,7 +41,7 @@ export function LoginPage() {
 
             toast.success('Bem-vindo de volta!')
             navigate(from, { replace: true })
-        } catch (error) {
+        } catch {
             toast.error('Ocorreu um erro ao realizar o login')
         } finally {
             setIsLoading(false)

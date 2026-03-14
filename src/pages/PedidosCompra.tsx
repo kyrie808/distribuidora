@@ -7,7 +7,7 @@ import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { PurchaseOrderForm } from '../components/features/purchase-orders/PurchaseOrderForm'
 import { PurchaseOrderPaymentModal } from '../components/features/purchase-orders/PurchaseOrderPaymentModal'
 import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
-import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder, PurchaseOrderPaymentStatus } from '../types/domain'
+import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder, PurchaseOrderPaymentStatus, CreatePurchaseOrderItem } from '../types/domain'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { Spinner } from '../components/ui/Spinner'
 import { ProductNicknamesModal } from '../components/features/purchase-orders/ProductNicknamesModal'
@@ -57,7 +57,7 @@ export function PedidosCompra() {
         setIsFormOpen(true)
     }
 
-    const _handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: any[]) => {
+    const _handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: CreatePurchaseOrderItem[]) => {
         if (selectedOrder) {
             await updateOrder({ id: selectedOrder.id, updates: orderData as UpdatePurchaseOrder })
         } else {

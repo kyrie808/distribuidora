@@ -1,4 +1,46 @@
 import { supabase } from '../lib/supabase'
+import type { Tables } from '../types/database'
+
+type HomeFinanceiroRow = Tables<'view_home_financeiro'>
+type HomeOperacionalRow = Tables<'view_home_operacional'>
+type HomeAlertasRow = Tables<'view_home_alertas'>
+
+interface BreakdownResult {
+    vencidos: number
+    vencem_hoje: number
+    vencem_semana: number
+    sem_data: number
+    valor_vencido: number
+    valor_hoje: number
+    valor_semana: number
+    valor_sem_data: number
+}
+
+export interface TopIndicador {
+    indicadorId: string
+    nome: string
+    totalIndicados: number
+    totalVendasIndicados: number
+}
+
+export interface VendaAlerta {
+    id: string
+    total: number
+    status: string
+    pago: boolean
+    data: string
+    contato: {
+        nome: string | null
+    } | null
+}
+
+export interface RawFinanceiroAlerta {
+    venda_id: string
+    valor: number
+    contato_nome: string
+    contato_telefone: string
+    vencimento: string
+}
 
 export interface DashboardMetrics {
     operational: {
@@ -7,8 +49,8 @@ export interface DashboardMetrics {
         entregas_pendentes_total: number
         entregas_hoje_realizadas: number
         clientes_ativos: number
-        ranking_indicacoes: any[]
-        ultimas_vendas: any[]
+        ranking_indicacoes: TopIndicador[]
+        ultimas_vendas: VendaAlerta[]
     },
     financial: {
         faturamento_mes_atual: number
@@ -20,7 +62,7 @@ export interface DashboardMetrics {
         total_a_receber: number
         liquidado_mes: number
         liquidado_mes_count: number
-        alertas_financeiros: any[]
+        alertas_financeiros: RawFinanceiroAlerta[]
         a_receber_detalhado?: {
             vencidos: number
             vencem_hoje: number
@@ -51,29 +93,34 @@ export const dashboardService = {
         ] = await Promise.all([
             supabase
                 .from('view_home_financeiro')
-                .select('*')
-                .eq('mes' as any, month)
-                .eq('ano' as any, year)
+                .select('faturamento, ticket_medio, lucro_estimado, total_a_receber, liquidado_mes, liquidado_mes_count, faturamento_anterior, variacao_faturamento_percentual, alertas_financeiros')
+                .eq('mes', month)
+                .eq('ano', year)
                 .maybeSingle(),
             supabase
                 .from('view_home_operacional')
-                .select('*')
-                .eq('mes' as any, month)
-                .eq('ano' as any, year)
+                .select('total_vendas, total_itens, pedidos_pendentes, pedidos_entregues_hoje, clientes_ativos, ranking_indicacoes, ultimas_vendas')
+                .eq('mes', month)
+                .eq('ano', year)
                 .maybeSingle(),
             supabase
                 .from('view_home_alertas')
-                .select('*')
+                .select('contato_id, nome, telefone, data_ultima_compra, dias_sem_compra')
                 .limit(10),
-            supabase.rpc('get_areceber_breakdown' as any).maybeSingle()
-        ]) as any[]
+            supabase.rpc('get_areceber_breakdown').maybeSingle()
+        ])
 
         if (finError) throw finError
         if (opError) throw opError
         if (alrError) throw alrError
         if (breakdownError) throw breakdownError
 
-        return mapDashboardMetrics(financialData, operationalData, alertsData, breakdownData)
+        return mapDashboardMetrics(
+            financialData as HomeFinanceiroRow,
+            operationalData as HomeOperacionalRow,
+            alertsData as HomeAlertasRow[],
+            breakdownData as BreakdownResult
+        )
     },
 
     async getLucroLiquido(mes: Date): Promise<{
@@ -92,8 +139,8 @@ export const dashboardService = {
         const fim = `${ano}-${String(mesNum).padStart(2, '0')}-${fimMes}`
 
         const { data, error } = await supabase
-            .from('view_lucro_liquido_mensal' as any)
-            .select('*')
+            .from('view_lucro_liquido_mensal')
+            .select('receita_bruta, custo_produtos, lucro_bruto, despesas_operacionais, custo_fabrica, lucro_liquido, margem_liquida_pct')
             .gte('mes', inicio)
             .lte('mes', fim)
             .maybeSingle()
@@ -105,13 +152,13 @@ export const dashboardService = {
         }
 
         return {
-            receita_bruta: Number((data as any).receita_bruta) || 0,
-            custo_produtos: Number((data as any).custo_produtos) || 0,
-            lucro_bruto: Number((data as any).lucro_bruto) || 0,
-            despesas_operacionais: Number((data as any).despesas_operacionais) || 0,
-            custo_fabrica: Number((data as any).custo_fabrica) || 0,
-            lucro_liquido: Number((data as any).lucro_liquido) || 0,
-            margem_liquida_pct: Number((data as any).margem_liquida_pct) || 0,
+            receita_bruta: Number(data.receita_bruta) || 0,
+            custo_produtos: Number(data.custo_produtos) || 0,
+            lucro_bruto: Number(data.lucro_bruto) || 0,
+            despesas_operacionais: Number(data.despesas_operacionais) || 0,
+            custo_fabrica: Number(data.custo_fabrica) || 0,
+            lucro_liquido: Number(data.lucro_liquido) || 0,
+            margem_liquida_pct: Number(data.margem_liquida_pct) || 0,
         }
     },
 
@@ -126,8 +173,8 @@ export const dashboardService = {
         const fim = `${ano}-${String(mesNum).padStart(2, '0')}-${fimMes}`
 
         const { data, error } = await supabase
-            .from('view_liquidado_mensal' as any)
-            .select('*')
+            .from('view_liquidado_mensal')
+            .select('vendas_liquidadas, total_liquidado')
             .gte('mes', inicio)
             .lte('mes', fim)
             .maybeSingle()
@@ -138,8 +185,8 @@ export const dashboardService = {
         }
 
         return {
-            vendas_liquidadas: Number((data as any).vendas_liquidadas) || 0,
-            total_liquidado: Number((data as any).total_liquidado) || 0
+            vendas_liquidadas: Number(data.vendas_liquidadas) || 0,
+            total_liquidado: Number(data.total_liquidado) || 0
         }
     },
 
@@ -169,7 +216,12 @@ export const dashboardService = {
 }
 
 // Pure business logic extracted for testing
-export function mapDashboardMetrics(financialData: any, operationalData: any, alertsData: any, breakdownData?: any): DashboardMetrics {
+export function mapDashboardMetrics(
+    financialData: HomeFinanceiroRow | null,
+    operationalData: HomeOperacionalRow | null,
+    alertsData: HomeAlertasRow[] | null,
+    breakdownData?: BreakdownResult
+): DashboardMetrics {
     const fin = financialData || {
         faturamento: 0,
         ticket_medio: 0,
@@ -199,8 +251,8 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
             entregas_pendentes_total: op.pedidos_pendentes ?? 0,
             entregas_hoje_realizadas: op.pedidos_entregues_hoje ?? 0,
             clientes_ativos: op.clientes_ativos ?? 0,
-            ranking_indicacoes: (op.ranking_indicacoes as any[]) ?? [],
-            ultimas_vendas: (op.ultimas_vendas as any[]) ?? [],
+            ranking_indicacoes: (op.ranking_indicacoes as unknown as TopIndicador[]) ?? [],
+            ultimas_vendas: (op.ultimas_vendas as VendaAlerta[]) ?? [],
         },
         financial: {
             faturamento_mes_atual: fin.faturamento ?? 0,
@@ -212,7 +264,7 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
             total_a_receber: fin.total_a_receber ?? 0,
             liquidado_mes: fin.liquidado_mes ?? 0,
             liquidado_mes_count: fin.liquidado_mes_count ?? 0,
-            alertas_financeiros: (fin.alertas_financeiros as any[]) ?? [],
+            alertas_financeiros: (fin.alertas_financeiros as RawFinanceiroAlerta[]) ?? [],
             a_receber_detalhado: breakdownData ? {
                 vencidos: Number(breakdownData.vencidos || 0),
                 vencem_hoje: Number(breakdownData.vencem_hoje || 0),
@@ -224,7 +276,7 @@ export function mapDashboardMetrics(financialData: any, operationalData: any, al
                 valor_sem_data: Number(breakdownData.valor_sem_data || 0),
             } : undefined
         },
-        alertas_recompra: (alertsData || []).map((a: any) => ({
+        alertas_recompra: (alertsData || []).map((a) => ({
             contato_id: a.contato_id ?? '',
             nome: a.nome ?? 'Cliente sem nome',
             telefone: a.telefone ?? '',

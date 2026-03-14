@@ -16,7 +16,7 @@ export const recompraService = {
     async getRecompraData(config: { b2b: number, b2c: number }): Promise<ContatoRecompra[]> {
         const { data: clientesData, error: clientesError } = await supabase
             .from('contatos')
-            .select('*')
+            .select('id, nome, tipo, ultimo_contato, criado_em, status')
             .eq('status', 'cliente')
 
         if (clientesError) throw clientesError
@@ -26,12 +26,12 @@ export const recompraService = {
             .from('vendas')
             .select('contato_id, data')
             .eq('status', 'entregue')
-            .order('data', { ascending: false }) as any
+            .order('data', { ascending: false })
 
         if (vendasError) throw vendasError
 
         const ultimaVendaPorContato = new Map<string, string>()
-        vendasData?.forEach((v: any) => {
+        vendasData?.forEach((v) => {
             if (!ultimaVendaPorContato.has(v.contato_id)) {
                 ultimaVendaPorContato.set(v.contato_id, v.data)
             }

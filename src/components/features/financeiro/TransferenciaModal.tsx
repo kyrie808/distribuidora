@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -15,7 +15,7 @@ const transferenciaSchema = z.object({
     data: z.string().min(1, 'A data é obrigatória'),
     conta_id: z.string().min(1, 'A conta de origem é obrigatória'),
     conta_destino_id: z.string().min(1, 'A conta de destino é obrigatória'),
-    descricao: z.string().optional().nullable(),
+    descricao: z.string().optional(),
 }).refine(data => data.conta_id !== data.conta_destino_id, {
     message: "A conta de destino deve ser diferente da origem",
     path: ["conta_destino_id"]
@@ -39,7 +39,6 @@ export function TransferenciaModal({ isOpen, onClose, onSuccess }: Transferencia
         register,
         handleSubmit,
         setValue,
-        reset,
         formState: { errors, isSubmitting },
     } = useForm<TransferenciaFormData>({
         resolver: zodResolver(transferenciaSchema),
@@ -52,19 +51,7 @@ export function TransferenciaModal({ isOpen, onClose, onSuccess }: Transferencia
         },
     })
 
-    // Reset form when modal opens
-    useEffect(() => {
-        if (isOpen) {
-            reset({
-                valor: 0,
-                data: new Date().toISOString().split('T')[0],
-                conta_id: '',
-                conta_destino_id: '',
-                descricao: 'Transferência interna',
-            })
-            setDisplayValor('')
-        }
-    }, [isOpen, reset])
+    // Reset form handled by key in parent
 
     // Currency Mask Logic
     const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,7 +69,7 @@ export function TransferenciaModal({ isOpen, onClose, onSuccess }: Transferencia
 
     const onSubmit = async (data: TransferenciaFormData) => {
         try {
-            await createTransferencia(data as any)
+            await createTransferencia(data)
             toast.success('Transferência realizada com sucesso!')
             onSuccess?.()
             onClose()

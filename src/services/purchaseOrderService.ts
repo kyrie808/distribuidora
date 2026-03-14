@@ -1,6 +1,13 @@
 import { supabase } from '../lib/supabase'
 import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder } from '../types/domain'
 import { toDomainPurchaseOrderWithItems } from './mappers'
+import type { Database } from '../types/database'
+
+export interface CreatePurchaseOrderItem {
+    productId: string
+    quantity: number
+    unitCost: number
+}
 
 export const purchaseOrderService = {
     async fetchOrders(): Promise<DomainPurchaseOrderWithItems[]> {
@@ -42,7 +49,7 @@ export const purchaseOrderService = {
         return toDomainPurchaseOrderWithItems(data)
     },
 
-    async createOrder(order: CreatePurchaseOrder, items: any[]): Promise<DomainPurchaseOrderWithItems> {
+    async createOrder(order: CreatePurchaseOrder, items: CreatePurchaseOrderItem[]): Promise<DomainPurchaseOrderWithItems> {
         // Implementation remains similar but uses mappers for return
         const { data: newOrder, error: orderError } = await supabase
             .from('purchase_orders')
@@ -77,7 +84,7 @@ export const purchaseOrderService = {
     },
 
     async updateOrder(id: string, updates: UpdatePurchaseOrder): Promise<DomainPurchaseOrderWithItems> {
-        const dbUpdates: any = {}
+        const dbUpdates: Database['public']['Tables']['purchase_orders']['Update'] = {}
         if (updates.fornecedorId !== undefined) dbUpdates.fornecedor_id = updates.fornecedorId
         if (updates.orderDate !== undefined) dbUpdates.order_date = updates.orderDate
         if (updates.status !== undefined) dbUpdates.status = updates.status

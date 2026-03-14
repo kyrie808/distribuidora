@@ -15,7 +15,8 @@ describe('cashFlowService - processAlertasFinanceiros', () => {
     it('should categorize a past due sale as "atrasado"', () => {
         const pastDate = subDays(new Date('2023-10-15T12:00:00Z'), 2).toISOString();
         const vendas = [
-            { id: 'v1', total: 100, data_prevista_pagamento: pastDate } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v1', total: 100, data_prevista_pagamento: pastDate } as unknown as any
         ];
 
         const result = processAlertasFinanceiros(vendas);
@@ -28,7 +29,8 @@ describe('cashFlowService - processAlertasFinanceiros', () => {
     it('should categorize a sale due today as "hoje"', () => {
         const todayDate = new Date('2023-10-15T12:00:00Z').toISOString();
         const vendas = [
-            { id: 'v2', total: 200, data_prevista_pagamento: todayDate } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v2', total: 200, data_prevista_pagamento: todayDate } as unknown as any
         ];
 
         const result = processAlertasFinanceiros(vendas);
@@ -41,7 +43,8 @@ describe('cashFlowService - processAlertasFinanceiros', () => {
     it('should categorize a sale due in 2 days as "proximo"', () => {
         const nearFutureDate = addDays(new Date('2023-10-15T12:00:00Z'), 2).toISOString();
         const vendas = [
-            { id: 'v3', total: 300, data_prevista_pagamento: nearFutureDate } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v3', total: 300, data_prevista_pagamento: nearFutureDate } as unknown as any
         ];
 
         const result = processAlertasFinanceiros(vendas);
@@ -54,7 +57,8 @@ describe('cashFlowService - processAlertasFinanceiros', () => {
     it('should ignore a sale due far in the future', () => {
         const farFutureDate = addDays(new Date('2023-10-15T12:00:00Z'), 10).toISOString();
         const vendas = [
-            { id: 'v4', total: 400, data_prevista_pagamento: farFutureDate } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v4', total: 400, data_prevista_pagamento: farFutureDate } as unknown as any
         ];
 
         const result = processAlertasFinanceiros(vendas);
@@ -64,10 +68,14 @@ describe('cashFlowService - processAlertasFinanceiros', () => {
 
     it('should aggregate all categories correctly', () => {
         const vendas = [
-            { id: 'v1', total: 50, data_prevista_pagamento: subDays(new Date('2023-10-15T12:00:00Z'), 1).toISOString() } as any,
-            { id: 'v2', total: 100, data_prevista_pagamento: new Date('2023-10-15T12:00:00Z').toISOString() } as any,
-            { id: 'v3', total: 200, data_prevista_pagamento: addDays(new Date('2023-10-15T12:00:00Z'), 1).toISOString() } as any,
-            { id: 'v4', total: 400, data_prevista_pagamento: addDays(new Date('2023-10-15T12:00:00Z'), 20).toISOString() } as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v1', total: 50, data_prevista_pagamento: subDays(new Date('2023-10-15T12:00:00Z'), 1).toISOString() } as unknown as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v2', total: 100, data_prevista_pagamento: new Date('2023-10-15T12:00:00Z').toISOString() } as unknown as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v3', total: 200, data_prevista_pagamento: addDays(new Date('2023-10-15T12:00:00Z'), 1).toISOString() } as unknown as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            { id: 'v4', total: 400, data_prevista_pagamento: addDays(new Date('2023-10-15T12:00:00Z'), 20).toISOString() } as unknown as any,
         ];
 
         const result = processAlertasFinanceiros(vendas);

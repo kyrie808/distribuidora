@@ -28,6 +28,8 @@ type VendaRow = Tables<'vendas'>
 type PurchaseOrderRow = Tables<'purchase_orders'>
 type PurchaseOrderItemRow = Tables<'purchase_order_items'>
 type PurchaseOrderPaymentRow = Tables<'purchase_order_payments'>
+type CatalogOrderRow = Tables<'cat_pedidos'>
+type CatalogOrderItemRow = Tables<'cat_itens_pedido'>
 
 // ---------------------------------------------------
 // Extended row types for Supabase joins
@@ -39,22 +41,22 @@ export type ContatoRowWithIndicador = ContatoRow & {
     indicador?: { id: string; nome: string } | null
 }
 
-type ItemVendaRowWithProduto = ItemVendaRow & {
+export type ItemVendaRowWithProduto = ItemVendaRow & {
     produto?: ProdutoRow | null
 }
 
-type PagamentoRowWithStatus = PagamentoRow & {
+export type PagamentoRowWithStatus = PagamentoRow & {
     status?: string
 }
 
-type VendaRowWithRelations = VendaRow & {
+export type VendaRowWithRelations = VendaRow & {
     contato?: ContatoRow | null
     itens?: ItemVendaRow[]
     pagamentos?: PagamentoRow[]
 }
 
 type ProdutoRowWithImages = ProdutoRow & {
-    sis_imagens_produto?: { url: string }[]
+    sis_imagens_produto?: { url: string } | null
 }
 
 type PurchaseOrderItemRowWithProduct = PurchaseOrderItemRow & {
@@ -127,7 +129,7 @@ export const toDomainProduto = (dbProduto: ProdutoRowWithImages): DomainProduto 
             ? Number(dbProduto.preco_ancoragem)
             : null,
         categoria: dbProduto.categoria || null,
-        imagemUrl: dbProduto.sis_imagens_produto?.[0]?.url
+        imagemUrl: dbProduto.sis_imagens_produto?.url
     }
 }
 
@@ -215,11 +217,15 @@ export const toDomainPurchaseOrderWithItems = (dbOrder: PurchaseOrderRowWithRela
     }
 }
 
-export const toDomainCatalogOrderItem = (dbItem: any): DomainCatalogOrderItem => {
+export type CatalogOrderRowWithItems = CatalogOrderRow & {
+    itens?: CatalogOrderItemRow[]
+}
+
+export const toDomainCatalogOrderItem = (dbItem: CatalogOrderItemRow): DomainCatalogOrderItem => {
     return {
         id: dbItem.id,
-        pedidoId: dbItem.pedido_id,
-        produtoId: dbItem.produto_id,
+        pedidoId: dbItem.pedido_id || '',
+        produtoId: dbItem.produto_id || '',
         nomeProduto: dbItem.nome_produto,
         quantidade: Number(dbItem.quantidade || 0),
         precoUnitarioCentavos: Number(dbItem.preco_unitario_centavos || 0),
@@ -227,14 +233,14 @@ export const toDomainCatalogOrderItem = (dbItem: any): DomainCatalogOrderItem =>
     }
 }
 
-export const toDomainCatalogOrder = (dbOrder: any): DomainCatalogOrder => {
+export const toDomainCatalogOrder = (dbOrder: CatalogOrderRowWithItems): DomainCatalogOrder => {
     return {
         id: dbOrder.id,
         numeroPedido: dbOrder.numero_pedido,
         nomeCliente: dbOrder.nome_cliente,
         telefoneCliente: dbOrder.telefone_cliente,
         enderecoEntrega: dbOrder.endereco_entrega,
-        metodoEntrega: dbOrder.metodo_entrega,
+        metodoEntrega: dbOrder.metodo_entrega as DomainCatalogOrder['metodoEntrega'],
         status: dbOrder.status as CatalogOrderStatus,
         subtotalCentavos: Number(dbOrder.subtotal_centavos || 0),
         freteCentavos: Number(dbOrder.frete_centavos || 0),
@@ -243,9 +249,9 @@ export const toDomainCatalogOrder = (dbOrder: any): DomainCatalogOrder => {
         statusPagamento: dbOrder.status_pagamento as CatalogPaymentStatus,
         observacoes: dbOrder.observacoes,
         indicadoPor: dbOrder.indicado_por,
-        criadoEm: dbOrder.criado_em,
-        atualizadoEm: dbOrder.atualizado_em,
+        criadoEm: dbOrder.criado_em || new Date().toISOString(),
+        atualizadoEm: dbOrder.atualizado_em || dbOrder.criado_em || new Date().toISOString(),
         contatoId: dbOrder.contato_id,
-        itens: (dbOrder.itens || []).map((i: any) => toDomainCatalogOrderItem(i))
+        itens: (dbOrder.itens || []).map(i => toDomainCatalogOrderItem(i))
     }
 }

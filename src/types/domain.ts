@@ -169,6 +169,7 @@ export interface DomainPurchaseOrderWithItems extends DomainPurchaseOrder {
 }
 
 export type CreatePurchaseOrder = Omit<DomainPurchaseOrder, 'id' | 'createdAt' | 'status' | 'paymentStatus' | 'amountPaid'>
+export type CreatePurchaseOrderItem = Omit<DomainPurchaseOrderItem, 'id' | 'product' | 'totalCost'>
 export type UpdatePurchaseOrder = Partial<CreatePurchaseOrder> & {
     status?: PurchaseOrderStatus
     paymentStatus?: PurchaseOrderPaymentStatus
@@ -207,4 +208,12 @@ export interface DomainCatalogOrder {
     atualizadoEm: string
     contatoId?: string | null
     itens?: DomainCatalogOrderItem[]
+}
+
+export interface LocalPartida {
+    id: string
+    nome: string
+    endereco: string
+    lat: number
+    lng: number
 }

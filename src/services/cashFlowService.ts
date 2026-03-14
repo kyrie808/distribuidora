@@ -47,7 +47,7 @@ export const cashFlowService = {
     async getContas() {
         const { data, error } = await supabase
             .from('contas')
-            .select('*')
+            .select('id, nome, tipo, banco, ativo, saldo_atual, saldo_inicial, criado_em, atualizado_em')
             .order('nome')
         if (error) throw error
         return data as Conta[]
@@ -67,7 +67,7 @@ export const cashFlowService = {
     async getPlanoDeContas() {
         const { data, error } = await supabase
             .from('plano_de_contas')
-            .select('*')
+            .select('id, nome, tipo, categoria, ativo, automatica')
             .eq('ativo', true)
             .eq('automatica', false)
             .order('nome')
@@ -77,8 +77,8 @@ export const cashFlowService = {
 
     async getExtratoDeSaldo() {
         const { data, error } = await supabase
-            .from('view_extrato_saldo' as any)
-            .select('*')
+            .from('view_extrato_saldo')
+            .select('mes, mes_ordem, entradas, saidas, saldo_mes, saldo_acumulado')
             .order('mes_ordem', { ascending: false })
         if (error) throw error
         return data as unknown as ExtratoDeSaldoRow[]
@@ -154,7 +154,7 @@ export const cashFlowService = {
 
         const { data, error } = await supabase
             .from('view_extrato_mensal')
-            .select('*')
+            .select('id, data, valor, conta_id, categoria_tipo, categoria_nome, origem, descricao, tipo')
             .gte('data', start)
             .lte('data', end)
             .order('data', { ascending: false })
@@ -169,7 +169,7 @@ export const cashFlowService = {
 
         const { data, error } = await supabase
             .from('view_fluxo_resumo')
-            .select('*')
+            .select('mes, ano, total_entradas, total_saidas, total_faturamento, lucro_estimado, total_a_receber')
             .eq('mes', mes)
             .eq('ano', ano)
             .maybeSingle()

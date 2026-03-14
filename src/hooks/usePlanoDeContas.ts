@@ -1,3 +1,4 @@
+import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cashFlowService } from '../services/cashFlowService'
 import type { Database } from '../types/database'
@@ -19,12 +20,16 @@ export function usePlanoDeContas() {
         },
     })
 
+    const createPlanoConta = useCallback(async (data: PlanoContaInsert) => {
+        return createMutation.mutateAsync(data)
+    }, [createMutation])
+
     return {
         planoContas,
         isLoading,
         error,
         refetch,
-        createPlanoConta: createMutation.mutateAsync,
+        createPlanoConta,
         isCreating: createMutation.isPending,
     }
 }

@@ -3,7 +3,7 @@ import { CheckCircle } from 'lucide-react'
 
 interface WizardProgressProps {
     currentStep: number
-    steps: { id: string; label: string; icon: any }[]
+    steps: { id: string; label: string; icon: React.ComponentType<{ className?: string }> }[]
 }
 
 export const WizardProgress: React.FC<WizardProgressProps> = ({ currentStep, steps }) => {

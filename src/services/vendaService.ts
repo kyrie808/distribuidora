@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import type { VendaInsert, VendaUpdate, ItemVendaInsert } from '../types/database'
 import type { DomainVenda, CreateVenda, UpdateVenda, VendasMetrics } from '../types/domain'
-import { toDomainVenda } from './mappers'
+import { toDomainVenda, type VendaRowWithRelations } from './mappers'
 import { isToday } from 'date-fns'
 
 
@@ -43,7 +43,7 @@ export const vendaService = {
         const { data, error } = await query
         if (error) throw error
 
-        return (data || []).map(v => toDomainVenda(v as any))
+        return (data || []).map(v => toDomainVenda(v as unknown as VendaRowWithRelations))
     },
 
     async getVendaById(id: string): Promise<DomainVenda> {
@@ -59,7 +59,7 @@ export const vendaService = {
             .single()
 
         if (error) throw error
-        return toDomainVenda(data as any)
+        return toDomainVenda(data as unknown as VendaRowWithRelations)
     },
 
     async createVenda(data: CreateVenda): Promise<DomainVenda> {
@@ -205,7 +205,7 @@ export const vendaService = {
         // 1. Buscar último pagamento
         const { data: pagamento, error: fetchError } = await supabase
             .from('pagamentos_venda')
-            .select('*')
+            .select('id, valor')
             .eq('venda_id', vendaId)
             .order('criado_em', { ascending: false })
             .limit(1)

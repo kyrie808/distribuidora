@@ -23,7 +23,8 @@ describe('Domain Mappers', () => {
                 observacao: 'Cliente VIP'
             }
 
-            const result = toDomainContato(dbContato as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainContato(dbContato as unknown as any)
 
             expect(result.id).toBe('123')
             expect(result.nome).toBe('João Silva')
@@ -40,7 +41,8 @@ describe('Domain Mappers', () => {
                 // Missing tipo, bairro, cep, endereco, latitude, longitude, observacao
             }
 
-            const result = toDomainContato(dbContato as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainContato(dbContato as unknown as any)
 
             expect(result.id).toBe('456')
             expect(result.nome).toBe('Maria Souza')
@@ -66,7 +68,8 @@ describe('Domain Mappers', () => {
                 estoque_minimo: '10'
             }
 
-            const result = toDomainProduto(dbProduto as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainProduto(dbProduto as unknown as any)
 
             expect(result.id).toBe('p1')
             expect(result.preco).toBe(15.50)
@@ -85,7 +88,8 @@ describe('Domain Mappers', () => {
                 // Missing custo, estoque_atual, estoque_minimo
             }
 
-            const result = toDomainProduto(dbProduto as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainProduto(dbProduto as unknown as any)
 
             expect(result.custo).toBe(0)
             expect(result.estoqueAtual).toBe(0)
@@ -104,7 +108,8 @@ describe('Domain Mappers', () => {
                 subtotal: '21.00'
             }
 
-            const result = toDomainItemVenda(dbItem as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainItemVenda(dbItem as unknown as any)
 
             expect(result.id).toBe('item1')
             expect(result.produtoId).toBe('prod1')
@@ -128,7 +133,8 @@ describe('Domain Mappers', () => {
                 atualizado_em: '2023-10-01T10:00:00Z',
                 created_by: null,
                 updated_by: null
-            } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as unknown as any
 
             const result = toDomainPagamento(dbPagamento)
 
@@ -162,17 +168,23 @@ describe('Domain Mappers', () => {
                 origem: 'manual',
                 // Nested models
                 itens: [
-                    { id: 'i1', produto_id: 'p1', quantidade: 1, preco_unitario: 100, subtotal: 100 } as any,
-                    { id: 'i2', produto_id: 'p2', quantidade: 2, preco_unitario: 50, subtotal: 100 } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    { id: 'i1', produto_id: 'p1', quantidade: 1, preco_unitario: 100, subtotal: 100 } as unknown as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    { id: 'i2', produto_id: 'p2', quantidade: 2, preco_unitario: 50, subtotal: 100 } as unknown as any
                 ],
                 pagamentos: [
-                    { id: 'pag1', venda_id: 'v1', valor: 150, metodo: 'pix', data: '2023-10-01' } as any,
-                    { id: 'pag2', venda_id: 'v1', valor: 50, metodo: 'dinheiro', data: '2023-10-01' } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    { id: 'pag1', venda_id: 'v1', valor: 150, metodo: 'pix', data: '2023-10-01' } as unknown as any,
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    { id: 'pag2', venda_id: 'v1', valor: 50, metodo: 'dinheiro', data: '2023-10-01' } as unknown as any
                 ],
-                contato: { id: 'c1', nome: 'Cliente Teste' } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                contato: { id: 'c1', nome: 'Cliente Teste' } as unknown as any
             } as unknown as VendaComItens
 
-            const result = toDomainVenda(dbVenda as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainVenda(dbVenda as unknown as any)
 
             expect(result.id).toBe('v1')
             expect(result.total).toBe(200)
@@ -191,10 +203,13 @@ describe('Domain Mappers', () => {
                 id: 'v2',
                 total: 300,
                 itens: [],
-                pagamentos: null as any // Simulate outer join missing
-            } as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+                pagamentos: null as unknown as any // Simulate outer join missing
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as unknown as any
 
-            const result = toDomainVenda(dbVenda as any)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const result = toDomainVenda(dbVenda as unknown as any)
 
             expect(result.valorPago).toBe(0)
             expect(result.pagamentos).toEqual([])

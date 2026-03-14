@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { useProdutos } from '../hooks/useProdutos'
@@ -81,7 +81,7 @@ export function NovaVenda() {
             }
             loadVenda()
         }
-    }, [id])
+    }, [id, getVendaById, setSelectedContato, setItems])
 
     // Load pre-selected client from navigation state
     useEffect(() => {
@@ -137,7 +137,7 @@ export function NovaVenda() {
     }
 
 
-    const handleConfirmSale = async (data: VendaFormData) => {
+    const handleConfirmSale = useCallback(async (data: VendaFormData) => {
         try {
             const vendaData = {
                 contatoId: data.contato_id || selectedContato?.id || '',
@@ -165,7 +165,7 @@ export function NovaVenda() {
             console.error('Erro no checkout:', error)
             toast.error('Ocorreu um erro ao processar a venda')
         }
-    }
+    }, [selectedContato, createVenda, toast, clearCart, navigate])
 
     const nextStep = (contatoOverride?: typeof selectedContato) => {
         const contato = contatoOverride ?? selectedContato

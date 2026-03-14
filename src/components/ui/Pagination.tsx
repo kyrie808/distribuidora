@@ -61,6 +61,7 @@ export function Pagination({
 }
 
 /** Slice an array for the current page */
+// eslint-disable-next-line react-refresh/only-export-components
 export function paginateArray<T>(items: T[], page: number, pageSize: number): T[] {
     const start = (page - 1) * pageSize
     return items.slice(start, start + pageSize)

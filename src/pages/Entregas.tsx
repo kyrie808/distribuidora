@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Clock, MapPin } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { PageContainer } from '@/components/layout/PageContainer'
@@ -52,32 +52,7 @@ export function Entregas() {
     const [optimizing, setOptimizing] = useState(false)
     const [route, setRoute] = useState<RouteStop[]>([])
 
-    // Fetch pending deliveries
-    useEffect(() => {
-        fetchPendingSales()
-        // Fetch saved locations
-        supabase.from('configuracoes')
-            .select('*')
-            .eq('chave', 'locais_partida')
-            .maybeSingle()
-            .then(({ data }) => {
-                if (data) {
-                    const val = (data as any)?.valor
-                    if (val && Array.isArray(val) && val.length > 0) {
-                        // Transform to legacy format
-                        const formatted = val.map((loc: any) => ({
-                            endereco: loc.endereco || loc.nome,
-                            tipo: loc.nome?.toLowerCase() || 'local'
-                        }))
-                        setLocais(formatted)
-                        // Set first location as default origin
-                        setOrigin(formatted[0].endereco)
-                    }
-                }
-            })
-    }, [])
-
-    const fetchPendingSales = async () => {
+    const fetchPendingSales = useCallback(async () => {
         setLoading(true)
         try {
             const { data, error } = await supabase
@@ -100,24 +75,66 @@ export function Entregas() {
 
             if (error) throw error
 
-            const formatted: DeliveryItem[] = (data || []).map((v) => ({
+            type RawVenda = {
+                id: string
+                total: number
+                data: string
+                contato: {
+                    id: string
+                    nome: string
+                    endereco: string | null
+                    bairro: string | null
+                    logradouro: string | null
+                    numero: string | null
+                    cidade: string | null
+                    latitude: number | null
+                    longitude: number | null
+                } | null
+            }
+
+            const formatted: DeliveryItem[] = ((data as unknown as RawVenda[]) || []).map((v) => ({
                 id: v.id,
-                cliente_nome: (v.contato as any)?.nome || 'Cliente',
-                endereco: (v.contato as any)?.endereco || '',
-                bairro: (v.contato as any)?.bairro || null,
+                cliente_nome: v.contato?.nome || 'Cliente',
+                endereco: v.contato?.endereco || `${v.contato?.logradouro || ''}, ${v.contato?.numero || ''} - ${v.contato?.cidade || ''}`,
+                bairro: v.contato?.bairro || null,
                 total: v.total || 0,
-                latitude: (v.contato as any)?.latitude || null,
-                longitude: (v.contato as any)?.longitude || null,
+                latitude: v.contato?.latitude || null,
+                longitude: v.contato?.longitude || null,
                 data: v.data
             }))
 
             setPendentes(formatted)
-        } catch (error: any) {
-            toast.error(error.message || 'Não foi possível carregar as entregas')
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Não foi possível carregar as entregas')
         } finally {
             setLoading(false)
         }
-    }
+    }, [toast])
+
+    // Fetch pending deliveries
+    useEffect(() => {
+        fetchPendingSales()
+        // Fetch saved locations
+        supabase.from('configuracoes')
+            .select('*')
+            .eq('chave', 'locais_partida')
+            .maybeSingle()
+            .then(({ data }) => {
+                if (data) {
+                    const val = data?.valor as Array<{ endereco?: string; nome?: string }> | undefined
+                    if (val && Array.isArray(val) && val.length > 0) {
+                        // Transform to legacy format
+                        const formatted = val.map((loc) => ({
+                            endereco: loc.endereco || loc.nome || '',
+                            tipo: loc.nome?.toLowerCase() || 'local'
+                        }))
+                        setLocais(formatted)
+                        // Set first location as default origin
+                        setOrigin(formatted[0].endereco)
+                    }
+                }
+            })
+    }, [fetchPendingSales])
 
     const handleToggleSelection = (id: string) => {
         setSelectedIds(prev => {
@@ -172,8 +189,8 @@ export function Entregas() {
             setRoute(stops)
 
             toast.success(`Rota otimizada! ${stops.length} paradas organizadas por bairro`)
-        } catch (error: any) {
-            toast.error(error.message || 'Não foi possível otimizar a rota')
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Não foi possível otimizar a rota')
         } finally {
             setOptimizing(false)
         }

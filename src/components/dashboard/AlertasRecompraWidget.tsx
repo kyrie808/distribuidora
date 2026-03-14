@@ -5,8 +5,27 @@ import { DashboardCarousel } from './DashboardCarousel'
 import { useRecompra } from '@/hooks/useRecompra'
 import { Card, CardContent } from '@/components/ui/Card'
 
+interface RecompraAlerta {
+    contato_id?: string
+    nome?: string
+    telefone?: string
+    dias_sem_compra?: number
+    contato: {
+        id: string
+        nome: string
+        telefone: string
+    }
+    diasSemCompra: number
+    status: string
+}
+
 interface AlertasRecompraWidgetProps {
-    data?: any[]
+    data?: Array<{
+        contato_id: string
+        nome: string
+        telefone: string
+        dias_sem_compra: number
+    }>
     loading?: boolean
 }
 
@@ -19,13 +38,13 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
     const rawAlerts = data || contatos
 
     // Normalize data if it comes from JSON view / different structure
-    const alertas = data
+    const alertas: RecompraAlerta[] = data
         ? data.map(a => ({
             contato: { id: a.contato_id, nome: a.nome, telefone: a.telefone },
             diasSemCompra: a.dias_sem_compra,
             status: 'atrasado'
         }))
-        : rawAlerts.filter(c => c.status === 'atrasado')
+        : (rawAlerts as RecompraAlerta[]).filter(c => c.status === 'atrasado')
 
     const handleWhatsApp = (telefone: string, nome: string) => {
         const message = `Olá, ${nome}! Notei que faz um tempinho desde sua última compra. Estamos com promoções especiais hoje!`

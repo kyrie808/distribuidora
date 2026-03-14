@@ -17,6 +17,7 @@ import { formatCurrency } from '../utils/formatters'
 import { produtoService } from '../services/produtoService'
 import type { DomainProduto, CreateProduto, UpdateProduto } from '../types/domain'
 
+
 export function Produtos() {
     const toast = useToast()
     const [searchParams, setSearchParams] = useSearchParams()
@@ -154,8 +155,9 @@ export function Produtos() {
             await createProduto(data)
             toast.success('Produto criado!')
             setIsCreateModalOpen(false)
-        } catch (e: any) {
-            toast.error(e.message || 'Erro ao criar produto')
+        } catch (e: unknown) {
+            console.error(e)
+            toast.error(e instanceof Error ? e.message : 'Erro ao criar produto')
         } finally {
             _setCreating(false)
         }
@@ -192,8 +194,9 @@ export function Produtos() {
             await updateProduto(editingProduto.id, data)
             toast.success('Produto atualizado!')
             handleCloseEdit()
-        } catch (e: any) {
-            toast.error(e.message || 'Erro ao atualizar produto')
+        } catch (e: unknown) {
+            console.error(e)
+            toast.error(e instanceof Error ? e.message : 'Erro ao atualizar produto')
         } finally {
             _setUpdating(false)
         }
@@ -206,15 +209,16 @@ export function Produtos() {
             await produtoService.addImageReference(editingProduto!.id, url)
             setEditImagemUrl(url)
             toast.success('Imagem atualizada!')
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('[Upload] Erro completo:', err)
+            const error = err as Error
 
-            if (err?.message?.includes('maximum allowed size')) {
+            if (error?.message?.includes('maximum allowed size')) {
                 toast.error('Imagem muito grande. O limite é 5MB. Comprima a imagem e tente novamente.')
-            } else if (err?.message?.includes('mime type')) {
+            } else if (error?.message?.includes('mime type')) {
                 toast.error('Formato não suportado. Use PNG, JPG ou WebP.')
             } else {
-                toast.error(`Erro no upload: ${err?.message || 'Tente novamente.'}`)
+                toast.error(`Erro no upload: ${error?.message || 'Tente novamente.'}`)
             }
         } finally {
             setUploadingImage(false)
@@ -562,9 +566,9 @@ export function Produtos() {
                                                     await produtoService.deleteImage(editingProduto!.id, editImagemUrl)
                                                     setEditImagemUrl(null)
                                                     toast.success('Imagem removida com sucesso')
-                                                } catch (err: any) {
-                                                    console.error('[DeleteImage] Erro:', err)
-                                                    toast.error('Erro ao remover imagem')
+                                                } catch (err: unknown) {
+                                                    console.error('Erro ao excluir:', err)
+                                                    toast.error('Erro ao excluir produto')
                                                 }
                                             }}
                                             className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md"

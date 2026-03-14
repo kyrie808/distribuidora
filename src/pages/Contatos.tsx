@@ -67,7 +67,11 @@ export function Contatos() {
     }, [contatos, activeStory])
 
     // Reset page when filters/search change
-    useMemo(() => setCurrentPage(1), [activeStory, debouncedSearchTerm])
+    // Reset page when filters change - removed to avoid set-state-in-effect
+    // Logic will be handled in the setters
+    // useEffect(() => {
+    //     setCurrentPage(1)
+    // }, [activeStory, debouncedSearchTerm])
 
     // Client-side pagination (temporary — server-side in UX-S005-v2)
     const paginatedContatos = paginateArray(filteredContatos, currentPage, PAGE_SIZE)
@@ -117,7 +121,10 @@ export function Contatos() {
                                 type="text"
                                 placeholder="Buscar por nome, apelido ou telefone..."
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value)
+                                    setCurrentPage(1)
+                                }}
                                 className="w-full pl-10 pr-4 py-3 bg-secondary/50 dark:bg-secondary/20 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md"
                                 autoFocus
                             />
@@ -132,7 +139,10 @@ export function Contatos() {
                         <ContactStoryFilter
                             items={storyItems}
                             activeId={activeStory}
-                            onSelect={(id) => setActiveStory(id as FilterStoryId)}
+                            onSelect={(id) => {
+                                setActiveStory(id as FilterStoryId)
+                                setCurrentPage(1)
+                            }}
                         />
                     </section>
 

@@ -56,12 +56,15 @@ export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }:
         }
     })
 
+    // eslint-disable-next-line react-hooks/incompatible-library
+    const currentAmount = watch('amount')
+
     // Load accounts
     useEffect(() => {
         async function loadContas() {
             try {
                 const data = await cashFlowService.getContas()
-                setContas(data.filter((c: any) => c.ativo !== false))
+                setContas(data.filter((c: Conta) => c.ativo !== false))
             } catch (err) {
                 console.error('Erro ao carregar contas:', err)
             }
@@ -195,7 +198,7 @@ export function PurchaseOrderPaymentModal({ isOpen, onClose, onConfirm, order }:
                         {errors.amount && (
                             <span className="text-xs text-red-500">{errors.amount.message}</span>
                         )}
-                        {watch('amount') > remainingAmount + 0.01 && (
+                        {currentAmount > remainingAmount + 0.01 && (
                             <p className="text-xs text-amber-600 mt-1">
                                 ⚠️ Atenção: Valor maior que o restante.
                             </p>

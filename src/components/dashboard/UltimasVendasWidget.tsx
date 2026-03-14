@@ -5,9 +5,12 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { useVendas } from '@/hooks/useVendas'
 import { formatCurrency, formatRelativeDate } from '@/utils/formatters'
 import { cn } from '@/lib/utils'
+import type { VendaAlerta } from '@/services/dashboardService'
+
+
 
 interface UltimasVendasWidgetProps {
-    data?: any[]
+    data?: VendaAlerta[]
     loading?: boolean
 }
 
@@ -21,16 +24,16 @@ export function UltimasVendasWidget({ data, loading: externalLoading }: UltimasV
     const rawVendas = data || vendas
 
     // Normalize data if it comes from JSON view
-    const latestSales = data
+    const latestSales: VendaAlerta[] = data
         ? data.map(v => ({
             id: v.id,
             total: v.total,
             status: v.status,
             pago: v.pago,
             data: v.data,
-            contato: { nome: v.contato_nome }
+            contato: v.contato
         }))
-        : rawVendas.slice(0, 5)
+        : (rawVendas as VendaAlerta[]).slice(0, 5)
 
     if (loading) return <div className="h-[300px] animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 

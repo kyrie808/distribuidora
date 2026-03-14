@@ -15,8 +15,8 @@ export function useCatalogoPendentes() {
       const { data, error } = await supabase
         .from('cat_pedidos_pendentes_vinculacao')
         .select(`
-          *,
-          cat_pedidos (*)
+          id, cat_pedido_id, motivo_falha, criado_em,
+          cat_pedidos (id, numero_pedido, nome_cliente, telefone_cliente, endereco_entrega, metodo_entrega, status, subtotal_centavos, frete_centavos, total_centavos, metodo_pagamento, status_pagamento, observacoes, indicado_por, criado_em, atualizado_em, contato_id)
         `)
         .order('criado_em', { ascending: false })
 
@@ -39,7 +39,7 @@ export function useCatalogoPendentes() {
       // 1. Buscar dados do pedido
       const { data: pedido, error: errPed } = await supabase
         .from('cat_pedidos')
-        .select('*')
+        .select('id, numero_pedido, nome_cliente, telefone_cliente, endereco_entrega, metodo_entrega, status, subtotal_centavos, frete_centavos, total_centavos, metodo_pagamento, status_pagamento, observacoes, indicado_por, criado_em, atualizado_em, contato_id')
         .eq('id', catPedidoId)
         .single()
 

@@ -5,9 +5,31 @@ import { DashboardCarousel } from './DashboardCarousel'
 import { useAlertasFinanceiros } from '@/hooks/useAlertasFinanceiros'
 import { Card, CardContent } from '@/components/ui/Card'
 import { formatRelativeDate, formatPhone } from '@/utils/formatters'
+import type { RawFinanceiroAlerta } from '@/services/dashboardService'
+
+interface FinAlerta {
+    venda_id?: string
+    valor?: number
+    contato_nome?: string
+    contato_telefone?: string
+    vencimento?: string
+    status?: string
+    venda: {
+        id: string
+        total: number
+        contato: {
+            nome: string | null
+            telefone: string | null
+        } | null
+    }
+    diasAtraso: number
+    dataPrevista: string
+}
+
+
 
 interface AlertasFinanceiroWidgetProps {
-    data?: any[]
+    data?: RawFinanceiroAlerta[]
     loading?: boolean
 }
 
@@ -20,13 +42,13 @@ export function AlertasFinanceiroWidget({ data, loading: externalLoading }: Aler
     const rawAlerts = data || alertas
 
     // Normalize data if it comes from JSON view
-    const atrasados = data
-        ? data.map(v => ({
+    const atrasados: FinAlerta[] = data
+        ? data.map((v: RawFinanceiroAlerta) => ({
             venda: { id: v.venda_id, total: v.valor, contato: { nome: v.contato_nome, telefone: v.contato_telefone } },
             diasAtraso: Math.floor((new Date().getTime() - new Date(v.vencimento).getTime()) / (1000 * 60 * 60 * 24)),
             dataPrevista: v.vencimento
         }))
-        : rawAlerts.filter(a => a.status === 'atrasado')
+        : (rawAlerts as FinAlerta[]).filter(a => a.status === 'atrasado')
 
     const handleWhatsApp = (telefone: string, nome: string, valor: number) => {
         const message = `Olá ${nome}, tudo bem? Estou entrando em contato referente ao valor de ${formatCurrency(valor)} que está em aberto.`

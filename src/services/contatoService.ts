@@ -70,10 +70,10 @@ export class ContatoService {
             nome: data.nome,
             apelido: data.apelido || null,
             telefone: data.telefone,
-            tipo: data.tipo as any,
+            tipo: data.tipo as NonNullable<ContatoInsert['tipo']>,
             subtipo: data.subtipo,
-            status: data.status as any,
-            origem: data.origem as any,
+            status: data.status as NonNullable<ContatoInsert['status']>,
+            origem: data.origem as NonNullable<ContatoInsert['origem']>,
             indicado_por_id: data.indicadoPorId,
             endereco: data.endereco,
             cep: data.cep,
@@ -125,10 +125,10 @@ export class ContatoService {
         if (data.nome !== undefined) dbUpdate.nome = data.nome
         if (data.apelido !== undefined) dbUpdate.apelido = data.apelido
         if (data.telefone !== undefined) dbUpdate.telefone = data.telefone
-        if (data.tipo !== undefined) dbUpdate.tipo = data.tipo as any
+        if (data.tipo !== undefined) dbUpdate.tipo = data.tipo as NonNullable<ContatoUpdate['tipo']>
         if (data.subtipo !== undefined) dbUpdate.subtipo = data.subtipo
-        if (data.status !== undefined) dbUpdate.status = data.status as any
-        if (data.origem !== undefined) dbUpdate.origem = data.origem as any
+        if (data.status !== undefined) dbUpdate.status = data.status as NonNullable<ContatoUpdate['status']>
+        if (data.origem !== undefined) dbUpdate.origem = data.origem as NonNullable<ContatoUpdate['origem']>
         if (data.indicadoPorId !== undefined) dbUpdate.indicado_por_id = data.indicadoPorId
         if (data.endereco !== undefined) dbUpdate.endereco = data.endereco
         if (data.cep !== undefined) dbUpdate.cep = data.cep

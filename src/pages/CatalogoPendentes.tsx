@@ -29,7 +29,7 @@ export function CatalogoPendentes() {
   const { contatos, loading: loadingContatos } = useContatos()
 
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedPedido, setSelectedPedido] = useState<any>(null)
+  const [selectedPedido, setSelectedPedido] = useState<CatalogoPendente | null>(null)
   const [isLinking, setIsLinking] = useState(false)
 
   const filteredContatos = contatos?.filter(c =>
@@ -49,7 +49,7 @@ export function CatalogoPendentes() {
       })
       toast.success('Pedido vinculado com sucesso!')
       setSelectedPedido(null)
-    } catch (err) {
+    } catch {
       toast.error('Erro ao vincular pedido')
     } finally {
       setIsLinking(false)

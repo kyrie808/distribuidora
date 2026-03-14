@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { contatoService } from '../services/contatoService'
+import { useToast } from '../components/ui/Toast'
 import type { CreateContato, UpdateContato } from '../types/domain'
 import type { ContatoFiltros } from '../schemas/contato'
 
@@ -11,6 +12,7 @@ interface UseContatosOptions {
 export function useContatos(options: UseContatosOptions = {}) {
     const { filtros } = options
     const queryClient = useQueryClient()
+    const toast = useToast()
     const queryKey = ['contatos', filtros]
 
     const { data: contatos, isLoading: loading, error, refetch } = useQuery({
@@ -47,27 +49,37 @@ export function useContatos(options: UseContatosOptions = {}) {
     })
 
     const createContato = useCallback(async (data: CreateContato) => {
-        return createMutation.mutateAsync(data)
-    }, [createMutation])
+        try {
+            return await createMutation.mutateAsync(data)
+        } catch {
+            toast.error('Erro ao criar contato')
+            return null
+        }
+    }, [createMutation, toast])
 
     const updateContato = useCallback(async (id: string, data: UpdateContato) => {
-        return updateMutation.mutateAsync({ id, data })
-    }, [updateMutation])
+        try {
+            return await updateMutation.mutateAsync({ id, data })
+        } catch {
+            toast.error('Erro ao atualizar contato')
+            return null
+        }
+    }, [updateMutation, toast])
 
     const deleteContato = useCallback(async (id: string) => {
         try {
             await deleteMutation.mutateAsync(id)
             return { success: true }
-        } catch (e: any) {
-            console.error('Erro ao deletar contato:', e)
+        } catch (e: unknown) {
+            toast.error('Erro ao deletar contato')
             return {
                 success: false,
-                error: e?.message?.includes('violates foreign key constraint')
+                error: (e as Error)?.message?.includes('violates foreign key constraint')
                     ? 'Este contato possui vendas ou pedidos vinculados e não pode ser excluído.'
                     : (e as Error).message
             }
         }
-    }, [deleteMutation])
+    }, [deleteMutation, toast])
 
     const searchContatos = useCallback(async (query: string) => {
         return contatoService.func(query)

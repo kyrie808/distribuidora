@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { mapDashboardMetrics } from '../dashboardService';
+import type { Database } from '../../types/database';
+
+type HomeFinanceiroRow = Database['public']['Views']['view_home_financeiro']['Row'];
+type HomeOperacionalRow = Database['public']['Views']['view_home_operacional']['Row'];
+type HomeAlertasRow = Database['public']['Views']['view_home_alertas']['Row'];
 
 describe('dashboardService - mapDashboardMetrics', () => {
     it('should handle completely null inputs providing correct fallbacks', () => {
@@ -20,7 +25,7 @@ describe('dashboardService - mapDashboardMetrics', () => {
             faturamento_anterior: 10000,
             variacao_faturamento_percentual: 50,
             total_a_receber: 2000,
-            alertas_financeiros: [{ id: 1, message: 'Alert' }]
+            alertas_financeiros: [{ venda_id: 'v1', valor: 100, contato_nome: 'Test', contato_telefone: '123', vencimento: '2023-10-01' }]
         };
 
         const mockOp = {
@@ -30,14 +35,18 @@ describe('dashboardService - mapDashboardMetrics', () => {
             pedidos_entregues_hoje: 20,
             clientes_ativos: 45,
             ranking_indicacoes: [{ user: 'Alice', count: 10 }],
-            ultimas_vendas: [{ id: 101, total: 100 }]
+            ultimas_vendas: [{ id: '101', total: 100, status: 'entregue', pago: true, data: '2023-10-01', contato: { nome: 'Alice' } }]
         };
 
         const mockAlerts = [
             { contato_id: 'c1', nome: 'Bob', telefone: '123', data_ultima_compra: '2023-01-01', dias_sem_compra: 45 }
         ];
 
-        const result = mapDashboardMetrics(mockFin, mockOp, mockAlerts);
+        const result = mapDashboardMetrics(
+            mockFin as unknown as HomeFinanceiroRow, 
+            mockOp as unknown as HomeOperacionalRow, 
+            mockAlerts as unknown as HomeAlertasRow[]
+        );
 
         expect(result.financial.faturamento_mes_atual).toBe(15000);
         expect(result.financial.variacao_percentual).toBe(50);
@@ -55,7 +64,11 @@ describe('dashboardService - mapDashboardMetrics', () => {
         const mockFin = { faturamento: 1000 };
         const mockOp = { total_vendas: 25 };
 
-        const result = mapDashboardMetrics(mockFin, mockOp, []);
+        const result = mapDashboardMetrics(
+            mockFin as unknown as HomeFinanceiroRow, 
+            mockOp as unknown as HomeOperacionalRow, 
+            []
+        );
 
         expect(result.financial.vendas_mes_atual).toBe(25);
     });
@@ -64,7 +77,11 @@ describe('dashboardService - mapDashboardMetrics', () => {
         const mockFin = { faturamento: 1000 }; // missing others
         const mockOp = { total_vendas: 25 }; // missing others
 
-        const result = mapDashboardMetrics(mockFin, mockOp, [{}]); // Alert missing properties
+        const result = mapDashboardMetrics(
+            mockFin as unknown as HomeFinanceiroRow, 
+            mockOp as unknown as HomeOperacionalRow, 
+            [{}] as unknown as HomeAlertasRow[]
+        );
 
         expect(result.financial.lucro_mes_atual).toBe(0);
         expect(result.financial.variacao_percentual).toBe(0);

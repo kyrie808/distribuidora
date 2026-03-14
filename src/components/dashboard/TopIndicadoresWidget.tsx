@@ -2,9 +2,12 @@ import { Medal, Trophy } from 'lucide-react'
 import { useTopIndicadores } from '@/hooks/useTopIndicadores'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils'
+import type { TopIndicador } from '@/services/dashboardService'
+
+
 
 interface TopIndicadoresWidgetProps {
-    data?: any[]
+    data?: TopIndicador[]
     loading?: boolean
 }
 
@@ -18,12 +21,15 @@ export function TopIndicadoresWidget({ data, loading: externalLoading }: TopIndi
     if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
 
     // Map data to expected format if it comes from JSON view
-    const validIndicadores = rawData.map(i => ({
-        indicadorId: i.indicador_id || i.indicadorId,
-        nome: i.nome,
-        totalIndicados: i.total_indicados || i.totalIndicados,
-        totalVendasIndicados: i.total_vendas_indicados || i.totalVendasIndicados
-    })).filter(i => i.totalIndicados > 0)
+    const validIndicadores = rawData.map(i => {
+        const item = i as unknown as Record<string, unknown>
+        return {
+            indicadorId: (i as TopIndicador).indicadorId || item.indicador_id as string,
+            nome: i.nome,
+            totalIndicados: (i as TopIndicador).totalIndicados ?? (item.total_indicados as number),
+            totalVendasIndicados: (i as TopIndicador).totalVendasIndicados ?? (item.total_vendas_indicados as number)
+        }
+    }).filter(i => i.totalIndicados > 0)
 
     if (validIndicadores.length === 0) return null
 
@@ -38,14 +44,14 @@ export function TopIndicadoresWidget({ data, loading: externalLoading }: TopIndi
 
             <div className="grid grid-cols-1 gap-3">
                 {validIndicadores.map((indicador, index) => (
-                    <TopIndicadorCard key={indicador.indicadorId} indicador={indicador as any} index={index} />
+                    <TopIndicadorCard key={indicador.indicadorId} indicador={indicador} index={index} />
                 ))}
             </div>
         </div>
     )
 }
 
-function TopIndicadorCard({ indicador, index }: { indicador: any, index: number }) {
+function TopIndicadorCard({ indicador, index }: { indicador: TopIndicador, index: number }) {
     const getGradient = (ranking: number) => {
         switch (ranking) {
             case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400"

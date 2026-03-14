@@ -11,19 +11,19 @@ interface ProductListProps {
     onUpdateQuantity: (produtoId: string, delta: number) => void
 }
 
+const PRODUCT_ORDER = [
+    'Massa Pão de Queijo 4kg',
+    'Massa Pão de Queijo 1kg',
+    'Chipa Congelada 2kg',
+    'Chipa Congelada 1kg',
+    'Palito de Queijo Congelado 2kg',
+    'Palito de Queijo Congelado 1kg',
+    'Pão de Queijo Congelado 2kg',
+    'Pão de Queijo Congelado 1kg'
+]
+
 export function ProductList({ produtos, loading, getQuantity, onAdd, onUpdateQuantity }: ProductListProps) {
     const [search, setSearch] = useState('')
-
-    const PRODUCT_ORDER = [
-        'Massa Pão de Queijo 4kg',
-        'Massa Pão de Queijo 1kg',
-        'Chipa Congelada 2kg',
-        'Chipa Congelada 1kg',
-        'Palito de Queijo Congelado 2kg',
-        'Palito de Queijo Congelado 1kg',
-        'Pão de Queijo Congelado 2kg',
-        'Pão de Queijo Congelado 1kg'
-    ]
 
     const filteredProdutos = useMemo(() => {
         let result = [...produtos]

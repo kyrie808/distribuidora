@@ -62,6 +62,7 @@ export function PaymentSidebar({
         formState: { errors, isValid }
     } = useForm<PagamentoFormData>({
         mode: 'onChange',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(pagamentoSchema) as any,
         defaultValues: {
             venda_id: vendaId,
@@ -210,7 +211,7 @@ export function PaymentSidebar({
                                 <button
                                     key={method.value}
                                     type="button"
-                                    onClick={() => setValue('metodo', method.value as any)}
+                                    onClick={() => setValue('metodo', method.value as PagamentoFormData['metodo'])}
                                     className={cn(
                                         "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-1.5",
                                         isSelected

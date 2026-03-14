@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 
 interface CepData {
     cep: string
@@ -22,7 +22,7 @@ export function useCep(): UseCepResult {
     const [error, setError] = useState<string | null>(null)
     const [address, setAddress] = useState<CepData | null>(null)
 
-    const fetchCep = async (cep: string) => {
+    const fetchCep = useCallback(async (cep: string) => {
         // Remove non-digits
         const cleanCep = cep.replace(/\D/g, '')
 
@@ -55,12 +55,12 @@ export function useCep(): UseCepResult {
         } finally {
             setLoading(false)
         }
-    }
+    }, [])
 
-    const clearAddress = () => {
+    const clearAddress = useCallback(() => {
         setAddress(null)
         setError(null)
-    }
+    }, [])
 
     return {
         loading,

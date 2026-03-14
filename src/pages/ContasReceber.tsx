@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 import {
     Search,
     Filter,
@@ -36,7 +36,7 @@ export function ContasReceber() {
     const navigate = useNavigate()
     const toast = useToast()
 
-    const fetchVendas = async () => {
+    const fetchVendas = useCallback(async () => {
         try {
             setIsLoading(true)
             // Fetch all delivered but unpaid sales
@@ -48,14 +48,9 @@ export function ContasReceber() {
         } finally {
             setIsLoading(false)
         }
-    }
+    }, [toast])
 
-    useEffect(() => {
-        fetchVendas()
-        fetchContas()
-    }, [])
-
-    const fetchContas = async () => {
+    const fetchContas = useCallback(async () => {
         try {
             const data = await cashFlowService.getContas()
             setContas(data)
@@ -63,7 +58,12 @@ export function ContasReceber() {
         } catch (error) {
             console.error('Erro ao carregar contas:', error)
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        fetchVendas()
+        fetchContas()
+    }, [fetchVendas, fetchContas])
 
     const filteredVendas = useMemo(() => {
         let result = vendas

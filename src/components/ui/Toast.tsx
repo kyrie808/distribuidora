@@ -17,6 +17,7 @@ interface ToastStore {
     removeToast: (id: string) => void
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useToastStore = create<ToastStore>((set) => ({
     toasts: [],
     addToast: (toast) => {
@@ -39,7 +40,7 @@ export const useToastStore = create<ToastStore>((set) => ({
 }))
 
 // Hook for easy toast usage
-export function useToast() {
+function useToast() {
     const addToast = useToastStore((state) => state.addToast)
 
     return {
@@ -53,6 +54,9 @@ export function useToast() {
             addToast({ type: 'warning', message, duration }),
     }
 }
+
+// eslint-disable-next-line react-refresh/only-export-components
+export { useToast }
 
 const icons = {
     success: CheckCircle2,

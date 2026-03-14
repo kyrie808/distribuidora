@@ -85,8 +85,7 @@ function NavButton({ active, onClick, icon: Icon, label }: NavButtonProps) {
         >
             <Icon
                 className={cn("h-6 w-6", active ? "text-primary" : "text-muted-foreground")}
-                // @ts-ignore - Lucide icon types might conflict with style prop locally
-                style={active ? { fill: 'currentColor', fillOpacity: 0.2 } : undefined}
+                style={active ? { fill: 'currentColor', fillOpacity: 0.2 } as React.CSSProperties : undefined}
             />
             <span className="text-[10px] font-medium leading-none">
                 {label}

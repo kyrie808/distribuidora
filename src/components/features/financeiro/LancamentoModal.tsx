@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -16,7 +16,7 @@ const lancamentoSchema = z.object({
     data: z.string().min(1, 'A data é obrigatória'),
     conta_id: z.string().min(1, 'A conta é obrigatória'),
     plano_conta_id: z.string().min(1, 'A categoria é obrigatória'),
-    descricao: z.string().optional().nullable(),
+    descricao: z.string().optional(),
 })
 
 type LancamentoFormData = z.infer<typeof lancamentoSchema>
@@ -39,7 +39,6 @@ export function LancamentoModal({ type, isOpen, onClose, onSuccess }: Lancamento
         register,
         handleSubmit,
         setValue,
-        reset,
         formState: { errors, isSubmitting },
     } = useForm<LancamentoFormData>({
         resolver: zodResolver(lancamentoSchema),
@@ -52,22 +51,10 @@ export function LancamentoModal({ type, isOpen, onClose, onSuccess }: Lancamento
         },
     })
 
-    // Reset form when modal opens or type changes
-    useEffect(() => {
-        if (isOpen) {
-            reset({
-                valor: 0,
-                data: new Date().toISOString().split('T')[0],
-                conta_id: '',
-                plano_conta_id: '',
-                descricao: '',
-            })
-            setDisplayValor('')
-        }
-    }, [isOpen, type, reset])
+    // Reset form handled by key in parent
 
     // Filter categories based on type
-    const filteredCategorias = planoContas.filter((c: any) => c.tipo === (type === 'entrada' ? 'receita' : 'despesa'))
+    const filteredCategorias = planoContas.filter((c) => c.tipo === (type === 'entrada' ? 'receita' : 'despesa'))
 
     // Currency Mask Logic
     const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {

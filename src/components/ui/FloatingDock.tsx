@@ -7,7 +7,7 @@
  */
 
 import { useRef, useState, useEffect } from "react"
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion"
+import { motion, useMotionValue, useSpring, useTransform, MotionValue } from "framer-motion"
 import { cn } from "../../utils/cn"
 
 interface DockItem {
@@ -106,7 +106,7 @@ export function FloatingDock({ items, className, onItemClick }: FloatingDockProp
 }
 
 interface DockIconProps extends DockItem {
-    mouseX: any
+    mouseX: MotionValue<number>
     isMobile: boolean
     onItemClick?: (href: string) => void
 }

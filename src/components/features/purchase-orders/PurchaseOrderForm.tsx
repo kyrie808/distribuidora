@@ -6,14 +6,14 @@ import { Input } from '../../ui/Input'
 // import { Select } from '../../ui/Select'
 import { useProdutos } from '../../../hooks/useProdutos'
 import { useContatos } from '../../../hooks/useContatos'
-import type { PurchaseOrder, PurchaseOrderWithItems } from '../../../types/database'
+import type { CreatePurchaseOrder, UpdatePurchaseOrder, CreatePurchaseOrderItem, DomainPurchaseOrderWithItems } from '../../../types/domain'
 import { formatCurrency } from '../../../utils/formatters'
 
 interface PurchaseOrderFormProps {
     isOpen: boolean
     onClose: () => void
-    onSave: (order: Partial<PurchaseOrder>, items: any[]) => Promise<void>
-    initialData?: PurchaseOrderWithItems | null
+    onSave: (order: CreatePurchaseOrder | UpdatePurchaseOrder, items: CreatePurchaseOrderItem[]) => Promise<void>
+    initialData?: DomainPurchaseOrderWithItems | null
 }
 
 export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: PurchaseOrderFormProps) {
@@ -39,15 +39,15 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
     useEffect(() => {
         if (isOpen) {
             if (initialData) {
-                setDate(initialData.order_date.split('T')[0])
+                setDate(initialData.orderDate.split('T')[0])
                 setNotes(initialData.notes || '')
-                setFornecedorId(initialData.fornecedor_id || '')
-                setAmountPaid(initialData.amount_paid || 0)
+                setFornecedorId(initialData.fornecedorId || '')
+                setAmountPaid(initialData.amountPaid || 0)
                 setItems(initialData.items.map(item => ({
                     tempId: Math.random().toString(36),
-                    product_id: item.product_id,
+                    product_id: item.productId,
                     quantity: item.quantity,
-                    unit_cost: item.unit_cost
+                    unit_cost: item.unitCost
                 })))
             } else {
                 // Reset for new order
@@ -73,7 +73,7 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
         setItems(items.filter(i => i.tempId !== tempId))
     }
 
-    const handleItemChange = (tempId: string, field: string, value: any) => {
+    const handleItemChange = (tempId: string, field: string, value: string | number) => {
         setItems(items.map(item => {
             if (item.tempId === tempId) {
                 const updated = { ...item, [field]: value }
@@ -113,15 +113,21 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
             if (amountPaid >= totalAmount && totalAmount > 0) paymentStatus = 'paid'
             else if (amountPaid > 0) paymentStatus = 'partial'
 
+            const mappedItems: CreatePurchaseOrderItem[] = items.map(i => ({
+                productId: i.product_id,
+                quantity: i.quantity,
+                unitCost: i.unit_cost
+            }))
+
             await onSave({
-                order_date: date,
+                orderDate: date,
                 notes: notes,
-                fornecedor_id: fornecedorId,
-                total_amount: totalAmount,
+                fornecedorId: fornecedorId,
+                totalAmount: totalAmount,
                 status: initialData ? initialData.status : 'pending',
-                payment_status: paymentStatus,
-                amount_paid: amountPaid
-            }, items)
+                paymentStatus: paymentStatus,
+                amountPaid: amountPaid
+            } as CreatePurchaseOrder, mappedItems)
             onClose()
         } catch (error) {
             console.error(error)

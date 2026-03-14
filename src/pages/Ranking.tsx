@@ -115,7 +115,7 @@ export function Ranking() {
                                 trendDirection="up"
                                 icon={m.icon}
                                 progressColor={m.color}
-                                trendColor={m.color.replace('bg-', '') as any}
+                                trendColor={m.color.replace('bg-semantic-', '').replace('bg-', '') as "primary" | "green" | "yellow" | "red" | undefined}
                                 iconColor={m.iconColor}
                                 variant="compact"
                             />

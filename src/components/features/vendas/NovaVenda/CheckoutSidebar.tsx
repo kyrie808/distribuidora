@@ -13,7 +13,7 @@ interface CheckoutSidebarProps {
     total: number
     contatoId: string
     contatoNome: string
-    items: any[]
+    items: VendaFormData['itens']
 }
 
 const PAYMENT_METHODS = [
@@ -44,6 +44,7 @@ export function CheckoutSidebar({
         reset,
         formState: { errors }
     } = useForm<VendaFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         resolver: zodResolver(vendaSchema) as any,
         defaultValues: {
             contato_id: contatoId,
@@ -59,6 +60,7 @@ export function CheckoutSidebar({
 
     const formaPagamento = watch('forma_pagamento')
     const taxaEntregaValue = watch('taxa_entrega') || 0
+    const numParcelas = watch('parcelas') || 1
     const totalGeral = total + taxaEntregaValue
 
     useEffect(() => {
@@ -129,7 +131,7 @@ export function CheckoutSidebar({
                                 <button
                                     key={method.id}
                                     type="button"
-                                    onClick={() => setValue('forma_pagamento', method.id as any)}
+                                    onClick={() => setValue('forma_pagamento', method.id as VendaFormData['forma_pagamento'])}
                                     className={cn(
                                         "flex flex-col items-center justify-center p-3 rounded-xl border transition-all gap-1.5",
                                         isSelected
@@ -214,13 +216,13 @@ export function CheckoutSidebar({
                                 <div className="flex items-center gap-3">
                                     <button
                                         type="button"
-                                        onClick={() => setValue('parcelas', Math.max(1, (watch('parcelas') || 1) - 1))}
+                                        onClick={() => setValue('parcelas', Math.max(1, numParcelas - 1))}
                                         className="p-1 px-3 bg-white dark:bg-zinc-800 border border-violet-200 dark:border-violet-800 rounded-lg"
                                     >-</button>
-                                    <span className="font-bold text-lg min-w-[20px] text-center">{watch('parcelas') || 1}x</span>
+                                    <span className="font-bold text-lg min-w-[20px] text-center">{numParcelas}x</span>
                                     <button
                                         type="button"
-                                        onClick={() => setValue('parcelas', Math.min(12, (watch('parcelas') || 1) + 1))}
+                                        onClick={() => setValue('parcelas', Math.min(12, numParcelas + 1))}
                                         className="p-1 px-3 bg-white dark:bg-zinc-800 border border-violet-200 dark:border-violet-800 rounded-lg"
                                     >+</button>
                                 </div>
@@ -228,7 +230,7 @@ export function CheckoutSidebar({
                             <div className="flex justify-between items-end">
                                 <span className="text-xs text-violet-600">Valor da Parcela</span>
                                 <span className="font-bold text-lg text-violet-700 dark:text-violet-400">
-                                    {(totalGeral / (watch('parcelas') || 1)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    {numParcelas > 0 ? (totalGeral / numParcelas).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : totalGeral.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                 </span>
                             </div>
                         </div>
