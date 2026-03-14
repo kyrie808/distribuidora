@@ -95,7 +95,14 @@
       "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && mkdir -p docs/archive)",
       "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && mv PRD-MassasCRM-v1.md docs/archive/ && mv SETUP-PROMPT.md docs/archive/ && mv docs/discovery docs/archive/ && mv docs/reviews docs/archive/ && mv docs/stories docs/archive/ && mv docs/planning docs/archive/ && mv docs/qa docs/archive/ && mv docs/prd docs/archive/)",
       "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && npm install 2>&1 | head -50)",
-      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && npm run build 2>&1)"
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && npm run build 2>&1)",
+      "mcp__supabase-distribuidora__get_advisors",
+      "mcp__supabase-distribuidora__list_migrations",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && supabase projects list)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx supabase db dump --data-only false --schema public 2>&1 | grep -E \"^CREATE TABLE|CREATE VIEW|CREATE FUNCTION|CREATE TRIGGER|CREATE POLICY\" | head -100)",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx supabase db dump --schema public --data-only false 2>&1 | head -200)",
+      "mcp__supabase-distribuidora__list_tables",
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && ls supabase/migrations/*.sql | wc -l)"
     ]
   },
   "enableAllProjectMcpServers": true,

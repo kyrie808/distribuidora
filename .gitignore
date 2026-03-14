@@ -54,6 +54,7 @@ opencode.json
 
 # Build
 build/
+backup/
 
 # IDE & OS
 Thumbs.db
