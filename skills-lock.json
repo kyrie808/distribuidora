@@ -36,6 +36,11 @@
       "sourceType": "github",
       "computedHash": "6c806f31279047f73f3d3a8cd3031d2d2ae84d9be6885f70a8475e890061b549"
     },
+    "skill-creator": {
+      "source": "anthropics/skills",
+      "sourceType": "github",
+      "computedHash": "57f470f512f45bdac598e302bc72fd62bf2b649fc7fad032efe97720149cde4d"
+    },
     "supabase-postgres-best-practices": {
       "source": "supabase/agent-skills",
       "sourceType": "github",

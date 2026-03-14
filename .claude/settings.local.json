@@ -69,11 +69,29 @@
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills find \"zustand state management react\" 2>&1 | grep -E \"installs|skills\\\\.sh\")",
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx -y skills add bobmatnyc/claude-mpm-skills --skill zustand -y 2>&1 | tail -15)",
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && rm -f .claude/skills/zustand && cp -r .agents/skills/zustand .claude/skills/zustand && cp -r .agents/skills/zustand .agent/skills/zustand && rm -rf .agents && echo \"Done\" && ls -1 .claude/skills/ | wc -l && ls -1 .agent/skills/ | wc -l)",
-      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && rm -rf .claude/skills/zustand .agent/skills/zustand && cp -r .agents/skills/zustand .claude/skills/zustand && cp -r .agents/skills/zustand .agent/skills/zustand && rm -rf .agents && echo \"Done\" && ls -1 .claude/skills/ | wc -l && ls -1 .agent/skills/ | wc -l)"
+      "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && rm -rf .claude/skills/zustand .agent/skills/zustand && cp -r .agents/skills/zustand .claude/skills/zustand && cp -r .agents/skills/zustand .agent/skills/zustand && rm -rf .agents && echo \"Done\" && ls -1 .claude/skills/ | wc -l && ls -1 .agent/skills/ | wc -l)",
+      "Read(//d/1. LUCCAS/aplicativos ai/distribuidora/$HOME/**)",
+      "Read(//d/1. LUCCAS/aplicativos ai/distribuidora/$PWD/**)",
+      "Bash(echo $HOME)",
+      "Read(//c/Users/lukka/.claude/**)",
+      "Read(//d/1. LUCCAS/aplicativos ai/distribuidora/**)",
+      "Bash(python -c \"import json; print\\(json.load\\(open\\('C:/Users/lukka/.claude/settings.json'\\)\\)\\)\")",
+      "Bash(python -c \"import json; data=json.load\\(open\\('C:/Users/lukka/.claude/settings.json'\\)\\); print\\('JSON válido!'\\); print\\('MCP servers:', list\\(data['mcpServers'].keys\\(\\)\\)\\)\")",
+      "mcp__supabase-kyrie__list_organizations",
+      "Bash(env SUPABASE_URL=\"https://herlvujykltxnwqmwmyx.supabase.co\" SUPABASE_ACCESS_TOKEN=\"sbp_cbf493384a06e37d566b27b7bdcb930ae00b4f24\" node \"C:\\\\Users\\\\lukka\\\\AppData\\\\Roaming\\\\npm\\\\node_modules\\\\@supabase\\\\mcp-server-supabase\\\\dist\\\\transports\\\\stdio.js\" --version 2>&1 || echo \"Testing MCP connection...\")",
+      "Bash(curl -s \"https://herlvujykltxnwqmwmyx.supabase.co/rest/v1/\" -H \"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhlcmx2dWp5a2x0eG53cW13bXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMjc3MDcsImV4cCI6MjA4MDkwMzcwN30.eUT-obnvG_CERXdbSfUvPIHro_kiceyH9I7TPRCRnLM\" -H \"apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhlcmx2dWp5a2x0eG53cW13bXl4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMjc3MDcsImV4cCI6MjA4MDkwMzcwN30.eUT-obnvG_CERXdbSfUvPIHro_kiceyH9I7TPRCRnLM\" | head -20)",
+      "Bash(npx skills:*)",
+      "Bash(cp -r \".agents/skills/skill-creator\" \".agent/skills/skill-creator-backup\" 2>/dev/null; cp -r \".agents/skills/skill-creator\" \".agent/skills/skill-creator\" && echo \"✓ Copiado para .agent/skills/skill-creator\" && ls -la \".agent/skills/skill-creator\" | head -5)",
+      "Read(//tmp/**)",
+      "Bash(if [ -f .gitignore ]; then echo \"=== .gitignore atual ===\" && cat .gitignore | grep -E \"^\\\\.agent\"; else echo \".gitignore não existe\"; fi)",
+      "Bash(cp -r \".claude/skills/brownfield-discovery\" \".agent/skills/brownfield-discovery\" && echo \"✓ brownfield-discovery copiado para .agent/skills/\")"
     ]
   },
   "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase-distribuidora"
-  ]
+  ],
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  }
 }
