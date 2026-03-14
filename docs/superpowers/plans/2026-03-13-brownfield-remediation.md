@@ -148,17 +148,17 @@ CREATE POLICY "Authenticated insert access"
     TO authenticated
     WITH CHECK (true);
 
-CREATE POLICY "Authenticated update own contact"
+CREATE POLICY "Authenticated update access"
     ON public.contatos
     FOR UPDATE
     TO authenticated
-    USING (
-        id = (
-            SELECT contact_id FROM contatos
-            WHERE contatos.id = contatos.id
-            LIMIT 1
-        ) -- Add proper ownership logic here
-    );
+    USING (true)
+    WITH CHECK (true);
+
+-- NOTA: Por enquanto todos os usuários autenticados podem ler e edit
+-- ar contatos. Quando implementarmos multi-tenancy no futuro, r
+-- efinamos essa policy para restringir por ownership (created_by/
+-- updated_by fields).
 
 -- lancamentos
 CREATE POLICY "Admin full access"
