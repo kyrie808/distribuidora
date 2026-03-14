@@ -68,6 +68,9 @@ Regenerate types: MCP `generate_typescript_types` → update `src/types/database
 
 VITE_SUPABASE_URL · VITE_SUPABASE_ANON_KEY
 
-## Known Issue
+## Known Issues
 
-TS error in `ContatoFormModal.tsx:244` — `'fornecedor'` not in status union. Fix: add to status type in `src/types/domain.ts`.
+See docs/brownfield-report-2026-03-13.md for full diagnostic.
+Sprint 1 (Security): RLS user_metadata, SECURITY DEFINER views, always-true policies, mutable search_path
+Sprint 2 (Performance): Bundle splitting, missing indexes, RLS initplan
+Sprint 3 (Code Quality): Large components, console.logs, test coverage
