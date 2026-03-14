@@ -70,7 +70,9 @@ VITE_SUPABASE_URL · VITE_SUPABASE_ANON_KEY
 
 ## Known Issues
 
-See docs/brownfield-report-2026-03-13.md for full diagnostic.
+**Brownfield Remediation:** See docs/brownfield-report-2026-03-13.md for diagnostic.
+**Implementation Plan:** docs/superpowers/plans/2026-03-13-brownfield-remediation.md
+
 Sprint 1 (Security): RLS user_metadata, SECURITY DEFINER views, always-true policies, mutable search_path
 Sprint 2 (Performance): Bundle splitting, missing indexes, RLS initplan
 Sprint 3 (Code Quality): Large components, console.logs, test coverage
