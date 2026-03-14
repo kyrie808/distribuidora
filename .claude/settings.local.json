@@ -84,7 +84,18 @@
       "Bash(cp -r \".agents/skills/skill-creator\" \".agent/skills/skill-creator-backup\" 2>/dev/null; cp -r \".agents/skills/skill-creator\" \".agent/skills/skill-creator\" && echo \"✓ Copiado para .agent/skills/skill-creator\" && ls -la \".agent/skills/skill-creator\" | head -5)",
       "Read(//tmp/**)",
       "Bash(if [ -f .gitignore ]; then echo \"=== .gitignore atual ===\" && cat .gitignore | grep -E \"^\\\\.agent\"; else echo \".gitignore não existe\"; fi)",
-      "Bash(cp -r \".claude/skills/brownfield-discovery\" \".agent/skills/brownfield-discovery\" && echo \"✓ brownfield-discovery copiado para .agent/skills/\")"
+      "Bash(cp -r \".claude/skills/brownfield-discovery\" \".agent/skills/brownfield-discovery\" && echo \"✓ brownfield-discovery copiado para .agent/skills/\")",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -rf android/)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -f capacitor.config.ts)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && mkdir -p scripts/backup && mv scripts/wsl-chrome-bridge.sh scripts/backup/ && rm -rf scripts/*.ts 2>/dev/null; mv scripts/backup/wsl-chrome-bridge.sh scripts/; rmdir scripts/backup 2>/dev/null; ls -la scripts/)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -f public/vite.svg)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -f opencode.json)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -f docs/STICH_PROMPT_CUSTOMER_PROFILE.md)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && rm -f cleanup.sh)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && mkdir -p docs/archive)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && mv PRD-MassasCRM-v1.md docs/archive/ && mv SETUP-PROMPT.md docs/archive/ && mv docs/discovery docs/archive/ && mv docs/reviews docs/archive/ && mv docs/stories docs/archive/ && mv docs/planning docs/archive/ && mv docs/qa docs/archive/ && mv docs/prd docs/archive/)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && npm install 2>&1 | head -50)",
+      "Bash(cd \"D:/1. LUCCAS/aplicativos ai/distribuidora\" && npm run build 2>&1)"
     ]
   },
   "enableAllProjectMcpServers": true,
