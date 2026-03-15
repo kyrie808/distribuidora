@@ -4,13 +4,13 @@ import {
     Filter,
     Calendar,
     Phone,
-    ArrowLeft,
     CheckCircle2,
     AlertCircle,
     Clock,
     CalendarDays
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Header } from '../components/layout/Header'
 import { Button } from '../components/ui/Button'
 import { vendaService } from '../services/vendaService'
 import type { DomainVenda } from '../types/domain'
@@ -127,26 +127,8 @@ export function ContasReceber() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 pb-32">
-            {/* Header */}
-            <header className="sticky top-0 z-30 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
-                <div className="flex items-center gap-4 px-4 h-16 max-w-5xl mx-auto">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-                    >
-                        <ArrowLeft className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-                    </button>
-                    <div className="flex-1">
-                        <h1 className="text-lg font-black text-zinc-900 dark:text-white uppercase tracking-tight">
-                            Contas a Receber
-                        </h1>
-                        <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-                            Gestão de Inadimplência
-                        </p>
-                    </div>
-                </div>
-            </header>
+        <>
+            <Header title="Contas a Receber" showBack />
 
             <main className="max-w-5xl mx-auto p-4 space-y-6">
                 {/* Search & Filters */}
@@ -158,7 +140,7 @@ export function ContasReceber() {
                             placeholder="Buscar cliente ou valor..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl outline-none focus:ring-2 focus:ring-primary-500/20 transition-all font-medium"
+                            className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                         />
                     </div>
 
@@ -178,8 +160,8 @@ export function ContasReceber() {
                                     className={cn(
                                         "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all",
                                         isSelected
-                                            ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 border-zinc-900 dark:border-white shadow-lg"
-                                            : "bg-white dark:bg-zinc-900 text-zinc-500 border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700"
+                                            ? "bg-foreground text-background border-foreground shadow-card"
+                                            : "bg-card text-muted-foreground border-border hover:border-foreground/30"
                                     )}
                                 >
                                     <Icon className="w-3.5 h-3.5" />
@@ -198,8 +180,8 @@ export function ContasReceber() {
                             <p className="text-sm font-bold text-zinc-500 uppercase animate-pulse">Carregando pendências...</p>
                         </div>
                     ) : filteredVendas.length === 0 ? (
-                        <div className="py-20 flex flex-col items-center text-center space-y-4 bg-white dark:bg-zinc-900/50 rounded-3xl border border-dashed border-zinc-300 dark:border-zinc-800">
-                            <div className="p-4 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+                        <div className="py-20 flex flex-col items-center text-center space-y-4 bg-card/50 rounded-3xl border border-dashed border-border">
+                            <div className="p-4 bg-muted rounded-full">
                                 <CheckCircle2 className="w-8 h-8 text-zinc-400" />
                             </div>
                             <div>
@@ -213,7 +195,7 @@ export function ContasReceber() {
                             const hoje = new Date()
                             hoje.setHours(0, 0, 0, 0)
 
-                            let badgeStyle = "bg-zinc-100 text-zinc-500 border-zinc-200" // Sem data
+                            let badgeStyle = "bg-muted text-muted-foreground border-border" // Sem data
                             let label = "Sem Data"
                             let atraso = 0
 
@@ -234,12 +216,12 @@ export function ContasReceber() {
                             return (
                                 <div
                                     key={venda.id}
-                                    className="bg-white dark:bg-zinc-900 rounded-3xl border border-zinc-200 dark:border-zinc-800 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                                    className="bg-card rounded-3xl border border-border overflow-hidden shadow-card hover:shadow-elevated transition-shadow"
                                 >
                                     <div className="p-5 flex flex-col gap-4">
                                         <div className="flex justify-between items-start">
                                             <div className="flex gap-3">
-                                                <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-2xl flex items-center justify-center font-black text-lg text-zinc-400">
+                                                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center font-black text-lg text-zinc-400">
                                                     {venda.contato?.nome?.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
@@ -272,7 +254,7 @@ export function ContasReceber() {
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-2 gap-4 py-4 border-y border-zinc-100 dark:border-zinc-800">
+                                        <div className="grid grid-cols-2 gap-4 py-4 border-y border-border">
                                             <div>
                                                 <span className="text-[10px] font-black text-zinc-400 uppercase block mb-1">Valor Pendente</span>
                                                 <span className="text-xl font-black text-zinc-900 dark:text-white">
@@ -324,7 +306,7 @@ export function ContasReceber() {
                 >
                     {selectedVenda && (
                         <div className="space-y-4">
-                            <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                            <div className="p-4 bg-muted/50 rounded-2xl border border-border">
                                 <div className="flex justify-between items-center mb-2">
                                     <span className="text-xs font-bold text-zinc-500 uppercase">Cliente</span>
                                     <span className="text-sm font-black text-zinc-900 dark:text-white">{selectedVenda.contato?.nome}</span>
@@ -374,6 +356,6 @@ export function ContasReceber() {
                     )}
                 </Modal>
             </main>
-        </div>
+        </>
     )
 }

@@ -61,13 +61,13 @@ export function UltimasVendasWidget({ data, loading: externalLoading }: UltimasV
                 {latestSales.map((venda) => (
                     <Card
                         key={venda.id}
-                        className="group overflow-hidden border-0 shadow-sm hover:shadow-md transition-all duration-300 bg-white dark:bg-surface-dark"
+                        className="group overflow-hidden border-0 shadow-card hover:shadow-elevated transition-all duration-300 bg-card"
                     >
                         <CardContent className="p-4 flex items-center justify-between relative">
                             <div className="flex items-center gap-3">
                                 <div className={cn(
                                     "size-2 rounded-full",
-                                    venda.status === 'entregue' ? "bg-semantic-green shadow-[0_0_8px_rgba(34,197,94,0.5)]" :
+                                    venda.status === 'entregue' ? "bg-semantic-green shadow-card" :
                                         venda.status === 'cancelada' ? "bg-semantic-red" : "bg-semantic-yellow"
                                 )} />
 

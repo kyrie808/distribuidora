@@ -121,11 +121,11 @@ export function VendaDetalhe() {
     )
 
     return (
-        <div className="bg-secondary dark:bg-background font-display text-gray-900 dark:text-gray-200 min-h-screen flex flex-col relative overflow-x-hidden">
+        <>
             <Header
                 title={`PEDIDO #${venda.id.slice(0, 6)}`}
                 showBack
-                className="bg-secondary/80 dark:bg-background/80 backdrop-blur-md border-b border-gray-100 dark:border-border"
+                className="bg-secondary/80 dark:bg-background/80 backdrop-blur-md border-b border-border"
             />
 
             <main className="flex-1 flex flex-col pt-6 px-4 pb-32 w-full max-w-md mx-auto">
@@ -167,7 +167,7 @@ export function VendaDetalhe() {
             {showPaymentModal && venda && (
                 <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
                     <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
-                    <div className="relative w-[85vw] max-w-sm bg-white dark:bg-gray-800 h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
+                    <div className="relative w-[85vw] max-w-sm bg-card h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
                         <PaymentSidebar
                             onBack={() => setShowPaymentModal(false)}
                             onConfirm={handlePaymentConfirm}
@@ -184,7 +184,7 @@ export function VendaDetalhe() {
             {/* Desktop Sidebar */}
             <div className="hidden md:block">
                  {showPaymentModal && venda && (
-                    <aside className="fixed right-0 top-0 w-96 flex flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-screen z-[60]">
+                    <aside className="fixed right-0 top-0 w-96 flex flex-col border-l border-border bg-card h-screen z-[60]">
                         <PaymentSidebar
                             onBack={() => setShowPaymentModal(false)}
                             onConfirm={handlePaymentConfirm}
@@ -197,6 +197,6 @@ export function VendaDetalhe() {
                     </aside>
                 )}
             </div>
-        </div>
+        </>
     )
 }

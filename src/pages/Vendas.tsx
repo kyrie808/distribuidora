@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
+import { useNavigationStore } from '@/stores/useNavigationStore'
 import { PageContainer } from '../components/layout/PageContainer'
 import { LoadingScreen, paginateArray } from '../components/ui'
 import { useVendas } from '../hooks/useVendas'
@@ -10,12 +11,13 @@ import { useDebounce } from '../hooks/useDebounce'
 // Sub-components
 import { VendasFilters } from '../components/features/vendas/VendasFilters'
 import { VendasList } from '../components/features/vendas/VendasList'
-import { VendasModais } from '../components/features/vendas/VendasModais'
+import { VendaModais } from '../components/features/vendas/VendaModais'
 
 type StatusFilter = 'todos' | 'pendente' | 'entregue' | 'cancelada'
 type PagamentoFilter = 'todos' | 'pago' | 'parcial' | 'pendente'
 
 export function Vendas() {
+    const { openDrawer } = useNavigationStore()
     const [searchParams, setSearchParams] = useSearchParams()
     const { startDate, endDate } = useDashboardFilter()
     const statusFilter = searchParams.get('status') as StatusFilter | null
@@ -101,17 +103,16 @@ export function Vendas() {
     if (loading) return <LoadingScreen message="Carregando vendas..." />
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 min-h-screen flex justify-center">
-            <div className="relative flex min-h-screen w-full flex-col max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark overflow-x-hidden">
-                <Header title="Vendas" showBack centerTitle />
+        <>
+            <Header title="Vendas" showMenu centerTitle onMenuClick={openDrawer} />
                 <PageContainer className="pt-0 pb-32 bg-transparent px-4">
-                    <VendasFilters 
+                    <VendasFilters
                         searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                         statusFilter={statusFilter} setStatusFilter={setStatusFilter}
                         pagamentoFilter={pagamentoFilter} setPagamentoFilter={setPagamentoFilter}
                         deliveryCounts={deliveryCounts} paymentCounts={paymentCounts}
                     />
-                    <VendasList 
+                    <VendasList
                         vendas={paginateArray(filteredVendas, currentPage, PAGE_SIZE)}
                         filteredCount={filteredVendas.length}
                         currentPage={currentPage} pageSize={PAGE_SIZE}
@@ -119,11 +120,10 @@ export function Vendas() {
                         onDeleteClick={(id) => { setVendaToDelete(id); setShowDeleteModal(true); }}
                     />
                 </PageContainer>
-            </div>
-            <VendasModais 
+            <VendaModais
                 showDeleteModal={showDeleteModal} setShowDeleteModal={setShowDeleteModal}
                 handleDelete={handleDelete} isDeleting={isDeleting}
             />
-        </div>
+        </>
     )
 }

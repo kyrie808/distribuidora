@@ -57,7 +57,7 @@ function TopIndicadorCard({ indicador, index }: { indicador: TopIndicador, index
             case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400"
             case 2: return "bg-gradient-to-r from-gray-300 to-gray-400 text-gray-900 border-gray-400"
             case 3: return "bg-gradient-to-r from-orange-300 to-orange-400 text-orange-900 border-orange-400"
-            default: return "bg-white dark:bg-surface-dark text-gray-900 dark:text-white border-gray-100 dark:border-gray-800"
+            default: return "bg-card text-foreground border-border"
         }
     }
 
@@ -71,7 +71,7 @@ function TopIndicadorCard({ indicador, index }: { indicador: TopIndicador, index
         )}>
             <div className={cn("absolute inset-0 opacity-20", gradientClass)}></div>
 
-            <CardContent className={cn("flex items-center justify-between p-4 relative z-10", isTop3 ? "" : "bg-white/50 dark:bg-surface-dark/50")}>
+            <CardContent className={cn("flex items-center justify-between p-4 relative z-10", isTop3 ? "" : "bg-card/50")}>
                 <div className="flex items-center gap-4">
                     <div className={cn(
                         "flex items-center justify-center size-10 rounded-full font-bold text-lg shadow-inner",

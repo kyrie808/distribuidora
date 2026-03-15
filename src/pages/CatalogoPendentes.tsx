@@ -58,7 +58,7 @@ export function CatalogoPendentes() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-dvh">
         <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
       </div>
     )
@@ -74,7 +74,7 @@ export function CatalogoPendentes() {
   }
 
   return (
-    <div className="pb-20">
+    <>
       <Header title="Pendentes Catálogo" showBack />
 
       <div className="p-4 space-y-4">
@@ -194,6 +194,6 @@ export function CatalogoPendentes() {
           </div>
         </div>
       </Modal>
-    </div>
+    </>
   )
 }

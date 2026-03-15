@@ -70,7 +70,7 @@ export function KpiCard({
 
     return (
         <Card
-            className={cn("shadow-sm bg-white dark:bg-surface-dark border-gray-100 dark:border-gray-800 rounded-xl", className)}
+            className={cn("shadow-sm bg-card border-border rounded-xl", className)}
             onClick={onClick}
         >
             <CardContent className="p-5">
@@ -82,7 +82,7 @@ export function KpiCard({
                             {tooltip && (
                                 <div className="relative flex items-center group/tooltip">
                                     <Info className="w-3 h-3 text-gray-400 hover:text-primary transition-colors cursor-help" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-xl font-normal text-center">
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-tooltip shadow-xl font-normal text-center">
                                         {tooltip}
                                         <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
                                     </div>
@@ -112,7 +112,7 @@ export function KpiCard({
                                     {tooltip && (
                                         <div className="relative flex items-center group/tooltip">
                                             <Info className="w-3 h-3 text-gray-400 hover:text-primary transition-colors cursor-help" />
-                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-50 shadow-xl font-normal text-center">
+                                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 p-2 bg-gray-900 text-white text-[10px] rounded leading-tight w-48 opacity-0 pointer-events-none group-hover/tooltip:opacity-100 transition-opacity z-tooltip shadow-xl font-normal text-center">
                                                 {tooltip}
                                                 <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
                                             </div>

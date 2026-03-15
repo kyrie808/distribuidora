@@ -13,7 +13,7 @@ export function OriginSelector({ locais, origin, onOriginChange, onAddressInput 
     const isCustomAddress = origin === '' || !locais.some(l => l.endereco === origin)
 
     return (
-        <Card className="p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl">
+        <Card className="p-5 bg-card shadow-sm border border-border rounded-xl">
             <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full bg-semantic-green/10 flex items-center justify-center">
                     <MapPin className="w-5 h-5 text-semantic-green" />
@@ -27,7 +27,7 @@ export function OriginSelector({ locais, origin, onOriginChange, onAddressInput 
             <select
                 value={origin}
                 onChange={(e) => onOriginChange(e.target.value)}
-                className="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-200 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
+                className="w-full px-4 py-3 bg-background border border-border rounded-lg text-foreground text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/50 transition-colors"
             >
                 {locais.map((loc, i) => (
                     <option key={i} value={loc.endereco}>

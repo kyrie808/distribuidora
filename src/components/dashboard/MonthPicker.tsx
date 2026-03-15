@@ -16,7 +16,7 @@ export function MonthPicker({ selectedMonth, onMonthSelect, className }: MonthPi
         <div className={cn("w-full", className)}>
             <div
                 ref={scrollContainerRef}
-                className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar scroll-smooth rounded-full bg-white dark:bg-surface-dark p-1 shadow-sm border border-gray-100 dark:border-gray-800"
+                className="flex items-center justify-between gap-1 overflow-x-auto no-scrollbar scroll-smooth rounded-full bg-card p-1 shadow-sm border border-border"
             >
                 {months.map((month) => {
                     const isSelected = selectedMonth === month
@@ -42,7 +42,7 @@ export function MonthPicker({ selectedMonth, onMonthSelect, className }: MonthPi
                             )}></span>
                             <span className={cn(
                                 "relative z-10 text-sm font-medium transition-colors duration-200",
-                                isSelected ? "text-background-dark font-bold" : "text-gray-500 dark:text-gray-400"
+                                isSelected ? "text-background font-bold" : "text-gray-500 dark:text-gray-400"
 
                             )}>
                                 {month}

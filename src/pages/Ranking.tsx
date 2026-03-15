@@ -15,7 +15,7 @@ import { useRankingCompras } from '../hooks/useRankingCompras'
 import { useTopIndicadores } from '../hooks/useTopIndicadores'
 import { TopIndicadoresWidget } from '../components/dashboard/TopIndicadoresWidget'
 import { RankingComprasWidget } from '../components/dashboard/RankingComprasWidget'
-import { cn } from '../lib/utils'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui'
 import { formatCurrency } from '../utils/formatters'
 
 type TabType = 'compras' | 'indicacoes'
@@ -83,7 +83,7 @@ export function Ranking() {
                 },
                 {
                     title: "Top Indicador",
-                    value: topIndicador ? `🏆 ${topIndicador.nome.split(' ')[0]}` : "Nenhum ainda",
+                    value: topIndicador ? topIndicador.nome.split(' ')[0] : "Nenhum ainda",
                     trend: topIndicador ? formatCurrency(topIndicador.totalVendasIndicados) : "Aguardando",
                     icon: Trophy,
                     color: "bg-semantic-yellow",
@@ -94,15 +94,13 @@ export function Ranking() {
     }, [activeTab, rankingCompras, topIndicadores, totalConversoes])
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-8">
-                <Header
-                    title="Ranking Mont"
-                    showBack
-                    centerTitle
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
-                />
-                <PageContainer className="pt-0 pb-16 bg-transparent px-4">
+        <>
+            <Header
+                title="Ranking Mont"
+                showBack
+                centerTitle
+            />
+            <PageContainer className="pt-0 pb-16 bg-transparent px-4">
                     {/* Metrics / KPI Summary */}
                     <div className="grid grid-cols-3 gap-3 mb-6 min-h-[110px]">
                         {metrics.map((m, idx) => (
@@ -123,31 +121,17 @@ export function Ranking() {
                     </div>
 
                     {/* Apple-like Tabs */}
-                    <div className="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-xl mb-6">
-                        <button
-                            onClick={() => setActiveTab('compras')}
-                            className={cn(
-                                "flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all",
-                                activeTab === 'compras'
-                                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                            )}
-                        >
-                            <ShoppingBag className="size-4" />
-                            Compras
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('indicacoes')}
-                            className={cn(
-                                "flex-1 flex items-center justify-center gap-2 py-2 text-sm font-bold rounded-lg transition-all",
-                                activeTab === 'indicacoes'
-                                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
-                                    : "text-gray-500 hover:text-gray-700 dark:text-gray-400"
-                            )}
-                        >
-                            <Users className="size-4" />
-                            Indicações
-                        </button>
+                    <div className="mb-6">
+                        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as TabType)}>
+                            <TabsList>
+                                <TabsTrigger value="compras">
+                                    <ShoppingBag className="size-4" /> Compras
+                                </TabsTrigger>
+                                <TabsTrigger value="indicacoes">
+                                    <Users className="size-4" /> Indicações
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
                     </div>
 
                     {/* Ranking Content */}
@@ -174,7 +158,6 @@ export function Ranking() {
                         </div>
                     </div>
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

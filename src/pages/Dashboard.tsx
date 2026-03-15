@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
 import {
-    Menu,
     Bell,
     TrendingUp,
     TrendingDown,
@@ -14,6 +13,8 @@ import {
     Wallet
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Header } from '../components/layout/Header'
+import { useNavigationStore } from '@/stores/useNavigationStore'
 import { useDashboardMetrics } from '../hooks/useDashboardMetrics'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { dashboardService } from '../services/dashboardService'
@@ -30,6 +31,7 @@ import { MonthPicker } from '@/components/dashboard/MonthPicker'
 
 export function Dashboard() {
     const [isRefreshing, setIsRefreshing] = useState(false)
+    const { openDrawer } = useNavigationStore()
     const [userName, setUserName] = useState<string>('Comandante')
     const [greeting, setGreeting] = useState<string>('Olá')
     const { month, year, setMonth } = useDashboardFilter()
@@ -108,32 +110,27 @@ export function Dashboard() {
     const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">
-            <div className="relative flex h-auto min-h-[100dvh] w-full flex-col overflow-x-hidden max-w-screen-2xl shadow-2xl bg-background-light dark:bg-background-dark">
-
-                {/* TopAppBar */}
-                <header className="flex items-center px-6 py-4 justify-between sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-sm">
-                    <button className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
-                        <Menu className="text-gray-800 dark:text-gray-200 w-6 h-6" />
-                    </button>
-                    <div className="flex-1 flex justify-center">
-                        <h1 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
-                            {greeting}, {userName}
-                        </h1>
-                    </div>
+        <>
+            <Header
+                title={`${greeting}, ${userName}`}
+                showMenu
+                onMenuClick={openDrawer}
+                centerTitle
+                rightAction={
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
                         <button
                             className="flex size-10 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative"
                             onClick={handleRefresh}
                         >
-                            <Bell className={cn("text-gray-800 dark:text-gray-200 w-6 h-6", isRefreshing && "animate-spin")} />
+                            <Bell className={cn("text-foreground w-6 h-6", isRefreshing && "animate-spin")} />
                             {totalAlerts > 0 && (
-                                <span className="absolute top-2 right-2 size-2 bg-semantic-red rounded-full border-2 border-background-light dark:border-background-dark animate-pulse"></span>
+                                <span className="absolute top-2 right-2 size-2 bg-semantic-red rounded-full border-2 border-background animate-pulse" />
                             )}
                         </button>
                     </div>
-                </header>
+                }
+            />
 
                 {/* Main Content */}
                 <main className="flex-1 flex flex-col gap-6 px-4 pb-32">
@@ -240,7 +237,7 @@ export function Dashboard() {
                     <div className="flex items-center gap-2 mb-2 mt-2 px-1">
                         <ShoppingCart className="w-4 h-4 text-gray-400" />
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            🛒 VENDAS & ENTREGAS
+                            VENDAS & ENTREGAS
                         </span>
                     </div>
 
@@ -319,7 +316,6 @@ export function Dashboard() {
                         </div>
                     </div>
                 </main>
-            </div>
-        </div>
+        </>
     )
 }

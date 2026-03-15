@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useNavigationStore } from '@/stores/useNavigationStore'
 import {
     Package,
     Plus,
@@ -19,6 +20,7 @@ import type { DomainProduto, CreateProduto, UpdateProduto } from '../types/domai
 
 
 export function Produtos() {
+    const { openDrawer } = useNavigationStore()
     const toast = useToast()
     const [searchParams, setSearchParams] = useSearchParams()
     const { produtos, loading, createProduto, updateProduto } = useProdutos(true)
@@ -234,20 +236,16 @@ export function Produtos() {
     const _newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-[100dvh] flex justify-center">
-            <div className="relative flex h-auto min-h-[100dvh] w-full flex-col overflow-x-hidden max-w-screen-2xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
+        <>
                 <Header
                     title="Produtos"
-                    showBack
+                    showMenu
                     centerTitle
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
+                    onMenuClick={openDrawer}
                     rightAction={
-                        <button
-                            onClick={handleOpenCreate}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
-                        >
+                        <Button variant="ghost" size="icon" onClick={handleOpenCreate}>
                             <Plus className="h-5 w-5" />
-                        </button>
+                        </Button>
                     }
                 />
                 <PageContainer className="pt-0 pb-16 bg-transparent px-4">
@@ -604,7 +602,6 @@ export function Produtos() {
                         </div>
                     </Modal>
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

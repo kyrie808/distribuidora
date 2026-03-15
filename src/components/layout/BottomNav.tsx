@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Users, ShoppingCart, Menu, Plus, type LucideIcon } from 'lucide-react'
+import { LayoutDashboard, Users, ShoppingCart, Package, Plus, type LucideIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 export function BottomNav() {
@@ -9,7 +9,7 @@ export function BottomNav() {
     const isActive = (path: string) => location.pathname === path
 
     return (
-        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-[#102210] border-t border-gray-100 dark:border-gray-800 safe-bottom">
+        <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-bottom">
             <div className="flex items-end justify-between px-2 pb-2 h-16">
 
                 {/* Dashboard */}
@@ -54,12 +54,12 @@ export function BottomNav() {
                     label="Vendas"
                 />
 
-                {/* Menu */}
+                {/* Produtos */}
                 <NavButton
-                    active={isActive('/menu')}
-                    onClick={() => navigate('/menu')}
-                    icon={Menu}
-                    label="Menu"
+                    active={isActive('/produtos')}
+                    onClick={() => navigate('/produtos')}
+                    icon={Package}
+                    label="Produtos"
                 />
             </div>
         </nav>
@@ -80,7 +80,7 @@ function NavButton({ active, onClick, icon: Icon, label }: NavButtonProps) {
             className={cn(
                 "flex-1 flex flex-col items-center justify-center gap-1 py-1 rounded-lg transition-colors",
                 "h-14 min-w-[3.5rem]", // Touch target
-                active ? "text-primary" : "text-muted-foreground hover:bg-gray-50"
+                active ? "text-primary" : "text-muted-foreground hover:bg-muted"
             )}
         >
             <Icon

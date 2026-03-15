@@ -18,7 +18,7 @@ export function LogisticsWidget({ metrics }: LogisticsWidgetProps) {
             </div>
 
             {/* Delivery Status Card */}
-            <div className="flex items-center gap-4 rounded-xl bg-white dark:bg-surface-dark p-4 shadow-sm border border-gray-100 dark:border-gray-800">
+            <div className="flex items-center gap-4 rounded-xl bg-card p-4 shadow-sm border border-border">
                 {/* Circular Gauge */}
                 <div className="relative size-16 shrink-0">
                     <svg className="size-full -rotate-90" viewBox="0 0 36 36">

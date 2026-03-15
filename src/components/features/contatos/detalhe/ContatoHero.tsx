@@ -48,7 +48,7 @@ export function ContatoHero({ contato, nivel, onEdit }: ContatoHeroProps) {
                     </div>
                     {/* Verified Badge - Only for active 'Cliente' */}
                     {contato.status === 'cliente' && (
-                        <div className="absolute bottom-0 right-0 bg-violet-600 p-1.5 rounded-full border-[3px] border-background-light dark:border-background-dark shadow-md z-10" title="Cliente Verificado">
+                        <div className="absolute bottom-0 right-0 bg-violet-600 p-1.5 rounded-full border-[3px] border-background shadow-md z-10" title="Cliente Verificado">
                             <BadgeCheck className="h-4 w-4 text-white" />
                         </div>
                     )}

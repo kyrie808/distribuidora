@@ -111,13 +111,8 @@ export function Menu() {
     ]
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
-                <Header
-                    title="Menu"
-                    showBack
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
-                />
+        <>
+            <Header title="Menu" showBack />
                 <PageContainer className="pt-0 pb-32 bg-transparent px-4">
                     <div className="grid grid-cols-2 gap-4 pb-20">
                         {menuItems.filter(item => item.visible).map((item) => {
@@ -143,7 +138,6 @@ export function Menu() {
                         })}
                     </div>
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

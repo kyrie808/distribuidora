@@ -55,10 +55,8 @@ export function ContatoDetalhe() {
     }
 
     return (
-        <div className="bg-secondary dark:bg-background font-display text-foreground min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background pb-24">
-                
-                <ContatoHero 
+        <>
+            <ContatoHero
                     contato={contato} 
                     nivel={nivelCliente.nivel} 
                     onEdit={() => setIsEditModalOpen(true)}
@@ -71,7 +69,7 @@ export function ContatoDetalhe() {
 
                         {/* Notes Section */}
                         {contato.observacoes && (
-                            <div className="flex items-start gap-4 p-5 bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm">
+                            <div className="flex items-start gap-4 p-5 bg-card border border-border rounded-xl shadow-sm">
                                 <Award className="h-6 w-6 text-semantic-yellow shrink-0 mt-0.5" />
                                 <div className="flex-1">
                                     <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-1">
@@ -122,7 +120,6 @@ export function ContatoDetalhe() {
                     />
 
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

@@ -62,7 +62,7 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
                 count={0}
                 onViewAll={() => navigate('/clientes')}
                 emptyState={
-                    <div className="w-full flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 border-dashed">
+                    <div className="w-full flex flex-col items-center justify-center p-6 bg-card rounded-xl border border-border border-dashed">
                         <ShoppingCart className="size-8 text-gray-300 dark:text-gray-600 mb-2" />
                         <p className="text-sm text-gray-500 dark:text-gray-400">Todos os clientes abastecidos!</p>
                     </div>
@@ -82,7 +82,7 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
         >
             {alertas.map((alerta) => (
                 <div key={alerta.contato.id} className="min-w-[260px] snap-center">
-                    <Card className="h-full bg-white dark:bg-surface-dark border-l-4 border-l-orange-500 border-y-gray-100 hover:border-y-gray-200 dark:border-y-gray-800 dark:hover:border-y-gray-700 shadow-sm transition-all">
+                    <Card className="h-full bg-card border-l-4 border-l-orange-500 border-y-border hover:border-y-border/80 shadow-sm transition-all">
                         <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
                                 <div>

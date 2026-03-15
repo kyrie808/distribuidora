@@ -64,7 +64,7 @@ export function StoryFilter({ items, activeId, onSelect, size = 'md' }: StoryFil
                                 ${isSelectedStyle}
                             `}>
                                 {/* Inner Surface */}
-                                <div className={`w-full h-full rounded-full flex items-center justify-center border-2 border-transparent relative overflow-hidden transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'bg-surface-light dark:bg-surface-dark'
+                                <div className={`w-full h-full rounded-full flex items-center justify-center border-2 border-transparent relative overflow-hidden transition-colors ${isActive ? 'bg-primary text-primary-foreground' : 'bg-card'
                                     }`}>
                                     {/* Inner Glow/Gradient */}
                                     <div className={`absolute inset-0 bg-gradient-to-br ${activeColorClass} opacity-10 dark:opacity-20`} />
@@ -80,7 +80,7 @@ export function StoryFilter({ items, activeId, onSelect, size = 'md' }: StoryFil
                                         absolute -top-1 -right-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full border shadow-sm z-20 transition-colors
                                         ${isActive
                                             ? 'bg-primary text-primary-foreground border-primary-foreground/20'
-                                            : 'bg-surface-light dark:bg-surface-dark text-muted-foreground border-border'
+                                            : 'bg-card text-muted-foreground border-border'
                                         }
                                     `}>
                                         {item.count}

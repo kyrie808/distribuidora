@@ -13,13 +13,7 @@ export default {
         background: "hsl(var(--background) / <alpha-value>)",
         foreground: "hsl(var(--foreground) / <alpha-value>)",
 
-        // Custom Tactical Palette - STRICT ENFORCEMENT
-        "background-light": "#f6f8f6",
-        "background-dark": "#0a0f0d", // Tactical Dark (Fixed from Green)
-        "surface-light": "#ffffff",
-        "surface-dark": "#1a2e1a",
-
-        "semantic-red": "#ef4444",
+"semantic-red": "#ef4444",
         "semantic-yellow": "#eab308",
         "semantic-green": "#22c55e",
 
@@ -65,6 +59,22 @@ export default {
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
       },
+      boxShadow: {
+        card:     "var(--shadow-card)",
+        elevated: "var(--shadow-elevated)",
+        modal:    "var(--shadow-modal)",
+      },
+      zIndex: {
+        tooltip: "45",
+        header:  "40",
+        overlay: "50",
+        modal:   "60",
+        toast:   "100",
+      },
+      spacing: {
+        "page-x": "var(--page-x)",
+        "page-y": "var(--page-y)",
+      },
       keyframes: {
         "accordion-down": {
           from: { height: "0" },
@@ -82,7 +92,7 @@ export default {
       fontFamily: {
         sans: ['Lexend', 'system-ui', '-apple-system', 'sans-serif'],
         display: ['Lexend', 'sans-serif'],
-        body: ['Noto Sans', 'sans-serif'],
+        // body (Noto Sans) removed — was defined but never used
       },
     },
   },

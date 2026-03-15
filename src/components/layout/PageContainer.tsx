@@ -15,8 +15,7 @@ export function PageContainer({
     return (
         <main
             className={cn(
-                "flex-1 min-h-[calc(100vh-4rem)] bg-background",
-                "pt-20",
+                "flex-1 min-h-dvh",
                 "pb-24",
                 noPadding ? '' : 'px-4',
                 className

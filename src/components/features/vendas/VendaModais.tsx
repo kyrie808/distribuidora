@@ -5,13 +5,14 @@ interface VendaModaisProps {
     setShowDeleteModal: (val: boolean) => void
     handleDelete: () => void
     isDeleting: boolean
-    showRevertModal: boolean
-    setShowRevertModal: (val: boolean) => void
-    handleRevertDelivery: () => void
-    showUndoPaymentConfirm: boolean
-    setShowUndoPaymentConfirm: (val: boolean) => void
-    handleDesfazerPagamento: () => void
-    loadingAction: boolean
+    // Optional: only needed in VendaDetalhe, not in Vendas list
+    showRevertModal?: boolean
+    setShowRevertModal?: (val: boolean) => void
+    handleRevertDelivery?: () => void
+    showUndoPaymentConfirm?: boolean
+    setShowUndoPaymentConfirm?: (val: boolean) => void
+    handleDesfazerPagamento?: () => void
+    loadingAction?: boolean
 }
 
 export function VendaModais({
@@ -19,13 +20,13 @@ export function VendaModais({
     setShowDeleteModal,
     handleDelete,
     isDeleting,
-    showRevertModal,
-    setShowRevertModal,
-    handleRevertDelivery,
-    showUndoPaymentConfirm,
-    setShowUndoPaymentConfirm,
-    handleDesfazerPagamento,
-    loadingAction
+    showRevertModal = false,
+    setShowRevertModal = () => {},
+    handleRevertDelivery = () => {},
+    showUndoPaymentConfirm = false,
+    setShowUndoPaymentConfirm = () => {},
+    handleDesfazerPagamento = () => {},
+    loadingAction = false
 }: VendaModaisProps) {
     return (
         <>

@@ -47,7 +47,7 @@ export function DeliveryCard({
         <div
             onClick={() => onToggle(id)}
             className={cn(
-                "relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer bg-white dark:bg-surface-dark",
+                "relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer bg-card",
                 isSelected
                     ? "border-semantic-green shadow-md"
                     : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm"

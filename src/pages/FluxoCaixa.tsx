@@ -7,7 +7,7 @@ import { useExtrato } from '../hooks/useExtrato'
 import { useExtratoDeSaldo } from '../hooks/useExtratoDeSaldo'
 import { useContas } from '../hooks/useContas'
 import { usePlanoDeContas } from '../hooks/usePlanoDeContas'
-import { cn } from '@/lib/utils'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui'
 
 // Refactored Sub-components
 import { FinanceiroResumo } from '../components/features/financeiro/FinanceiroResumo'
@@ -58,39 +58,22 @@ export function FluxoCaixa() {
     }, [contas])
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
-                <Header title="Financeiro" showBack centerTitle />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+        <>
+            <Header title="Financeiro" showBack centerTitle />
+            <PageContainer className="pt-0 pb-32 bg-transparent px-4">
 
                     {/* Hub Tabs Navigation */}
                     <div className="px-4 mt-4">
-                        <div className="flex bg-white dark:bg-zinc-900 rounded-2xl p-1 shadow-sm border border-zinc-200 dark:border-zinc-800">
-                            <button
-                                onClick={() => setActiveHubTab('financeiro')}
-                                className={cn(
-                                    "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all",
-                                    activeHubTab === 'financeiro'
-                                        ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg"
-                                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-                                )}
-                            >
-                                <DollarSign className="w-4 h-4" />
-                                Fluxo de Caixa
-                            </button>
-                            <button
-                                onClick={() => setActiveHubTab('configuracoes')}
-                                className={cn(
-                                    "flex-1 flex items-center justify-center gap-2 py-3 text-xs font-black uppercase tracking-wider rounded-xl transition-all",
-                                    activeHubTab === 'configuracoes'
-                                        ? "bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-lg"
-                                        : "text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300"
-                                )}
-                            >
-                                <Settings className="w-4 h-4" />
-                                Configurações
-                            </button>
-                        </div>
+                        <Tabs value={activeHubTab} onValueChange={(v) => setActiveHubTab(v as HubTab)}>
+                            <TabsList>
+                                <TabsTrigger value="financeiro">
+                                    <DollarSign className="w-4 h-4" /> Fluxo de Caixa
+                                </TabsTrigger>
+                                <TabsTrigger value="configuracoes">
+                                    <Settings className="w-4 h-4" /> Configurações
+                                </TabsTrigger>
+                            </TabsList>
+                        </Tabs>
                     </div>
 
                     {activeHubTab === 'financeiro' ? (
@@ -130,8 +113,7 @@ export function FluxoCaixa() {
                     {activeHubTab === 'financeiro' && (
                         <FinanceiroFab refreshAll={refreshAll} />
                     )}
-                </PageContainer>
-            </div>
-        </div>
+            </PageContainer>
+        </>
     )
 }

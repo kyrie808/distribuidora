@@ -1,7 +1,10 @@
 import { useState, useMemo } from 'react'
 import { Plus, Search, Diamond, Flame, History, Users, X, UserCheck } from 'lucide-react'
 import { Header } from '../components/layout/Header'
+import { useNavigationStore } from '@/stores/useNavigationStore'
 import { PageContainer } from '../components/layout/PageContainer'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 import { EmptyState, LoadingScreen, Pagination, paginateArray } from '../components/ui'
 import { ContatoCard, ContatoFormModal, ContactStoryFilter } from '../components/contatos'
 import { useContatos } from '../hooks/useContatos'
@@ -15,6 +18,7 @@ export function Contatos() {
     const [showSearch, setShowSearch] = useState(false)
     const [activeStory, setActiveStory] = useState<FilterStoryId>('all')
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const { openDrawer } = useNavigationStore()
     const [currentPage, setCurrentPage] = useState(1)
     const PAGE_SIZE = 30
 
@@ -77,34 +81,28 @@ export function Contatos() {
     const paginatedContatos = paginateArray(filteredContatos, currentPage, PAGE_SIZE)
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
-                {/* Background Ambience (Stich Style) */}
-                <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-[-10%] left-[-20%] w-[70vw] h-[70vw] bg-violet-600/10 rounded-full blur-[100px] opacity-40 mix-blend-screen" />
-                    <div className="absolute bottom-[-10%] right-[-20%] w-[80vw] h-[80vw] bg-blue-600/5 rounded-full blur-[120px] opacity-30 mix-blend-screen" />
-                </div>
-
-                <Header
+        <>
+            <Header
                     title="Gestão de Clientes"
                     centerTitle
-                    showMenu={true}
-                    transparent
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
+                    showMenu
+                    onMenuClick={openDrawer}
                     rightAction={
                         <div className="flex items-center gap-2">
-                            <button
+                            <Button
+                                variant="default"
+                                size="icon"
                                 onClick={() => setIsModalOpen(true)}
-                                className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm"
                             >
                                 <Plus className="h-6 w-6" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                                variant={showSearch ? 'accent' : 'ghost'}
+                                size="icon"
                                 onClick={() => setShowSearch(!showSearch)}
-                                className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-accent hover:text-accent-foreground text-foreground ${showSearch ? 'bg-accent text-accent-foreground' : ''}`}
                             >
                                 {showSearch ? <X className="h-6 w-6" /> : <Search className="h-6 w-6" />}
-                            </button>
+                            </Button>
                         </div>
                     }
                 />
@@ -117,7 +115,7 @@ export function Contatos() {
                     <div className="px-4 py-2">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                            <input
+                            <Input
                                 type="text"
                                 placeholder="Buscar por nome, apelido ou telefone..."
                                 value={searchTerm}
@@ -125,7 +123,6 @@ export function Contatos() {
                                     setSearchTerm(e.target.value)
                                     setCurrentPage(1)
                                 }}
-                                className="w-full pl-10 pr-4 py-3 bg-secondary/50 dark:bg-secondary/20 border border-border rounded-xl text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md"
                                 autoFocus
                             />
                         </div>
@@ -214,7 +211,6 @@ export function Contatos() {
                         onSuccess={() => refetch()}
                     />
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

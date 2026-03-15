@@ -70,7 +70,7 @@ export function DeliveryList({
 
     if (deliveries.length === 0) {
         return (
-            <Card className="p-8 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl">
+            <Card className="p-8 bg-card shadow-sm border border-border rounded-xl">
                 <div className="flex flex-col items-center justify-center text-center">
                     <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                         <MapPin className="w-8 h-8 text-gray-400" />
@@ -83,7 +83,7 @@ export function DeliveryList({
     }
 
     return (
-        <Card className="p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl space-y-4">
+        <Card className="p-5 bg-card shadow-sm border border-border rounded-xl space-y-4">
             {/* Header: Stats + View Toggle */}
             <div className="flex items-center justify-between">
                 <div>
@@ -144,7 +144,7 @@ export function DeliveryList({
                     <div key={bairro}>
                         {/* Neighborhood Header */}
                         {groupByNeighborhood && (
-                            <div className="sticky top-0 bg-background-light dark:bg-background-dark z-10 pb-2 mb-3 flex items-center justify-between">
+                            <div className="sticky top-0 bg-background z-10 pb-2 mb-3 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <div className="w-1 h-4 bg-semantic-green rounded-full" />
                                     <h4 className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">

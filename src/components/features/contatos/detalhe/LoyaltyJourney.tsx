@@ -75,7 +75,7 @@ export function LoyaltyJourney({ contatoId, isB2B }: { contatoId: string, isB2B:
                             </div>
 
                             {/* Progress Bar (Glow) */}
-                            <div className="relative w-full h-3 bg-surface-dark rounded-full overflow-hidden border border-white/5 shadow-inner">
+                            <div className="relative w-full h-3 bg-card rounded-full overflow-hidden border border-white/5 shadow-inner">
                                 <div
                                     className="bg-gradient-to-r from-green-600 via-primary to-green-400 h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_20px_theme(colors.primary.DEFAULT)] relative overflow-hidden"
                                     style={{ width: `${progressPercent}%` }}
@@ -86,7 +86,7 @@ export function LoyaltyJourney({ contatoId, isB2B }: { contatoId: string, isB2B:
                             </div>
 
                             {/* Mission/Goal Intel */}
-                            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-surface-dark to-surface-dark/50 border border-white/5 relative group overflow-hidden">
+                            <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-card to-card/50 border border-white/5 relative group overflow-hidden">
                                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
                                 <div className="flex items-start gap-4 relative z-10">

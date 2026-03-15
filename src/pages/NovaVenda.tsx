@@ -185,9 +185,8 @@ export function NovaVenda() {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark flex justify-center">
-            <div className="relative flex h-[calc(100dvh-80px)] w-full flex-col overflow-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark">
-                <Header
+        <>
+            <Header
                     title={isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Nova Venda'}
                     showBack
                     className="flex-shrink-0"
@@ -317,7 +316,6 @@ export function NovaVenda() {
                     </aside>
                 </div>
 
-            </div>
-        </div>
+        </>
     )
 }

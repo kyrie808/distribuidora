@@ -54,15 +54,10 @@ export function Estoque() {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
-                <Header 
-                    title="🧊 Geladeira" 
-                    showBack 
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none" 
-                />
+        <>
+            <Header title="Geladeira" showBack />
                 
-                <div className="flex flex-col h-[calc(100vh-4rem)]">
+                <div className="flex flex-col h-[calc(100dvh-4rem)]">
                     {/* Cena 3D - Split do bundle aqui */}
                     <div className="h-[65vh] bg-gradient-to-b from-slate-50 to-gray-200 relative overflow-hidden group">
                         <Suspense fallback={
@@ -79,18 +74,18 @@ export function Estoque() {
                         {/* Legenda flutuante */}
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4 pointer-events-none">
                             <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg px-4 py-2 rounded-2xl shadow-xl border border-white/20">
-                                <div className="w-3.5 h-3.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
+                                <div className="w-3.5 h-3.5 rounded-full bg-warning shadow-card" />
                                 <span className="font-bold text-sm tracking-tight">1kg: {total1kg}</span>
                             </div>
                             <div className="flex items-center gap-2 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg px-4 py-2 rounded-2xl shadow-xl border border-white/20">
-                                <div className="w-3.5 h-3.5 rounded-full bg-violet-600 shadow-[0_0_8px_rgba(124,58,237,0.5)]" />
+                                <div className="w-3.5 h-3.5 rounded-full bg-accent shadow-card" />
                                 <span className="font-bold text-sm tracking-tight">4kg: {total4kg}</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Controles de Estoque */}
-                    <div className="flex-1 overflow-y-auto bg-white/50 dark:bg-gray-900/50 backdrop-blur-sm">
+                    <div className="flex-1 overflow-y-auto bg-card/50 backdrop-blur-sm">
                         <PageContainer className="py-6 pt-2">
                             <div className="flex items-center justify-between mb-4 px-1">
                                 <h2 className="text-base font-bold text-gray-800 dark:text-gray-200">Painel de Estoque</h2>
@@ -123,7 +118,6 @@ export function Estoque() {
                         </PageContainer>
                     </div>
                 </div>
-            </div>
-        </div>
+        </>
     )
 }

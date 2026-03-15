@@ -42,13 +42,13 @@ export function RouteTimeline({ stops, className }: RouteTimelineProps) {
                             "w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm border-2 flex-shrink-0 transition-colors",
                             isFirst ? "bg-semantic-green border-semantic-green text-white" :
                                 isLast ? "bg-semantic-red border-semantic-red text-white" :
-                                    "bg-white dark:bg-surface-dark border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white"
+                                    "bg-card border-border text-foreground"
                         )}>
                             {isFirst ? <MapPin className="w-5 h-5" /> : index}
                         </div>
 
                         {/* Stop Info */}
-                        <div className="flex-1 p-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-surface-dark group-hover:border-gray-300 dark:group-hover:border-gray-600 group-hover:shadow-sm transition-all">
+                        <div className="flex-1 p-4 rounded-xl border border-border bg-card group-hover:border-border/80 group-hover:shadow-sm transition-all">
                             <div className="flex items-start justify-between gap-2 mb-1">
                                 <h4 className="font-bold text-gray-900 dark:text-white text-sm">{stop.name}</h4>
                                 {isLast && (

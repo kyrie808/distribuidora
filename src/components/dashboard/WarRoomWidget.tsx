@@ -56,7 +56,7 @@ export function WarRoomWidget({ overdueAlert, recompraAlert }: WarRoomWidgetProp
                     onAction={() => handleWhatsApp(overdueAlert.telefone, overdueAlert.nome, overdueAlert.valorDevido)}
                 />
             ) : (
-                <div className="rounded-xl bg-white dark:bg-surface-dark p-6 text-center shadow-sm opacity-60">
+                <div className="rounded-xl bg-card p-6 text-center shadow-sm opacity-60">
                     <p className="text-sm text-gray-500">Nenhum pagamento atrasado. Ótimo trabalho!</p>
                 </div>
             )}

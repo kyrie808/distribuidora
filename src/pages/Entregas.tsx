@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { LoadingScreen } from '@/components/ui'
 
 // Entregas Components
 import {
@@ -205,25 +206,18 @@ export function Entregas() {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-24">
-
-                {/* Header */}
+        <>
                 <Header
                     title="Rota Inteligente"
                     centerTitle
                     showBack
-                    transparent
-                    className="sticky top-0 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md z-30 px-6 py-4 h-auto shadow-none"
                 />
 
                 <PageContainer className="relative z-10 space-y-6 pt-4 pb-32 px-4">
 
                     {/* Loading State */}
                     {loading ? (
-                        <div className="flex items-center justify-center py-12">
-                            <div className="w-12 h-12 border-4 border-gray-200 dark:border-gray-700 border-t-semantic-green rounded-full animate-spin" />
-                        </div>
+                        <LoadingScreen message="Carregando entregas..." />
                     ) : (
                         <>
                             {/* 2-Column Layout */}
@@ -261,7 +255,7 @@ export function Entregas() {
                                     {route.length > 0 ? (
                                         <>
                                             {/* Route Stats Card */}
-                                            <Card className="p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl">
+                                            <Card className="p-5 bg-card shadow-card border border-border rounded-xl">
                                                 <div className="flex items-center justify-between mb-4">
                                                     <div>
                                                         <h3 className="text-sm font-bold text-gray-900 dark:text-white">Rota Gerada</h3>
@@ -283,14 +277,14 @@ export function Entregas() {
                                             </Card>
 
                                             {/* Route Timeline */}
-                                            <Card className="p-5 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl max-h-[600px] overflow-y-auto">
+                                            <Card className="p-5 bg-card shadow-card border border-border rounded-xl max-h-[600px] overflow-y-auto">
                                                 <RouteTimeline stops={route} />
                                             </Card>
                                         </>
                                     ) : (
-                                        <Card className="p-8 bg-white dark:bg-surface-dark shadow-sm border border-gray-100 dark:border-gray-800 rounded-xl">
+                                        <Card className="p-8 bg-card shadow-card border border-border rounded-xl">
                                             <div className="flex flex-col items-center justify-center text-center">
-                                                <div className="w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                                                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                                                     <Clock className="w-8 h-8 text-gray-400" />
                                                 </div>
                                                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Aguardando rota</p>
@@ -305,7 +299,6 @@ export function Entregas() {
                         </>
                     )}
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

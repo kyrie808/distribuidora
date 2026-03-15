@@ -49,11 +49,10 @@ export function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 transition-colors duration-200">
-            <div className="relative flex h-full min-h-screen w-full flex-col items-center justify-center max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark overflow-hidden">
+        <div className="min-h-dvh w-full flex items-center justify-center bg-background text-foreground">
 
                 {/* Decorative elements - subtle as in Dashboard */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-primary-neo shadow-[0_0_15px_rgba(19,236,19,0.3)]" />
+                <div className="absolute top-0 left-0 w-full h-1 bg-primary shadow-elevated" />
 
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -62,7 +61,7 @@ export function LoginPage() {
                 >
                     {/* Logo / Header */}
                     <div className="flex flex-col items-center mb-12">
-                        <div className="w-16 h-16 bg-primary-neo rounded-2xl flex items-center justify-center shadow-[0_4px_20px_rgba(19,236,19,0.2)] mb-6">
+                        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-elevated mb-6">
                             <Shield className="w-8 h-8 text-black" />
                         </div>
                         <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-1">
@@ -81,13 +80,13 @@ export function LoginPage() {
                                     E-mail
                                 </label>
                                 <div className="relative group">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-neo transition-colors" />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
                                     <input
                                         type="email"
                                         placeholder="comandante@mont.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary-neo focus:border-primary-neo transition-all outline-none font-display"
+                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none font-display"
                                     />
                                 </div>
                             </div>
@@ -97,13 +96,13 @@ export function LoginPage() {
                                     Senha
                                 </label>
                                 <div className="relative group">
-                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary-neo transition-colors" />
+                                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
                                     <input
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary-neo focus:border-primary-neo transition-all outline-none font-display"
+                                        className="w-full bg-gray-50 dark:bg-black/20 border border-gray-100 dark:border-white/5 rounded-xl py-3.5 pl-12 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 focus:ring-1 focus:ring-primary focus:border-primary transition-all outline-none font-display"
                                     />
                                 </div>
                             </div>
@@ -111,7 +110,7 @@ export function LoginPage() {
                             <Button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-primary-neo hover:opacity-90 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group border-none shadow-sm h-auto"
+                                className="w-full bg-primary hover:opacity-90 text-black font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 group border-none shadow-sm h-auto"
                             >
                                 {isLoading ? (
                                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -131,7 +130,6 @@ export function LoginPage() {
                         </p>
                     </div>
                 </motion.div>
-            </div>
         </div>
     )
 }

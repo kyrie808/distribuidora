@@ -9,7 +9,7 @@ export function ContatoIntel({ contato }: { contato: DomainContato }) {
     const [isAddressExpanded, setIsAddressExpanded] = useState(false)
 
     return (
-        <div className="flex flex-col bg-white dark:bg-surface-dark border border-gray-100 dark:border-gray-800 rounded-xl shadow-sm overflow-hidden transition-all duration-300">
+        <div className="flex flex-col bg-card border border-border rounded-xl shadow-sm overflow-hidden transition-all duration-300">
             {/* Header (Clickable) */}
             <div
                 onClick={() => setIsAddressExpanded(!isAddressExpanded)}

@@ -67,9 +67,8 @@ export function PedidosCompra() {
     }
 
     return (
-        <div className="bg-background-light dark:bg-background-dark font-display text-[#111811] dark:text-gray-100 min-h-screen flex justify-center">
-            <div className="relative flex h-auto min-h-screen w-full flex-col max-w-7xl shadow-2xl bg-background-light dark:bg-background-dark pb-8">
-                <Header
+        <>
+            <Header
                     title="Pedidos de Compra"
                     showBack
                     centerTitle
@@ -308,7 +307,6 @@ export function PedidosCompra() {
                         onCancel={() => setPaymentToDelete(null)}
                     />
                 </PageContainer>
-            </div>
-        </div>
+        </>
     )
 }

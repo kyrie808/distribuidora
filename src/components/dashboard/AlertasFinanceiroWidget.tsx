@@ -66,7 +66,7 @@ export function AlertasFinanceiroWidget({ data, loading: externalLoading }: Aler
                 count={0}
                 onViewAll={() => navigate('/vendas?status=atrasado')}
                 emptyState={
-                    <div className="w-full flex flex-col items-center justify-center p-6 bg-white dark:bg-surface-dark rounded-xl border border-gray-100 dark:border-gray-800 border-dashed">
+                    <div className="w-full flex flex-col items-center justify-center p-6 bg-card rounded-xl border border-border border-dashed">
                         <DollarSign className="size-8 text-gray-300 dark:text-gray-600 mb-2" />
                         <p className="text-sm text-gray-500 dark:text-gray-400">Nenhuma pendência urgente</p>
                     </div>
@@ -86,7 +86,7 @@ export function AlertasFinanceiroWidget({ data, loading: externalLoading }: Aler
         >
             {atrasados.map((alerta) => (
                 <div key={alerta.venda.id} className="min-w-[280px] snap-center">
-                    <Card className="h-full bg-white dark:bg-surface-dark border-l-4 border-l-semantic-red border-y-gray-100 hover:border-y-gray-200 dark:border-y-gray-800 dark:hover:border-y-gray-700 shadow-sm transition-all">
+                    <Card className="h-full bg-card border-l-4 border-l-semantic-red border-y-border hover:border-y-border/80 shadow-sm transition-all">
                         <CardContent className="p-4">
                             <div className="flex justify-between items-start mb-2">
                                 <div>

@@ -12,7 +12,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     if (loading) {
         return (
-            <div className="flex h-screen w-screen items-center justify-center bg-background-light dark:bg-background-dark">
+            <div className="flex h-screen w-screen items-center justify-center bg-background">
                 <div className="flex flex-col items-center gap-4">
                     <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary-neo border-t-transparent"></div>
                     <p className="font-display font-medium text-gray-500 animate-pulse">Carregando...</p>

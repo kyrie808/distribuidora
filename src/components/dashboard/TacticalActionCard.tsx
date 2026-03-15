@@ -35,13 +35,13 @@ export function TacticalActionCard({
             border: 'border-semantic-red',
             text: 'text-semantic-red',
             button: 'bg-primary hover:bg-green-500 text-black shadow-green-500/20',
-            bg: 'bg-white dark:bg-surface-dark'
+            bg: 'bg-card'
         },
         warning: {
             border: 'border-semantic-yellow',
             text: 'text-semantic-yellow',
             button: 'bg-gray-100 dark:bg-white/10 hover:bg-gray-200 dark:hover:bg-white/20 text-gray-900 dark:text-white',
-            bg: 'bg-white dark:bg-surface-dark'
+            bg: 'bg-card'
         }
     }
 

@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils'
 interface HeaderProps {
     title: string
     showBack?: boolean
-    showMenu?: boolean // New prop to show Menu icon instead of Back
+    showMenu?: boolean
+    onMenuClick?: () => void
     rightAction?: React.ReactNode
     centerTitle?: boolean
     transparent?: boolean
@@ -17,6 +18,7 @@ export function Header({
     title,
     showBack = false,
     showMenu = false,
+    onMenuClick,
     rightAction,
     centerTitle = false,
     transparent = false,
@@ -26,12 +28,11 @@ export function Header({
 
     return (
         <header className={cn(
-            "sticky top-0 z-40 px-6 py-4 h-auto flex items-center justify-between transition-all duration-300",
-            transparent ? 'bg-transparent' : 'bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md',
-            !transparent && 'shadow-none',
+            "sticky top-0 z-header px-6 py-4 h-auto flex items-center justify-between transition-all duration-300",
+            transparent ? 'bg-transparent' : 'bg-background/95 backdrop-blur-md',
             className
         )}>
-            {/* Left Action (Back or Menu) */}
+            {/* Left Action */}
             <div className="flex items-center z-10">
                 {showBack && (
                     <button
@@ -45,12 +46,11 @@ export function Header({
                 {showMenu && !showBack && (
                     <button
                         className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
+                        onClick={onMenuClick}
                     >
                         <Menu className="h-6 w-6" />
                     </button>
                 )}
-
-                {/* Spacer if no left action, but typically we want the title to just align naturally if not centered */}
             </div>
 
             {/* Title */}
@@ -59,7 +59,7 @@ export function Header({
                 centerTitle ? 'justify-center items-center absolute inset-0' : 'justify-start'
             )}>
                 <h1 className={cn(
-                    "text-lg font-bold tracking-tight text-gray-900 dark:text-white",
+                    "text-lg font-bold tracking-tight text-foreground",
                     centerTitle ? "text-center" : ""
                 )}>
                     {title}
