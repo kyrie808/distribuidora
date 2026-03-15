@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Header } from '@/components/layout/Header'
 import { LoadingScreen, Button } from '../components/ui'
@@ -164,27 +165,25 @@ export function VendaDetalhe() {
                 loadingAction={loadingAction}
             />
 
-            {showPaymentModal && venda && (
-                <div className="fixed inset-0 z-[60] md:hidden flex justify-end">
-                    <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
-                    <div className="relative w-[85vw] max-w-sm bg-card h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden">
-                        <PaymentSidebar
-                            onBack={() => setShowPaymentModal(false)}
-                            onConfirm={handlePaymentConfirm}
-                            vendaId={venda.id}
-                            total={venda.total}
-                            valorPago={venda.valorPago || 0}
-                            historico={venda.pagamentos}
-                            customerName={venda.contato?.nome || 'Cliente'}
-                        />
+            {showPaymentModal && venda && createPortal(
+                <>
+                    {/* Mobile: full-screen slide-in panel */}
+                    <div className="fixed inset-0 z-[9998] md:hidden flex justify-end">
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)} />
+                        <div className="relative w-[85vw] max-w-sm bg-card h-[100dvh] shadow-2xl transform transition-transform animate-slide-in-right overflow-hidden z-[9999]">
+                            <PaymentSidebar
+                                onBack={() => setShowPaymentModal(false)}
+                                onConfirm={handlePaymentConfirm}
+                                vendaId={venda.id}
+                                total={venda.total}
+                                valorPago={venda.valorPago || 0}
+                                historico={venda.pagamentos}
+                                customerName={venda.contato?.nome || 'Cliente'}
+                            />
+                        </div>
                     </div>
-                </div>
-            )}
-
-            {/* Desktop Sidebar */}
-            <div className="hidden md:block">
-                 {showPaymentModal && venda && (
-                    <aside className="fixed right-0 top-0 w-96 flex flex-col border-l border-border bg-card h-screen z-[60]">
+                    {/* Desktop: fixed sidebar */}
+                    <aside className="hidden md:flex fixed right-0 top-0 w-96 flex-col border-l border-border bg-card h-screen z-[9999]">
                         <PaymentSidebar
                             onBack={() => setShowPaymentModal(false)}
                             onConfirm={handlePaymentConfirm}
@@ -195,8 +194,9 @@ export function VendaDetalhe() {
                             customerName={venda.contato?.nome || 'Cliente'}
                         />
                     </aside>
-                )}
-            </div>
+                </>,
+                document.body
+            )}
         </>
     )
 }

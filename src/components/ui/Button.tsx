@@ -26,7 +26,7 @@ const buttonVariants = cva(
                 md: "h-12 px-4 py-2",      // Alias for legacy
                 sm: "h-9 rounded-md px-3",
                 lg: "h-14 rounded-md px-8",
-                icon: "h-10 w-10",
+                icon: "h-11 w-11",
             },
         },
         defaultVariants: {

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Plus, ArrowUpRight, ArrowDownLeft, ArrowRightLeft } from 'lucide-react'
 import { LancamentoModal } from './LancamentoModal'
 import { TransferenciaModal } from './TransferenciaModal'
@@ -14,18 +15,18 @@ export function FinanceiroFab({ refreshAll }: FinanceiroFabProps) {
     const [isSaidaOpen, setIsSaidaOpen] = useState(false)
     const [isTransferenciaOpen, setIsTransferenciaOpen] = useState(false)
 
-    return (
+    return createPortal(
         <>
             {/* Backdrop for FAB */}
             {isFabOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 transition-all duration-300"
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[9998] transition-all duration-300"
                     onClick={() => setIsFabOpen(false)}
                 />
             )}
 
             {/* Floating Action Buttons Area */}
-            <div className="fixed right-6 bottom-24 flex flex-col items-end gap-3 z-50">
+            <div className="fixed right-6 bottom-24 flex flex-col items-end gap-3 z-[9999]">
                 <div className={cn(
                     "flex flex-col items-end gap-3 transition-all duration-300 origin-bottom",
                     isFabOpen ? "scale-100 opacity-100 mb-2" : "scale-0 opacity-0 h-0 pointer-events-none"
@@ -105,6 +106,7 @@ export function FinanceiroFab({ refreshAll }: FinanceiroFabProps) {
                     onSuccess={refreshAll}
                 />
             )}
-        </>
+        </>,
+        document.body
     )
 }

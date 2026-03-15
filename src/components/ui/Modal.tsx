@@ -57,45 +57,50 @@ export function Modal({
 
     if (!isOpen) return null
 
-    return createPortal(
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-            {/* Backdrop */}
+    const modalContent = (
+        <>
+            {/* Backdrop — own fixed layer */}
             <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm"
                 onClick={onClose}
             />
 
-            {/* Modal */}
-            <div
-                className={`
-          relative bg-white/95 dark:bg-card/90 backdrop-blur-md border border-border/50 rounded-xl shadow-2xl w-full
-          ${sizeClasses[size]}
-          max-h-[85vh] overflow-y-auto
-          [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
-          animate-in fade-in zoom-in-95 duration-300
-        `}
-            >
-                {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-border">
-                    <h2 className="text-lg font-semibold text-foreground">{title}</h2>
-                    {showCloseButton && (
-                        <button
-                            onClick={onClose}
-                            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                        >
-                            <X className="h-5 w-5" />
-                        </button>
-                    )}
-                </div>
+            {/* Centering wrapper — pointer-events-none so backdrop click-through works */}
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
+                {/* Panel — pointer-events-auto to capture own interactions */}
+                <div
+                    className={`
+                        pointer-events-auto bg-card border border-border/50 rounded-xl shadow-2xl w-full
+                        ${sizeClasses[size]}
+                        max-h-[85vh] overflow-y-auto
+                        [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
+                        animate-in fade-in zoom-in-95 duration-300
+                    `}
+                >
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                        <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+                        {showCloseButton && (
+                            <button
+                                aria-label="Fechar"
+                                onClick={onClose}
+                                className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                        )}
+                    </div>
 
-                {/* Content */}
-                <div className="p-4">
-                    {children}
+                    {/* Content */}
+                    <div className="p-4">
+                        {children}
+                    </div>
                 </div>
             </div>
-        </div>,
-        document.body
+        </>
     )
+
+    return createPortal(modalContent, document.body)
 }
 
 interface ModalActionsProps {

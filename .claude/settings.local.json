@@ -103,7 +103,9 @@
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && npx supabase db dump --schema public --data-only false 2>&1 | head -200)",
       "mcp__supabase-distribuidora__list_tables",
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && ls supabase/migrations/*.sql | wc -l)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "Bash(python:*)",
+      "Bash(where python:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -24,7 +24,7 @@ export function MonthPicker({ selectedMonth, onMonthSelect, className }: MonthPi
                         <label
                             key={month}
                             className={cn(
-                                "flex-1 cursor-pointer h-9 flex items-center justify-center rounded-full relative z-0 transition-all duration-300 select-none min-w-[3.5rem]",
+                                "flex-1 cursor-pointer min-h-[44px] flex items-center justify-center rounded-full relative z-0 transition-all duration-300 select-none min-w-[3.5rem]",
                                 isSelected ? "flex-grow-[1.5]" : ""
                             )}
                             onClick={() => onMonthSelect(month)}

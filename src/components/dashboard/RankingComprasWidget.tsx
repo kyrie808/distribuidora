@@ -2,12 +2,13 @@ import { Medal, Trophy, Star } from 'lucide-react'
 import { useRankingCompras } from '@/hooks/useRankingCompras'
 import type { RankingComprasStats } from '@/hooks/useRankingCompras'
 import { Card, CardContent } from '@/components/ui/Card'
+import { WidgetSkeleton } from '@/components/ui/WidgetSkeleton'
 import { cn } from '@/lib/utils'
 
 export function RankingComprasWidget() {
     const { rankingCompras, loading } = useRankingCompras()
 
-    if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
+    if (loading) return <WidgetSkeleton height="h-40" lines={3} />
 
     // Filter out entries with 0 points (already handled by view)
     const validRanking = rankingCompras.filter(i => i.totalPontos > 0)
@@ -66,8 +67,8 @@ function RankingCompraCard({ item, index }: { item: RankingComprasStats, index: 
                                 {item.nome}
                             </h3>
                             {isTop3 && (
-                                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/10 text-[9px] font-bold uppercase tracking-tight">
-                                    <Star className="size-2" />
+                                <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-black/10 text-xs font-bold uppercase tracking-tight">
+                                    <Star className="size-3" />
                                     Embaixador
                                 </span>
                             )}
@@ -76,7 +77,7 @@ function RankingCompraCard({ item, index }: { item: RankingComprasStats, index: 
                             <p className={cn("text-xs font-medium opacity-80", isTop3 ? "text-black dark:text-white" : "text-gray-500")}>
                                 {item.totalCompras} {item.totalCompras === 1 ? 'venda entregue' : 'vendas entregues'}
                             </p>
-                            <p className={cn("text-[10px] font-bold", isTop3 ? "text-black/70 dark:text-white/70" : "text-semantic-orange")}>
+                            <p className={cn("text-xs font-bold", isTop3 ? "text-black/70 dark:text-white/70" : "text-semantic-orange")}>
                                 {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(item.totalPontos)} em pontos
                             </p>
                         </div>

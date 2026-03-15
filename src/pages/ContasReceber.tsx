@@ -48,7 +48,7 @@ export function ContasReceber() {
         } finally {
             setIsLoading(false)
         }
-    }, [toast])
+    }, [])
 
     const fetchContas = useCallback(async () => {
         try {
@@ -158,7 +158,7 @@ export function ContasReceber() {
                                     key={btn.id}
                                     onClick={() => setFilter(btn.id as StatusFilter)}
                                     className={cn(
-                                        "flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap border transition-all",
+                                        "flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-full text-xs font-bold whitespace-nowrap border transition-all",
                                         isSelected
                                             ? "bg-foreground text-background border-foreground shadow-card"
                                             : "bg-card text-muted-foreground border-border hover:border-foreground/30"
@@ -175,9 +175,9 @@ export function ContasReceber() {
                 {/* List */}
                 <div className="space-y-4">
                     {isLoading ? (
-                        <div className="py-20 flex flex-col items-center gap-4">
-                            <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
-                            <p className="text-sm font-bold text-zinc-500 uppercase animate-pulse">Carregando pendências...</p>
+                        <div role="status" aria-live="polite" className="py-20 flex flex-col items-center gap-4">
+                            <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                            <p className="text-sm font-bold text-zinc-500 uppercase">Carregando pendências...</p>
                         </div>
                     ) : filteredVendas.length === 0 ? (
                         <div className="py-20 flex flex-col items-center text-center space-y-4 bg-card/50 rounded-3xl border border-dashed border-border">
@@ -232,7 +232,7 @@ export function ContasReceber() {
                                                         {venda.contato?.nome || 'Cliente não identificado'}
                                                     </h3>
                                                     <div className="flex items-center gap-3 mt-1">
-                                                        <div className="flex items-center gap-1 text-[11px] text-zinc-500 font-bold uppercase tracking-tight">
+                                                        <div className="flex items-center gap-1 text-xs text-zinc-500 font-bold uppercase tracking-tight">
                                                             <Calendar className="w-3 h-3" />
                                                             {new Date(venda.data).toLocaleDateString('pt-BR')}
                                                         </div>
@@ -240,7 +240,8 @@ export function ContasReceber() {
                                                             <a
                                                                 href={`https://wa.me/55${venda.contato.telefone.replace(/\D/g, '')}`}
                                                                 target="_blank"
-                                                                className="flex items-center gap-1 text-[11px] text-emerald-600 font-bold uppercase tracking-tight hover:underline"
+                                                                rel="noopener noreferrer"
+                                                                className="flex items-center gap-1 text-xs text-emerald-600 font-bold uppercase tracking-tight hover:underline"
                                                             >
                                                                 <Phone className="w-3 h-3" />
                                                                 WhatsApp
@@ -249,20 +250,20 @@ export function ContasReceber() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className={cn("px-2.5 py-1 rounded-full text-[10px] font-black uppercase border", badgeStyle)}>
+                                            <div className={cn("px-2.5 py-1 rounded-full text-xs font-black uppercase border", badgeStyle)}>
                                                 {label} {atraso > 0 ? `(${atraso}d)` : ''}
                                             </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4 py-4 border-y border-border">
                                             <div>
-                                                <span className="text-[10px] font-black text-zinc-400 uppercase block mb-1">Valor Pendente</span>
+                                                <span className="text-xs font-black text-zinc-400 uppercase block mb-1">Valor Pendente</span>
                                                 <span className="text-xl font-black text-zinc-900 dark:text-white">
                                                     {formatCurrency(venda.total)}
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-[10px] font-black text-zinc-400 uppercase block mb-1">Previsão</span>
+                                                <span className="text-xs font-black text-zinc-400 uppercase block mb-1">Previsão</span>
                                                 <span className={cn(
                                                     "text-base font-bold",
                                                     atraso > 0 ? "text-red-600 dark:text-red-400" : "text-zinc-600 dark:text-zinc-400"
@@ -318,7 +319,7 @@ export function ContasReceber() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black text-zinc-500 uppercase tracking-wider ml-1">
+                                <label className="text-xs font-black text-zinc-500 uppercase tracking-wider ml-1">
                                     Conta de Destino
                                 </label>
                                 <Select
@@ -330,7 +331,7 @@ export function ContasReceber() {
                             </div>
 
                             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                                <p className="text-[11px] text-blue-700 dark:text-blue-300 font-medium">
+                                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
                                     Este recebimento será registrado automaticamente no Fluxo de Caixa como entrada na conta selecionada.
                                 </p>
                             </div>

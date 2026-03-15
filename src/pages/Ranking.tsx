@@ -100,7 +100,7 @@ export function Ranking() {
                 showBack
                 centerTitle
             />
-            <PageContainer className="pt-0 pb-16 bg-transparent px-4">
+            <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     {/* Metrics / KPI Summary */}
                     <div className="grid grid-cols-3 gap-3 mb-6 min-h-[110px]">
                         {metrics.map((m, idx) => (

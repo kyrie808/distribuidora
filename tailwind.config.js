@@ -96,5 +96,14 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.touch-target': {
+          'min-height': '44px',
+          'min-width': '44px',
+        },
+      })
+    },
+  ],
 }

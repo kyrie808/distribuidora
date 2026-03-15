@@ -1,4 +1,5 @@
 /// <reference types="vite-plugin-pwa/client" />
+import { createPortal } from 'react-dom'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { RefreshCw, X } from 'lucide-react'
 
@@ -24,7 +25,7 @@ export function PwaUpdateToast() {
 
     if (!needRefresh) return null
 
-    return (
+    return createPortal(
         <div className="fixed bottom-4 right-4 z-[9999] p-4 bg-background border border-border rounded-lg shadow-2xl animate-in slide-in-from-bottom-5 fade-in flex flex-col gap-3 max-w-sm">
             <div className="flex items-start justify-between gap-4">
                 <div className="flex flex-col gap-1">
@@ -56,6 +57,7 @@ export function PwaUpdateToast() {
                     Depois
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     )
 }

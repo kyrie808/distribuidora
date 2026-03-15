@@ -110,7 +110,7 @@ export function Entregas() {
         } finally {
             setLoading(false)
         }
-    }, [toast])
+    }, [])
 
     // Fetch pending deliveries
     useEffect(() => {

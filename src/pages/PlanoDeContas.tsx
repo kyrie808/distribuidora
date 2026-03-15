@@ -1,8 +1,9 @@
+import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Header } from '../components/layout/Header'
 import { Plus, LayoutGrid, FileText } from 'lucide-react'
 import { usePlanoDeContas } from '../hooks/usePlanoDeContas'
-import { useState } from 'react'
 import { PlanoContaModal } from '../components/features/financeiro/PlanoContaModal'
 
 export function PlanoDeContas() {
@@ -13,7 +14,7 @@ export function PlanoDeContas() {
     const filteredPlano = planoContas.filter(item => item.tipo === activeTab)
 
     return (
-        <PageContainer>
+        <PageContainer className="pb-32">
             <Header title="Plano de Contas" showBack />
 
             <div className="px-4 py-6">
@@ -80,13 +81,16 @@ export function PlanoDeContas() {
                 </div>
             </div>
 
-            {/* FAB */}
-            <button
-                onClick={() => setIsModalOpen(true)}
-                className="fixed right-6 bottom-24 w-14 h-14 bg-violet-600 text-white rounded-full shadow-lg shadow-violet-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
-            >
-                <Plus size={24} />
-            </button>
+            {/* FAB — portaled to escape stacking context */}
+            {createPortal(
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="fixed right-6 bottom-24 w-14 h-14 bg-violet-600 text-white rounded-full shadow-lg shadow-violet-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[9999]"
+                >
+                    <Plus size={24} />
+                </button>,
+                document.body
+            )}
 
             <PlanoContaModal
                 isOpen={isModalOpen}

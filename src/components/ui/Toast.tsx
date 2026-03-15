@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom'
 import { create } from 'zustand'
 import { CheckCircle2, AlertCircle, Info, AlertTriangle, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -102,11 +103,12 @@ export function ToastContainer() {
 
     if (toasts.length === 0) return null
 
-    return (
+    return createPortal(
         <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] flex flex-col items-center gap-2 w-full pointer-events-none px-4">
             {toasts.map((toast) => (
                 <ToastItem key={toast.id} toast={toast} />
             ))}
-        </div>
+        </div>,
+        document.body
     )
 }

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/Button'
 import { Shield, Lock, User, ArrowRight, Loader2 } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { motion, useReducedMotion } from 'framer-motion'
 import { useToast } from '@/components/ui/Toast'
 
 export function LoginPage() {
@@ -15,6 +15,7 @@ export function LoginPage() {
     const toast = useToast()
 
     const from = location.state?.from?.pathname || '/'
+    const shouldReduceMotion = useReducedMotion()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -55,8 +56,8 @@ export function LoginPage() {
                 <div className="absolute top-0 left-0 w-full h-1 bg-primary shadow-elevated" />
 
                 <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 10 }}
+                    animate={shouldReduceMotion ? false : { opacity: 1, y: 0 }}
                     className="w-full max-w-[400px] px-6"
                 >
                     {/* Logo / Header */}
@@ -76,12 +77,13 @@ export function LoginPage() {
                     <div className="bg-white dark:bg-white/5 border border-black/5 dark:border-white/10 rounded-2xl p-8 shadow-sm">
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                                <label htmlFor="login-email" className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                                     E-mail
                                 </label>
                                 <div className="relative group">
                                     <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
                                     <input
+                                        id="login-email"
                                         type="email"
                                         placeholder="comandante@mont.com"
                                         value={email}
@@ -92,12 +94,13 @@ export function LoginPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
+                                <label htmlFor="login-password" className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                                     Senha
                                 </label>
                                 <div className="relative group">
                                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
                                     <input
+                                        id="login-password"
                                         type="password"
                                         placeholder="••••••••"
                                         value={password}

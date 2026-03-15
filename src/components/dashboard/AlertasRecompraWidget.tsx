@@ -4,6 +4,7 @@ import { formatPhone } from '@/utils/formatters'
 import { DashboardCarousel } from './DashboardCarousel'
 import { useRecompra } from '@/hooks/useRecompra'
 import { Card, CardContent } from '@/components/ui/Card'
+import { WidgetSkeleton } from '@/components/ui/WidgetSkeleton'
 
 interface RecompraAlerta {
     contato_id?: string
@@ -52,7 +53,7 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
         window.open(url, '_blank')
     }
 
-    if (loading) return <div className="h-40 animate-pulse bg-gray-100 dark:bg-gray-800 rounded-xl" />
+    if (loading) return <WidgetSkeleton height="h-40" lines={2} />
 
     if (alertas.length === 0) {
         return (
@@ -86,6 +87,9 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
                         <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
                                 <div>
+                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 mb-1.5 uppercase tracking-wide">
+                                        Recompra
+                                    </span>
                                     <h3 className="font-bold text-gray-900 dark:text-white truncate max-w-[140px]">
                                         {alerta.contato.nome}
                                     </h3>
@@ -95,10 +99,11 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <button
+                                        aria-label={`Ver perfil de ${alerta.contato.nome}`}
                                         onClick={() => navigate(`/clientes/${alerta.contato.id}`)}
-                                        className="p-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-colors"
+                                        className="size-11 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-primary transition-colors"
                                     >
-                                        <Eye className="size-3.5" />
+                                        <Eye className="size-4" />
                                     </button>
                                 </div>
                             </div>

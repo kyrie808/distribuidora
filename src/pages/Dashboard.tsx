@@ -120,12 +120,13 @@ export function Dashboard() {
                     <div className="flex items-center gap-2">
                         <ThemeToggle />
                         <button
-                            className="flex size-10 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative"
+                            aria-label="Atualizar alertas"
+                            className="flex size-11 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors relative"
                             onClick={handleRefresh}
                         >
-                            <Bell className={cn("text-foreground w-6 h-6", isRefreshing && "animate-spin")} />
+                            <Bell className={cn("text-foreground w-6 h-6", isRefreshing && "animate-spin motion-reduce:animate-none")} />
                             {totalAlerts > 0 && (
-                                <span className="absolute top-2 right-2 size-2 bg-semantic-red rounded-full border-2 border-background animate-pulse" />
+                                <span className="absolute top-2 right-2 size-2 bg-semantic-red rounded-full border-2 border-background animate-pulse motion-reduce:animate-none" />
                             )}
                         </button>
                     </div>
@@ -139,7 +140,7 @@ export function Dashboard() {
                     <MonthPicker selectedMonth={selectedMonthStr} onMonthSelect={handleMonthSelect} />
 
                     {/* FINANCEIRO Section */}
-                    <div className="flex items-center gap-2 mb-2 px-1">
+                    <div className="flex items-center gap-2 mt-2 mb-2 px-1">
                         <DollarSign className="w-4 h-4 text-gray-400" />
                         <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">
                             $ FINANCEIRO

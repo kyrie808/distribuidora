@@ -30,7 +30,7 @@ export function ContatoHero({ contato, nivel, onEdit }: ContatoHeroProps) {
                 showBack
                 className="sticky top-0 z-30"
                 rightAction={
-                    <button onClick={onEdit} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-foreground transition-colors">
+                    <button aria-label="Editar contato" onClick={onEdit} className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-foreground transition-colors">
                         <Edit className="h-5 w-5" />
                     </button>
                 }

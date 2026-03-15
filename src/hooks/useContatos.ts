@@ -55,7 +55,7 @@ export function useContatos(options: UseContatosOptions = {}) {
             toast.error('Erro ao criar contato')
             return null
         }
-    }, [createMutation, toast])
+    }, [createMutation])
 
     const updateContato = useCallback(async (id: string, data: UpdateContato) => {
         try {
@@ -64,7 +64,7 @@ export function useContatos(options: UseContatosOptions = {}) {
             toast.error('Erro ao atualizar contato')
             return null
         }
-    }, [updateMutation, toast])
+    }, [updateMutation])
 
     const deleteContato = useCallback(async (id: string) => {
         try {
@@ -79,7 +79,7 @@ export function useContatos(options: UseContatosOptions = {}) {
                     : (e as Error).message
             }
         }
-    }, [deleteMutation, toast])
+    }, [deleteMutation])
 
     const searchContatos = useCallback(async (query: string) => {
         return contatoService.func(query)

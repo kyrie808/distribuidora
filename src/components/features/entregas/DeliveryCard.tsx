@@ -1,4 +1,4 @@
-import { MapPin, DollarSign, AlertCircle } from 'lucide-react'
+import { MapPin, DollarSign, AlertCircle, Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 interface DeliveryCardProps {
@@ -45,24 +45,24 @@ export function DeliveryCard({
 
     return (
         <div
+            role="checkbox"
+            aria-checked={isSelected}
             onClick={() => onToggle(id)}
             className={cn(
-                "relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer bg-card",
+                "relative p-4 rounded-xl border-2 transition-all duration-200 cursor-pointer",
                 isSelected
-                    ? "border-semantic-green shadow-md"
-                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm"
+                    ? "border-semantic-green shadow-md bg-semantic-green/5"
+                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm bg-card"
             )}
         >
             <div className="flex items-start gap-3">
-                {/* Checkbox */}
+                {/* Checkbox — min 44px hit area via card, visual size w-7 h-7 */}
                 <div className={cn(
-                    "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 mt-0.5",
+                    "w-7 h-7 rounded-md border-2 flex items-center justify-center transition-all flex-shrink-0 mt-0.5",
                     isSelected ? "bg-semantic-green border-semantic-green" : "border-gray-300 dark:border-gray-600"
                 )}>
                     {isSelected && (
-                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                        </svg>
+                        <Check className="w-4 h-4 text-white" strokeWidth={3} />
                     )}
                 </div>
 

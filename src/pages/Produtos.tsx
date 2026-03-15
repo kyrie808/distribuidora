@@ -343,6 +343,7 @@ export function Produtos() {
                                 value={newNome}
                                 onChange={(e) => setNewNome(e.target.value)}
                                 placeholder="Ex: Pão de Queijo 1kg"
+                                required
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
@@ -350,6 +351,7 @@ export function Produtos() {
                                     value={newCodigo}
                                     onChange={(e) => setNewCodigo(e.target.value)}
                                     placeholder="Ex: PQ001"
+                                    required
                                 />
                                 <Input
                                     label="Apelido"
@@ -359,8 +361,9 @@ export function Produtos() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Variação / Subtítulo</label>
+                                <label htmlFor="new-subtitulo" className="block text-sm font-medium mb-1">Variação / Subtítulo</label>
                                 <input
+                                    id="new-subtitulo"
                                     type="text"
                                     list="variacoes-sugestoes"
                                     placeholder="Ex: 75gr por unidade, 1 balde, combo"
@@ -452,12 +455,14 @@ export function Produtos() {
                                 label="Nome do Produto"
                                 value={editNome}
                                 onChange={(e) => setEditNome(e.target.value)}
+                                required
                             />
                             <div className="grid grid-cols-2 gap-4">
                                 <Input
                                     label="Código"
                                     value={editCodigo}
                                     onChange={(e) => setEditCodigo(e.target.value)}
+                                    required
                                 />
                                 <Input
                                     label="Apelido"
@@ -466,8 +471,9 @@ export function Produtos() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium mb-1">Variação / Subtítulo</label>
+                                <label htmlFor="edit-subtitulo" className="block text-sm font-medium mb-1">Variação / Subtítulo</label>
                                 <input
+                                    id="edit-subtitulo"
                                     type="text"
                                     list="variacoes-sugestoes-edit"
                                     placeholder="Ex: 75gr por unidade, 1 balde, combo"

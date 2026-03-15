@@ -90,6 +90,7 @@ export function Contatos() {
                     rightAction={
                         <div className="flex items-center gap-2">
                             <Button
+                                aria-label="Adicionar contato"
                                 variant="default"
                                 size="icon"
                                 onClick={() => setIsModalOpen(true)}
@@ -97,6 +98,7 @@ export function Contatos() {
                                 <Plus className="h-6 w-6" />
                             </Button>
                             <Button
+                                aria-label={showSearch ? 'Fechar busca' : 'Abrir busca'}
                                 variant={showSearch ? 'accent' : 'ghost'}
                                 size="icon"
                                 onClick={() => setShowSearch(!showSearch)}
@@ -193,6 +195,12 @@ export function Contatos() {
                                 icon={<Users className="h-16 w-16 text-zinc-600" />}
                                 title="Nenhum contato encontrado"
                                 description="Tente ajustar os filtros ou adicione um novo contato."
+                                action={
+                                    <Button onClick={() => setIsModalOpen(true)}>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Adicionar Contato
+                                    </Button>
+                                }
                             />
                         )
                     )}

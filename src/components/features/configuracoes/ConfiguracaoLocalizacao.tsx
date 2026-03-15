@@ -68,16 +68,20 @@ export function ConfiguracaoLocalizacao({
                     <div className="grid gap-2 border-t pt-4">
                         <h4 className="text-sm font-medium">Novo Local</h4>
                         <Input
+                            label="Nome"
                             placeholder="Nome (Ex: Sede)"
                             value={novoLocalNome}
                             onChange={e => setNovoLocalNome(e.target.value)}
+                            required
                         />
                         <div className="flex gap-2">
                             <Input
+                                label="Endereço"
                                 placeholder="Endereço completo ou CEP"
                                 value={novoLocalEndereco}
                                 onChange={handleEnderecoChange}
                                 className="flex-1"
+                                required
                             />
                             <Button
                                 onClick={handleAddLocal}

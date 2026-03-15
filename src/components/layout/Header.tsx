@@ -36,7 +36,8 @@ export function Header({
             <div className="flex items-center z-10">
                 {showBack && (
                     <button
-                        className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
+                        aria-label="Voltar"
+                        className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
                         onClick={() => navigate(-1)}
                     >
                         <ArrowLeft className="h-6 w-6" />
@@ -45,7 +46,8 @@ export function Header({
 
                 {showMenu && !showBack && (
                     <button
-                        className="flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
+                        aria-label="Abrir menu"
+                        className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors -ml-2 text-foreground"
                         onClick={onMenuClick}
                     >
                         <Menu className="h-6 w-6" />

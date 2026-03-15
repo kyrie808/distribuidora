@@ -108,9 +108,8 @@ export function Recompra() {
                     <div className="grid grid-cols-3 gap-3 mb-4">
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'atrasado' ? 'todos' : 'atrasado')}
-                            className={`p-3 rounded-xl text-center transition-colors ${filterStatus === 'atrasado' ? 'ring-2 ring-danger-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors bg-red-100 dark:bg-red-900/30 ${filterStatus === 'atrasado' ? 'ring-2 ring-danger-500' : ''
                                 }`}
-                            style={{ backgroundColor: '#FEE2E2' }}
                         >
                             <AlertCircle className="h-5 w-5 mx-auto mb-1 text-danger-500" />
                             <p className="text-2xl font-bold text-danger-600">{atrasados}</p>
@@ -118,9 +117,8 @@ export function Recompra() {
                         </button>
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'proximo' ? 'todos' : 'proximo')}
-                            className={`p-3 rounded-xl text-center transition-colors ${filterStatus === 'proximo' ? 'ring-2 ring-warning-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors bg-yellow-100 dark:bg-yellow-900/30 ${filterStatus === 'proximo' ? 'ring-2 ring-warning-500' : ''
                                 }`}
-                            style={{ backgroundColor: '#FEF3C7' }}
                         >
                             <Clock className="h-5 w-5 mx-auto mb-1 text-warning-500" />
                             <p className="text-2xl font-bold text-warning-600">{proximos}</p>
@@ -128,9 +126,8 @@ export function Recompra() {
                         </button>
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'ok' ? 'todos' : 'ok')}
-                            className={`p-3 rounded-xl text-center transition-colors ${filterStatus === 'ok' ? 'ring-2 ring-success-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors bg-emerald-100 dark:bg-emerald-900/30 ${filterStatus === 'ok' ? 'ring-2 ring-success-500' : ''
                                 }`}
-                            style={{ backgroundColor: '#D1FAE5' }}
                         >
                             <CheckCircle className="h-5 w-5 mx-auto mb-1 text-success-500" />
                             <p className="text-2xl font-bold text-success-600">{emDia}</p>
