@@ -58,9 +58,9 @@ export function KpiCard({
     // Legacy color logic for the Default variant badge if we don't use SmartProgressBar there
     const getTrendColors = () => {
         switch (trendColor) {
-            case 'green': return 'bg-green-100 dark:bg-green-900/30 text-semantic-green'
-            case 'red': return 'bg-red-100 dark:bg-red-900/30 text-semantic-red'
-            case 'yellow': return 'bg-yellow-100 dark:bg-yellow-900/30 text-semantic-yellow'
+            case 'green': return 'bg-success/10 text-semantic-green'
+            case 'red': return 'bg-destructive/10 text-semantic-red'
+            case 'yellow': return 'bg-warning/10 text-semantic-yellow'
             default: return 'bg-gray-100 dark:bg-gray-800 text-gray-500'
         }
     }

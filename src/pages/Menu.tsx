@@ -112,8 +112,8 @@ export function Menu() {
 
     return (
         <>
-            <Header title="Menu" showBack />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+            <Header title="Menu" showBack centerTitle />
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     <div className="grid grid-cols-2 gap-4 pb-20">
                         {menuItems.filter(item => item.visible).map((item) => {
                             const IconComponent = item.icon

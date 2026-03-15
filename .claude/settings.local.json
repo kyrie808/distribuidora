@@ -105,7 +105,9 @@
       "Bash(cd \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\" && ls supabase/migrations/*.sql | wc -l)",
       "Bash(cd:*)",
       "Bash(python:*)",
-      "Bash(where python:*)"
+      "Bash(where python:*)",
+      "Read(//d D:/1. LUCCAS/aplicativos ai/**)",
+      "Bash(npm run:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

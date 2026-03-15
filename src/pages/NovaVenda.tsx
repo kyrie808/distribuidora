@@ -7,6 +7,7 @@ import { useToast } from '../components/ui/Toast'
 import { useVendas } from '../hooks/useVendas'
 import { useContatos } from '../hooks/useContatos'
 import type { DomainProduto } from '../types/domain'
+import { formatCurrency } from '../utils/formatters'
 
 import { ClientSelector } from '../components/features/vendas/NovaVenda/ClientSelector'
 import { ProductList } from '../components/features/vendas/NovaVenda/ProductList'
@@ -14,6 +15,7 @@ import { CartSidebar } from '../components/features/vendas/NovaVenda/CartSidebar
 import { CheckoutSidebar } from '../components/features/vendas/NovaVenda/CheckoutSidebar'
 import { WizardProgress } from '../components/features/vendas/NovaVenda/WizardProgress'
 import { User, ShoppingBag, CheckCircle, ChevronRight, ChevronLeft } from 'lucide-react'
+import { Button } from '../components/ui'
 import type { VendaFormData } from '../schemas/venda'
 
 const WIZARD_STEPS = [
@@ -161,8 +163,7 @@ export function NovaVenda() {
             } else {
                 toast.error('Erro ao realizar venda. Tente novamente.')
             }
-        } catch (error) {
-            console.error('Erro no checkout:', error)
+        } catch (_error) {
             toast.error('Ocorreu um erro ao processar a venda')
         }
     }, [selectedContato, createVenda, toast, clearCart, navigate])
@@ -190,13 +191,14 @@ export function NovaVenda() {
                     title={isEditing ? `Editar Venda #${id?.slice(0, 8)}` : 'Nova Venda'}
                     showBack
                     className="flex-shrink-0"
+                    centerTitle
                 />
 
                 <WizardProgress currentStep={currentStep} steps={WIZARD_STEPS} />
 
-                <div className="flex-1 flex overflow-hidden relative">
+                <div className="flex-1 flex min-w-0 relative">
                     {/* Main Content Area */}
-                    <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50">
+                    <main className="flex-1 flex flex-col min-w-0 bg-muted">
                         {/* Step 0: Cliente */}
                         {currentStep === 0 && (
                             <div className="p-4 flex-1 min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -213,13 +215,14 @@ export function NovaVenda() {
                                 />
 
                                 {selectedContato && (
-                                    <button
+                                    <Button
+                                        variant="primary"
                                         onClick={() => nextStep()}
-                                        className="mt-4 w-full bg-primary text-white py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
+                                        className="mt-4 w-full py-4 rounded-2xl font-semibold text-base flex items-center justify-center gap-2 active:scale-95 transition-transform"
                                     >
                                         Próximo
                                         <ChevronRight className="h-5 w-5" />
-                                    </button>
+                                    </Button>
                                 )}
                             </div>
                         )}
@@ -227,13 +230,13 @@ export function NovaVenda() {
                         {/* Step 1: Produtos */}
                         {currentStep === 1 && (
                             <div className="flex-1 flex flex-col min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
-                                <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-between">
+                                <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-card flex items-center justify-between">
                                     <h2 className="text-lg font-bold flex items-center gap-2">
                                         <ShoppingBag className="h-5 w-5 text-primary" />
                                         Adicionar Produtos
                                     </h2>
                                     <div className="text-sm font-medium text-primary">
-                                        Total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}
+                                        Total: {formatCurrency(cartTotal)}
                                     </div>
                                 </div>
                                 <div className="flex-1 overflow-y-auto px-4">
@@ -256,7 +259,7 @@ export function NovaVenda() {
                                         <CheckCircle className="h-5 w-5 text-primary" />
                                         Finalizar Venda
                                     </h2>
-                                    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                    <div className="bg-card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
                                         <CheckoutSidebar
                                             onBack={prevStep}
                                             onConfirm={handleConfirmSale}
@@ -277,16 +280,17 @@ export function NovaVenda() {
 
                         {/* Bottom Navigation Bar — fixed height, outside scroll, hidden on checkout */}
                         {currentStep > 0 && currentStep < 2 && (
-                            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 md:hidden">
+                            <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 bg-card p-4 md:hidden">
                                 <div className="flex gap-3 max-w-sm mx-auto">
                                     {currentStep > 0 && (
-                                        <button
+                                        <Button
+                                            variant="outline"
                                             onClick={prevStep}
-                                            className="flex-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-white h-12 rounded-2xl shadow-sm flex items-center justify-center gap-2 font-bold border border-gray-200 dark:border-gray-600 active:scale-95 transition-transform"
+                                            className="h-12 rounded-2xl flex-1 flex items-center justify-center gap-2 active:scale-95 transition-transform"
                                         >
                                             <ChevronLeft className="h-5 w-5" />
                                             Voltar
-                                        </button>
+                                        </Button>
                                     )}
                                     <button
                                         onClick={() => nextStep()}
@@ -304,7 +308,7 @@ export function NovaVenda() {
                     </main>
 
                     {/* Desktop Sidebar (Optional, maybe just a summary in steps 0/1) */}
-                    <aside className="hidden lg:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-y-auto">
+                    <aside className="hidden lg:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-card h-full overflow-y-auto">
                         <CartSidebar
                             items={cart}
                             total={cartTotal}

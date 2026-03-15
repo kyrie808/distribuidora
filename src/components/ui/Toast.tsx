@@ -48,7 +48,7 @@ function useToast() {
         success: (message: string, duration?: number) =>
             addToast({ type: 'success', message, duration }),
         error: (message: string, duration?: number) =>
-            addToast({ type: 'error', message, duration }),
+            addToast({ type: 'error', message, duration: duration ?? 4000 }),
         info: (message: string, duration?: number) =>
             addToast({ type: 'info', message, duration }),
         warning: (message: string, duration?: number) =>

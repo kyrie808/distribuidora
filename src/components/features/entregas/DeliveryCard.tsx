@@ -83,12 +83,12 @@ export function DeliveryCard({
 
                     <div className="flex items-center gap-2 mb-2">
                         {bairro && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 text-xs font-medium">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-primary/10 text-primary text-xs font-medium">
                                 {bairro}
                             </span>
                         )}
                         {!hasAddress && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 text-xs font-medium">
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-warning/10 text-warning text-xs font-medium">
                                 <AlertCircle className="w-3 h-3" />
                                 Sem endereço
                             </span>

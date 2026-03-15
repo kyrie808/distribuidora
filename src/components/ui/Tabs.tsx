@@ -37,6 +37,7 @@ function Tabs({ value, onValueChange, children, className }: TabsProps) {
 function TabsList({ children, className }: TabsListProps) {
   return (
     <div
+      role="tablist"
       className={cn(
         'flex w-full rounded-2xl bg-muted p-1 gap-1',
         className
@@ -56,6 +57,8 @@ function TabsTrigger({ value, children, className }: TabsTriggerProps) {
   return (
     <button
       type="button"
+      role="tab"
+      aria-selected={isActive}
       onClick={() => ctx.onValueChange(value)}
       className={cn(
         'flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-3',

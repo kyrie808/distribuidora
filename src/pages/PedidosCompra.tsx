@@ -57,7 +57,7 @@ export function PedidosCompra() {
         setIsFormOpen(true)
     }
 
-    const _handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: CreatePurchaseOrderItem[]) => {
+    const handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: CreatePurchaseOrderItem[]) => {
         if (selectedOrder) {
             await updateOrder({ id: selectedOrder.id, updates: orderData as UpdatePurchaseOrder })
         } else {
@@ -80,7 +80,7 @@ export function PedidosCompra() {
                     }
                 />
 
-                <PageContainer className="!pt-6 px-4">
+                <PageContainer className="!pt-6 px-4 pb-24">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                         <KpiCard
                             title="Total Pedido"
@@ -131,7 +131,7 @@ export function PedidosCompra() {
                                         {/* Header do pedido */}
                                         <div
                                             onClick={() => handleEdit(orderWithItems)}
-                                            className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                            className="flex items-center justify-between px-4 py-3 bg-muted cursor-pointer hover:bg-muted transition-colors"
                                         >
                                             <div className="flex flex-col gap-0.5">
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">{formatDate(order.orderDate)}</span>
@@ -175,7 +175,7 @@ export function PedidosCompra() {
 
                                         {/* Histórico de Pagamentos */}
                                         {orderWithItems.payments && orderWithItems.payments.length > 0 && (
-                                            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/20">
+                                            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-muted">
                                                 <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
                                                     Pagamentos registrados
                                                 </h4>
@@ -220,11 +220,12 @@ export function PedidosCompra() {
                                                 <div className="flex flex-col sm:flex-row gap-2">
                                                     {order.status === 'pending' && (
                                                         <Button
+                                                            variant="success"
                                                             onClick={(e: React.MouseEvent) => {
                                                                 e.stopPropagation()
                                                                 updateOrder({ id: order.id, updates: { status: 'received', dataRecebimento: new Date().toISOString() } })
                                                             }}
-                                                            className="flex-1 flex items-center justify-center gap-2 bg-semantic-green hover:bg-semantic-green/90 text-white"
+                                                            className="flex-1 flex items-center justify-center gap-2"
                                                         >
                                                             <PackageCheck size={16} />
                                                             Confirmar Recebimento
@@ -256,7 +257,7 @@ export function PedidosCompra() {
                         <PurchaseOrderForm
                             isOpen={isFormOpen}
                             onClose={() => setIsFormOpen(false)}
-                            onSave={_handleSave}
+                            onSave={handleSave}
                         />
                     )}
 

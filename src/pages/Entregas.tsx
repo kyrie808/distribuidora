@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Clock, MapPin } from 'lucide-react'
+import { Clock, MapPin, Truck } from 'lucide-react'
 import { Header } from '@/components/layout/Header'
 import { PageContainer } from '@/components/layout/PageContainer'
 import { Button } from '@/components/ui/Button'
@@ -213,11 +213,21 @@ export function Entregas() {
                     showBack
                 />
 
-                <PageContainer className="relative z-10 space-y-6 pt-4 pb-32 px-4">
+                <PageContainer className="relative z-10 space-y-6 pt-4 pb-24 px-4">
 
                     {/* Loading State */}
                     {loading ? (
                         <LoadingScreen message="Carregando entregas..." />
+                    ) : pendentes.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                                <Truck className="w-8 h-8 text-muted-foreground" />
+                            </div>
+                            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">Nenhuma entrega pendente</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xs">
+                                Todas as vendas estão entregues ou não há pedidos pendentes.
+                            </p>
+                        </div>
                     ) : (
                         <>
                             {/* 2-Column Layout */}
@@ -269,8 +279,9 @@ export function Entregas() {
                                                 </div>
 
                                                 <Button
+                                                    variant="outline"
                                                     onClick={handleNavigateGoogleMaps}
-                                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg h-10 font-medium"
+                                                    className="w-full rounded-lg h-10 font-medium"
                                                 >
                                                     Abrir no Google Maps
                                                 </Button>

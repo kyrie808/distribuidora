@@ -50,7 +50,7 @@ export function Estoque() {
 
     return (
         <>
-            <Header title="Geladeira" showBack />
+            <Header title="Geladeira" showBack centerTitle />
                 
                 <div className="flex flex-col h-[calc(100dvh-4rem)]">
                     {/* Cena 3D - Split do bundle aqui */}
@@ -76,7 +76,7 @@ export function Estoque() {
 
                     {/* Controles de Estoque */}
                     <div className="flex-1 overflow-y-auto bg-card/50 backdrop-blur-sm">
-                        <PageContainer className="py-6 pt-2">
+                        <PageContainer className="py-6 pt-2 pb-24">
                             <div className="flex items-center justify-between mb-4 px-1">
                                 <h2 className="text-base font-bold text-gray-800 dark:text-gray-200">Painel de Estoque</h2>
                                 <span className="text-xs font-semibold px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-lg text-gray-500">

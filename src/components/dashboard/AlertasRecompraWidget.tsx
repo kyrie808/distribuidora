@@ -83,7 +83,7 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
         >
             {alertas.map((alerta) => (
                 <div key={alerta.contato.id} className="min-w-[260px] snap-center">
-                    <Card className="h-full bg-card border-l-4 border-l-orange-500 border-y-border hover:border-y-border/80 shadow-sm transition-all">
+                    <Card className="h-full bg-card border-l-4 border-l-warning border-y-border hover:border-y-border/80 shadow-sm transition-all">
                         <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
                                 <div>
@@ -110,7 +110,7 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
 
                             <button
                                 onClick={() => handleWhatsApp(alerta.contato.telefone, alerta.contato.nome)}
-                                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-white bg-orange-500 hover:bg-orange-600 transition-colors px-3 py-2 rounded-lg"
+                                className="w-full flex items-center justify-center gap-2 text-xs font-bold text-white bg-warning hover:bg-warning/90 transition-colors px-3 py-2 rounded-lg"
                             >
                                 <MessageCircle className="size-3.5" />
                                 Oferecer Recompra

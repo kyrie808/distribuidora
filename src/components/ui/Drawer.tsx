@@ -31,7 +31,7 @@ export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
                         </button>
                         <h2 className="font-semibold text-base">{title}</h2>
                     </div>
-                    <div className="flex-1 overflow-hidden flex flex-col">
+                    <div className="flex-1 overflow-y-auto flex flex-col">
                         {children}
                     </div>
                 </div>
@@ -48,7 +48,7 @@ export function Drawer({ isOpen, onClose, title, children }: DrawerProps) {
                     </button>
                     <h2 className="font-semibold text-base">{title}</h2>
                 </div>
-                <div className="flex-1 overflow-hidden flex flex-col">
+                <div className="flex-1 overflow-y-auto flex flex-col">
                     {children}
                 </div>
             </aside>

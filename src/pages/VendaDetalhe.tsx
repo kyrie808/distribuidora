@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Header } from '@/components/layout/Header'
+import { formatCurrency } from '../utils/formatters'
 import { LoadingScreen, Button, Drawer } from '../components/ui'
 import { useVenda, useVendas } from '../hooks/useVendas'
 import type { PagamentoFormData } from '../schemas/venda'
@@ -100,12 +101,12 @@ export function VendaDetalhe() {
 
     const handleShare = async () => {
         if (!venda) return
-        const text = `🛒 *Pedido #${venda.id.slice(0, 6)}*\n👤 Cliente: ${venda.contato?.nome}\n💰 Total: ${new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(venda.total)}`.trim()
+        const text = `🛒 *Pedido #${venda.id.slice(0, 6)}*\n👤 Cliente: ${venda.contato?.nome}\n💰 Total: ${formatCurrency(venda.total)}`.trim()
 
         if (navigator.share) {
             try {
                 await navigator.share({ title: `Pedido #${venda.id.slice(0, 6)}`, text })
-            } catch (err) { console.error('Share failed', err) }
+            } catch (_err) { }
         } else {
             navigator.clipboard.writeText(text)
             toast.success('Copiado para área de transferência!')
@@ -123,12 +124,13 @@ export function VendaDetalhe() {
     return (
         <>
             <Header
-                title={`PEDIDO #${venda.id.slice(0, 6)}`}
+                title={`Pedido #${venda.id.slice(0, 6)}`}
                 showBack
                 className="bg-secondary/80 dark:bg-background/80 backdrop-blur-md border-b border-border"
+                centerTitle
             />
 
-            <main className="flex-1 flex flex-col pt-6 px-4 pb-32 w-full max-w-md mx-auto">
+            <main className="flex-1 flex flex-col pt-6 px-4 pb-24 w-full max-w-md mx-auto">
                 <VendaReceipt venda={venda} />
 
                 <VendaAcoesPrincipais 

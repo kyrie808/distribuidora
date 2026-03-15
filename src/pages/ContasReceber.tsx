@@ -14,12 +14,12 @@ import { Header } from '../components/layout/Header'
 import { Button } from '../components/ui/Button'
 import { vendaService } from '../services/vendaService'
 import type { DomainVenda } from '../types/domain'
-import { formatCurrency } from '../utils/formatters'
+import { formatCurrency, formatDate } from '../utils/formatters'
 import { differenceInDays, parseISO, isPast, isToday as isTodayFns, addDays, isBefore } from 'date-fns'
 import { cn } from '../utils/cn'
 import { useToast } from '../components/ui/Toast'
 import { cashFlowService } from '../services/cashFlowService'
-import { Modal, ModalActions, Select } from '../components/ui'
+import { Modal, ModalActions, Select, Badge } from '../components/ui'
 import type { Conta } from '../types/database'
 
 type StatusFilter = 'todos' | 'vencidos' | 'hoje' | 'semana'
@@ -42,8 +42,7 @@ export function ContasReceber() {
             // Fetch all delivered but unpaid sales
             const data = await vendaService.getVendas(undefined, undefined, false)
             setVendas(data.filter(v => v.status === 'entregue' && !v.pago && v.origem !== 'catalogo' && v.formaPagamento !== 'brinde'))
-        } catch (error) {
-            console.error('Erro ao carregar contas a receber:', error)
+        } catch (_error) {
             toast.error('Não foi possível carregar as contas a receber')
         } finally {
             setIsLoading(false)
@@ -55,8 +54,7 @@ export function ContasReceber() {
             const data = await cashFlowService.getContas()
             setContas(data)
             if (data.length > 0) setSelectedContaId(data[0].id)
-        } catch (error) {
-            console.error('Erro ao carregar contas:', error)
+        } catch (_error) {
         }
     }, [])
 
@@ -118,8 +116,7 @@ export function ContasReceber() {
             toast.success('Venda quitada com sucesso')
             setSelectedVenda(null)
             fetchVendas()
-        } catch (error) {
-            console.error('Erro ao quitar venda:', error)
+        } catch (_error) {
             toast.error('Não foi possível quitar a venda')
         } finally {
             setIsQuitting(false)
@@ -128,13 +125,13 @@ export function ContasReceber() {
 
     return (
         <>
-            <Header title="Contas a Receber" showBack />
+            <Header title="Contas a Receber" showBack centerTitle />
 
-            <main className="max-w-5xl mx-auto p-4 space-y-6">
+            <main className="max-w-5xl mx-auto p-4 pb-24 space-y-6">
                 {/* Search & Filters */}
                 <div className="space-y-4">
                     <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Buscar cliente ou valor..."
@@ -158,7 +155,7 @@ export function ContasReceber() {
                                     key={btn.id}
                                     onClick={() => setFilter(btn.id as StatusFilter)}
                                     className={cn(
-                                        "flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-full text-xs font-bold whitespace-nowrap border transition-all",
+                                        "flex items-center gap-2 px-4 py-2 min-h-[44px] rounded-full text-xs font-bold whitespace-nowrap border transition-all active:scale-95",
                                         isSelected
                                             ? "bg-foreground text-background border-foreground shadow-card"
                                             : "bg-card text-muted-foreground border-border hover:border-foreground/30"
@@ -177,16 +174,16 @@ export function ContasReceber() {
                     {isLoading ? (
                         <div role="status" aria-live="polite" className="py-20 flex flex-col items-center gap-4">
                             <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                            <p className="text-sm font-bold text-zinc-500 uppercase">Carregando pendências...</p>
+                            <p className="text-sm font-bold text-gray-500 uppercase">Carregando pendências...</p>
                         </div>
                     ) : filteredVendas.length === 0 ? (
-                        <div className="py-20 flex flex-col items-center text-center space-y-4 bg-card/50 rounded-3xl border border-dashed border-border">
+                        <div className="py-20 flex flex-col items-center text-center space-y-4 bg-card/50 rounded-xl border border-dashed border-border">
                             <div className="p-4 bg-muted rounded-full">
-                                <CheckCircle2 className="w-8 h-8 text-zinc-400" />
+                                <CheckCircle2 className="w-12 h-12 text-gray-400" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-zinc-900 dark:text-white">Nenhuma conta encontrada</h3>
-                                <p className="text-sm text-zinc-500">Tudo em dia por aqui!</p>
+                                <h3 className="font-bold text-gray-900 dark:text-white">Nenhuma conta encontrada</h3>
+                                <p className="text-sm text-gray-500">Tudo em dia por aqui!</p>
                             </div>
                         </div>
                     ) : (
@@ -195,20 +192,20 @@ export function ContasReceber() {
                             const hoje = new Date()
                             hoje.setHours(0, 0, 0, 0)
 
-                            let badgeStyle = "bg-muted text-muted-foreground border-border" // Sem data
+                            let badgeVariant: 'danger' | 'warning' | 'success' | 'default' = 'default'
                             let label = "Sem Data"
                             let atraso = 0
 
                             if (dataPrevista) {
                                 if (isBefore(dataPrevista, hoje)) {
-                                    badgeStyle = "bg-red-50 text-red-600 border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30"
+                                    badgeVariant = 'danger'
                                     label = "Vencido"
                                     atraso = differenceInDays(hoje, dataPrevista)
                                 } else if (isTodayFns(dataPrevista)) {
-                                    badgeStyle = "bg-orange-50 text-orange-600 border-orange-100 dark:bg-orange-900/20 dark:text-orange-400 dark:border-orange-900/30"
+                                    badgeVariant = 'warning'
                                     label = "Vence Hoje"
                                 } else {
-                                    badgeStyle = "bg-emerald-50 text-emerald-600 border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-900/30"
+                                    badgeVariant = 'success'
                                     label = "Futuro"
                                 }
                             }
@@ -216,25 +213,25 @@ export function ContasReceber() {
                             return (
                                 <div
                                     key={venda.id}
-                                    className="bg-card rounded-3xl border border-border overflow-hidden shadow-card hover:shadow-elevated transition-shadow"
+                                    className="bg-card rounded-xl border border-border overflow-hidden shadow-card hover:shadow-elevated transition-shadow"
                                 >
                                     <div className="p-5 flex flex-col gap-4">
                                         <div className="flex justify-between items-start">
                                             <div className="flex gap-3">
-                                                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center font-black text-lg text-zinc-400">
+                                                <div className="w-12 h-12 bg-muted rounded-2xl flex items-center justify-center font-bold text-lg text-gray-400">
                                                     {venda.contato?.nome?.charAt(0).toUpperCase()}
                                                 </div>
                                                 <div>
                                                     <h3
-                                                        className="font-black text-zinc-900 dark:text-white leading-tight cursor-pointer hover:text-primary-500 transition-colors"
+                                                        className="font-bold text-gray-900 dark:text-white leading-tight cursor-pointer hover:text-primary-500 transition-colors"
                                                         onClick={() => navigate(`/contatos/${venda.contatoId}`)}
                                                     >
                                                         {venda.contato?.nome || 'Cliente não identificado'}
                                                     </h3>
                                                     <div className="flex items-center gap-3 mt-1">
-                                                        <div className="flex items-center gap-1 text-xs text-zinc-500 font-bold uppercase tracking-tight">
+                                                        <div className="flex items-center gap-1 text-xs text-gray-500 font-bold uppercase tracking-tight">
                                                             <Calendar className="w-3 h-3" />
-                                                            {new Date(venda.data).toLocaleDateString('pt-BR')}
+                                                            {formatDate(venda.data)}
                                                         </div>
                                                         {venda.contato?.telefone && (
                                                             <a
@@ -250,26 +247,26 @@ export function ContasReceber() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className={cn("px-2.5 py-1 rounded-full text-xs font-black uppercase border", badgeStyle)}>
-                                                {label} {atraso > 0 ? `(${atraso}d)` : ''}
-                                            </div>
+                                            <Badge variant={badgeVariant} className="uppercase">
+                                                {label}{atraso > 0 ? ` (${atraso}d)` : ''}
+                                            </Badge>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4 py-4 border-y border-border">
                                             <div>
-                                                <span className="text-xs font-black text-zinc-400 uppercase block mb-1">Valor Pendente</span>
-                                                <span className="text-xl font-black text-zinc-900 dark:text-white">
+                                                <span className="text-xs font-bold text-gray-400 uppercase block mb-1">Valor Pendente</span>
+                                                <span className="text-xl font-bold text-gray-900 dark:text-white">
                                                     {formatCurrency(venda.total)}
                                                 </span>
                                             </div>
                                             <div>
-                                                <span className="text-xs font-black text-zinc-400 uppercase block mb-1">Previsão</span>
+                                                <span className="text-xs font-bold text-gray-400 uppercase block mb-1">Previsão</span>
                                                 <span className={cn(
                                                     "text-base font-bold",
-                                                    atraso > 0 ? "text-red-600 dark:text-red-400" : "text-zinc-600 dark:text-zinc-400"
+                                                    atraso > 0 ? "text-red-600 dark:text-red-400" : "text-gray-600 dark:text-gray-400"
                                                 )}>
                                                     {venda.dataPrevistaPagamento
-                                                        ? new Date(venda.dataPrevistaPagamento).toLocaleDateString('pt-BR')
+                                                        ? formatDate(venda.dataPrevistaPagamento)
                                                         : 'Não definida'
                                                     }
                                                 </span>
@@ -285,7 +282,8 @@ export function ContasReceber() {
                                                 Detalhes
                                             </Button>
                                             <Button
-                                                className="flex-[1.5] rounded-2xl h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-black"
+                                                variant="success"
+                                                className="flex-[1.5] rounded-2xl h-12"
                                                 onClick={() => handleQuitar(venda)}
                                             >
                                                 Quitar Agora
@@ -309,17 +307,17 @@ export function ContasReceber() {
                         <div className="space-y-4">
                             <div className="p-4 bg-muted/50 rounded-2xl border border-border">
                                 <div className="flex justify-between items-center mb-2">
-                                    <span className="text-xs font-bold text-zinc-500 uppercase">Cliente</span>
-                                    <span className="text-sm font-black text-zinc-900 dark:text-white">{selectedVenda.contato?.nome}</span>
+                                    <span className="text-xs font-bold text-gray-500 uppercase">Cliente</span>
+                                    <span className="text-sm font-bold text-gray-900 dark:text-white">{selectedVenda.contato?.nome}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-xs font-bold text-zinc-500 uppercase">Valor</span>
-                                    <span className="text-lg font-black text-primary-600 dark:text-primary-400">{formatCurrency(selectedVenda.total)}</span>
+                                    <span className="text-xs font-bold text-gray-500 uppercase">Valor</span>
+                                    <span className="text-lg font-bold text-primary-600 dark:text-primary-400">{formatCurrency(selectedVenda.total)}</span>
                                 </div>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-xs font-black text-zinc-500 uppercase tracking-wider ml-1">
+                                <label className="text-xs font-bold text-gray-500 uppercase tracking-wider ml-1">
                                     Conta de Destino
                                 </label>
                                 <Select
@@ -346,9 +344,10 @@ export function ContasReceber() {
                                     Cancelar
                                 </Button>
                                 <Button
+                                    variant="success"
                                     onClick={confirmQuitar}
                                     isLoading={isQuitting}
-                                    className="flex-[2] bg-emerald-600 hover:bg-emerald-700 text-white font-black"
+                                    className="flex-[2]"
                                 >
                                     Confirmar Recebimento
                                 </Button>

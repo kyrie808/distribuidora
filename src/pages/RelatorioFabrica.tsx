@@ -16,6 +16,7 @@ import { useRelatorioFabrica, getDefaultDates } from '../hooks/useRelatorioFabri
 import { useToast } from '../components/ui/Toast'
 import { format, parseISO, differenceInDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
+import { supabase } from '../lib/supabase'
 
 function formatDateShort(dateStr: string): string {
     try {
@@ -33,12 +34,33 @@ export function RelatorioFabrica() {
     const defaultDates = getDefaultDates()
     const [dataInicio, setDataInicio] = useState(defaultDates.dataInicio)
     const [dataFim, setDataFim] = useState(defaultDates.dataFim)
+    const [telefoneFabrica, setTelefoneFabrica] = useState<string | null>(null)
+    const [nomeFabrica, setNomeFabrica] = useState<string | null>(null)
 
     // Auto-generate on first load
     useEffect(() => {
         gerarRelatorio(dataInicio, dataFim)
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []) // Only on mount
+
+    useEffect(() => {
+        supabase.from('configuracoes')
+            .select('valor')
+            .eq('chave', 'telefone_fabrica')
+            .maybeSingle()
+            .then(({ data }) => {
+                if (data?.valor && typeof data.valor === 'string') {
+                    setTelefoneFabrica(data.valor)
+                }
+            })
+        supabase.from('configuracoes')
+            .select('valor')
+            .eq('chave', 'nome_fabrica')
+            .maybeSingle()
+            .then(({ data }) => {
+                if (data?.valor && typeof data.valor === 'string') setNomeFabrica(data.valor)
+            })
+    }, [])
 
     const handleGerar = () => {
         if (!dataInicio || !dataFim) {
@@ -55,7 +77,7 @@ export function RelatorioFabrica() {
         }
 
         // Montar mensagem formatada em português
-        let mensagem = `📋 *PEDIDO GILMAR DISTRIBUIDOR*\n`
+        let mensagem = `📋 *PEDIDO ${nomeFabrica ?? 'GILMAR DISTRIBUIDOR'}*\n`
         mensagem += `Período: ${formatDateShort(relatorio.dataInicio)} - ${formatDateShort(relatorio.dataFim)}/${format(parseISO(relatorio.dataFim), 'yyyy')}\n\n`
 
         for (const produto of relatorio.produtos) {
@@ -66,7 +88,18 @@ export function RelatorioFabrica() {
         mensagem += `Total: ${relatorio.total} unidades`
 
         // Abrir WhatsApp
-        const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`
+        const cleanNumber = telefoneFabrica
+            ? telefoneFabrica.replace(/\D/g, '')
+            : null
+
+        const url = cleanNumber
+            ? `https://wa.me/55${cleanNumber}?text=${encodeURIComponent(mensagem)}`
+            : `https://wa.me/?text=${encodeURIComponent(mensagem)}`
+
+        if (!cleanNumber) {
+            toast.warning('Configure o telefone da fábrica nas Configurações para envio direto')
+        }
+
         window.open(url, '_blank')
     }
 
@@ -85,7 +118,7 @@ export function RelatorioFabrica() {
     return (
         <>
             <Header title="Relatório Fábrica" showBack centerTitle />
-                <PageContainer className="pt-0 pb-16 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     {/* KPI Metrics */}
                     {!loading && relatorio && relatorio.produtos.length > 0 && (
                         <div className="grid grid-cols-3 gap-3 mb-4">
@@ -157,7 +190,8 @@ export function RelatorioFabrica() {
                             </div>
 
                             <Button
-                                className="w-full font-bold h-12 shadow-lg shadow-emerald-500/20 bg-emerald-600 hover:bg-emerald-700 text-white transition-all active:scale-[0.98]"
+                                variant="success"
+                                className="w-full font-bold h-12 shadow-lg transition-all active:scale-[0.98]"
                                 leftIcon={<RefreshCw className="h-4 w-4" />}
                                 onClick={handleGerar}
                                 isLoading={loading}
@@ -186,7 +220,7 @@ export function RelatorioFabrica() {
                             {relatorio.produtos.length === 0 ? (
                                 <div className="text-center py-12">
                                     <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <Package className="h-8 w-8 text-gray-400" />
+                                        <Package className="h-12 w-12 text-gray-400" />
                                     </div>
                                     <h3 className="text-gray-900 dark:text-gray-100 font-semibold mb-1">Nada encontrado</h3>
                                     <p className="text-gray-500 text-sm">Nenhuma venda neste período</p>

@@ -23,7 +23,11 @@ export function ConfiguracaoMensagens({
                     </div>
                 </div>
 
+                <label htmlFor="mensagem-recompra" className="sr-only">
+                    Mensagem de Recompra
+                </label>
                 <textarea
+                    id="mensagem-recompra"
                     value={mensagemRecompra}
                     onChange={(e) => setMensagemRecompra(e.target.value)}
                     rows={4}

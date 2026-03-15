@@ -34,6 +34,7 @@ export function RankingComprasWidget() {
 }
 
 function RankingCompraCard({ item, index }: { item: RankingComprasStats, index: number }) {
+    // Gradients intencionais: ouro/prata/bronze têm semântica visual universal — não substituir por tokens semânticos
     const getGradient = (ranking: number) => {
         switch (ranking) {
             case 1: return "bg-gradient-to-r from-yellow-300 to-yellow-500 text-yellow-900 border-yellow-400"

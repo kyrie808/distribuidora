@@ -52,7 +52,7 @@ export function Vendas() {
     const PAGE_SIZE = 25
 
     const filteredVendas = useMemo(() => {
-        if (!statusFilter && !pagamentoFilter && !debouncedSearchTerm) return []
+        if (!statusFilter && !pagamentoFilter && !debouncedSearchTerm) return vendas
         return vendas.filter(venda => {
             if (statusFilter && statusFilter !== 'todos' && venda.status !== statusFilter) return false
             if (pagamentoFilter && pagamentoFilter !== 'todos') {
@@ -105,7 +105,7 @@ export function Vendas() {
     return (
         <>
             <Header title="Vendas" showMenu centerTitle onMenuClick={openDrawer} />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     <VendasFilters
                         searchTerm={searchTerm} setSearchTerm={setSearchTerm}
                         statusFilter={statusFilter} setStatusFilter={setStatusFilter}

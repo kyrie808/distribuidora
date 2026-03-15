@@ -29,7 +29,7 @@ export function ConfiguracaoCiclo({
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="ciclo-b2c" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Pessoa Física (B2C)
                         </label>
                         <div className="flex items-stretch gap-1">
@@ -42,6 +42,7 @@ export function ConfiguracaoCiclo({
                                 −
                             </Button>
                             <Input
+                                id="ciclo-b2c"
                                 type="number"
                                 min={1}
                                 max={90}
@@ -61,7 +62,7 @@ export function ConfiguracaoCiclo({
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        <label htmlFor="ciclo-b2b" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                             Pessoa Jurídica (B2B)
                         </label>
                         <div className="flex items-stretch gap-1">
@@ -74,6 +75,7 @@ export function ConfiguracaoCiclo({
                                 −
                             </Button>
                             <Input
+                                id="ciclo-b2b"
                                 type="number"
                                 min={1}
                                 max={90}

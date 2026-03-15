@@ -46,7 +46,7 @@ export function Produtos() {
     }
 
     // Modal states
-    const [_isCreateModalOpen, setIsCreateModalOpen] = useState(false)
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
     const [editingProduto, setEditingProduto] = useState<DomainProduto | null>(null)
 
     // Form states for create
@@ -59,7 +59,7 @@ export function Produtos() {
     const [newUnidade, setNewUnidade] = useState('kg')
     const [newEstoqueMinimo, setNewEstoqueMinimo] = useState('10')
     const [newCategoria, setNewCategoria] = useState('')
-    const [_creating, _setCreating] = useState(false)
+    const [isCreating, setIsCreating] = useState(false)
 
     // Form states for edit
     const [uploadingImage, setUploadingImage] = useState(false)
@@ -75,7 +75,7 @@ export function Produtos() {
     const [editCategoria, setEditCategoria] = useState('')
     const [editUnidade, setEditUnidade] = useState('un')
     const [editPrecoAncoragem, setEditPrecoAncoragem] = useState('')
-    const [_updating, _setUpdating] = useState(false)
+    const [isUpdating, setIsUpdating] = useState(false)
 
     // Stats
     const produtosAtivos = produtos.filter(p => p.ativo).length
@@ -119,7 +119,7 @@ export function Produtos() {
         setIsCreateModalOpen(true)
     }
 
-    const _handleCreate = async () => {
+    const handleCreate = async () => {
         if (!newNome.trim() || !newCodigo.trim()) {
             toast.error('Nome e código são obrigatórios')
             return
@@ -138,7 +138,7 @@ export function Produtos() {
             return
         }
 
-        _setCreating(true)
+        setIsCreating(true)
 
         const data: CreateProduto = {
             nome: newNome.trim(),
@@ -159,13 +159,13 @@ export function Produtos() {
             setIsCreateModalOpen(false)
         } catch (e: unknown) {
             console.error(e)
-            toast.error(e instanceof Error ? e.message : 'Erro ao criar produto')
+            toast.error(e instanceof Error ? e.message : 'Erro ao criar produto. Tente novamente.')
         } finally {
-            _setCreating(false)
+            setIsCreating(false)
         }
     }
 
-    const _handleUpdate = async () => {
+    const handleUpdate = async () => {
         if (!editingProduto) return
 
         const preco = parseFloat(editPreco)
@@ -176,7 +176,7 @@ export function Produtos() {
             return
         }
 
-        _setUpdating(true)
+        setIsUpdating(true)
 
         const data: UpdateProduto = {
             nome: editNome.trim(),
@@ -198,9 +198,9 @@ export function Produtos() {
             handleCloseEdit()
         } catch (e: unknown) {
             console.error(e)
-            toast.error(e instanceof Error ? e.message : 'Erro ao atualizar produto')
+            toast.error(e instanceof Error ? e.message : 'Erro ao atualizar produto. Tente novamente.')
         } finally {
-            _setUpdating(false)
+            setIsUpdating(false)
         }
     }
 
@@ -232,8 +232,8 @@ export function Produtos() {
         return ((preco - custo) / preco) * 100
     }
 
-    const _editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
-    const _newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
+    const editMargem = calcularMargem(parseFloat(editPreco) || 0, parseFloat(editCusto) || 0)
+    const newMargem = calcularMargem(parseFloat(newPreco) || 0, parseFloat(newCusto) || 0)
 
     return (
         <>
@@ -248,7 +248,7 @@ export function Produtos() {
                         </Button>
                     }
                 />
-                <PageContainer className="pt-0 pb-16 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     {loading && <PageSkeleton rows={10} showHeader showCards />}
 
                     {!loading && (
@@ -332,7 +332,7 @@ export function Produtos() {
 
                     {/* Modal de Criação */}
                     <Modal
-                        isOpen={_isCreateModalOpen}
+                        isOpen={isCreateModalOpen}
                         onClose={() => setIsCreateModalOpen(false)}
                         title="Novo Produto"
                         size="lg"
@@ -403,8 +403,8 @@ export function Produtos() {
                             {(parseFloat(newPreco) > 0) && (
                                 <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg flex justify-between items-center transition-all animate-in fade-in slide-in-from-left-2">
                                     <span className="text-sm text-gray-500">Margem Estimada</span>
-                                    <Badge variant={_newMargem > 30 ? 'success' : _newMargem > 15 ? 'warning' : 'destructive'}>
-                                        {_newMargem.toFixed(1)}%
+                                    <Badge variant={newMargem > 30 ? 'success' : newMargem > 15 ? 'warning' : 'destructive'}>
+                                        {newMargem.toFixed(1)}%
                                     </Badge>
                                 </div>
                             )}
@@ -434,8 +434,9 @@ export function Produtos() {
                                 </Button>
                                 <Button
                                     variant="primary"
-                                    onClick={_handleCreate}
-                                    isLoading={_creating}
+                                    onClick={handleCreate}
+                                    isLoading={isCreating}
+                                    disabled={isCreating}
                                 >
                                     Criar Produto
                                 </Button>
@@ -519,8 +520,8 @@ export function Produtos() {
                             {/* Margem Preview */}
                             <div className="bg-gray-50 dark:bg-white/5 p-3 rounded-lg flex justify-between items-center">
                                 <span className="text-sm text-gray-500">Margem Estimada</span>
-                                <Badge variant={_editMargem > 30 ? 'success' : _editMargem > 15 ? 'warning' : 'destructive'}>
-                                    {_editMargem.toFixed(1)}%
+                                <Badge variant={editMargem > 30 ? 'success' : editMargem > 15 ? 'warning' : 'destructive'}>
+                                    {editMargem.toFixed(1)}%
                                 </Badge>
                             </div>
 
@@ -577,6 +578,7 @@ export function Produtos() {
                                             }}
                                             className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center shadow-md"
                                             title="Remover imagem"
+                                            aria-label="Remover imagem"
                                         >
                                             <X className="h-3 w-3" />
                                         </button>
@@ -599,8 +601,9 @@ export function Produtos() {
                                 </Button>
                                 <Button
                                     variant="primary"
-                                    onClick={_handleUpdate}
-                                    isLoading={_updating}
+                                    onClick={handleUpdate}
+                                    isLoading={isUpdating}
+                                    disabled={isUpdating}
                                 >
                                     Salvar Alterações
                                 </Button>

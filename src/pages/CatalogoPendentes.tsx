@@ -72,12 +72,12 @@ export function CatalogoPendentes() {
 
   return (
     <>
-      <Header title="Pendentes Catálogo" showBack />
+      <Header title="Pendentes Catálogo" showBack centerTitle />
 
-      <div className="p-4 space-y-4">
+      <div className="p-4 pb-24 space-y-4">
         {pendentes.length === 0 ? (
           <Card className="p-8 text-center flex flex-col items-center justify-center space-y-3">
-            <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+            <CheckCircle2 className="w-12 h-12 text-success" />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Tudo em dia!</h3>
               <p className="text-sm text-gray-500">Não há pedidos pendentes de vinculação.</p>
@@ -97,7 +97,7 @@ export function CatalogoPendentes() {
                 <Badge variant="warning">Aguardando Vínculo</Badge>
               </div>
 
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg border border-red-100 dark:border-red-900/30">
+              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-xl border border-red-100 dark:border-red-900/30">
                 <p className="text-xs text-red-600 dark:text-red-400 font-medium flex items-center gap-2">
                   <AlertCircle className="w-3.5 h-3.5" />
                   {pedido.motivo_falha}
@@ -117,7 +117,7 @@ export function CatalogoPendentes() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => window.open(`http://wa.me/55${pedido.cat_pedidos.telefone_cliente.replace(/\D/g, '')}`)}
+                  onClick={() => window.open(`https://wa.me/55${pedido.cat_pedidos.telefone_cliente.replace(/\D/g, '')}`)}
                 >
                   <ExternalLink className="w-4 h-4" />
                 </Button>

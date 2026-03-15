@@ -116,9 +116,8 @@ export function Configuracoes() {
             setNovoLocalNome('')
             setNovoLocalEndereco('')
             toast.success('Local adicionado e salvo!')
-        } catch (error) {
-            toast.error('Erro ao adicionar local')
-            console.error(error)
+        } catch (_error) {
+            toast.error('Erro ao adicionar local. Tente novamente.')
         } finally {
             setAddingLocal(false)
         }
@@ -134,9 +133,8 @@ export function Configuracoes() {
                 valor: updatedLocais as unknown as Json
             }, { onConflict: 'chave' })
             toast.success('Local removido!')
-        } catch (error) {
-            toast.error('Erro ao remover local')
-            console.error(error)
+        } catch (_error) {
+            toast.error('Erro ao remover local. Tente novamente.')
         }
     }
 
@@ -164,9 +162,8 @@ export function Configuracoes() {
 
             await refetch()
             toast.success('Configurações salvas!')
-        } catch (err) {
-            toast.error('Erro ao salvar configurações')
-            console.error(err)
+        } catch (_err) {
+            toast.error('Erro ao salvar configurações. Tente novamente.')
         } finally {
             setSaving(false)
         }
@@ -194,8 +191,8 @@ export function Configuracoes() {
 
     return (
         <>
-            <Header title="Configurações" showBack />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+            <Header title="Configurações" showBack centerTitle />
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     {loading && <PageSkeleton rows={5} showHeader showCards />}
 
                     {!loading && (

@@ -73,7 +73,6 @@ export function Modal({
                         pointer-events-auto bg-card border border-border/50 rounded-xl shadow-2xl w-full
                         ${sizeClasses[size]}
                         max-h-[85vh] overflow-y-auto
-                        [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]
                         animate-in fade-in zoom-in-95 duration-300
                     `}
                 >
@@ -109,7 +108,7 @@ interface ModalActionsProps {
 
 export function ModalActions({ children }: ModalActionsProps) {
     return (
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-200">
+        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-border">
             {children}
         </div>
     )

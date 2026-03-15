@@ -131,7 +131,7 @@ export function Contatos() {
                     </div>
                 </div>
 
-                <PageContainer className="relative z-10 space-y-6 pt-0 pb-32 bg-transparent px-4">
+                <PageContainer className="relative z-10 space-y-6 pt-0 pb-24 bg-transparent px-4">
 
                     {/* Story Filters Carousel */}
                     <section className="bg-white dark:bg-card rounded-2xl p-4 shadow-sm border border-border/50">
@@ -192,7 +192,7 @@ export function Contatos() {
                             </div>
                         ) : (
                             <EmptyState
-                                icon={<Users className="h-16 w-16 text-zinc-600" />}
+                                icon={<Users className="h-12 w-12 text-zinc-600" />}
                                 title="Nenhum contato encontrado"
                                 description="Tente ajustar os filtros ou adicione um novo contato."
                                 action={

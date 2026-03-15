@@ -93,6 +93,7 @@ export function Recompra() {
             <Header
                     title="Recompra"
                     showBack
+                    centerTitle
                     rightAction={
                         <button
                             onClick={() => setShowFilterModal(true)}
@@ -103,12 +104,12 @@ export function Recompra() {
                         </button>
                     }
                 />
-                <PageContainer className="pt-0 pb-32 bg-transparent px-4">
+                <PageContainer className="pt-0 pb-24 bg-transparent px-4">
                     {/* Metrics */}
                     <div className="grid grid-cols-3 gap-3 mb-4">
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'atrasado' ? 'todos' : 'atrasado')}
-                            className={`p-3 rounded-xl text-center transition-colors bg-red-100 dark:bg-red-900/30 ${filterStatus === 'atrasado' ? 'ring-2 ring-danger-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors active:scale-95 bg-red-100 dark:bg-red-900/30 ${filterStatus === 'atrasado' ? 'ring-2 ring-danger-500' : ''
                                 }`}
                         >
                             <AlertCircle className="h-5 w-5 mx-auto mb-1 text-danger-500" />
@@ -117,7 +118,7 @@ export function Recompra() {
                         </button>
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'proximo' ? 'todos' : 'proximo')}
-                            className={`p-3 rounded-xl text-center transition-colors bg-yellow-100 dark:bg-yellow-900/30 ${filterStatus === 'proximo' ? 'ring-2 ring-warning-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors active:scale-95 bg-yellow-100 dark:bg-yellow-900/30 ${filterStatus === 'proximo' ? 'ring-2 ring-warning-500' : ''
                                 }`}
                         >
                             <Clock className="h-5 w-5 mx-auto mb-1 text-warning-500" />
@@ -126,7 +127,7 @@ export function Recompra() {
                         </button>
                         <button
                             onClick={() => setFilterStatus(filterStatus === 'ok' ? 'todos' : 'ok')}
-                            className={`p-3 rounded-xl text-center transition-colors bg-emerald-100 dark:bg-emerald-900/30 ${filterStatus === 'ok' ? 'ring-2 ring-success-500' : ''
+                            className={`p-3 rounded-xl text-center transition-colors active:scale-95 bg-emerald-100 dark:bg-emerald-900/30 ${filterStatus === 'ok' ? 'ring-2 ring-success-500' : ''
                                 }`}
                         >
                             <CheckCircle className="h-5 w-5 mx-auto mb-1 text-success-500" />
@@ -163,7 +164,7 @@ export function Recompra() {
                     {/* Empty State */}
                     {!loading && !error && contatosFiltrados.length === 0 && (
                         <EmptyState
-                            icon={<Bell className="h-16 w-16" />}
+                            icon={<Bell className="h-12 w-12" />}
                             title={filterStatus !== 'todos' ? 'Nenhum contato nesse status' : 'Sem alertas de recompra'}
                             description={
                                 filterStatus !== 'todos'
@@ -233,7 +234,7 @@ export function Recompra() {
                                             </Button>
                                             <button
                                                 onClick={() => navigate(`/contatos/${item.contato.id}`)}
-                                                className="p-2 text-gray-400 hover:text-gray-600"
+                                                className="p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-400 hover:text-gray-600"
                                             >
                                                 <ChevronRight className="h-5 w-5" />
                                             </button>
