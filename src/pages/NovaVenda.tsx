@@ -292,16 +292,15 @@ export function NovaVenda() {
                                             Voltar
                                         </Button>
                                     )}
-                                    <button
+                                    <Button
+                                        variant="primary"
                                         onClick={() => nextStep()}
-                                        className={`flex-[2] h-12 rounded-2xl shadow-sm flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform
-                                            ${(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)
-                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                                : 'bg-primary text-white shadow-primary/30'}`}
+                                        disabled={(currentStep === 0 && !selectedContato) || (currentStep === 1 && cart.length === 0)}
+                                        className="flex-[2] h-12 rounded-2xl font-bold active:scale-95 transition-transform flex items-center justify-center gap-2"
                                     >
                                         Próximo
                                         <ChevronRight className="h-5 w-5" />
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         )}

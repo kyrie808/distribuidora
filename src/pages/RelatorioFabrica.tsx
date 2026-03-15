@@ -206,7 +206,7 @@ export function RelatorioFabrica() {
 
                     {/* Error */}
                     {error && (
-                        <Card className="bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 mb-6 border-red-100 dark:border-red-900/20">
+                        <Card className="bg-destructive/10 text-destructive mb-6 border-destructive/20">
                             <div className="flex items-center gap-3">
                                 <AlertTriangle className="h-5 w-5 shrink-0" />
                                 <p className="font-medium text-sm">{error}</p>
@@ -257,6 +257,7 @@ export function RelatorioFabrica() {
                                     </div>
 
                                     {/* Card de Resumo Total */}
+                                    {/* Gradiente intencional: identidade visual do card de resumo — não substituir por tokens semânticos */}
                                     <div className="mt-8 relative overflow-hidden rounded-2xl shadow-xl shadow-indigo-500/20">
                                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-violet-700"></div>
                                         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>

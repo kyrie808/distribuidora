@@ -238,7 +238,7 @@ export function ContasReceber() {
                                                                 href={`https://wa.me/55${venda.contato.telefone.replace(/\D/g, '')}`}
                                                                 target="_blank"
                                                                 rel="noopener noreferrer"
-                                                                className="flex items-center gap-1 text-xs text-emerald-600 font-bold uppercase tracking-tight hover:underline"
+                                                                className="flex items-center gap-1 text-xs text-success font-bold uppercase tracking-tight hover:underline"
                                                             >
                                                                 <Phone className="w-3 h-3" />
                                                                 WhatsApp
@@ -328,8 +328,8 @@ export function ContasReceber() {
                                 />
                             </div>
 
-                            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">
+                            <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
+                                <p className="text-xs text-primary font-medium">
                                     Este recebimento será registrado automaticamente no Fluxo de Caixa como entrada na conta selecionada.
                                 </p>
                             </div>

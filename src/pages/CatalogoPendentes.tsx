@@ -166,7 +166,7 @@ export function CatalogoPendentes() {
                   key={contato.id}
                   onClick={() => handleLink(contato.id)}
                   disabled={isLinking}
-                  className="w-full p-3 text-left rounded-lg border border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors flex justify-between items-center group"
+                  className="w-full p-3 text-left rounded-lg border border-border hover:bg-muted transition-colors flex justify-between items-center group"
                 >
                   <div>
                     <p className="font-medium text-gray-900 dark:text-white">{contato.nome}</p>

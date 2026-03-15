@@ -152,7 +152,7 @@ export function PedidosCompra() {
                                         {/* Tabela de itens */}
                                         {orderWithItems.items && orderWithItems.items.length > 0 && (
                                             <table className="w-full text-left text-sm">
-                                                <thead className="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-gray-700">
+                                                <thead className="text-xs text-muted-foreground border-b border-border">
                                                     <tr>
                                                         <th className="px-4 py-2 font-medium">Produto</th>
                                                         <th className="px-4 py-2 font-medium text-center">Qtd</th>
@@ -175,7 +175,7 @@ export function PedidosCompra() {
 
                                         {/* Histórico de Pagamentos */}
                                         {orderWithItems.payments && orderWithItems.payments.length > 0 && (
-                                            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700 bg-muted">
+                                            <div className="px-4 py-3 border-t border-border bg-muted">
                                                 <h4 className="text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">
                                                     Pagamentos registrados
                                                 </h4>
@@ -209,7 +209,7 @@ export function PedidosCompra() {
 
                                         {/* Ações (Recebimento / Pagamento) */}
                                         {(order.status === 'pending' || order.paymentStatus !== 'paid') && (
-                                            <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-700">
+                                            <div className="px-4 py-3 border-t border-border">
                                                 <div className="mb-3 text-xs text-gray-500 dark:text-gray-400 text-left">
                                                     Valor do pedido {orderWithItems.fornecedor?.nome || 'não informado'}:{' '}
                                                     <span className="font-medium text-gray-700 dark:text-gray-300">
@@ -238,7 +238,7 @@ export function PedidosCompra() {
                                                                 e.stopPropagation()
                                                                 setPaymentModalOrder(orderWithItems)
                                                             }}
-                                                            className="flex items-center justify-center gap-2 border-slate-300 dark:border-slate-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800"
+                                                            className="flex items-center justify-center gap-2 border-border hover:bg-muted"
                                                         >
                                                             <DollarSign size={16} />
                                                             Quitar

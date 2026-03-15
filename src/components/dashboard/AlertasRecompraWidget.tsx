@@ -5,6 +5,7 @@ import { DashboardCarousel } from './DashboardCarousel'
 import { useRecompra } from '@/hooks/useRecompra'
 import { Card, CardContent } from '@/components/ui/Card'
 import { WidgetSkeleton } from '@/components/ui/WidgetSkeleton'
+import { Badge } from '@/components/ui'
 
 interface RecompraAlerta {
     contato_id?: string
@@ -87,15 +88,15 @@ export function AlertasRecompraWidget({ data, loading: externalLoading }: Alerta
                         <CardContent className="p-4">
                             <div className="flex items-start justify-between mb-3">
                                 <div>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 mb-1.5 uppercase tracking-wide">
+                                    <Badge variant="warning" className="mb-1.5 text-[10px] uppercase tracking-wide">
                                         Recompra
-                                    </span>
+                                    </Badge>
                                     <h3 className="font-bold text-gray-900 dark:text-white truncate max-w-[140px]">
                                         {alerta.contato.nome}
                                     </h3>
-                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 mt-1">
+                                    <Badge variant="warning" className="mt-1 text-[10px]">
                                         {alerta.diasSemCompra} dias sem comprar
-                                    </span>
+                                    </Badge>
                                 </div>
                                 <div className="flex flex-col gap-1">
                                     <button

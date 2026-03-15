@@ -192,7 +192,7 @@ export function Contatos() {
                             </div>
                         ) : (
                             <EmptyState
-                                icon={<Users className="h-12 w-12 text-zinc-600" />}
+                                icon={<Users className="h-12 w-12 text-muted-foreground" />}
                                 title="Nenhum contato encontrado"
                                 description="Tente ajustar os filtros ou adicione um novo contato."
                                 action={

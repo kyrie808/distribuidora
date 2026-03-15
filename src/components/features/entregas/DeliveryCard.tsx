@@ -24,6 +24,7 @@ export function DeliveryCard({
 }: DeliveryCardProps) {
     // Generate avatar color from client name
     const getAvatarColor = (name: string) => {
+        // Cores de avatar intencionais: distinção visual por hash do nome — não substituir por tokens semânticos
         const colors = [
             'bg-blue-500',
             'bg-violet-500',
