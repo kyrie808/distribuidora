@@ -5,7 +5,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Button, LoadingScreen } from '../components/ui'
+import { Button, PageSkeleton } from '../components/ui'
 import { useConfiguracoes } from '../hooks/useConfiguracoes'
 import { useToast } from '../components/ui/Toast'
 import { supabase } from '../lib/supabase'
@@ -196,7 +196,7 @@ export function Configuracoes() {
         <>
             <Header title="Configurações" showBack />
                 <PageContainer className="pt-0 pb-32 bg-transparent px-4">
-                    {loading && <LoadingScreen message="Carregando configurações..." />}
+                    {loading && <PageSkeleton rows={5} showHeader showCards />}
 
                     {!loading && (
                         <div className="space-y-6 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0 text-gray-900 dark:text-gray-100">

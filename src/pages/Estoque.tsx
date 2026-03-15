@@ -2,7 +2,7 @@ import React, { useState, Suspense } from 'react'
 import { Box } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, LoadingScreen } from '../components/ui'
+import { Card, PageSkeleton, WidgetSkeleton } from '../components/ui'
 import { useProdutos } from '../hooks/useProdutos'
 import { useToast } from '../components/ui/Toast'
 import { EstoqueCard } from '../components/features/estoque/EstoqueCard'
@@ -45,12 +45,7 @@ export function Estoque() {
         .reduce((acc, p) => acc + (p.estoqueAtual || 0), 0)
 
     if (loading) {
-        return (
-            <>
-                <Header title="Estoque" showBack />
-                <LoadingScreen message="Carregando estoque..." />
-            </>
-        )
+        return <PageSkeleton rows={8} />
     }
 
     return (
@@ -61,12 +56,7 @@ export function Estoque() {
                     {/* Cena 3D - Split do bundle aqui */}
                     <div className="h-[65vh] bg-gradient-to-b from-slate-50 to-gray-200 relative overflow-hidden group">
                         <Suspense fallback={
-                            <div className="w-full h-full flex flex-col items-center justify-center bg-gray-100">
-                                <div className="animate-pulse flex flex-col items-center gap-4">
-                                    <Box className="h-12 w-12 text-gray-300" />
-                                    <span className="text-gray-400 text-sm font-medium">Carregando visualização 3D...</span>
-                                </div>
-                            </div>
+                            <WidgetSkeleton height="h-64" lines={3} />
                         }>
                             <Estoque3DView produtos={produtosMassa} />
                         </Suspense>

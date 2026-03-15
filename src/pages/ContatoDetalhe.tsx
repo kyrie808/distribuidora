@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Award, Trash2 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Button, LoadingScreen } from '../components/ui'
+import { Button, PageSkeleton } from '../components/ui'
 import { ContatoFormModal } from '../components/contatos'
 import { useContato, useContatos } from '../hooks/useContatos'
 import { useToast } from '../components/ui/Toast'
@@ -32,7 +32,7 @@ export function ContatoDetalhe() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
 
-    if (loading) return <> <Header title="..." showBack /><LoadingScreen /> </>
+    if (loading) return <PageSkeleton rows={4} showHeader showCards={false} />
     if (error || !contato) return <> <Header title="Erro" showBack /><PageContainer><div className="text-red-500">Contato não encontrado</div></PageContainer> </>
 
     // Cálculo de nível para passar pro Hero

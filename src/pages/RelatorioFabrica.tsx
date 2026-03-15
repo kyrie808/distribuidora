@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, Button, LoadingScreen, Input } from '../components/ui'
+import { Card, Button, PageSkeleton, Input } from '../components/ui'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { useRelatorioFabrica, getDefaultDates } from '../hooks/useRelatorioFabrica'
 import { useToast } from '../components/ui/Toast'
@@ -168,7 +168,7 @@ export function RelatorioFabrica() {
                     </Card>
 
                     {/* Loading */}
-                    {loading && <LoadingScreen message="Processando dados..." />}
+                    {loading && <PageSkeleton rows={10} showHeader showCards />}
 
                     {/* Error */}
                     {error && (

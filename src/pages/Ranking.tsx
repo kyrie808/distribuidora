@@ -15,14 +15,14 @@ import { useRankingCompras } from '../hooks/useRankingCompras'
 import { useTopIndicadores } from '../hooks/useTopIndicadores'
 import { TopIndicadoresWidget } from '../components/dashboard/TopIndicadoresWidget'
 import { RankingComprasWidget } from '../components/dashboard/RankingComprasWidget'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui'
+import { Tabs, TabsList, TabsTrigger, PageSkeleton } from '@/components/ui'
 import { formatCurrency } from '../utils/formatters'
 
 type TabType = 'compras' | 'indicacoes'
 
 export function Ranking() {
     const { totalConversoes } = useIndicacoes()
-    const { rankingCompras } = useRankingCompras()
+    const { rankingCompras, loading } = useRankingCompras()
     const { topIndicadores } = useTopIndicadores()
     const [activeTab, setActiveTab] = useState<TabType>('compras')
 
@@ -92,6 +92,8 @@ export function Ranking() {
             ]
         }
     }, [activeTab, rankingCompras, topIndicadores, totalConversoes])
+
+    if (loading) return <PageSkeleton rows={8} showHeader />
 
     return (
         <>

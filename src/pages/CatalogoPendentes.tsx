@@ -16,7 +16,8 @@ import {
   Badge,
   Button,
   Input,
-  Modal
+  Modal,
+  PageSkeleton
 } from '../components/ui'
 import { useCatalogoPendentes } from '../hooks/useCatalogoPendentes'
 import { useContatos } from '../hooks/useContatos'
@@ -57,11 +58,7 @@ export function CatalogoPendentes() {
   }
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-dvh">
-        <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
-      </div>
-    )
+    return <PageSkeleton rows={5} showHeader showCards={false} />
   }
 
   if (error) {

@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { useNavigationStore } from '@/stores/useNavigationStore'
 import { PageContainer } from '../components/layout/PageContainer'
-import { LoadingScreen, paginateArray } from '../components/ui'
+import { PageSkeleton, paginateArray } from '../components/ui'
 import { useVendas } from '../hooks/useVendas'
 import { useDashboardFilter } from '../hooks/useDashboardFilter'
 import { useDebounce } from '../hooks/useDebounce'
@@ -100,7 +100,7 @@ export function Vendas() {
         setIsDeleting(false)
     }
 
-    if (loading) return <LoadingScreen message="Carregando vendas..." />
+    if (loading) return <PageSkeleton rows={8} showHeader showCards={false} />
 
     return (
         <>

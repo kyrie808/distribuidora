@@ -5,7 +5,7 @@ import { useNavigationStore } from '@/stores/useNavigationStore'
 import { PageContainer } from '../components/layout/PageContainer'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
-import { EmptyState, LoadingScreen, Pagination, paginateArray } from '../components/ui'
+import { EmptyState, PageSkeleton, Pagination, paginateArray } from '../components/ui'
 import { ContatoCard, ContatoFormModal, ContactStoryFilter } from '../components/contatos'
 import { useContatos } from '../hooks/useContatos'
 import { useDebounce } from '../hooks/useDebounce'
@@ -169,7 +169,7 @@ export function Contatos() {
                     </div>
 
                     {/* Loading State */}
-                    {loading && <LoadingScreen message="Carregando contatos..." />}
+                    {loading && <PageSkeleton rows={12} showHeader showCards />}
 
                     {/* Error State */}
                     {error && (

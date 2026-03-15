@@ -199,7 +199,7 @@ export function NovaVenda() {
                     <main className="flex-1 flex flex-col min-w-0 bg-gray-50 dark:bg-gray-900/50">
                         {/* Step 0: Cliente */}
                         {currentStep === 0 && (
-                            <div className="p-4 flex-1 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                            <div className="p-4 flex-1 min-w-0 animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
                                     <User className="h-5 w-5 text-primary" />
                                     Selecionar Cliente
@@ -226,7 +226,7 @@ export function NovaVenda() {
 
                         {/* Step 1: Produtos */}
                         {currentStep === 1 && (
-                            <div className="flex-1 flex flex-col overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500">
+                            <div className="flex-1 flex flex-col min-w-0 animate-in fade-in slide-in-from-right-4 duration-500">
                                 <div className="p-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800 flex items-center justify-between">
                                     <h2 className="text-lg font-bold flex items-center gap-2">
                                         <ShoppingBag className="h-5 w-5 text-primary" />
@@ -236,7 +236,7 @@ export function NovaVenda() {
                                         Total: {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cartTotal)}
                                     </div>
                                 </div>
-                                <div className="flex-1 overflow-hidden px-4">
+                                <div className="flex-1 overflow-y-auto px-4">
                                     <ProductList
                                         produtos={produtos}
                                         loading={loadingProdutos}
@@ -304,7 +304,7 @@ export function NovaVenda() {
                     </main>
 
                     {/* Desktop Sidebar (Optional, maybe just a summary in steps 0/1) */}
-                    <aside className="hidden lg:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-hidden">
+                    <aside className="hidden lg:flex w-96 flex-col border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 h-full overflow-y-auto">
                         <CartSidebar
                             items={cart}
                             total={cartTotal}

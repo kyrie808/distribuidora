@@ -9,7 +9,7 @@ import {
 } from 'lucide-react'
 import { Header } from '../components/layout/Header'
 import { PageContainer } from '../components/layout/PageContainer'
-import { Card, LoadingScreen, Modal, ModalActions, Button, Input, Select, Badge } from '../components/ui'
+import { Card, PageSkeleton, Modal, ModalActions, Button, Input, Select, Badge } from '../components/ui'
 import { KpiCard } from '../components/dashboard/KpiCard'
 import { cn } from '@/lib/utils'
 import { useProdutos } from '../hooks/useProdutos'
@@ -249,7 +249,7 @@ export function Produtos() {
                     }
                 />
                 <PageContainer className="pt-0 pb-16 bg-transparent px-4">
-                    {loading && <LoadingScreen message="Carregando produtos..." />}
+                    {loading && <PageSkeleton rows={10} showHeader showCards />}
 
                     {!loading && (
                         <div className="space-y-4">

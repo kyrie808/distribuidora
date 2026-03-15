@@ -9,7 +9,7 @@ import { PurchaseOrderPaymentModal } from '../components/features/purchase-order
 import { usePurchaseOrders } from '../hooks/usePurchaseOrders'
 import type { DomainPurchaseOrderWithItems, CreatePurchaseOrder, UpdatePurchaseOrder, PurchaseOrderPaymentStatus, CreatePurchaseOrderItem } from '../types/domain'
 import { formatCurrency, formatDate } from '../utils/formatters'
-import { Spinner } from '../components/ui/Spinner'
+import { WidgetSkeleton } from '../components/ui'
 import { ProductNicknamesModal } from '../components/features/purchase-orders/ProductNicknamesModal'
 import { KpiCard } from '../components/dashboard/KpiCard'
 
@@ -119,7 +119,7 @@ export function PedidosCompra() {
                         />
                     </div>
 
-                    {loading && !orders.length ? <Spinner /> : orders.length === 0 ? (
+                    {loading && !orders.length ? <WidgetSkeleton height="h-48" lines={3} /> : orders.length === 0 ? (
                         <EmptyState title="Nenhum pedido" description="Crie seu primeiro pedido." action={<Button onClick={handleCreateNew}>Novo Pedido</Button>} />
                     ) : (
                         <div className="flex flex-col gap-4">
