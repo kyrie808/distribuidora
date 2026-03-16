@@ -81,6 +81,20 @@ export type Database = {
             foreignKeyName: "cat_imagens_produto_produto_id_fkey"
             columns: ["produto_id"]
             isOneToOne: false
+            referencedRelation: "rpt_giro_estoque"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "cat_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_margem_por_sku"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "cat_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
             referencedRelation: "vw_catalogo_produtos"
             referencedColumns: ["id"]
           },
@@ -128,6 +142,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "produtos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cat_itens_pedido_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_giro_estoque"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "cat_itens_pedido_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_margem_por_sku"
+            referencedColumns: ["produto_id"]
           },
           {
             foreignKeyName: "cat_itens_pedido_produto_id_fkey"
@@ -222,6 +250,13 @@ export type Database = {
             foreignKeyName: "cat_pedidos_contato_id_fkey"
             columns: ["contato_id"]
             isOneToOne: false
+            referencedRelation: "rpt_ltv_por_cliente"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "cat_pedidos_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
             referencedRelation: "view_home_alertas"
             referencedColumns: ["contato_id"]
           },
@@ -282,6 +317,7 @@ export type Database = {
           ativo: boolean | null
           atualizado_em: string | null
           banco: string | null
+          codigo: string | null
           created_by: string | null
           criado_em: string | null
           id: string
@@ -295,6 +331,7 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           banco?: string | null
+          codigo?: string | null
           created_by?: string | null
           criado_em?: string | null
           id?: string
@@ -308,6 +345,7 @@ export type Database = {
           ativo?: boolean | null
           atualizado_em?: string | null
           banco?: string | null
+          codigo?: string | null
           created_by?: string | null
           criado_em?: string | null
           id?: string
@@ -430,6 +468,13 @@ export type Database = {
             foreignKeyName: "contatos_indicado_por_id_fkey"
             columns: ["indicado_por_id"]
             isOneToOne: false
+            referencedRelation: "rpt_ltv_por_cliente"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "contatos_indicado_por_id_fkey"
+            columns: ["indicado_por_id"]
+            isOneToOne: false
             referencedRelation: "view_home_alertas"
             referencedColumns: ["contato_id"]
           },
@@ -475,8 +520,29 @@ export type Database = {
             foreignKeyName: "itens_venda_produto_id_fkey"
             columns: ["produto_id"]
             isOneToOne: false
+            referencedRelation: "rpt_giro_estoque"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "itens_venda_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_margem_por_sku"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "itens_venda_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
             referencedRelation: "vw_catalogo_produtos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "itens_venda_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_projecao_recebimentos"
+            referencedColumns: ["venda_id"]
           },
           {
             foreignKeyName: "itens_venda_venda_id_fkey"
@@ -572,6 +638,13 @@ export type Database = {
             foreignKeyName: "lancamentos_venda_id_fkey"
             columns: ["venda_id"]
             isOneToOne: false
+            referencedRelation: "rpt_projecao_recebimentos"
+            referencedColumns: ["venda_id"]
+          },
+          {
+            foreignKeyName: "lancamentos_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
             referencedRelation: "vendas"
             referencedColumns: ["id"]
           },
@@ -610,6 +683,13 @@ export type Database = {
             foreignKeyName: "pagamentos_venda_venda_id_fkey"
             columns: ["venda_id"]
             isOneToOne: false
+            referencedRelation: "rpt_projecao_recebimentos"
+            referencedColumns: ["venda_id"]
+          },
+          {
+            foreignKeyName: "pagamentos_venda_venda_id_fkey"
+            columns: ["venda_id"]
+            isOneToOne: false
             referencedRelation: "vendas"
             referencedColumns: ["id"]
           },
@@ -620,6 +700,7 @@ export type Database = {
           ativo: boolean | null
           automatica: boolean | null
           categoria: string
+          codigo: string | null
           criado_em: string | null
           id: string
           nome: string
@@ -629,6 +710,7 @@ export type Database = {
           ativo?: boolean | null
           automatica?: boolean | null
           categoria: string
+          codigo?: string | null
           criado_em?: string | null
           id?: string
           nome: string
@@ -638,6 +720,7 @@ export type Database = {
           ativo?: boolean | null
           automatica?: boolean | null
           categoria?: string
+          codigo?: string | null
           criado_em?: string | null
           id?: string
           nome?: string
@@ -749,6 +832,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "produtos"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_giro_estoque"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "purchase_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_margem_por_sku"
+            referencedColumns: ["produto_id"]
           },
           {
             foreignKeyName: "purchase_order_items_product_id_fkey"
@@ -883,6 +980,13 @@ export type Database = {
             foreignKeyName: "purchase_orders_fornecedor_id_fkey"
             columns: ["fornecedor_id"]
             isOneToOne: false
+            referencedRelation: "rpt_ltv_por_cliente"
+            referencedColumns: ["contato_id"]
+          },
+          {
+            foreignKeyName: "purchase_orders_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
             referencedRelation: "view_home_alertas"
             referencedColumns: ["contato_id"]
           },
@@ -931,6 +1035,20 @@ export type Database = {
             foreignKeyName: "sis_imagens_produto_produto_id_fkey"
             columns: ["produto_id"]
             isOneToOne: true
+            referencedRelation: "rpt_giro_estoque"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: true
+            referencedRelation: "rpt_margem_por_sku"
+            referencedColumns: ["produto_id"]
+          },
+          {
+            foreignKeyName: "sis_imagens_produto_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: true
             referencedRelation: "vw_catalogo_produtos"
             referencedColumns: ["id"]
           },
@@ -952,7 +1070,7 @@ export type Database = {
           id: string
           observacoes: string | null
           origem: string | null
-          pago: boolean | null
+          pago: boolean
           parcelas: number | null
           status: string
           taxa_entrega: number | null
@@ -975,7 +1093,7 @@ export type Database = {
           id?: string
           observacoes?: string | null
           origem?: string | null
-          pago?: boolean | null
+          pago?: boolean
           parcelas?: number | null
           status?: string
           taxa_entrega?: number | null
@@ -998,7 +1116,7 @@ export type Database = {
           id?: string
           observacoes?: string | null
           origem?: string | null
-          pago?: boolean | null
+          pago?: boolean
           parcelas?: number | null
           status?: string
           taxa_entrega?: number | null
@@ -1007,6 +1125,13 @@ export type Database = {
           valor_pago?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "vendas_cat_pedido_id_fkey"
+            columns: ["cat_pedido_id"]
+            isOneToOne: true
+            referencedRelation: "cat_pedidos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendas_contato_id_fkey"
             columns: ["contato_id"]
@@ -1027,6 +1152,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "ranking_indicacoes"
             referencedColumns: ["indicador_id"]
+          },
+          {
+            foreignKeyName: "vendas_contato_id_fkey"
+            columns: ["contato_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_ltv_por_cliente"
+            referencedColumns: ["contato_id"]
           },
           {
             foreignKeyName: "vendas_contato_id_fkey"
@@ -1077,6 +1209,118 @@ export type Database = {
           nome: string | null
           total_indicados: number | null
           total_vendas_indicados: number | null
+        }
+        Relationships: []
+      }
+      rpt_break_even_mensal: {
+        Row: {
+          break_even_receita: number | null
+          cobertura_despesas: number | null
+          custo_fabrica: number | null
+          custo_produtos: number | null
+          despesas_operacionais: number | null
+          lucro_bruto: number | null
+          lucro_liquido: number | null
+          margem_contribuicao_pct: number | null
+          margem_liquida_pct: number | null
+          mes: string | null
+          receita_bruta: number | null
+        }
+        Relationships: []
+      }
+      rpt_distribuicao_forma_pagamento: {
+        Row: {
+          faturamento: number | null
+          forma_pagamento: string | null
+          pct_contagem: number | null
+          pct_faturamento: number | null
+          total_vendas: number | null
+          vendas_liquidadas: number | null
+          vendas_pendentes: number | null
+        }
+        Relationships: []
+      }
+      rpt_faturamento_comparativo: {
+        Row: {
+          ano: number | null
+          faturamento: number | null
+          faturamento_anterior: number | null
+          liquidado_mes: number | null
+          lucro_estimado: number | null
+          margem_bruta_pct: number | null
+          mes: number | null
+          total_a_receber: number | null
+          variacao_faturamento_percentual: number | null
+        }
+        Relationships: []
+      }
+      rpt_giro_estoque: {
+        Row: {
+          codigo: string | null
+          estoque_atual: number | null
+          estoque_minimo: number | null
+          giro_estoque: number | null
+          nome: string | null
+          produto_id: string | null
+          status_estoque: string | null
+          total_comprado_historico: number | null
+          total_vendido_historico: number | null
+        }
+        Relationships: []
+      }
+      rpt_ltv_por_cliente: {
+        Row: {
+          contato_id: string | null
+          dias_relacionamento: number | null
+          ltv_total: number | null
+          nome: string | null
+          primeira_compra: string | null
+          status: string | null
+          telefone: string | null
+          ticket_medio: number | null
+          tipo: string | null
+          total_pedidos: number | null
+          ultima_compra: string | null
+        }
+        Relationships: []
+      }
+      rpt_margem_por_sku: {
+        Row: {
+          codigo: string | null
+          custo_total: number | null
+          lucro_bruto: number | null
+          margem_pct: number | null
+          nome: string | null
+          produto_id: string | null
+          receita_total: number | null
+          total_vendido: number | null
+          unidade: string | null
+        }
+        Relationships: []
+      }
+      rpt_prazo_medio_recebimento: {
+        Row: {
+          mes: string | null
+          pagamento_imediato: number | null
+          pago_1_7_dias: number | null
+          pago_8_30_dias: number | null
+          pago_mais_30_dias: number | null
+          prazo_medio_dias: number | null
+          vendas_liquidadas: number | null
+        }
+        Relationships: []
+      }
+      rpt_projecao_recebimentos: {
+        Row: {
+          contato_nome: string | null
+          contato_telefone: string | null
+          data_prevista_pagamento: string | null
+          data_venda: string | null
+          saldo_aberto: number | null
+          situacao: string | null
+          total: number | null
+          valor_pago: number | null
+          venda_id: string | null
         }
         Relationships: []
       }
@@ -1314,30 +1558,56 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: undefined
       }
-      registrar_lancamento_venda:
-        | {
-            Args: {
-              p_conta_id: string
-              p_data: string
-              p_valor: number
-              p_venda_id: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              p_conta_id: string
-              p_data: string
-              p_metodo?: string
-              p_observacao?: string
-              p_valor: number
-              p_venda_id: string
-            }
-            Returns: string
-          }
+      registrar_lancamento_venda: {
+        Args: {
+          p_conta_id: string
+          p_data: string
+          p_metodo?: string
+          p_observacao?: string
+          p_valor: number
+          p_venda_id: string
+        }
+        Returns: string
+      }
+      registrar_pagamento_venda: {
+        Args: {
+          p_conta_id: string
+          p_data: string
+          p_metodo: string
+          p_observacao?: string
+          p_valor: number
+          p_venda_id: string
+        }
+        Returns: string
+      }
       rpc_marcar_venda_paga: {
         Args: { p_conta_id: string; p_data?: string; p_venda_id: string }
         Returns: undefined
+      }
+      rpc_total_a_receber_dashboard: { Args: never; Returns: Json }
+      rpc_total_a_receber_simples: { Args: never; Returns: number }
+      rpt_churn: {
+        Args: { p_dias_threshold?: number }
+        Returns: {
+          contato_id: string
+          dias_sem_compra: number
+          nome: string
+          qtd_pedidos: number
+          telefone: string
+          total_historico: number
+          ultima_compra: string
+        }[]
+      }
+      rpt_vendas_por_periodo: {
+        Args: { p_agrupamento?: string; p_fim: string; p_inicio: string }
+        Returns: {
+          clientes_unicos: number
+          faturamento: number
+          periodo: string
+          ticket_medio: number
+          total_itens: number
+          total_vendas: number
+        }[]
       }
     }
     Enums: {
@@ -1487,7 +1757,6 @@ export type Lancamento = Table<'lancamentos'>
 export type ExtratoItem = Table<'view_extrato_mensal'>
 export type FluxoResumo = Table<'view_fluxo_resumo'>
 
-// STORY-005 Missing Table Aliases
 export type Venda = Table<'vendas'>
 export type Contato = Table<'contatos'>
 export type Produto = Table<'produtos'>
@@ -1498,7 +1767,6 @@ export type PurchaseOrder = Table<'purchase_orders'>
 export type PurchaseOrderItem = Table<'purchase_order_items'>
 export type PurchaseOrderPayment = Table<'purchase_order_payments'>
 
-// CRUD Aliases
 export type VendaInsert = Insert<'vendas'>
 export type VendaUpdate = Update<'vendas'>
 export type ContatoInsert = Insert<'contatos'>
@@ -1507,7 +1775,6 @@ export type ProdutoInsert = Insert<'produtos'>
 export type ProdutoUpdate = Update<'produtos'>
 export type ItemVendaInsert = Insert<'itens_venda'>
 
-// Complex Types for Services
 export interface VendaComItens extends Venda {
   itens: (ItemVenda & {
     produto?: {

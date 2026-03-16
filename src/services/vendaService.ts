@@ -137,38 +137,26 @@ export const vendaService = {
     },
 
     async addPagamento(vendaId: string, valor: number, metodo: string, data: string, contaId: string, observacao?: string): Promise<boolean> {
-        const { error } = await supabase.from('pagamentos_venda').insert({
-            venda_id: vendaId,
-            valor,
-            data,
-            metodo,
-            observacao
-        })
-        if (error) throw error
-
-        // Gera lançamento automático no fluxo de caixa
-        const { error: rpcError } = await supabase.rpc('registrar_lancamento_venda', {
+        // RPC atômica: pagamento + lançamento em uma única transação.
+        // Se qualquer parte falhar, nada é commitado.
+        const dataDate = data.includes('T') ? data.split('T')[0] : data
+        const { error } = await supabase.rpc('registrar_pagamento_venda', {
             p_venda_id: vendaId,
             p_valor: valor,
+            p_metodo: metodo,
+            p_data: dataDate,
             p_conta_id: contaId,
-            p_data: data.includes('T') ? data.split('T')[0] : data,
-            p_metodo: metodo
+            p_observacao: observacao ?? undefined
         })
 
-        if (rpcError) throw rpcError
-
+        if (error) throw error
         return true
     },
 
     async getTotalAReceber(): Promise<number> {
-        const { data, error } = await supabase
-            .from('vendas')
-            .select('total')
-            .eq('pago', false)
-            .neq('status', 'cancelada')
-            .neq('forma_pagamento', 'brinde')
+        const { data, error } = await supabase.rpc('rpc_total_a_receber_simples')
         if (error) return 0
-        return (data || []).reduce((acc, v) => acc + (v.total || 0), 0)
+        return Number(data) || 0
     },
 
     calculateKPIs(vendas: DomainVenda[]): VendasMetrics {

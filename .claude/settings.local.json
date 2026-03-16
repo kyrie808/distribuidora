@@ -107,7 +107,12 @@
       "Bash(python:*)",
       "Bash(where python:*)",
       "Read(//d D:/1. LUCCAS/aplicativos ai/**)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(ls:*)",
+      "Bash(Get-ChildItem -Path \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\\\\docs\" -Recurse -File | Select-Object FullName, LastWriteTime | Sort-Object FullName)",
+      "Bash(find:*)",
+      "mcp__supabase-distribuidora__generate_typescript_types",
+      "Bash(cat:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

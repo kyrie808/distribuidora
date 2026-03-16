@@ -194,23 +194,12 @@ export const dashboardService = {
         total_a_receber: number
         total_vendas_abertas: number
     }> {
-        const { data, error } = await supabase
-            .from('vendas')
-            .select('total')
-            .eq('pago', false)
-            .eq('status', 'entregue')
-            .neq('forma_pagamento', 'brinde')
-            .or('origem.is.null,origem.neq.catalogo')
-
-        if (error || !data) return {
-            total_a_receber: 0,
-            total_vendas_abertas: 0
-        }
-
+        const { data, error } = await supabase.rpc('rpc_total_a_receber_dashboard')
+        if (error || !data) return { total_a_receber: 0, total_vendas_abertas: 0 }
+        const result = data as { total_a_receber: number; total_vendas_abertas: number }
         return {
-            total_a_receber: data.reduce((acc, v) =>
-                acc + Number(v.total), 0),
-            total_vendas_abertas: data.length
+            total_a_receber: Number(result.total_a_receber) || 0,
+            total_vendas_abertas: Number(result.total_vendas_abertas) || 0
         }
     }
 }
