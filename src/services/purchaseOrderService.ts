@@ -137,7 +137,7 @@ export const purchaseOrderService = {
             .from('purchase_order_payments')
             .insert({
                 purchase_order_id: orderId,
-                amount: payment.amount,
+                amount: Math.round(payment.amount * 100) / 100,
                 payment_method: payment.method,
                 conta_id: payment.contaId,
                 notes: payment.notes,

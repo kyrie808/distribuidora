@@ -109,7 +109,7 @@ export const cashFlowService = {
             .from('lancamentos')
             .insert({
                 tipo: 'transferencia',
-                valor: data.valor,
+                valor: Math.round(data.valor * 100) / 100,
                 data: data.data,
                 conta_id: data.conta_id,
                 conta_destino_id: data.conta_destino_id,
@@ -131,7 +131,7 @@ export const cashFlowService = {
         plano_conta_id: string
     }) {
         const { error } = await supabase.rpc('registrar_despesa_manual', {
-            p_valor: data.valor,
+            p_valor: Math.round(data.valor * 100) / 100,
             p_descricao: data.descricao ?? '',
             p_data: data.data,
             p_conta_id: data.conta_id,
@@ -148,7 +148,7 @@ export const cashFlowService = {
         plano_conta_id: string
     }) {
         const { error } = await supabase.rpc('registrar_entrada_manual', {
-            p_valor: data.valor,
+            p_valor: Math.round(data.valor * 100) / 100,
             p_descricao: data.descricao ?? '',
             p_data: data.data,
             p_conta_id: data.conta_id,

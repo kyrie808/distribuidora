@@ -72,14 +72,16 @@ export const contasAPagarService = {
         contaId: string
         metodoPagamento?: string
         observacao?: string
+        contaCredorId?: string
     }): Promise<string> {
         const { data, error } = await supabase.rpc('registrar_pagamento_conta_a_pagar', {
             p_conta_a_pagar_id: params.contaAPagarId,
-            p_valor: params.valor,
+            p_valor: Math.round(params.valor * 100) / 100,
             p_data_pagamento: params.dataPagamento,
             p_conta_id: params.contaId,
             p_metodo_pagamento: params.metodoPagamento ?? 'pix',
             p_observacao: params.observacao,
+            p_conta_credor_id: params.contaCredorId,
         })
 
         if (error) throw error

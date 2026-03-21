@@ -1764,6 +1764,7 @@ export type Database = {
       registrar_pagamento_conta_a_pagar: {
         Args: {
           p_conta_a_pagar_id: string
+          p_conta_credor_id?: string
           p_conta_id: string
           p_data_pagamento: string
           p_metodo_pagamento?: string

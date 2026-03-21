@@ -54,6 +54,7 @@ export function useContasAPagar() {
             contaId: string
             metodoPagamento?: string
             observacao?: string
+            contaCredorId?: string
         }) => contasAPagarService.registrarPagamento(params),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['contas_a_pagar'] })

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { DollarSign } from 'lucide-react'
+import { DollarSign, Info } from 'lucide-react'
 import { Modal, ModalActions, Button, Input, Select } from '../../ui'
 import { useToast } from '../../ui/Toast'
 import { useContas } from '../../../hooks/useContas'
@@ -41,6 +41,7 @@ interface PagamentoContaAPagarModalProps {
         contaId: string
         metodoPagamento: string
         observacao?: string
+        contaCredorId?: string
     }) => Promise<void>
 }
 
@@ -50,6 +51,7 @@ export function PagamentoContaAPagarModal({ isOpen, onClose, conta, onConfirm }:
     const contasAtivas = contas.filter(c => c.ativo !== false)
     const [pagamentos, setPagamentos] = useState<PagamentoRow[]>([])
     const [loadingPagamentos, setLoadingPagamentos] = useState(false)
+    const [contaCredorId, setContaCredorId] = useState('')
 
     const saldoDevedor = conta.saldo_devedor ?? (conta.valor_total - conta.valor_pago)
     const percentualPago = conta.valor_total > 0
@@ -96,6 +98,7 @@ export function PagamentoContaAPagarModal({ isOpen, onClose, conta, onConfirm }:
                 metodo_pagamento: 'pix',
                 observacao: '',
             })
+            setContaCredorId('')
         }
     }, [isOpen, saldoDevedor, reset, contasAtivas.length])
 
@@ -112,6 +115,7 @@ export function PagamentoContaAPagarModal({ isOpen, onClose, conta, onConfirm }:
                 contaId: data.conta_id,
                 metodoPagamento: data.metodo_pagamento,
                 observacao: data.observacao || undefined,
+                contaCredorId: contaCredorId || undefined,
             })
             toast.success('Pagamento registrado!')
             onClose()
@@ -216,9 +220,38 @@ export function PagamentoContaAPagarModal({ isOpen, onClose, conta, onConfirm }:
                     {...register('observacao')}
                 />
 
+                {/* Conta do credor (opcional) */}
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                        <label className="text-sm font-medium text-foreground">
+                            Creditar conta do credor (opcional)
+                        </label>
+                        <div className="group relative">
+                            <Info className="size-3.5 text-muted-foreground cursor-help" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block w-56 p-2 bg-foreground text-background text-xs rounded-lg shadow-lg z-10">
+                                Se o credor possui uma conta no sistema, selecione-a para que o saldo seja atualizado automaticamente.
+                            </div>
+                        </div>
+                    </div>
+                    <select
+                        value={contaCredorId}
+                        onChange={(e) => setContaCredorId(e.target.value)}
+                        className="w-full px-3 py-2.5 bg-background border border-border rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                        aria-label="Conta do credor"
+                    >
+                        <option value="">Nenhuma (pagamento simples)</option>
+                        {contasAtivas.map(c => (
+                            <option key={c.id} value={c.id}>{c.nome}</option>
+                        ))}
+                    </select>
+                </div>
+
                 <div className="p-3 bg-primary/10 rounded-xl border border-primary/20">
                     <p className="text-xs text-primary font-medium">
-                        Este pagamento será registrado automaticamente no Fluxo de Caixa como saída na conta selecionada.
+                        {contaCredorId
+                            ? 'Este pagamento debitará a conta de origem e creditará a conta do credor (transferência).'
+                            : 'Este pagamento será registrado automaticamente no Fluxo de Caixa como saída na conta selecionada.'
+                        }
                     </p>
                 </div>
 
