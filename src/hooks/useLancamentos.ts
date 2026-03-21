@@ -1,15 +1,29 @@
 import { useCallback } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { cashFlowService } from '../services/cashFlowService'
-import type { Database } from '../types/database'
 
-type LancamentoInsert = Database['public']['Tables']['lancamentos']['Insert']
+type LancamentoManualData = {
+    valor: number
+    descricao?: string | null
+    data: string
+    conta_id: string
+    plano_conta_id: string
+}
 
 export function useLancamentos() {
     const queryClient = useQueryClient()
 
-    const createMutation = useMutation({
-        mutationFn: (data: LancamentoInsert) => cashFlowService.createLancamento(data),
+    const registrarDespesaMutation = useMutation({
+        mutationFn: (data: LancamentoManualData) => cashFlowService.registrarDespesaManual(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['extrato'] })
+            queryClient.invalidateQueries({ queryKey: ['fluxo_resumo'] })
+            queryClient.invalidateQueries({ queryKey: ['contas'] })
+        },
+    })
+
+    const registrarEntradaMutation = useMutation({
+        mutationFn: (data: LancamentoManualData) => cashFlowService.registrarEntradaManual(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['extrato'] })
             queryClient.invalidateQueries({ queryKey: ['fluxo_resumo'] })
@@ -32,22 +46,13 @@ export function useLancamentos() {
         },
     })
 
-    const marcarVendaPagaMutation = useMutation({
-        mutationFn: ({ vendaId, contaId, dataPagamento }: { vendaId: string, contaId: string, dataPagamento?: string }) =>
-            cashFlowService.marcarVendaPaga(vendaId, contaId, dataPagamento),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['vendas'] })
-            queryClient.invalidateQueries({ queryKey: ['contas_receber'] })
-            queryClient.invalidateQueries({ queryKey: ['extrato'] })
-            queryClient.invalidateQueries({ queryKey: ['fluxo_resumo'] })
-            queryClient.invalidateQueries({ queryKey: ['contas'] })
-            queryClient.invalidateQueries({ queryKey: ['dashboard_metrics'] })
-        },
-    })
+    const registrarDespesaManual = useCallback(async (data: LancamentoManualData) => {
+        return registrarDespesaMutation.mutateAsync(data)
+    }, [registrarDespesaMutation])
 
-    const createLancamento = useCallback(async (data: LancamentoInsert) => {
-        return createMutation.mutateAsync(data)
-    }, [createMutation])
+    const registrarEntradaManual = useCallback(async (data: LancamentoManualData) => {
+        return registrarEntradaMutation.mutateAsync(data)
+    }, [registrarEntradaMutation])
 
     const createTransferencia = useCallback(async (data: {
         valor: number
@@ -59,16 +64,12 @@ export function useLancamentos() {
         return createTransferenciaMutation.mutateAsync(data)
     }, [createTransferenciaMutation])
 
-    const marcarVendaPaga = useCallback(async (params: { vendaId: string, contaId: string, dataPagamento?: string }) => {
-        return marcarVendaPagaMutation.mutateAsync(params)
-    }, [marcarVendaPagaMutation])
-
     return {
-        createLancamento,
-        isCreating: createMutation.isPending,
+        registrarDespesaManual,
+        isRegistrandoDespesa: registrarDespesaMutation.isPending,
+        registrarEntradaManual,
+        isRegistrandoEntrada: registrarEntradaMutation.isPending,
         createTransferencia,
         isTransferring: createTransferenciaMutation.isPending,
-        marcarVendaPaga,
-        isMarkingPaid: marcarVendaPagaMutation.isPending,
     }
 }

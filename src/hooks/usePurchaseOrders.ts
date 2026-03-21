@@ -20,8 +20,8 @@ export function usePurchaseOrders() {
     })
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, updates }: { id: string, updates: UpdatePurchaseOrder }) =>
-            purchaseOrderService.updateOrder(id, updates),
+        mutationFn: ({ id, updates, items }: { id: string, updates: UpdatePurchaseOrder, items?: CreatePurchaseOrderItem[] }) =>
+            purchaseOrderService.updateOrder(id, updates, items),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['purchase_orders'] })
         }

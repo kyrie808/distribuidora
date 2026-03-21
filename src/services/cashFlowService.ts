@@ -94,20 +94,6 @@ export const cashFlowService = {
         return created as PlanoConta
     },
 
-    // --- Lancamentos ---
-    async createLancamento(data: Insert<'lancamentos'>) {
-        const { data: created, error } = await supabase
-            .from('lancamentos')
-            .insert({
-                ...data,
-                origem: data.origem || 'manual'
-            } as Insert<'lancamentos'>)
-            .select()
-            .single()
-        if (error) throw error
-        return created as Lancamento
-    },
-
     async createTransferencia(data: {
         valor: number
         data: string
@@ -136,15 +122,39 @@ export const cashFlowService = {
         return created as Lancamento
     },
 
-    // --- RPC: Marcar Venda como Paga ---
-    async marcarVendaPaga(vendaId: string, contaId: string, dataPagamento?: string) {
-        const { error } = await supabase.rpc('rpc_marcar_venda_paga', {
-            p_venda_id: vendaId,
-            p_conta_id: contaId,
-            p_data: dataPagamento || format(new Date(), 'yyyy-MM-dd')
+    // --- Lançamentos Manuais (via RPC com validações no banco) ---
+    async registrarDespesaManual(data: {
+        valor: number
+        descricao?: string | null
+        data: string
+        conta_id: string
+        plano_conta_id: string
+    }) {
+        const { error } = await supabase.rpc('registrar_despesa_manual', {
+            p_valor: data.valor,
+            p_descricao: data.descricao ?? '',
+            p_data: data.data,
+            p_conta_id: data.conta_id,
+            p_plano_conta_id: data.plano_conta_id,
         })
         if (error) throw error
-        return true
+    },
+
+    async registrarEntradaManual(data: {
+        valor: number
+        descricao?: string | null
+        data: string
+        conta_id: string
+        plano_conta_id: string
+    }) {
+        const { error } = await supabase.rpc('registrar_entrada_manual', {
+            p_valor: data.valor,
+            p_descricao: data.descricao ?? '',
+            p_data: data.data,
+            p_conta_id: data.conta_id,
+            p_plano_conta_id: data.plano_conta_id,
+        })
+        if (error) throw error
     },
 
     // --- Views / Reports ---

@@ -357,6 +357,83 @@ export type Database = {
         }
         Relationships: []
       }
+      contas_a_pagar: {
+        Row: {
+          atualizado_em: string | null
+          created_at: string | null
+          created_by: string | null
+          credor: string
+          criado_em: string | null
+          data_emissao: string
+          data_vencimento: string
+          descricao: string
+          id: string
+          observacao: string | null
+          parcela_atual: number | null
+          plano_conta_id: string
+          referencia: string | null
+          saldo_devedor: number | null
+          status: string
+          total_parcelas: number | null
+          updated_at: string | null
+          updated_by: string | null
+          valor_pago: number
+          valor_total: number
+        }
+        Insert: {
+          atualizado_em?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          credor: string
+          criado_em?: string | null
+          data_emissao?: string
+          data_vencimento: string
+          descricao: string
+          id?: string
+          observacao?: string | null
+          parcela_atual?: number | null
+          plano_conta_id: string
+          referencia?: string | null
+          saldo_devedor?: number | null
+          status?: string
+          total_parcelas?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor_pago?: number
+          valor_total: number
+        }
+        Update: {
+          atualizado_em?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          credor?: string
+          criado_em?: string | null
+          data_emissao?: string
+          data_vencimento?: string
+          descricao?: string
+          id?: string
+          observacao?: string | null
+          parcela_atual?: number | null
+          plano_conta_id?: string
+          referencia?: string | null
+          saldo_devedor?: number | null
+          status?: string
+          total_parcelas?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+          valor_pago?: number
+          valor_total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_a_pagar_plano_conta_id_fkey"
+            columns: ["plano_conta_id"]
+            isOneToOne: false
+            referencedRelation: "plano_de_contas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contatos: {
         Row: {
           apelido: string | null
@@ -565,7 +642,6 @@ export type Database = {
           id: string
           origem: string
           plano_conta_id: string | null
-          purchase_order_payment_id: string | null
           tipo: string
           updated_by: string | null
           valor: number
@@ -582,7 +658,6 @@ export type Database = {
           id?: string
           origem: string
           plano_conta_id?: string | null
-          purchase_order_payment_id?: string | null
           tipo: string
           updated_by?: string | null
           valor: number
@@ -599,7 +674,6 @@ export type Database = {
           id?: string
           origem?: string
           plano_conta_id?: string | null
-          purchase_order_payment_id?: string | null
           tipo?: string
           updated_by?: string | null
           valor?: number
@@ -628,13 +702,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "lancamentos_purchase_order_payment_id_fkey"
-            columns: ["purchase_order_payment_id"]
-            isOneToOne: false
-            referencedRelation: "purchase_order_payments"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "lancamentos_venda_id_fkey"
             columns: ["venda_id"]
             isOneToOne: false
@@ -646,6 +713,73 @@ export type Database = {
             columns: ["venda_id"]
             isOneToOne: false
             referencedRelation: "vendas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pagamentos_conta_a_pagar: {
+        Row: {
+          atualizado_em: string | null
+          conta_a_pagar_id: string
+          conta_id: string
+          created_at: string | null
+          created_by: string | null
+          criado_em: string | null
+          data_pagamento: string
+          id: string
+          metodo_pagamento: string
+          observacao: string | null
+          updated_by: string | null
+          valor: number
+        }
+        Insert: {
+          atualizado_em?: string | null
+          conta_a_pagar_id: string
+          conta_id: string
+          created_at?: string | null
+          created_by?: string | null
+          criado_em?: string | null
+          data_pagamento?: string
+          id?: string
+          metodo_pagamento?: string
+          observacao?: string | null
+          updated_by?: string | null
+          valor: number
+        }
+        Update: {
+          atualizado_em?: string | null
+          conta_a_pagar_id?: string
+          conta_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          criado_em?: string | null
+          data_pagamento?: string
+          id?: string
+          metodo_pagamento?: string
+          observacao?: string | null
+          updated_by?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagamentos_conta_a_pagar_conta_a_pagar_id_fkey"
+            columns: ["conta_a_pagar_id"]
+            isOneToOne: false
+            referencedRelation: "contas_a_pagar"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pagamentos_conta_a_pagar_conta_a_pagar_id_fkey"
+            columns: ["conta_a_pagar_id"]
+            isOneToOne: false
+            referencedRelation: "rpt_projecao_pagamentos"
+            referencedColumns: ["conta_a_pagar_id"]
+          },
+          {
+            foreignKeyName: "pagamentos_conta_a_pagar_conta_id_fkey"
+            columns: ["conta_id"]
+            isOneToOne: false
+            referencedRelation: "contas"
             referencedColumns: ["id"]
           },
         ]
@@ -867,7 +1001,7 @@ export type Database = {
         Row: {
           amount: number
           atualizado_em: string | null
-          conta_id: string | null
+          conta_id: string
           created_at: string
           id: string
           notes: string | null
@@ -878,7 +1012,7 @@ export type Database = {
         Insert: {
           amount: number
           atualizado_em?: string | null
-          conta_id?: string | null
+          conta_id: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -889,7 +1023,7 @@ export type Database = {
         Update: {
           amount?: number
           atualizado_em?: string | null
-          conta_id?: string | null
+          conta_id?: string
           created_at?: string
           id?: string
           notes?: string | null
@@ -1310,6 +1444,33 @@ export type Database = {
         }
         Relationships: []
       }
+      rpt_projecao_pagamentos: {
+        Row: {
+          categoria_nome: string | null
+          conta_a_pagar_id: string | null
+          credor: string | null
+          data_vencimento: string | null
+          descricao: string | null
+          dias_atraso: number | null
+          parcela_atual: number | null
+          plano_conta_id: string | null
+          referencia: string | null
+          saldo_devedor: number | null
+          situacao: string | null
+          total_parcelas: number | null
+          valor_pago: number | null
+          valor_total: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contas_a_pagar_plano_conta_id_fkey"
+            columns: ["plano_conta_id"]
+            isOneToOne: false
+            referencedRelation: "plano_de_contas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rpt_projecao_recebimentos: {
         Row: {
           contato_nome: string | null
@@ -1321,6 +1482,15 @@ export type Database = {
           total: number | null
           valor_pago: number | null
           venda_id: string | null
+        }
+        Relationships: []
+      }
+      view_contas_a_pagar_dashboard: {
+        Row: {
+          qtd_pendentes: number | null
+          qtd_vencidas: number | null
+          total_a_pagar: number | null
+          total_vencido: number | null
         }
         Relationships: []
       }
@@ -1520,6 +1690,19 @@ export type Database = {
         Args: { p_produto_id: string; p_url: string }
         Returns: undefined
       }
+      criar_obrigacao_parcelada: {
+        Args: {
+          p_credor: string
+          p_data_vencimento: string
+          p_descricao: string
+          p_observacao?: string
+          p_plano_conta_id: string
+          p_referencia?: string
+          p_total_parcelas?: number
+          p_valor_total: number
+        }
+        Returns: string[]
+      }
       criar_pedido: {
         Args: {
           p_endereco_entrega: string
@@ -1558,14 +1741,34 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: undefined
       }
-      registrar_lancamento_venda: {
+      registrar_despesa_manual: {
         Args: {
           p_conta_id: string
           p_data: string
-          p_metodo?: string
+          p_descricao: string
+          p_plano_conta_id: string
+          p_valor: number
+        }
+        Returns: string
+      }
+      registrar_entrada_manual: {
+        Args: {
+          p_conta_id: string
+          p_data: string
+          p_descricao: string
+          p_plano_conta_id: string
+          p_valor: number
+        }
+        Returns: string
+      }
+      registrar_pagamento_conta_a_pagar: {
+        Args: {
+          p_conta_a_pagar_id: string
+          p_conta_id: string
+          p_data_pagamento: string
+          p_metodo_pagamento?: string
           p_observacao?: string
           p_valor: number
-          p_venda_id: string
         }
         Returns: string
       }
@@ -1579,10 +1782,6 @@ export type Database = {
           p_venda_id: string
         }
         Returns: string
-      }
-      rpc_marcar_venda_paga: {
-        Args: { p_conta_id: string; p_data?: string; p_venda_id: string }
-        Returns: undefined
       }
       rpc_total_a_receber_dashboard: { Args: never; Returns: Json }
       rpc_total_a_receber_simples: { Args: never; Returns: number }
@@ -1608,6 +1807,19 @@ export type Database = {
           total_itens: number
           total_vendas: number
         }[]
+      }
+      update_purchase_order_with_items: {
+        Args: {
+          p_fornecedor_id: string
+          p_items: Json
+          p_notes: string
+          p_order_date: string
+          p_order_id: string
+          p_payment_status: string
+          p_status: string
+          p_total_amount: number
+        }
+        Returns: undefined
       }
     }
     Enums: {
@@ -1746,16 +1958,16 @@ export const Constants = {
   },
 } as const
 
-// Helper aliases
-export type Table<T extends keyof (Database['public']['Tables'] & Database['public']['Views'])> = Tables<T>
-export type Insert<T extends keyof Database['public']['Tables']> = TablesInsert<T>
-export type Update<T extends keyof Database['public']['Tables']> = TablesUpdate<T>
+type Table<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Row']
+type View<T extends keyof Database['public']['Views']> = Database['public']['Views'][T]['Row']
+export type Insert<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Insert']
+export type Update<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
 
 export type Conta = Table<'contas'>
 export type PlanoConta = Table<'plano_de_contas'>
 export type Lancamento = Table<'lancamentos'>
-export type ExtratoItem = Table<'view_extrato_mensal'>
-export type FluxoResumo = Table<'view_fluxo_resumo'>
+export type ExtratoItem = View<'view_extrato_mensal'>
+export type FluxoResumo = View<'view_fluxo_resumo'>
 
 export type Venda = Table<'vendas'>
 export type Contato = Table<'contatos'>
@@ -1766,6 +1978,9 @@ export type PagamentoVenda = Table<'pagamentos_venda'>
 export type PurchaseOrder = Table<'purchase_orders'>
 export type PurchaseOrderItem = Table<'purchase_order_items'>
 export type PurchaseOrderPayment = Table<'purchase_order_payments'>
+
+export type ContaAPagar = Table<'contas_a_pagar'>
+export type PagamentoContaAPagar = Table<'pagamentos_conta_a_pagar'>
 
 export type VendaInsert = Insert<'vendas'>
 export type VendaUpdate = Update<'vendas'>

@@ -190,6 +190,60 @@ export const dashboardService = {
         }
     },
 
+    async getContasAPagarDashboard(): Promise<{
+        total_a_pagar: number
+        total_vencido: number
+        qtd_pendentes: number
+        qtd_vencidas: number
+    }> {
+        const { data, error } = await supabase
+            .from('view_contas_a_pagar_dashboard')
+            .select('total_a_pagar, total_vencido, qtd_pendentes, qtd_vencidas')
+            .maybeSingle()
+
+        if (error || !data) return { total_a_pagar: 0, total_vencido: 0, qtd_pendentes: 0, qtd_vencidas: 0 }
+
+        return {
+            total_a_pagar: Number(data.total_a_pagar) || 0,
+            total_vencido: Number(data.total_vencido) || 0,
+            qtd_pendentes: Number(data.qtd_pendentes) || 0,
+            qtd_vencidas: Number(data.qtd_vencidas) || 0,
+        }
+    },
+
+    async getProximosVencimentos(): Promise<{
+        conta_a_pagar_id: string
+        credor: string
+        descricao: string
+        saldo_devedor: number
+        data_vencimento: string
+        situacao: string
+        dias_atraso: number
+        parcela_atual: number | null
+        total_parcelas: number | null
+    }[]> {
+        const { data, error } = await supabase
+            .from('rpt_projecao_pagamentos')
+            .select('conta_a_pagar_id, credor, descricao, saldo_devedor, data_vencimento, situacao, dias_atraso, parcela_atual, total_parcelas')
+            .in('situacao', ['vencido', 'vence_hoje', 'proximos_7_dias', 'proximos_30_dias'])
+            .order('data_vencimento', { ascending: true })
+            .limit(5)
+
+        if (error || !data) return []
+
+        return data.map(d => ({
+            conta_a_pagar_id: d.conta_a_pagar_id ?? '',
+            credor: d.credor ?? '',
+            descricao: d.descricao ?? '',
+            saldo_devedor: Number(d.saldo_devedor) || 0,
+            data_vencimento: d.data_vencimento ?? '',
+            situacao: d.situacao ?? '',
+            dias_atraso: Number(d.dias_atraso) || 0,
+            parcela_atual: d.parcela_atual,
+            total_parcelas: d.total_parcelas,
+        }))
+    },
+
     async getTotalAReceber(): Promise<{
         total_a_receber: number
         total_vendas_abertas: number

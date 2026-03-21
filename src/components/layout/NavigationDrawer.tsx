@@ -15,6 +15,7 @@ import {
     FileText,
     Wallet,
     CreditCard,
+    Receipt,
     Settings,
     Plus,
     BookMarked,
@@ -52,6 +53,7 @@ const NAV_GROUPS = [
         items: [
             { label: 'Fluxo de Caixa',     path: '/fluxo-caixa',        icon: Wallet     },
             { label: 'Contas a Receber',   path: '/contas-a-receber',   icon: CreditCard },
+            { label: 'Contas a Pagar',     path: '/contas-a-pagar',     icon: Receipt    },
             { label: 'Relatório Fábrica',  path: '/relatorio-fabrica',  icon: FileText   },
             { label: 'Plano de Contas',    path: '/plano-de-contas',    icon: BookMarked },
         ],

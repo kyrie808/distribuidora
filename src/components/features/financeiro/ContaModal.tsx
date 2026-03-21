@@ -13,7 +13,7 @@ interface ContaModalProps {
 interface ContaFormData {
     nome: string
     banco: string
-    tipo: 'corrente' | 'poupanca' | 'carteira'
+    tipo: 'dinheiro' | 'pix' | 'banco'
     saldo_inicial: number
 }
 
@@ -22,7 +22,7 @@ export function ContaModal({ isOpen, onClose, onSuccess }: ContaModalProps) {
     const [isLoading, setIsLoading] = useState(false)
     const { register, handleSubmit, reset, formState: { errors } } = useForm<ContaFormData>({
         defaultValues: {
-            tipo: 'corrente',
+            tipo: 'banco',
             saldo_inicial: 0
         }
     })
@@ -36,7 +36,6 @@ export function ContaModal({ isOpen, onClose, onSuccess }: ContaModalProps) {
             onSuccess?.()
             onClose()
         } catch (error) {
-            console.error('Erro ao criar conta:', error)
             toast.error('Erro ao criar conta')
         } finally {
             setIsLoading(false)
@@ -69,9 +68,9 @@ export function ContaModal({ isOpen, onClose, onSuccess }: ContaModalProps) {
                     label="Tipo de Conta"
                     {...register('tipo', { required: 'Tipo é obrigatório' })}
                     options={[
-                        { value: 'corrente', label: 'Conta Corrente' },
-                        { value: 'poupanca', label: 'Poupança' },
-                        { value: 'carteira', label: 'Dinheiro em Mãos' },
+                        { value: 'banco', label: 'Conta Bancária' },
+                        { value: 'pix', label: 'Pix' },
+                        { value: 'dinheiro', label: 'Dinheiro em Mãos' },
                     ]}
                     error={errors.tipo?.message}
                 />

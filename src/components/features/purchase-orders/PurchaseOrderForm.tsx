@@ -105,6 +105,10 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
             alert('Preencha todos os campos dos itens corretamente.')
             return
         }
+        if (!fornecedorId) {
+            alert('Selecione um fornecedor.')
+            return
+        }
 
         setLoading(true)
         try {
@@ -129,8 +133,7 @@ export function PurchaseOrderForm({ isOpen, onClose, onSave, initialData }: Purc
                 amountPaid: amountPaid
             } as CreatePurchaseOrder, mappedItems)
             onClose()
-        } catch (error) {
-            console.error(error)
+        } catch {
             alert('Erro ao salvar pedido.')
         } finally {
             setLoading(false)

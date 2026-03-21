@@ -70,8 +70,7 @@ export const purchaseOrderService = {
             purchase_order_id: newOrder.id,
             product_id: item.productId,
             quantity: item.quantity,
-            unit_cost: item.unitCost,
-            total_cost: item.quantity * item.unitCost
+            unit_cost: item.unitCost
         }))
 
         const { error: itemsError } = await supabase
@@ -83,7 +82,29 @@ export const purchaseOrderService = {
         return this.fetchOrderById(newOrder.id) as Promise<DomainPurchaseOrderWithItems>
     },
 
-    async updateOrder(id: string, updates: UpdatePurchaseOrder): Promise<DomainPurchaseOrderWithItems> {
+    async updateOrder(id: string, updates: UpdatePurchaseOrder, items?: CreatePurchaseOrderItem[]): Promise<DomainPurchaseOrderWithItems> {
+        // When items are provided, use the atomic RPC that does DELETE + INSERT in one transaction.
+        // This guarantees that if the INSERT fails, the prior DELETE is rolled back.
+        if (items !== undefined) {
+            const { error } = await supabase.rpc('update_purchase_order_with_items', {
+                p_order_id:       id,
+                p_fornecedor_id:  updates.fornecedorId!,
+                p_order_date:     updates.orderDate!,
+                p_total_amount:   updates.totalAmount!,
+                p_notes:          updates.notes ?? '',
+                p_status:         updates.status ?? 'pending',
+                p_payment_status: updates.paymentStatus ?? 'unpaid',
+                p_items:          items.map(i => ({
+                    product_id: i.productId,
+                    quantity:   i.quantity,
+                    unit_cost:  i.unitCost
+                }))
+            })
+            if (error) throw error
+            return this.fetchOrderById(id) as Promise<DomainPurchaseOrderWithItems>
+        }
+
+        // No items provided — simple header-only update (e.g. confirm receipt, status change)
         const dbUpdates: Database['public']['Tables']['purchase_orders']['Update'] = {}
         if (updates.fornecedorId !== undefined) dbUpdates.fornecedor_id = updates.fornecedorId
         if (updates.orderDate !== undefined) dbUpdates.order_date = updates.orderDate

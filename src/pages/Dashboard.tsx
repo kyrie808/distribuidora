@@ -10,7 +10,8 @@ import {
     CheckCircle2,
     DollarSign,
     ShoppingCart,
-    Wallet
+    Wallet,
+    Receipt,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
@@ -25,6 +26,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { KpiCard } from '@/components/dashboard/KpiCard'
 import { AlertasFinanceiroWidget } from '@/components/dashboard/AlertasFinanceiroWidget'
 import { AlertasRecompraWidget } from '@/components/dashboard/AlertasRecompraWidget'
+import { AlertasContasAPagarWidget } from '@/components/dashboard/AlertasContasAPagarWidget'
 import { TopIndicadoresWidget } from '@/components/dashboard/TopIndicadoresWidget'
 import { UltimasVendasWidget } from '@/components/dashboard/UltimasVendasWidget'
 import { MonthPicker } from '@/components/dashboard/MonthPicker'
@@ -41,6 +43,8 @@ export function Dashboard() {
     const [lucroData, setLucroData] = useState({ lucro_bruto: 0, receita_bruta: 0, lucro_liquido: 0, margem_liquida_pct: 0 })
     const [liquidadoData, setLiquidadoData] = useState({ vendas_liquidadas: 0, total_liquidado: 0 })
     const [aReceberGlobal, setAReceberGlobal] = useState({ total_a_receber: 0, total_vendas_abertas: 0 })
+    const [contasAPagarData, setContasAPagarData] = useState({ total_a_pagar: 0, total_vencido: 0, qtd_pendentes: 0, qtd_vencidas: 0 })
+    const [proximosVencimentos, setProximosVencimentos] = useState<Awaited<ReturnType<typeof dashboardService.getProximosVencimentos>>>([])
     const [isLoadingLucro, setIsLoadingLucro] = useState(true)
 
     const isLoading = isLoadingMetrics || isLoadingLucro
@@ -49,14 +53,18 @@ export function Dashboard() {
         const fetchData = async () => {
             setIsLoadingLucro(true)
             const date = new Date(year, month - 1, 1)
-            const [lucro, liquidado, aReceber] = await Promise.all([
+            const [lucro, liquidado, aReceber, capDash, proxVenc] = await Promise.all([
                 dashboardService.getLucroLiquido(date),
                 dashboardService.getLiquidadoMes(date),
-                dashboardService.getTotalAReceber()
+                dashboardService.getTotalAReceber(),
+                dashboardService.getContasAPagarDashboard(),
+                dashboardService.getProximosVencimentos(),
             ])
             setLucroData(lucro)
             setLiquidadoData(liquidado)
             setAReceberGlobal(aReceber)
+            setContasAPagarData(capDash)
+            setProximosVencimentos(proxVenc)
             setIsLoadingLucro(false)
         }
         fetchData()
@@ -107,7 +115,7 @@ export function Dashboard() {
         setIsRefreshing(false)
     }, [refetch])
 
-    const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0)
+    const totalAlerts = (metrics?.financial?.alertas_financeiros?.length || 0) + (metrics?.alertas_recompra?.length || 0) + contasAPagarData.qtd_vencidas
 
     return (
         <>
@@ -231,6 +239,36 @@ export function Dashboard() {
                             loading={isLoading}
                             tooltip="Dinheiro que entrou no caixa no mês selecionado. Inclui fiados de meses anteriores pagos agora."
                         />
+
+                        <KpiCard
+                            title="A Pagar"
+                            value={formatCurrency(contasAPagarData.total_a_pagar)}
+                            progress={50}
+                            trend={`— ${contasAPagarData.qtd_pendentes} pendências`}
+                            trendDirection="neutral"
+                            trendColor={contasAPagarData.qtd_pendentes > 0 ? "yellow" : "green"}
+                            icon={Receipt}
+                            className="col-span-1 cursor-pointer hover:bg-muted transition-colors"
+                            variant="compact"
+                            onClick={() => navigate('/contas-a-pagar')}
+                            loading={isLoading}
+                            tooltip="Total de saldo devedor de todas as obrigações não pagas — não é filtrado pelo mês selecionado."
+                        />
+
+                        <KpiCard
+                            title="Vencido"
+                            value={formatCurrency(contasAPagarData.total_vencido)}
+                            progress={100}
+                            trend={`${contasAPagarData.qtd_vencidas} vencida${contasAPagarData.qtd_vencidas !== 1 ? 's' : ''}`}
+                            trendDirection={contasAPagarData.total_vencido > 0 ? "down" : "neutral"}
+                            trendColor={contasAPagarData.total_vencido > 0 ? "red" : "green"}
+                            icon={Receipt}
+                            className="col-span-1 cursor-pointer hover:bg-muted transition-colors"
+                            variant="compact"
+                            onClick={() => navigate('/contas-a-pagar')}
+                            loading={isLoading}
+                            tooltip="Saldo devedor de obrigações com vencimento ultrapassado."
+                        />
                     </div>
 
 
@@ -297,6 +335,10 @@ export function Dashboard() {
                         <div className="space-y-8">
                             <AlertasFinanceiroWidget
                                 data={metrics?.financial?.alertas_financeiros}
+                                loading={isLoading}
+                            />
+                            <AlertasContasAPagarWidget
+                                data={proximosVencimentos}
                                 loading={isLoading}
                             />
                             <AlertasRecompraWidget

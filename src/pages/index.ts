@@ -16,6 +16,7 @@ export { Menu } from './Menu'
 export { CatalogoPendentes } from './CatalogoPendentes'
 export { FluxoCaixa } from './FluxoCaixa'
 export { PlanoDeContas } from './PlanoDeContas'
+export { ContasAPagar } from './ContasAPagar'
 export { LoginPage } from './LoginPage'
 
 

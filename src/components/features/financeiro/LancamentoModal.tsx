@@ -32,7 +32,7 @@ export function LancamentoModal({ type, isOpen, onClose, onSuccess }: Lancamento
     const toast = useToast()
     const { contas } = useContas()
     const { planoContas } = usePlanoDeContas()
-    const { createLancamento } = useLancamentos()
+    const { registrarDespesaManual, registrarEntradaManual } = useLancamentos()
     const [displayValor, setDisplayValor] = useState('')
 
     const {
@@ -72,17 +72,18 @@ export function LancamentoModal({ type, isOpen, onClose, onSuccess }: Lancamento
 
     const onSubmit = async (data: LancamentoFormData) => {
         try {
-            await createLancamento({
-                ...data,
-                tipo: type,
-                origem: 'manual'
-            })
+            const payload = { ...data, descricao: data.descricao || null }
+            if (type === 'saida') {
+                await registrarDespesaManual(payload)
+            } else {
+                await registrarEntradaManual(payload)
+            }
             toast.success(`${type === 'entrada' ? 'Entrada' : 'Saída'} registrada com sucesso!`)
             onSuccess?.()
             onClose()
         } catch (error) {
-            console.error(error)
-            toast.error('Erro ao registrar lançamento')
+            const msg = (error as { message?: string })?.message ?? 'Erro ao registrar lançamento'
+            toast.error(msg)
         }
     }
 

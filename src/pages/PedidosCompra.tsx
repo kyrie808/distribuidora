@@ -59,7 +59,7 @@ export function PedidosCompra() {
 
     const handleSave = async (orderData: CreatePurchaseOrder | UpdatePurchaseOrder, items: CreatePurchaseOrderItem[]) => {
         if (selectedOrder) {
-            await updateOrder({ id: selectedOrder.id, updates: orderData as UpdatePurchaseOrder })
+            await updateOrder({ id: selectedOrder.id, updates: orderData as UpdatePurchaseOrder, items })
         } else {
             await createOrder({ order: orderData as CreatePurchaseOrder, items })
         }
@@ -258,6 +258,7 @@ export function PedidosCompra() {
                             isOpen={isFormOpen}
                             onClose={() => setIsFormOpen(false)}
                             onSave={handleSave}
+                            initialData={selectedOrder}
                         />
                     )}
 

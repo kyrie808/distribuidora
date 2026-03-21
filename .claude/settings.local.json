@@ -112,7 +112,12 @@
       "Bash(Get-ChildItem -Path \"D:\\\\1. LUCCAS\\\\aplicativos ai\\\\distribuidora\\\\docs\" -Recurse -File | Select-Object FullName, LastWriteTime | Sort-Object FullName)",
       "Bash(find:*)",
       "mcp__supabase-distribuidora__generate_typescript_types",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Skill(supabase-distribuidora)",
+      "Bash(node:*)",
+      "Bash(\"D:/1. LUCCAS/aplicativos:*)",
+      "mcp__supabase-distribuidora__get_logs",
+      "Bash(node -e \":*)"
     ]
   },
   "enableAllProjectMcpServers": true,
