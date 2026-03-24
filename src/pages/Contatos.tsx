@@ -120,6 +120,7 @@ export function Contatos() {
                             <Input
                                 type="text"
                                 placeholder="Buscar por nome, apelido ou telefone..."
+                                className="pl-10"
                                 value={searchTerm}
                                 onChange={(e) => {
                                     setSearchTerm(e.target.value)
