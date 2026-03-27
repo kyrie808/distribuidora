@@ -21,12 +21,14 @@ export function VendaDetalhe() {
     const navigate = useNavigate()
     const toast = useToast()
     const { venda, loading, error, refetch } = useVenda(id)
-    const { deleteVenda, addPagamento, updateVendaStatus, deleteUltimoPagamento } = useVendas()
+    const { deleteVenda, cancelVenda, addPagamento, updateVendaStatus, deleteUltimoPagamento } = useVendas()
 
     const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showCancelModal, setShowCancelModal] = useState(false)
     const [showPaymentModal, setShowPaymentModal] = useState(false)
     const [showRevertModal, setShowRevertModal] = useState(false)
     const [isDeleting, setIsDeleting] = useState(false)
+    const [isCancelling, setIsCancelling] = useState(false)
     const [loadingAction, setLoadingAction] = useState(false)
     const [showUndoPaymentConfirm, setShowUndoPaymentConfirm] = useState(false)
 
@@ -42,6 +44,20 @@ export function VendaDetalhe() {
             toast.error('Erro ao excluir venda')
             setIsDeleting(false)
         }
+    }
+
+    const handleCancel = async () => {
+        if (!venda) return
+        setIsCancelling(true)
+        const success = await cancelVenda(venda.id)
+        if (success) {
+            await refetch()
+            setShowCancelModal(false)
+            toast.success('Venda cancelada com sucesso')
+        } else {
+            toast.error('Erro ao cancelar venda')
+        }
+        setIsCancelling(false)
     }
 
     const handlePaymentConfirm = async (data: PagamentoFormData): Promise<boolean> => {
@@ -145,18 +161,23 @@ export function VendaDetalhe() {
 
                 <VendaMetaInfo vendaId={venda.id} formaPagamento={venda.formaPagamento} />
 
-                <VendaAcoesSecundarias 
+                <VendaAcoesSecundarias
                     venda={venda}
                     handleShare={handleShare}
                     setShowDeleteModal={setShowDeleteModal}
+                    setShowCancelModal={setShowCancelModal}
                 />
             </main>
 
-            <VendaModais 
+            <VendaModais
                 showDeleteModal={showDeleteModal}
                 setShowDeleteModal={setShowDeleteModal}
                 handleDelete={handleDelete}
                 isDeleting={isDeleting}
+                showCancelModal={showCancelModal}
+                setShowCancelModal={setShowCancelModal}
+                handleCancel={handleCancel}
+                isCancelling={isCancelling}
                 showRevertModal={showRevertModal}
                 setShowRevertModal={setShowRevertModal}
                 handleRevertDelivery={handleRevertDelivery}

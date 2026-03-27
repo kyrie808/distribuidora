@@ -22,6 +22,7 @@ interface UseVendasReturn {
     updateVendaStatus: (id: string, status: 'pendente' | 'entregue' | 'cancelada') => Promise<boolean>
     updateVendaPago: (id: string, pago: boolean) => Promise<boolean>
     deleteVenda: (id: string) => Promise<boolean>
+    cancelVenda: (id: string) => Promise<boolean>
     updateVenda: (id: string, data: UpdateVenda) => Promise<DomainVenda | null>
     getVendaById: (id: string) => Promise<DomainVenda | null>
     addPagamento: (vendaId: string, data: { valor: number; metodo: string; data: string; conta_id: string; observacao?: string }) => Promise<boolean>
@@ -95,6 +96,14 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         }
     })
 
+    const cancelVendaMutation = useMutation({
+        mutationFn: (id: string) => vendaService.cancelVenda(id),
+        onSuccess: (_data, id) => {
+            queryClient.invalidateQueries({ queryKey: ['vendas'] })
+            queryClient.invalidateQueries({ queryKey: ['venda', id] })
+        }
+    })
+
     const metrics = data?.metrics || {
         faturamentoTotal: 0,
         faturamentoDia: 0,
@@ -143,6 +152,13 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         } catch (e) { console.error(e); return false }
     }, [deleteVendaMutation])
 
+    const cancelVenda = useCallback(async (id: string) => {
+        try {
+            await cancelVendaMutation.mutateAsync(id)
+            return true
+        } catch (e) { console.error(e); return false }
+    }, [cancelVendaMutation])
+
     const getVendaById = useCallback(async (id: string) => {
         return vendaService.getVendaById(id)
     }, [])
@@ -176,6 +192,7 @@ export function useVendas({ startDate, endDate, includePending = false, search, 
         updateVendaStatus,
         updateVendaPago,
         deleteVenda,
+        cancelVenda,
         getVendaById,
         addPagamento,
         deleteUltimoPagamento

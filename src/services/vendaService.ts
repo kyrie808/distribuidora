@@ -125,6 +125,16 @@ export const vendaService = {
         return this.getVendaById(id)
     },
 
+    async cancelVenda(id: string): Promise<boolean> {
+        const { error } = await supabase
+            .from('vendas')
+            .update({ status: 'cancelada', pago: false })
+            .eq('id', id)
+
+        if (error) throw error
+        return true
+    },
+
     async deleteVenda(id: string): Promise<boolean> {
         // Deletar lancamentos primeiro (FK sem CASCADE)
         const { error: lancError } = await supabase.from('lancamentos').delete().eq('venda_id', id)

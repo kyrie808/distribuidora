@@ -5,6 +5,11 @@ interface VendaModaisProps {
     setShowDeleteModal: (val: boolean) => void
     handleDelete: () => void
     isDeleting: boolean
+    // Cancel modal (UPDATE status, not DELETE)
+    showCancelModal?: boolean
+    setShowCancelModal?: (val: boolean) => void
+    handleCancel?: () => void
+    isCancelling?: boolean
     // Optional: only needed in VendaDetalhe, not in Vendas list
     showRevertModal?: boolean
     setShowRevertModal?: (val: boolean) => void
@@ -20,6 +25,10 @@ export function VendaModais({
     setShowDeleteModal,
     handleDelete,
     isDeleting,
+    showCancelModal = false,
+    setShowCancelModal = () => {},
+    handleCancel = () => {},
+    isCancelling = false,
     showRevertModal = false,
     setShowRevertModal = () => {},
     handleRevertDelivery = () => {},
@@ -49,6 +58,29 @@ export function VendaModais({
                     </Button>
                     <Button variant="danger" onClick={handleDelete} isLoading={isDeleting}>
                         Excluir
+                    </Button>
+                </ModalActions>
+            </Modal>
+
+            <Modal
+                isOpen={showCancelModal}
+                onClose={() => setShowCancelModal(false)}
+                title="Cancelar Venda"
+                size="sm"
+            >
+                <p className="text-gray-600 mb-4 dark:text-gray-300">
+                    Tem certeza que deseja cancelar esta venda?
+                    <br />
+                    <span className="text-sm text-gray-500">
+                        O estoque será restaurado se a venda já foi entregue.
+                    </span>
+                </p>
+                <ModalActions>
+                    <Button variant="secondary" onClick={() => setShowCancelModal(false)}>
+                        Voltar
+                    </Button>
+                    <Button variant="warning" onClick={handleCancel} isLoading={isCancelling}>
+                        Confirmar Cancelamento
                     </Button>
                 </ModalActions>
             </Modal>
