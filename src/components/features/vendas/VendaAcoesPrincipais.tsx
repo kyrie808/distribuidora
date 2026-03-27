@@ -18,8 +18,6 @@ export function VendaAcoesPrincipais({
     setShowUndoPaymentConfirm,
     loadingAction
 }: VendaAcoesPrincipaisProps) {
-    if (venda.origem === 'catalogo') return null
-
     return (
         <div className="flex gap-3 mb-6">
             {(venda.status === 'pendente' || venda.status === 'entregue') && (
