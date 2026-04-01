@@ -207,6 +207,7 @@ export interface DomainCatalogOrder {
     criadoEm: string
     atualizadoEm: string
     contatoId?: string | null
+    vendaId?: string | null
     itens?: DomainCatalogOrderItem[]
 }
 

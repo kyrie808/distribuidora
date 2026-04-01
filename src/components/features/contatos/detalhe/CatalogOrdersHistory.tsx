@@ -1,4 +1,5 @@
 
+import { useNavigate } from 'react-router-dom'
 import { Package } from 'lucide-react'
 import { useCatalogOrders } from '../../../../hooks/useCatalogOrders'
 import { formatDate, formatCurrency } from '../../../../utils/formatters'
@@ -7,9 +8,12 @@ import type { DomainCatalogOrder } from '../../../../types/domain'
 
 interface CatalogOrderCardProps {
     pedido: DomainCatalogOrder;
+    onView?: (vendaId: string) => void;
 }
 
-function CatalogOrderCard({ pedido }: CatalogOrderCardProps) {
+function CatalogOrderCard({ pedido, onView }: CatalogOrderCardProps) {
+    const isClickable = !!pedido.vendaId
+
     const statusColors: Record<string, string> = {
         pendente: "bg-blue-500/10 text-blue-500 border-blue-500/20",
         confirmado: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20",
@@ -26,7 +30,13 @@ function CatalogOrderCard({ pedido }: CatalogOrderCardProps) {
     }
 
     return (
-        <div className="group relative bg-white/5 border-l-[4px] border-l-orange-500 hover:border-l-orange-400 p-4 rounded-r-xl transition-all hover:bg-white/10 mb-3 shadow-sm border-y border-r border-white/5">
+        <div
+            onClick={() => isClickable && onView?.(pedido.vendaId!)}
+            className={cn(
+                "group relative bg-white/5 border-l-[4px] border-l-orange-500 hover:border-l-orange-400 p-4 rounded-r-xl transition-all hover:bg-white/10 mb-3 shadow-sm border-y border-r border-white/5",
+                isClickable && "cursor-pointer"
+            )}
+        >
             <div className="flex justify-between items-start mb-2">
                 <div className="flex flex-col">
                     <span className="text-[10px] text-gray-500 font-mono tracking-widest uppercase mb-1">Catálogo #{pedido.numeroPedido}</span>
@@ -72,6 +82,7 @@ function CatalogOrderCard({ pedido }: CatalogOrderCardProps) {
 }
 
 export function CatalogOrdersHistory({ contatoId }: { contatoId: string }) {
+    const navigate = useNavigate()
     const { orders, isLoading, error } = useCatalogOrders(contatoId)
 
     if (isLoading) return <div className="text-center py-8 text-gray-400 text-sm">Carregando pedidos do catálogo...</div>
@@ -88,7 +99,11 @@ export function CatalogOrdersHistory({ contatoId }: { contatoId: string }) {
             </div>
             <div className="mt-2">
                 {orders.map((pedido) => (
-                    <CatalogOrderCard key={pedido.id} pedido={pedido} />
+                    <CatalogOrderCard
+                        key={pedido.id}
+                        pedido={pedido}
+                        onView={(vendaId) => navigate(`/vendas/${vendaId}`)}
+                    />
                 ))}
             </div>
         </div>

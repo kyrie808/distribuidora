@@ -219,6 +219,7 @@ export const toDomainPurchaseOrderWithItems = (dbOrder: PurchaseOrderRowWithRela
 
 export type CatalogOrderRowWithItems = CatalogOrderRow & {
     itens?: CatalogOrderItemRow[]
+    venda_id?: string | null
 }
 
 export const toDomainCatalogOrderItem = (dbItem: CatalogOrderItemRow): DomainCatalogOrderItem => {
@@ -252,6 +253,7 @@ export const toDomainCatalogOrder = (dbOrder: CatalogOrderRowWithItems): DomainC
         criadoEm: dbOrder.criado_em || new Date().toISOString(),
         atualizadoEm: dbOrder.atualizado_em || dbOrder.criado_em || new Date().toISOString(),
         contatoId: dbOrder.contato_id,
+        vendaId: dbOrder.venda_id ?? null,
         itens: (dbOrder.itens || []).map(i => toDomainCatalogOrderItem(i))
     }
 }
