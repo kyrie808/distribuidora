@@ -191,6 +191,7 @@ export function VendaDetalhe() {
                 isOpen={showPaymentModal && !!venda}
                 onClose={() => setShowPaymentModal(false)}
                 title="Registrar Pagamento"
+                subtitle={venda?.contato?.nome || 'Cliente'}
             >
                 {venda && (
                     <PaymentSidebar
@@ -200,7 +201,6 @@ export function VendaDetalhe() {
                         total={venda.total}
                         valorPago={venda.valorPago || 0}
                         historico={venda.pagamentos}
-                        customerName={venda.contato?.nome || 'Cliente'}
                     />
                 )}
             </Drawer>
